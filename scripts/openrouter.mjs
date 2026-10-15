@@ -23,7 +23,7 @@ process.umask(0o077);
 function fail(message) {
   throw new Error(message);
 }
-async function safeStore() {
+export async function safeStore() {
   for (const p of [join(ROOT, ".cli"), STORE]) {
     try {
       await mkdir(p, { mode: 0o700 });
@@ -75,7 +75,7 @@ async function readToken() {
     await handle?.close();
   }
 }
-async function api(path, options = {}, authenticated = true) {
+export async function api(path, options = {}, authenticated = true) {
   const headers = { "Content-Type": "application/json", ...options.headers };
   if (authenticated) headers.Authorization = `Bearer ${await readToken()}`;
   let response;
@@ -288,7 +288,7 @@ export function enforceBudget(cost, limit, used) {
       "Project spending limit would be exceeded. Stop and ask the operator before raising the budget.",
     );
 }
-async function readLedger() {
+export async function readLedger() {
   const path = join(STORE, "spending.json");
   try {
     const stat = await lstat(path);
@@ -314,7 +314,7 @@ async function readLedger() {
     throw e;
   }
 }
-async function writeLedger(data) {
+export async function writeLedger(data) {
   const tmp = join(
     STORE,
     "spending." + randomBytes(8).toString("hex") + ".tmp",
@@ -325,7 +325,7 @@ async function writeLedger(data) {
   });
   await rename(tmp, join(STORE, "spending.json"));
 }
-async function generate(args) {
+export async function withGenerationLock(task) {
   await safeStore();
   const lockPath = join(STORE, "generation.lock");
   let lock;
@@ -345,11 +345,14 @@ async function generate(args) {
   }
   try {
     await lock.writeFile(String(process.pid));
-    await generateLocked(args);
+    return await task();
   } finally {
     await lock.close();
     await rm(lockPath, { force: true });
   }
+}
+async function generate(args) {
+  return withGenerationLock(() => generateLocked(args));
 }
 async function generateLocked(args) {
   const { qs, selected, model, voice, cost } = await selection(args);

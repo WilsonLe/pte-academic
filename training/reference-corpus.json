@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "general-american-synthetic-v1",
+  "model": "hexgrad/kokoro-82m",
+  "voices": ["af_heart", "af_bella", "am_michael", "am_puck"],
+  "heldOutVoice": "am_puck",
+  "seed": 20261016,
+  "passages": [
+    {
+      "id": "passage-001",
+      "text": "The morning sunlight reached the kitchen window while Julia carefully prepared breakfast for her family."
+    },
+    {
+      "id": "passage-002",
+      "text": "A curious student asked the librarian whether the new science books would arrive before Friday."
+    },
+    {
+      "id": "passage-003",
+      "text": "Please leave the blue folder beside the computer and close the office door when you finish."
+    },
+    {
+      "id": "passage-004",
+      "text": "Our neighborhood garden produces fresh tomatoes, sweet peppers, and enough herbs for everyone to share."
+    },
+    {
+      "id": "passage-005",
+      "text": "Michael checked the weather forecast before choosing a comfortable jacket for the walk across town."
+    },
+    {
+      "id": "passage-006",
+      "text": "The young musician practiced a difficult rhythm until every note sounded clear and confident."
+    },
+    {
+      "id": "passage-007",
+      "text": "Several volunteers gathered near the station to discuss a practical solution to the traffic problem."
+    },
+    {
+      "id": "passage-008",
+      "text": "After a quiet dinner, Rachel described the beautiful mountains she had visited during her vacation."
+    },
+    {
+      "id": "passage-009",
+      "text": "The friendly mechanic explained why the engine needed a small adjustment before the journey."
+    },
+    {
+      "id": "passage-010",
+      "text": "We should compare the available information before making a decision about the research project."
+    },
+    {
+      "id": "passage-011",
+      "text": "A silver airplane crossed the cloudy sky as children watched from the crowded observation deck."
+    },
+    {
+      "id": "passage-012",
+      "text": "The teacher encouraged her students to explain their answers using simple words and complete sentences."
+    },
+    {
+      "id": "passage-013",
+      "text": "Someone left a pair of yellow gloves on the wooden bench outside the community center."
+    },
+    {
+      "id": "passage-014",
+      "text": "David usually drinks a glass of water before taking a short walk through the park."
+    },
+    {
+      "id": "passage-015",
+      "text": "The little bakery on the corner sells warm bread, fresh cookies, and delicious apple pies."
+    },
+    {
+      "id": "passage-016",
+      "text": "An experienced engineer inspected the bridge carefully and recorded each measurement in a small notebook."
+    },
+    {
+      "id": "passage-017",
+      "text": "During the afternoon meeting, Amanda suggested a different approach to organizing the annual festival."
+    },
+    {
+      "id": "passage-018",
+      "text": "The museum guide pointed toward an unusual painting and explained the story behind its creation."
+    },
+    {
+      "id": "passage-019",
+      "text": "Every participant received a printed schedule with clear directions to the main conference room."
+    },
+    {
+      "id": "passage-020",
+      "text": "A gentle breeze moved through the branches while the neighbors enjoyed their lunch outside."
+    },
+    {
+      "id": "passage-021",
+      "text": "The photographer waited patiently for the perfect moment to capture the colorful birds in flight."
+    },
+    {
+      "id": "passage-022",
+      "text": "My brother borrowed a bicycle yesterday because his car was being repaired at the garage."
+    },
+    {
+      "id": "passage-023",
+      "text": "The doctor recommended regular exercise, balanced meals, and enough sleep to support a healthy routine."
+    },
+    {
+      "id": "passage-024",
+      "text": "Across the river, a narrow path leads visitors toward a peaceful village surrounded by trees."
+    },
+    {
+      "id": "passage-025",
+      "text": "Before submitting the application, check that your address and telephone number are written correctly."
+    },
+    {
+      "id": "passage-026",
+      "text": "The manager thanked the entire team for completing such a challenging assignment ahead of schedule."
+    },
+    {
+      "id": "passage-027",
+      "text": "We heard a sudden knock at the door just as the evening news began."
+    },
+    {
+      "id": "passage-028",
+      "text": "A thoughtful question can encourage a conversation and help people understand another point of view."
+    },
+    {
+      "id": "passage-029",
+      "text": "The restaurant serves grilled vegetables with brown rice and a refreshing glass of lemon water."
+    },
+    {
+      "id": "passage-030",
+      "text": "Our train arrived early, so we had plenty of time to explore the station."
+    },
+    {
+      "id": "passage-031",
+      "text": "The scientist placed the sample inside a transparent container and observed the gradual change."
+    },
+    {
+      "id": "passage-032",
+      "text": "She chose a bright purple notebook to keep track of important ideas and useful expressions."
+    },
+    {
+      "id": "passage-033",
+      "text": "The audience remained silent as the actor delivered the final sentence of the dramatic speech."
+    },
+    {
+      "id": "passage-034",
+      "text": "A small wooden boat floated beside the shore while fishermen prepared their equipment for tomorrow."
+    },
+    {
+      "id": "passage-035",
+      "text": "You can improve your pronunciation by listening carefully and repeating short phrases at a natural pace."
+    },
+    {
+      "id": "passage-036",
+      "text": "The software update includes several useful features that make everyday tasks easier to complete."
+    },
+    {
+      "id": "passage-037",
+      "text": "At the farmers market, customers discussed the difference between local peaches and imported fruit."
+    },
+    {
+      "id": "passage-038",
+      "text": "The children built an impressive castle using cardboard boxes, colored paper, and a little imagination."
+    },
+    {
+      "id": "passage-039",
+      "text": "Please remember to switch off the lights before leaving the building at the end of the day."
+    },
+    {
+      "id": "passage-040",
+      "text": "The mountain trail becomes steeper after the first mile, but the view is worth the effort."
+    },
+    {
+      "id": "passage-041",
+      "text": "A reliable public transportation system helps residents travel safely and reduces unnecessary traffic downtown."
+    },
+    {
+      "id": "passage-042",
+      "text": "The chef added a little butter to the pan before gently stirring the chopped onions."
+    },
+    {
+      "id": "passage-043",
+      "text": "Her presentation included a clear introduction, several practical examples, and a brief explanation of the results."
+    },
+    {
+      "id": "passage-044",
+      "text": "The winter storm forced the airport to delay several flights until conditions improved the following morning."
+    },
+    {
+      "id": "passage-045",
+      "text": "A curious puppy followed the family into the garden and discovered a tiny frog near the fountain."
+    },
+    {
+      "id": "passage-046",
+      "text": "The school orchestra rehearsed together every Thursday afternoon in preparation for the spring concert."
+    },
+    {
+      "id": "passage-047",
+      "text": "When the package arrives, please check the contents carefully and keep the receipt in a safe place."
+    },
+    {
+      "id": "passage-048",
+      "text": "The city council proposed a new library with quiet study areas and accessible entrances for everyone."
+    },
+    {
+      "id": "passage-049",
+      "text": "A generous neighbor offered to water our plants while we traveled to visit relatives in another state."
+    },
+    {
+      "id": "passage-050",
+      "text": "The documentary explained how changes in ocean temperature can influence weather patterns around the world."
+    },
+    {
+      "id": "passage-051",
+      "text": "Three thirsty travelers stopped at a roadside cafe to order sandwiches and freshly squeezed orange juice."
+    },
+    {
+      "id": "passage-052",
+      "text": "The first chapter introduces a mysterious character who lives alone in a house beside the railway."
+    },
+    {
+      "id": "passage-053",
+      "text": "Students should review their notes regularly instead of waiting until the night before an important examination."
+    },
+    {
+      "id": "passage-054",
+      "text": "The red ship moved slowly past the green fishing boat as waves rolled toward the beach."
+    },
+    {
+      "id": "passage-055",
+      "text": "A bowl of fresh fruit stood beside the refrigerator, beneath a photograph of the family picnic."
+    },
+    {
+      "id": "passage-056",
+      "text": "The speaker emphasized the second syllable of the word and asked the class to repeat it together."
+    },
+    {
+      "id": "passage-057",
+      "text": "Our company supports flexible working hours because employees have different responsibilities outside the office."
+    },
+    {
+      "id": "passage-058",
+      "text": "The careful driver reduced her speed when she noticed several cyclists approaching the narrow intersection."
+    },
+    {
+      "id": "passage-059",
+      "text": "A successful experiment often begins with a specific question and a method that others can repeat."
+    },
+    {
+      "id": "passage-060",
+      "text": "The hotel receptionist provided a map and suggested a pleasant walking route through the historic district."
+    },
+    {
+      "id": "passage-061",
+      "text": "The bright street lamps reflected in the puddles after a brief shower passed through the neighborhood."
+    },
+    {
+      "id": "passage-062",
+      "text": "Before the race, the coach reminded each athlete to breathe steadily and maintain a comfortable rhythm."
+    },
+    {
+      "id": "passage-063",
+      "text": "The artist mixed shades of green and yellow to paint the leaves around the old stone house."
+    },
+    {
+      "id": "passage-064",
+      "text": "A detailed budget helps families prepare for unexpected expenses and make steady progress toward their goals."
+    },
+    {
+      "id": "passage-065",
+      "text": "The passenger searched his pockets for the ticket while the conductor waited beside the open door."
+    },
+    {
+      "id": "passage-066",
+      "text": "The university offers evening classes for adults who want to develop new skills while continuing to work."
+    },
+    {
+      "id": "passage-067",
+      "text": "A group of friends shared stories around the kitchen table as a pot of vegetable soup simmered."
+    },
+    {
+      "id": "passage-068",
+      "text": "The shop assistant carefully wrapped the fragile glass vase and placed it inside a sturdy cardboard box."
+    },
+    {
+      "id": "passage-069",
+      "text": "Every summer, the town celebrates its history with music, dancing, and a parade along the main street."
+    },
+    {
+      "id": "passage-070",
+      "text": "The researcher noticed a significant difference between the original sample and the material collected later."
+    },
+    {
+      "id": "passage-071",
+      "text": "The dog slept beneath the dining room table while a gentle rain tapped against the windows."
+    },
+    {
+      "id": "passage-072",
+      "text": "A clear explanation of the rules helps new players feel comfortable before the game begins."
+    },
+    {
+      "id": "passage-073",
+      "text": "The park ranger advised visitors to carry drinking water and remain on the marked walking paths."
+    },
+    {
+      "id": "passage-074",
+      "text": "The newspaper published an interesting article about a young inventor who designed an affordable water filter."
+    },
+    {
+      "id": "passage-075",
+      "text": "After replacing the batteries, he tested the flashlight to make sure it would work during the trip."
+    },
+    {
+      "id": "passage-076",
+      "text": "The music gradually became softer as the dancers moved toward the center of the stage."
+    },
+    {
+      "id": "passage-077",
+      "text": "A warm scarf and a thick pair of socks can make a cold morning feel much more comfortable."
+    },
+    {
+      "id": "passage-078",
+      "text": "The customer requested a receipt and asked whether the store accepted returns within thirty days."
+    },
+    {
+      "id": "passage-079",
+      "text": "The lecturer paused briefly before explaining how the evidence supported a different interpretation of the event."
+    },
+    {
+      "id": "passage-080",
+      "text": "The empty classroom was quiet except for the soft sound of a clock above the whiteboard."
+    },
+    {
+      "id": "passage-081",
+      "text": "A fresh coat of paint transformed the small bedroom into a bright and welcoming place to study."
+    },
+    {
+      "id": "passage-082",
+      "text": "The team selected a simple design that could be repaired easily with materials available in most towns."
+    },
+    {
+      "id": "passage-083",
+      "text": "The nurse spoke calmly and answered every question before showing the patient where to wait."
+    },
+    {
+      "id": "passage-084",
+      "text": "The river bends sharply near the village, where a narrow footbridge connects the two grassy banks."
+    },
+    {
+      "id": "passage-085",
+      "text": "During the workshop, participants practiced giving short instructions and checking whether their partners understood them."
+    },
+    {
+      "id": "passage-086",
+      "text": "A busy schedule can still include a few minutes each day for reading, stretching, or quiet reflection."
+    },
+    {
+      "id": "passage-087",
+      "text": "The curious child wondered why the moon appeared larger when it was close to the horizon."
+    },
+    {
+      "id": "passage-088",
+      "text": "The repair technician discovered a loose wire behind the control panel and replaced the damaged connection."
+    },
+    {
+      "id": "passage-089",
+      "text": "A soft blanket lay across the sofa beside a collection of travel magazines and old photographs."
+    },
+    {
+      "id": "passage-090",
+      "text": "The market opened early to give local farmers enough time to arrange their vegetables and flowers."
+    },
+    {
+      "id": "passage-091",
+      "text": "The volunteer coordinator explained the schedule twice so that everyone knew when and where to meet."
+    },
+    {
+      "id": "passage-092",
+      "text": "A carefully chosen example can make an unfamiliar concept easier to understand and remember later."
+    },
+    {
+      "id": "passage-093",
+      "text": "The ferry crossed the bay beneath a clear sky while passengers enjoyed the cool morning air."
+    },
+    {
+      "id": "passage-094",
+      "text": "Our new neighbor speaks quietly, listens patiently, and always remembers to greet people by name."
+    },
+    {
+      "id": "passage-095",
+      "text": "The director asked the performers to slow down slightly without losing the energy of the scene."
+    },
+    {
+      "id": "passage-096",
+      "text": "A small change in the arrangement of the furniture made the room feel surprisingly spacious."
+    },
+    {
+      "id": "passage-097",
+      "text": "The researcher compared the recorded speech with several examples produced by speakers from different regions."
+    },
+    {
+      "id": "passage-098",
+      "text": "The final paragraph should connect the main ideas and explain why the findings matter to the reader."
+    },
+    {
+      "id": "passage-099",
+      "text": "The bus stopped outside the hospital before continuing toward the university and the central shopping district."
+    },
+    {
+      "id": "passage-100",
+      "text": "At the end of the lesson, each learner recorded another attempt and listened for changes in rhythm."
+    }
+  ]
+}

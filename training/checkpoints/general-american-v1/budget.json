@@ -1,0 +1,11 @@
+{
+  "providerReportedUsageUsd": 0.175072,
+  "providerKeyTotalLimitUsd": 10,
+  "conservativeLocalReservedUsd": 0.1994256,
+  "corpusEstimatedInputCostUsd": 0.0243536,
+  "completedCorpusRequests": 400,
+  "uncertainCorpusRequests": 0,
+  "generationHeaderIdsPresent": true,
+  "generationDetailsLookup": "Sampled first and last TTS IDs returned HTTP 404 from /generation; no paid requests retried. Provider key usage remained unchanged at readback; local estimates remain reserved.",
+  "ledgerReconciledToCanonicalCheckout": true
+}

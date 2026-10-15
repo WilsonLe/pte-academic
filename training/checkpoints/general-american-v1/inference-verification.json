@@ -1,0 +1,20 @@
+{
+  "modelSha256": "41a51dc6ccb421c62bf01c5b0c2a9fdfa2a865a968bf3a1eb717c69bc1ba5a50",
+  "referenceManifestSha256": "a2394fa5e3ee9d480def2063b47abdfad5b572a4497a8efe80325b97888c514d",
+  "sampleTakeId": "passage-083--am_puck",
+  "sampleSyllables": 23,
+  "scoredSyllables": 23,
+  "medianSimilarity": 79.38,
+  "gainControlMaxSimilarityChange": 0.010000000000005116,
+  "silenceStatus": "no-reliable-speech",
+  "noiseStatus": "no-reliable-speech",
+  "audioOnlyStatus": "scored",
+  "audioOnlyTranscript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+  "checkpointReloadIdentical": true,
+  "inferenceNetworkConnections": 0,
+  "correctVowelSyllableSimilarity": 85.46,
+  "wrongVowelSyllableSimilarity": 56.97,
+  "wrongVowelStatus": "scored",
+  "outputFolder": "/Users/wilsonle/projects/pte-academic.worktrees/syllable-comparison/artifacts/pronunciation/verification",
+  "scope": "Synthetic local audio controls; not human-speaker or browser validation."
+}
