@@ -38,6 +38,7 @@ export type PracticePlan = {
   minutes: Record<Section, number>;
 };
 export type Result = {
+  reward?: import("./progress").Reward;
   id: string;
   label: string;
   date: string;

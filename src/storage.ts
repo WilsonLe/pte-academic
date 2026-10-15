@@ -3,6 +3,15 @@ import { z } from "zod";
 import type { Result } from "./Runner";
 import { questions } from "./content";
 import { transcriptionSchema, type Transcription } from "./speech/scoring";
+import {
+  progressSchema,
+  rewardSchema,
+  emptyProgress,
+  awardPractice,
+  localDay,
+  type Progress,
+  type Reward,
+} from "./progress";
 const indexKey = "pte-studio-history-v1";
 const answerSchema = z.object({
   text: z.string().optional(),
@@ -18,8 +27,10 @@ const resultSchema = z.object({
     .refine((ids) => ids.every((id) => questions.some((q) => q.id === id))),
   answers: z.record(z.string(), answerSchema),
   finished: z.boolean(),
+  reward: rewardSchema.optional(),
 });
 interface AttemptStore extends DBSchema {
+  progress: { key: string; value: Progress };
   attempts: {
     key: string;
     value: { result: Result; recordings: Record<string, Blob> };
@@ -27,9 +38,12 @@ interface AttemptStore extends DBSchema {
 }
 let queue: Promise<unknown> = Promise.resolve();
 const database = () =>
-  openDB<AttemptStore>("pte-studio", 1, {
+  openDB<AttemptStore>("pte-studio", 2, {
     upgrade(db) {
-      db.createObjectStore("attempts");
+      if (!db.objectStoreNames.contains("attempts"))
+        db.createObjectStore("attempts");
+      if (!db.objectStoreNames.contains("progress"))
+        db.createObjectStore("progress");
     },
   });
 export function readHistory(): Result[] {
@@ -60,19 +74,48 @@ export function saveAttempt(result: Result) {
         ),
       });
       const db = await database();
-      const tx = db.transaction("attempts", "readwrite");
-      await tx.store.put({ result: clean, recordings }, result.id);
+      const tx = db.transaction(["attempts", "progress"], "readwrite");
+      const attemptStore = tx.objectStore("attempts");
+      const prior = await attemptStore.get(result.id);
+      const raw = await tx.objectStore("progress").get("profile");
+      const before = progressSchema.safeParse(raw);
+      const existingProgress = before.success ? before.data : emptyProgress();
+      const awarded = prior
+        ? {
+            progress: existingProgress,
+            reward: {
+              xp: 0,
+              badges: [],
+              levelUp: false,
+              dailyComplete: false,
+            } satisfies Reward,
+          }
+        : awardPractice(
+            existingProgress,
+            result,
+            localDay(new Date(result.date)),
+          );
+      const reward = prior?.result.reward || awarded.reward;
+      await attemptStore.put(
+        { result: { ...clean, reward }, recordings },
+        result.id,
+      );
+      await tx.objectStore("progress").put(awarded.progress, "profile");
       const recent = [
         { ...clean, answers: {} },
         ...readHistory().filter((x) => x.id !== result.id),
       ].slice(0, 10);
       const retained = new Set(recent.map((x) => x.id));
-      for (const key of await tx.store.getAllKeys())
-        if (!retained.has(key)) await tx.store.delete(key);
+      for (const key of await attemptStore.getAllKeys())
+        if (!retained.has(key)) await attemptStore.delete(key);
       await tx.done;
       db.close();
       localStorage.setItem(indexKey, JSON.stringify(recent));
-      return recent;
+      return {
+        history: recent,
+        progress: awarded.progress,
+        reward: awarded.reward,
+      };
     });
   queue = operation;
   return operation;
@@ -99,7 +142,10 @@ export function clearHistory() {
     .catch(() => {})
     .then(async () => {
       const db = await database();
-      await db.clear("attempts");
+      const tx = db.transaction(["attempts", "progress"], "readwrite");
+      await tx.objectStore("attempts").clear();
+      await tx.objectStore("progress").clear();
+      await tx.done;
       db.close();
       localStorage.removeItem(indexKey);
     });
@@ -143,4 +189,17 @@ export function saveTranscription(
     });
   queue = operation;
   return operation;
+}
+
+export async function loadProgress(): Promise<Progress> {
+  await queue.catch(() => {});
+  const db = await database();
+  try {
+    const parsed = progressSchema.safeParse(
+      await db.get("progress", "profile"),
+    );
+    return parsed.success ? parsed.data : emptyProgress();
+  } finally {
+    db.close();
+  }
 }

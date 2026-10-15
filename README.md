@@ -81,3 +81,13 @@ npm run test:speech:browser
 ```
 
 Implementation references: [Transformers.js](https://huggingface.co/docs/transformers.js/index), [model](https://huggingface.co/onnx-community/whisper-tiny.en).
+
+## Practice game
+
+The practice home has a rotating three-question reading quest, XP levels, daily streaks, weekly activity and six unlockable achievements. Any mode counts toward the daily goal. Answering a different question earns 10 XP once per local calendar day; reaching three earns a one-time 30 XP bonus. A level takes 150 XP. Empty attempts earn zero and replaying a review or transcribing an answer never earns XP. These are effort milestones, without a proficiency claim.
+
+Quest progress resumes remaining questions. XP, coverage and badges stay in IndexedDB even when older attempts fall outside the ten-attempt history. Game progress starts with newly saved practice after this update; existing attempts, recordings and transcripts are preserved. Clearing history also resets game progress, as the dialog explains. Public model caches remain separate. Daily records retain up to 365 days; cumulative XP, earned badges and longest streak persist.
+
+The IndexedDB upgrade creates a progress store at version 2 without rewriting old attempts. To roll back the game UI, retain the version-2 database opener; browsers cannot downgrade the database to version 1. Refresh other older app tabs after the update. Rewards appear after saving, with finite celebrations and reduced-motion support; no game effects run inside a timed test.
+
+Focused game checks: npm run test:progress and the daily-quest/browser journeys in tests/practice.spec.ts.

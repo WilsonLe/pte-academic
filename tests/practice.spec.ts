@@ -39,9 +39,11 @@ test("beginner navigation, all guides, mobile layout and original branding", asy
     page.getByRole("navigation", { name: "Mobile navigation" }),
   ).toBeHidden();
   await expect(page.getByText(/PTE Academic tests speaking/)).toBeHidden();
+  await settleView(page);
   await page.screenshot({
     path: "docs/evidence/overview-desktop.png",
     fullPage: true,
+    animations: "disabled",
   });
   await page.getByRole("button", { name: "Install app" }).hover();
   await expect(page.locator('[data-slot="tooltip-content"]')).toContainText(
@@ -106,9 +108,11 @@ test("beginner navigation, all guides, mobile layout and original branding", asy
       .evaluate((el) => getComputedStyle(el).animationName),
   ).toBe("none");
   await page.getByRole("button", { name: "New to PTE Academic?" }).click();
+  await settleView(page);
   await page.screenshot({
     path: "docs/evidence/overview-mobile.png",
-    fullPage: true,
+    fullPage: false,
+    animations: "disabled",
   });
 });
 test("single answer submits once and persisted review survives reload", async ({
@@ -541,4 +545,161 @@ test("new offline pack offers an update without reloading or interrupting practi
       server.close((error) => (error ? reject(error) : done())),
     );
   }
+});
+
+async function settleView(page: Page) {
+  await page.evaluate(() => {
+    (document.activeElement as HTMLElement)?.blur();
+    window.scrollTo(0, 0);
+  });
+  await page.locator(".page-enter").evaluate(async (el) => {
+    await Promise.all(
+      el
+        .getAnimations({ subtree: true })
+        .map((a) => a.finished.catch(() => {})),
+    );
+  });
+}
+async function answerReading(page: Page) {
+  const exam = page.locator(".exam");
+  if (await exam.getByRole("radio").count())
+    await exam.getByRole("radio").first().check();
+  else if (await exam.getByRole("checkbox").count())
+    await exam.getByRole("checkbox").first().check();
+  else if (await exam.getByRole("combobox").count())
+    await exam.getByRole("combobox").first().selectOption({ index: 1 });
+  else if (await exam.locator(".reorder").count()) {
+    await exam.locator(".paragraph").first().click();
+    await exam
+      .getByRole("button", {
+        name: "Move selected paragraph to answer",
+        exact: true,
+      })
+      .click();
+  } else {
+    await exam.locator(".word-bank button").first().click();
+    await exam.getByRole("button", { name: "Blank 1", exact: true }).click();
+  }
+}
+test("daily quest earns real XP and badges, persists after reload and resets with history", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "First spark, locked. View achievement" })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("0 / 1 so far");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Start quest", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Daily quest", exact: true }),
+  ).toBeVisible();
+  await start(page);
+  for (let i = 0; i < 3; i++) {
+    await answerReading(page);
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+  await expect(
+    page.getByRole("region", { name: "Practice rewards" }),
+  ).toContainText("+60");
+  await expect(
+    page.getByRole("heading", { name: "Daily quest complete!", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "60 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "docs/evidence/game-reward.png",
+    fullPage: true,
+    animations: "disabled",
+  });
+  await page
+    .getByRole("navigation", { name: "Main navigation", exact: true })
+    .getByRole("link", { name: "Practice", exact: true })
+    .click();
+  await expect(page.getByText("GOAL COMPLETE", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "First spark, unlocked. View achievement",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "Daily finisher, unlocked. View achievement",
+    }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "60 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await settleView(page);
+  await page.screenshot({
+    path: "docs/evidence/game-progress.png",
+    fullPage: true,
+    animations: "disabled",
+  });
+  await page
+    .getByRole("navigation", { name: "Main navigation", exact: true })
+    .getByRole("link", { name: "My practice", exact: true })
+    .click();
+  await page.locator(".history-list>button").first().click();
+  await expect(
+    page.getByRole("region", { name: "Practice rewards" }),
+  ).toContainText("+60");
+  await expect(page.locator(".confetti")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "60 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "My practice", exact: true }).click();
+  await page.getByRole("button", { name: "Clear practice history" }).click();
+  await expect(page.getByRole("dialog")).toContainText("XP, streaks, badges");
+  await page
+    .getByRole("button", { name: "Clear history", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+  ).toBeVisible();
+});
+test("an empty quest earns no XP; a partial quest resumes remaining questions; reduced motion suppresses celebrations", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start quest", exact: true }).click();
+  await start(page);
+  await end(page);
+  await expect(
+    page.getByRole("region", { name: "Practice rewards" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "0 XP, level 1. View progress" })
+    .click();
+  await page.getByRole("button", { name: "Start quest", exact: true }).click();
+  await start(page);
+  await answerReading(page);
+  await end(page);
+  await expect(
+    page.getByRole("region", { name: "Practice rewards" }),
+  ).toContainText("+10");
+  await expect(page.locator(".confetti")).toBeHidden();
+  await page
+    .getByRole("button", { name: "10 XP, level 1. View progress" })
+    .click();
+  await expect(
+    page.getByLabel("1 of 3 daily questions answered"),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Continue quest", exact: true })
+    .click();
+  await expect(page.getByText("2 questions", { exact: true })).toBeVisible();
 });

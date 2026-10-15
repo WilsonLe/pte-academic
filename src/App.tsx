@@ -43,7 +43,13 @@ import {
 } from "./content";
 import articles from "../content/learn.json";
 import { Preflight, Runner, type PracticePlan, type Result } from "./Runner";
-import { readHistory, saveAttempt, loadAttempt, clearHistory } from "./storage";
+import {
+  readHistory,
+  saveAttempt,
+  loadAttempt,
+  clearHistory,
+  loadProgress,
+} from "./storage";
 import { usePwa } from "./pwa";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
@@ -71,6 +77,13 @@ import {
   DialogDescription,
 } from "./components/ui/dialog";
 import { Toaster } from "./components/ui/sonner";
+import { GameHub, GameStatus, RewardMoment, TrackProgress } from "./GameHub";
+import {
+  emptyProgress,
+  localDay,
+  questQuestions,
+  type Progress,
+} from "./progress";
 import { Chart } from "./QuestionInput";
 import { SpeechReview } from "./speech/SpeechReview";
 import type { Transcription } from "./speech/scoring";
@@ -184,6 +197,10 @@ function Nav({
   );
 }
 export default function App() {
+  const [progress, setProgress] = useState<Progress>(emptyProgress);
+  const [progressReady, setProgressReady] = useState(false);
+  const [today, setToday] = useState(localDay);
+  const [celebration, setCelebration] = useState<string | null>(null);
   const [page, setPage] = useState(location.hash.slice(1) || "home");
   const [guideId, setGuideId] = useState("");
   const [filter, setFilter] = useState("all");
@@ -199,6 +216,34 @@ export default function App() {
   const stream = useRef<MediaStream | null>(null);
   const main = useRef<HTMLElement>(null);
   const pwa = usePwa();
+  useEffect(() => {
+    let live = true;
+    const refresh = () => {
+      setToday(localDay());
+      void loadProgress()
+        .then((value) => {
+          if (live) setProgress(value);
+        })
+        .catch(() => {
+          if (live)
+            setStorageError(
+              "Game progress could not load. Your practice controls are still available.",
+            );
+        })
+        .finally(() => {
+          if (live) setProgressReady(true);
+        });
+    };
+    refresh();
+    const timer = setInterval(() => setToday(localDay()), 30000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      live = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   useEffect(() => {
     const route = () => {
       setPage(location.hash.slice(1) || "home");
@@ -216,6 +261,7 @@ export default function App() {
     [],
   );
   function navigate(to: string) {
+    setCelebration(null);
     releaseRecordings(result);
     setResult(null);
     setGuideId("");
@@ -243,6 +289,22 @@ export default function App() {
       minutes: mocks[0].sectionMinutes,
     });
   }
+  function startQuest() {
+    const qs = questQuestions(progress, today);
+    if (!qs.length) {
+      navigate("types");
+      return;
+    }
+    releaseRecordings(result);
+    setResult(null);
+    setCelebration(null);
+    setPlan({
+      mode: "type",
+      label: "Daily quest",
+      questions: qs,
+      minutes: mocks[0].sectionMinutes,
+    });
+  }
   function finish(r: Result) {
     setRunning(false);
     setPlan(null);
@@ -250,9 +312,18 @@ export default function App() {
     setStorageError("");
     setSaving(true);
     void saveAttempt(r)
-      .then((rows) => {
-        setHistory(rows);
-        toast.success("Practice saved");
+      .then((saved) => {
+        setHistory(saved.history);
+        setProgress(saved.progress);
+        setResult((current) =>
+          current?.id === r.id ? { ...current, reward: saved.reward } : current,
+        );
+        if (saved.reward.xp) setCelebration(r.id);
+        toast.success(
+          saved.reward.xp
+            ? "+" + saved.reward.xp + " XP · Practice saved"
+            : "Practice saved",
+        );
       })
       .catch(() => {
         setStorageError(
@@ -263,6 +334,7 @@ export default function App() {
       .finally(() => setSaving(false));
   }
   async function openAttempt(id: string) {
+    setCelebration(null);
     try {
       const saved = await loadAttempt(id);
       releaseRecordings(result);
@@ -279,6 +351,8 @@ export default function App() {
     try {
       await clearHistory();
       setHistory([]);
+      setProgress(emptyProgress());
+      setCelebration(null);
       setClearConfirm(false);
       setStorageError("");
       toast.success("History cleared");
@@ -375,6 +449,11 @@ export default function App() {
               </h1>
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              <GameStatus
+                progress={progress}
+                today={today}
+                onClick={() => navigate("home")}
+              />
               <Tooltip>
                 <TooltipTrigger
                   render={
@@ -455,6 +534,7 @@ export default function App() {
               {result ? (
                 <Review
                   result={result}
+                  celebrate={celebration === result.id}
                   onTranscription={(questionId, value) =>
                     setResult((current) =>
                       current && current.id === result.id
@@ -478,25 +558,14 @@ export default function App() {
                   onStart={() => begin("type", currentGuide.id)}
                 />
               ) : active === "home" ? (
-                <div className="max-w-3xl">
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {[
-                      { id: "types", label: "Question types", icon: Target },
-                      { id: "sections", label: "Sections", icon: ListChecks },
-                      { id: "mocks", label: "Mock tests", icon: Trophy },
-                    ].map((n) => (
-                      <a
-                        href={`#${n.id}`}
-                        key={n.id}
-                        onClick={() => navigate(n.id)}
-                        className="practice-choice"
-                      >
-                        <n.icon className="size-5" />
-                        <span>{n.label}</span>
-                        <ChevronRight className="ml-auto size-4 text-muted-foreground" />
-                      </a>
-                    ))}
-                  </div>
+                <div>
+                  <GameHub
+                    progress={progress}
+                    today={today}
+                    ready={progressReady}
+                    onQuest={startQuest}
+                    navigate={navigate}
+                  />
                   <div className="mt-6">
                     <More label="New to PTE Academic?">
                       <p>
@@ -569,10 +638,24 @@ export default function App() {
                         <button
                           key={g.id}
                           className="type-row"
+                          data-track={g.section}
                           onClick={() => setGuideId(g.id)}
                         >
-                          <Icon className="size-4 text-muted-foreground" />
+                          <span className="type-icon">
+                            <Icon className="size-4" />
+                          </span>
                           <span className="flex-1 text-left">{g.title}</span>
+                          {questions.some(
+                            (q) =>
+                              q.type === g.id && progress.seen.includes(q.id),
+                          ) && (
+                            <span
+                              className="tried-marker"
+                              aria-label="Practised"
+                            >
+                              <Check className="size-3" />
+                            </span>
+                          )}
                           <Badge variant="secondary" className="tabular-nums">
                             {questions.filter((q) => q.type === g.id).length}
                           </Badge>
@@ -609,6 +692,7 @@ export default function App() {
                       <section
                         key={s.id}
                         className="section-card rounded-xl border px-4"
+                        data-track={s.id}
                       >
                         <div className="flex min-h-18 items-center gap-3">
                           <Icon className="size-5 text-muted-foreground" />
@@ -622,6 +706,7 @@ export default function App() {
                             onClick={() => begin("section", s.id)}
                           />
                         </div>
+                        <TrackProgress progress={progress} section={s.id} />
                         <More label={`${s.title} details`}>
                           <p className="mb-2 text-xs">
                             {s.duration} · {count} questions
@@ -640,10 +725,15 @@ export default function App() {
                   })}
                 </div>
               ) : active === "mocks" ? (
-                <section className="max-w-3xl rounded-xl border px-4">
-                  <div className="flex min-h-20 items-center gap-3">
-                    <Trophy className="size-5 text-muted-foreground" />
-                    <h2 className="flex-1 text-sm font-medium">Mock 01</h2>
+                <section className="mock-arena max-w-3xl">
+                  <div className="mock-heading">
+                    <span className="arena-trophy">
+                      <Trophy className="size-6" />
+                    </span>
+                    <div className="flex-1">
+                      <p className="game-eyebrow">THE FULL RUN</p>
+                      <h2 className="text-lg font-semibold">Mock 01</h2>
+                    </div>
                     <Badge variant="secondary">65</Badge>
                     <IconAction
                       label="Prepare for mock"
@@ -651,6 +741,21 @@ export default function App() {
                       onClick={() => begin("mock", "mock-01")}
                     />
                   </div>
+                  <ol className="arena-stages" aria-label="Mock test stages">
+                    {sections.map((s, i) => {
+                      const Icon = icons[s.id];
+                      return (
+                        <li key={s.id} data-track={s.id}>
+                          <span className="arena-node">
+                            <Icon className="size-5" />
+                            <small>{i + 1}</small>
+                          </span>
+                          <strong>{s.title}</strong>
+                          <span>{mocks[0].sectionMinutes[s.id]} min</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
                   <More label="Mock details">
                     <p className="mb-3">
                       One original 65-question form, covering all 22 question
@@ -771,8 +876,8 @@ export default function App() {
                     <p className="text-xs">
                       Up to 10 attempts and their recordings stay in this
                       browser. localStorage stores the index; IndexedDB stores
-                      responses. Nothing is uploaded. Clear history to remove
-                      them.
+                      responses and game progress. Nothing is uploaded. Clear
+                      history to reset progress and remove them.
                     </p>
                   </More>
                 </div>
@@ -785,8 +890,8 @@ export default function App() {
           <DialogContent showCloseButton={false}>
             <DialogTitle>Clear your practice history?</DialogTitle>
             <DialogDescription>
-              This removes responses, recordings and attempt history from this
-              browser.
+              This removes responses, recordings, transcripts, XP, streaks,
+              badges and attempt history from this browser.
             </DialogDescription>
             <div className="flex justify-end gap-3 pt-3">
               <Button variant="outline" onClick={() => setClearConfirm(false)}>
@@ -894,12 +999,15 @@ function modelAnswer(q: Question) {
 function Review({
   result: r,
   onTranscription,
+  celebrate,
 }: {
+  celebrate: boolean;
   result: Result;
   onTranscription: (questionId: string, value: Transcription) => void;
 }) {
   return (
     <div className="max-w-3xl">
+      {r.reward && <RewardMoment reward={r.reward} celebrate={celebrate} />}
       <div className="mb-4 flex items-center gap-3">
         <span className="text-sm">{r.label}</span>
         <Badge variant="secondary">

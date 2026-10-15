@@ -65,3 +65,35 @@ npm run test:subpath
 ```
 
 [Local speech review screenshot](local-speech-review.png).
+
+## Playful practice and real progress (issue #4)
+
+The practice workspace now uses violet/lime quest cards, tactile pastel mode cards, section colors, a weekly activity trail, rank/XP meters, six collectible achievements and a staged mock view. Timed exam styling/behavior is preserved. Default shadcn tokens/primitives remain; component-level game accents implement the operator's newer design request.
+
+The daily reading quest rotates original items and starts with varied types. It resumes remaining daily questions; any practice mode counts toward the goal. Saved answers earn 10 XP once per different question/local day, with 30 extra XP on first reaching three. Levels advance every 150 XP. Empty attempts, repeated review and transcription earn no XP. Rewards measure effort, not proficiency.
+
+IndexedDB v2 adds a separate profile and commits it atomically with attempts. Duplicate result IDs cannot re-award, daily IDs prevent repeat question rewards, earned progress survives the ten-attempt retention limit, and clearing history resets it with an explicit warning. Existing v1 responses, recording Blobs and transcripts survive upgrade. Calendar arithmetic is tested across Sydney DST and year/leap-day boundaries; credit uses the completion day, including delayed saves after midnight. Daily records are bounded at 365; cumulative XP, unlocked badges and longest streak persist. Rollback must retain a v2-compatible database opener because IndexedDB cannot downgrade.
+
+Evidence:
+- Six focused progress/storage contracts pass: effort and deduplication, daily bonus, calendar streaks, resumed/varied quest, bounded-ledger achievements, level-up, v1 preservation, repeated/concurrent queued saves, pruning/reset and midnight credit.
+- Nine affected practice browser journeys pass across scoped runs: navigation/disclosures/mobile, selected-answer persistence/clear, native microphone review, section/full mock transitions, offline app/media, explicit worker updates, complete daily quest/reload/badges/reset, and empty/partial quest/reduced motion.
+- Actual on-device MediaRecorder speech inference and fresh-document offline repeat pass after the schema upgrade. Five speech contracts and five content checks pass. Root build/TypeScript and subdirectory offline media/range checks pass.
+- A combined browser run had a microphone preflight timeout and a quest test timeout after its final reset. Both original cases passed unchanged in isolation (4.4s and 3.0s); no assertion or timeout was weakened. Root cause was not established.
+- Screenshots inspect honest zero state, earned progress and saved reward. Motion is disabled only when taking a stable screenshot; separate assertions exercise animation/reduced-motion behavior.
+- No current-head independent review, full-suite run, merge or deployment is claimed. The prior draft PR's one automatic review remains pinned to its older head.
+
+Visual evidence: [new desktop](overview-desktop.png), [mobile viewport](overview-mobile.png), [earned progress](game-progress.png), [quest reward](game-reward.png).
+
+Focused commands:
+
+```sh
+npm run test:progress
+TZ=Australia/Sydney npm run test:progress
+npm run test:speech
+npm run test:content
+npm run build
+npx playwright test tests/practice.spec.ts --grep "beginner navigation|single answer submits|section mode|empty quest"
+npx playwright test tests/practice.spec.ts --grep "daily quest earns|full mock"
+PTE_TEST_SPEECH=1 npx playwright test tests/speech.spec.ts --grep "real on-device"
+npm run test:subpath
+```

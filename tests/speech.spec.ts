@@ -67,7 +67,7 @@ async function seed(page: Page, { silence = false, recorded = false } = {}) {
         finished: true,
       };
       await new Promise<void>((resolve, reject) => {
-        const r = indexedDB.open("pte-studio", 1);
+        const r = indexedDB.open("pte-studio");
         r.onupgradeneeded = () => r.result.createObjectStore("attempts");
         r.onerror = () => reject(r.error);
         r.onsuccess = () => {
@@ -212,7 +212,7 @@ test("real on-device recognition, private transport, saved feedback and offline 
   expect(
     await page.evaluate(async () => {
       return await new Promise<number>((resolve) => {
-        const r = indexedDB.open("pte-studio", 1);
+        const r = indexedDB.open("pte-studio");
         r.onsuccess = () => {
           const db = r.result,
             q = db.transaction("attempts").objectStore("attempts").count();
@@ -312,7 +312,7 @@ test("undecodable recording reports an error without downloading models", async 
   await seed(page);
   await page.evaluate(async () => {
     await new Promise<void>((resolve) => {
-      const r = indexedDB.open("pte-studio", 1);
+      const r = indexedDB.open("pte-studio");
       r.onsuccess = () => {
         const db = r.result,
           tx = db.transaction("attempts", "readwrite"),

@@ -60,6 +60,10 @@
       {
         "title": "Make feedback useful",
         "text": "After a drill, identify one specific issue: a missing plural, a weak connection between ideas, or a pause that interrupts meaning. Practise that issue again. For a spoken answer, listen without looking at the script first, then compare against the key points. A model answer shows one valid approach, not the only acceptable wording."
+      },
+      {
+        "title": "What do XP and levels mean?",
+        "text": "XP means experience points. Answering a different question earns 10 XP once per day; answering three earns a 30 XP daily bonus. Every 150 XP opens the next practice level. Streaks count consecutive practice days, and badges mark small milestones. These reward showing up and trying tasks, not language proficiency. You can get a question wrong and still earn effort XP. None of these points predicts a test score."
       }
     ]
   },
@@ -95,7 +99,7 @@
     "blocks": [
       {
         "title": "What stays on your device",
-        "text": "Completed attempts are saved in this browser when browser storage is available. Responses, recordings and optional transcripts are saved in IndexedDB. A small attempt index is stored in localStorage. Nothing is uploaded. Anyone using the same browser profile can see the saved history; clear it from My practice whenever you want. Transcription first downloads public model files, then runs locally. Model files remain in browser Cache Storage; clear site storage in browser settings to remove them."
+        "text": "Completed attempts are saved in this browser when browser storage is available. Responses, recordings and optional transcripts are saved in IndexedDB. A small attempt index is stored in localStorage. Nothing is uploaded. Anyone using the same browser profile can see the saved history; clear it from My practice whenever you want. Transcription first downloads public model files, then runs locally. Model files remain in browser Cache Storage; clear site storage in browser settings to remove them. XP, streaks and badges are also saved locally. Clearing practice history resets these too; older attempts may be pruned without removing earned progress."
       },
       {
         "title": "Using the app offline",
