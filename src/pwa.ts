@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 interface InstallEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
@@ -10,6 +10,8 @@ export function usePwa() {
   const [install, setInstall] = useState<InstallEvent | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
+    let disposed = false;
+    const cleanups: Array<() => void> = [];
     const online = () => setOffline(!navigator.onLine);
     const offer = (e: Event) => {
       e.preventDefault();
@@ -22,31 +24,59 @@ export function usePwa() {
       void navigator.serviceWorker
         .register(`${import.meta.env.BASE_URL}sw.js`)
         .then((reg) => {
-          if (reg.waiting) setUpdate(reg);
-          reg.addEventListener("updatefound", () => {
-            reg.installing?.addEventListener("statechange", () => {
+          if (disposed) return navigator.serviceWorker.ready;
+          if (reg.waiting && navigator.serviceWorker.controller) setUpdate(reg);
+          const observeInstalling = () => {
+            const worker = reg.installing;
+            if (!worker) return;
+            const changed = () => {
               if (
-                reg.installing?.state === "installed" &&
+                !disposed &&
+                worker.state === "installed" &&
                 navigator.serviceWorker.controller
               )
                 setUpdate(reg);
-            });
-          });
+            };
+            worker.addEventListener("statechange", changed);
+            cleanups.push(() =>
+              worker.removeEventListener("statechange", changed),
+            );
+            changed();
+          };
+          reg.addEventListener("updatefound", observeInstalling);
+          cleanups.push(() =>
+            reg.removeEventListener("updatefound", observeInstalling),
+          );
+          observeInstalling();
           return navigator.serviceWorker.ready;
         })
-        .then(() => setReady(true))
-        .catch(() =>
-          setError(
-            "Offline setup failed. Keep an internet connection and reload to retry.",
-          ),
-        );
+        .then(() => {
+          if (!disposed) setReady(true);
+        })
+        .catch(() => {
+          if (!disposed)
+            setError(
+              "Offline setup failed. Keep an internet connection and reload to retry.",
+            );
+        });
     }
     return () => {
+      disposed = true;
+      cleanups.forEach((cleanup) => cleanup());
       window.removeEventListener("online", online);
       window.removeEventListener("offline", online);
       window.removeEventListener("beforeinstallprompt", offer);
     };
   }, []);
+  const applyUpdate = useCallback(() => {
+    if (!update?.waiting) return;
+    navigator.serviceWorker.addEventListener(
+      "controllerchange",
+      () => location.reload(),
+      { once: true },
+    );
+    update.waiting.postMessage("ACTIVATE_UPDATE");
+  }, [update]);
   return {
     offline,
     ready,
@@ -58,19 +88,8 @@ export function usePwa() {
         await install.userChoice;
         setInstall(null);
       } else
-        alert(
-          "To install: open your browser menu and choose Install app, or use Share → Add to Home Screen on iPhone/iPad.",
-        );
+        return "Use your browser’s Install option, or Share → Add to Home Screen on iPhone/iPad.";
     },
-    update: update
-      ? () => {
-          navigator.serviceWorker.addEventListener(
-            "controllerchange",
-            () => location.reload(),
-            { once: true },
-          );
-          update.waiting?.postMessage("ACTIVATE_UPDATE");
-        }
-      : null,
+    update: update ? applyUpdate : null,
   };
 }

@@ -4,16 +4,21 @@ test("subdirectory static build retains manifest, audio and offline navigation",
   context,
 }) => {
   await page.goto("http://127.0.0.1:4180/pte-academic/");
-  await expect(page.getByText("Offline ready", { exact: true })).toBeVisible({
+  await expect(
+    page.getByRole("status", { name: "Offline ready", exact: true }),
+  ).toBeVisible({
     timeout: 15000,
   });
   await page.reload();
   await context.setOffline(true);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: /Your next chapter/ }),
+    page.getByRole("heading", { name: "Practice", exact: true }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Question types", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Main navigation", exact: true })
+    .getByRole("link", { name: "Question types", exact: true })
+    .click();
   await expect(page.locator(".type-row")).toHaveCount(22);
   const audio = await page.evaluate(async () => {
     const r = await fetch("./audio/repeat-sentence-01.mp3", {

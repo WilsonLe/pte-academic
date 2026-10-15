@@ -4,9 +4,23 @@ import {
   DialogTitle,
   DialogDescription,
 } from "./components/ui/dialog";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "./components/ui/collapsible";
 import { Button } from "./components/ui/button";
 import { useEffect, useRef, useState } from "react";
-import { Clock3, Volume2, LogOut, Mic, Check, ArrowRight } from "lucide-react";
+import {
+  Clock3,
+  Volume2,
+  LogOut,
+  Mic,
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  Info,
+} from "lucide-react";
 import {
   type Question,
   type Answer,
@@ -113,23 +127,24 @@ export function Preflight({
   }
   return (
     <main className="setup-page">
-      <button className="text-button" onClick={onCancel}>
-        ← Back to practice
-      </button>
-      <div className="eyebrow">BEFORE YOU BEGIN</div>
-      <h1>
-        Make yourself
-        <br />
-        <em>test ready.</em>
-      </h1>
-      <p className="lead">
-        {plan.label} · {plan.questions.length} questions
-      </p>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Back to practice"
+          onClick={onCancel}
+        >
+          <ArrowLeft className="size-4" />
+        </Button>
+        <h1 className="text-sm font-medium">{plan.label}</h1>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {plan.questions.length} questions
+        </span>
+      </div>
       <div className="setup-panel">
-        <h2>A quiet place. A clear head.</h2>
         <p>
-          The timer starts when you begin. You can move forward only, and each
-          audio prompt plays once. Keep paper nearby for notes.
+          The timer starts when you begin. Move forward only; audio prompts play
+          once.
         </p>
         {needAudio && (
           <div className="check-row">
@@ -192,20 +207,33 @@ export function Preflight({
             </div>
           </div>
         )}
-        <div className="notice">
-          Independent practice simulation. Layout and timing follow familiar
-          computer-based exam conventions; exact live-test parity is unverified.
-          Synthetic audio is included. Speaking and extended writing use
-          self-review.
-        </div>
-        {plan.mode === "mock" && (
-          <p className="muted">
-            This form has 65 questions. Your section limits are 80, 30 and 39
-            minutes. Shorter original prompts can make practice faster than test
-            day. The unscored personal introduction and test-centre check-in are
-            not simulated.
-          </p>
-        )}
+        <Collapsible className="more mt-3">
+          <CollapsibleTrigger className="flex min-h-10 items-center gap-2 text-xs text-muted-foreground">
+            <Info className="size-3.5" />
+            Practice details
+          </CollapsibleTrigger>
+          <CollapsibleContent className="disclosure-panel">
+            <div className="space-y-3 py-3 text-xs leading-6 text-muted-foreground">
+              <p>
+                Independent practice simulation. Exact live-test parity is
+                unverified. Synthetic audio is included. Speaking and extended
+                writing use self-review.
+              </p>
+              {plan.mode === "mock" && (
+                <p>
+                  This form has 65 questions. Section limits are 80, 30 and 39
+                  minutes. Shorter prompts can make practice faster than test
+                  day. Personal introduction and check-in are not simulated.
+                </p>
+              )}
+              <p>
+                A desktop or laptop gives the closest test experience. Keep
+                paper nearby for notes. Responses and recordings stay on this
+                device.
+              </p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
         {error && (
           <p className="error" role="alert">
             {error}
@@ -223,10 +251,9 @@ export function Preflight({
           <ArrowRight size={17} />
         </Button>
       </div>
-      <p className="muted">
-        Use a desktop or laptop for the closest test experience. Leaving or
-        refreshing ends this attempt. Completed text responses are saved
-        locally; recordings are saved locally when browser storage is available.
+      <p className="mt-4 text-xs text-muted-foreground">
+        Leaving or refreshing ends this attempt. Completed attempts are saved
+        locally when browser storage is available.
       </p>
     </main>
   );

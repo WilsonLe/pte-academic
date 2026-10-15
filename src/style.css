@@ -130,7 +130,7 @@
 }
 @layer base {
   body {
-    @apply m-0 bg-background font-sans text-foreground antialiased;
+    @apply m-0 antialiased;
   }
   button,
   a,
@@ -154,530 +154,87 @@
   summary:focus-visible {
     @apply outline-2 outline-offset-4 outline-ring;
   }
-  h1 {
-    @apply text-4xl font-semibold tracking-tight leading-tight md:text-5xl;
-  }
-  h2 {
-    @apply text-xl font-semibold tracking-tight;
-  }
-  h3 {
-    @apply text-base font-medium;
-  }
-  p {
-    @apply leading-7;
-  }
 }
 @layer components {
   .app-shell {
-    @apply min-h-svh md:flex;
+    @apply min-h-svh;
   }
   .sidebar {
-    @apply border-b bg-sidebar px-4 pt-5 md:fixed md:inset-y-0 md:left-0 md:z-10 md:flex md:w-56 md:flex-col md:border-r md:border-b-0 md:px-5 md:py-8;
+    @apply fixed inset-y-0 left-0 z-30 hidden w-18 flex-col items-center gap-8 border-r bg-sidebar py-5 md:flex;
   }
-  .brand {
-    @apply mb-5 flex items-center gap-3 text-xl tracking-tight md:mb-12;
+  .rail-logo {
+    @apply flex size-10 items-center justify-center;
   }
-  .brand-symbol {
-    @apply size-10 rounded-xl;
+  .desktop-nav {
+    @apply flex flex-col gap-2;
   }
-  .brand-light {
-    @apply font-normal;
+  .nav-icon {
+    @apply flex size-11 items-center justify-center rounded-xl text-muted-foreground transition-colors duration-200 hover:bg-accent hover:text-foreground;
   }
-  .brand small {
-    @apply mt-1 block text-[8px] font-medium tracking-[.18em] text-muted-foreground;
-  }
-  .nav-label {
-    @apply mb-3 hidden px-3 text-[10px] tracking-widest text-muted-foreground md:block;
-  }
-  .sidebar nav {
-    @apply -mx-4 flex gap-1 overflow-x-auto px-3 pb-3 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0;
-  }
-  .sidebar nav > a {
-    @apply relative flex min-w-18 flex-col items-center gap-2 rounded-md px-3 py-3 text-[10px] whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:min-w-0 md:flex-row md:gap-3 md:text-xs;
-  }
-  .sidebar nav > a[aria-current="page"] {
-    @apply bg-accent font-medium text-accent-foreground;
-  }
-  .nav-dot {
-    @apply ml-auto hidden size-1.5 rounded-full bg-primary md:block;
-  }
-  .nav-rule {
-    @apply my-5 hidden border-t md:block;
-  }
-  .sidebar-bottom {
-    @apply mt-auto hidden px-3 pt-10 md:block;
-  }
-  .private-label {
-    @apply flex items-center gap-2 text-[10px] font-medium;
-  }
-  .sidebar-bottom p {
-    @apply mt-3 mb-5 text-[10px] leading-5 text-muted-foreground;
-  }
-  .sidebar-bottom > button {
-    @apply flex w-full items-center gap-2 border-t pt-5 text-[11px];
-  }
-  .sidebar-bottom > button svg:last-child {
-    @apply ml-auto;
+  .nav-icon[aria-current="page"] {
+    @apply bg-accent text-foreground;
   }
   .workspace {
-    @apply flex min-h-svh flex-1 flex-col md:ml-56 md:w-[calc(100%-14rem)];
+    @apply md:ml-18;
   }
   .topbar {
-    @apply flex min-h-16 items-center justify-between gap-5 border-b px-6 md:px-10;
-  }
-  .breadcrumbs {
-    @apply flex items-center gap-3 text-[11px] text-muted-foreground;
-  }
-  .breadcrumbs span {
-    @apply text-foreground;
-  }
-  .topbar-right {
-    @apply flex items-center gap-5;
-  }
-  .availability {
-    @apply flex items-center gap-2 text-[10px] whitespace-nowrap text-muted-foreground;
-  }
-  .status-dot {
-    @apply size-1.5 rounded-full bg-foreground;
-  }
-  .topbar-right > a {
-    @apply hidden border-l pl-5 text-muted-foreground sm:block;
-  }
-  .avatar {
-    @apply hidden size-7 items-center justify-center rounded-full bg-muted text-xs sm:flex;
+    @apply sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b bg-background/95 px-4 backdrop-blur-sm md:px-7;
   }
   .main-content {
-    @apply mx-auto w-full max-w-6xl flex-1 px-6 py-9 outline-none md:px-12 md:py-12;
+    @apply mx-auto max-w-6xl px-4 py-6 pb-28 outline-none md:px-8 md:py-8;
   }
-  .page-kicker,
-  .eyebrow {
-    @apply text-[10px] font-medium tracking-[.15em] text-muted-foreground;
+  .mobile-nav {
+    @apply fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t bg-background/95 px-2 pt-2 backdrop-blur-sm md:hidden;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
-  .page-kicker {
-    @apply mb-5;
-  }
-  .welcome-heading {
-    @apply mb-9 flex items-center justify-between gap-8;
-  }
-  .welcome-heading h1 {
-    @apply mb-5;
-  }
-  h1 em {
-    @apply font-normal not-italic text-muted-foreground;
-  }
-  .lead {
-    @apply mt-4 text-sm leading-7 text-muted-foreground;
-  }
-  .chapter-mark {
-    @apply relative mr-5 hidden h-40 w-52 items-center justify-center overflow-hidden lg:flex;
-  }
-  .chapter-mark > span {
-    @apply text-6xl font-light tracking-tighter text-muted-foreground;
-  }
-  .chapter-mark > span > span {
-    @apply mx-2 text-foreground;
-  }
-  .chapter-mark > small {
-    @apply absolute bottom-1 text-[8px] tracking-widest text-muted-foreground;
-  }
-  .orbit {
-    @apply absolute h-24 w-48 -rotate-30 rounded-full border;
-  }
-  .orbit-two {
-    @apply rotate-30;
-  }
-  .orbit-three {
-    @apply size-32 rotate-0;
-  }
-  .start-banner {
-    @apply mb-10 flex flex-wrap items-center gap-5 rounded-xl border bg-muted/50 p-6;
-  }
-  .start-icon {
-    @apply flex size-11 items-center justify-center rounded-lg border bg-background;
-  }
-  .start-banner h2 {
-    @apply mt-1 mb-1 text-lg;
-  }
-  .start-banner p {
-    @apply text-xs text-muted-foreground;
-  }
-  .start-banner .primary {
-    @apply ml-auto;
-  }
-  .primary {
-    @apply inline-flex min-h-9 items-center justify-center gap-3 rounded-lg bg-primary px-4 py-2 text-xs font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90;
-  }
-  .secondary {
-    @apply inline-flex min-h-9 items-center justify-center gap-3 rounded-lg border bg-background px-4 py-2 text-xs font-medium transition-colors hover:bg-muted;
-  }
-  .section-heading {
-    @apply mb-5 flex items-center justify-between gap-3;
-  }
-  .section-heading h2 {
-    @apply text-lg;
-  }
-  .section-heading > span {
-    @apply text-[10px] text-muted-foreground;
-  }
-  .mode-grid {
-    @apply grid gap-4 lg:grid-cols-3;
-  }
-  .mode-card {
-    @apply flex flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-foreground/30;
-  }
-  .mode-card-top {
-    @apply flex items-center justify-between px-6 pt-6 pb-6;
-  }
-  .mode-icon {
-    @apply flex size-11 items-center justify-center rounded-lg border bg-muted/50;
-  }
-  .mode-number {
-    @apply text-lg font-light text-muted-foreground/50;
-  }
-  .mode-card h3 {
-    @apply mx-6 mb-3 text-base;
-  }
-  .mode-card p {
-    @apply mx-6 mb-5 flex-1 text-xs leading-6 text-muted-foreground;
-  }
-  .mode-meta {
-    @apply mx-6 mb-5 text-[10px] text-muted-foreground;
-  }
-  .mode-card-action {
-    @apply flex items-center justify-between border-t px-6 py-4 text-xs;
-  }
-  .practice-section {
-    @apply mb-10;
-  }
-  .test-map {
-    @apply flex flex-col gap-8 border-t pt-8 lg:flex-row lg:gap-14;
-  }
-  .test-map > div:first-child {
-    @apply min-w-48;
-  }
-  .test-map h2 {
-    @apply my-4 text-2xl;
-  }
-  .text-link {
-    @apply inline-flex items-center gap-2 text-xs underline-offset-4 hover:underline;
-  }
-  .section-list {
-    @apply flex-1;
-  }
-  .section-list > button {
-    @apply flex w-full items-center gap-4 border-b py-4 text-left last:border-b-0;
-  }
-  .section-list h3 {
-    @apply mb-1 text-xs;
-  }
-  .section-list button div > span {
-    @apply text-[10px] text-muted-foreground;
-  }
-  .section-index {
-    @apply text-[10px] text-muted-foreground;
-  }
-  .section-duration {
-    @apply ml-auto text-[10px] whitespace-nowrap text-muted-foreground;
-  }
-  .quiet-note {
-    @apply mt-8 flex items-center gap-2 text-[10px] leading-5 text-muted-foreground;
-  }
-  .site-footer {
-    @apply mx-6 flex flex-wrap justify-between gap-4 border-t py-6 text-[10px] text-muted-foreground md:mx-10;
-  }
-  .site-footer a {
-    @apply flex items-center gap-2;
-  }
-  .footer-divider {
-    @apply mx-2 text-border;
-  }
-  .page-title {
-    @apply mb-9;
-  }
-  .page-title h1 {
-    @apply text-3xl md:text-4xl;
-  }
-  .page-title .page-kicker {
-    @apply mb-4;
-  }
-  .catalog-tools {
-    @apply mb-6 flex flex-wrap items-center justify-between gap-5;
-  }
-  .filter-tabs {
-    @apply flex flex-wrap gap-1 rounded-lg bg-muted p-1;
-  }
-  .filter-tabs button {
-    @apply min-h-8 rounded-md px-3 py-2 text-[10px];
-  }
-  .filter-tabs button[aria-pressed="true"] {
-    @apply bg-background shadow-sm;
-  }
-  .search {
-    @apply flex items-center gap-2 text-muted-foreground;
-  }
-  .search input {
-    @apply w-44 border-b bg-transparent py-2 text-xs text-foreground outline-none;
-  }
-  .type-list {
-    @apply overflow-hidden rounded-xl border bg-card;
+  .practice-choice {
+    @apply flex min-h-20 items-center gap-3 rounded-xl border px-4 text-sm transition-colors duration-200 hover:bg-muted/50;
   }
   .type-row {
-    @apply flex w-full items-center gap-4 border-b p-5 text-left transition-colors last:border-b-0 hover:bg-muted/50;
-  }
-  .type-row > div {
-    @apply min-w-0 flex-1;
-  }
-  .type-row h2 {
-    @apply mb-1 text-sm;
-  }
-  .type-row p {
-    @apply text-[11px] leading-5 text-muted-foreground;
-  }
-  .type-count {
-    @apply ml-auto hidden text-[10px] whitespace-nowrap text-muted-foreground sm:block;
-  }
-  .type-icon {
-    @apply flex size-10 shrink-0 items-center justify-center rounded-lg border bg-muted/50;
-  }
-  .text-button {
-    @apply mb-6 min-h-9 py-2 text-xs text-muted-foreground underline-offset-4 hover:underline;
-  }
-  .guide-layout {
-    @apply grid items-start gap-8 lg:grid-cols-[1fr_250px] lg:gap-12;
-  }
-  .guide-body section {
-    @apply mb-8;
-  }
-  .guide-body h2 {
-    @apply mb-4 text-lg;
-  }
-  .guide-body p {
-    @apply text-sm leading-7 text-muted-foreground;
-  }
-  .guide-facts {
-    @apply mt-5 flex flex-wrap gap-5 rounded-lg bg-muted p-4 text-[11px];
-  }
-  .guide-facts > span {
-    @apply flex items-center gap-2;
-  }
-  .strategy-list {
-    @apply list-none p-0;
-  }
-  .strategy-list li {
-    @apply flex gap-4 border-b py-4;
-  }
-  .strategy-list li > span {
-    @apply text-lg font-light text-muted-foreground;
-  }
-  .strategy-list p {
-    @apply m-0;
-  }
-  .pitfall {
-    @apply mb-6 rounded-lg border bg-muted/50 p-5;
-  }
-  .pitfall h3 {
-    @apply mb-2 text-sm;
-  }
-  .pitfall p {
-    @apply text-xs;
-  }
-  .scoring-detail summary {
-    @apply text-sm;
-  }
-  .scoring-detail p {
-    @apply mt-4 text-xs;
-  }
-  .guide-start {
-    @apply rounded-xl border bg-card p-6 lg:sticky lg:top-6;
-  }
-  .pill {
-    @apply inline-block rounded-md border bg-muted/50 px-2 py-1 text-[9px] font-medium tracking-wide;
-  }
-  .guide-start h2 {
-    @apply mt-6 mb-4 text-2xl;
-  }
-  .guide-start p {
-    @apply text-xs leading-6 text-muted-foreground;
-  }
-  .guide-start .primary {
-    @apply my-4 w-full;
-  }
-  .guide-start small {
-    @apply block text-[10px] leading-5 text-muted-foreground;
-  }
-  .section-cards {
-    @apply mb-6 grid gap-5 xl:grid-cols-3;
-  }
-  .section-card {
-    @apply flex flex-col rounded-xl border bg-card p-6;
-  }
-  .section-card-title {
-    @apply mb-6 flex items-center justify-between;
-  }
-  .section-card h2 {
-    @apply mb-4 text-xl;
-  }
-  .section-card > p {
-    @apply flex-1 text-xs leading-6 text-muted-foreground;
-  }
-  .section-card-meta {
-    @apply my-6 flex flex-wrap gap-4 text-[11px] text-muted-foreground;
-  }
-  .section-card-meta > span {
-    @apply flex items-center gap-2;
-  }
-  .section-card details {
-    @apply mb-6 text-xs;
-  }
-  .section-card ul {
-    @apply mt-3 list-disc space-y-2 pl-4 text-muted-foreground;
-  }
-  .section-card .primary {
-    @apply mt-auto;
-  }
-  .muted {
-    @apply mt-4 text-xs leading-6 text-muted-foreground;
-  }
-  .mock-feature {
-    @apply mb-6 grid overflow-hidden rounded-xl border bg-card lg:grid-cols-[.8fr_1.4fr];
-  }
-  .mock-art {
-    @apply relative flex min-h-40 items-center gap-6 overflow-hidden bg-primary p-8 text-primary-foreground lg:block lg:min-h-96;
-  }
-  .mock-art > div:first-child {
-    @apply relative z-10 text-8xl font-extralight;
-  }
-  .mock-art > span {
-    @apply relative z-10 text-xs leading-7 tracking-[.25em];
-  }
-  .mock-art-lines {
-    @apply absolute -bottom-48 -left-48 size-96 rounded-full border border-white/20;
-    box-shadow:
-      0 0 0 20px var(--primary),
-      0 0 0 21px #ffffff30,
-      0 0 0 42px var(--primary),
-      0 0 0 43px #ffffff30;
-  }
-  .mock-copy {
-    @apply p-6 md:p-9;
-  }
-  .mock-copy h2 {
-    @apply my-5 text-3xl;
-  }
-  .mock-copy > p {
-    @apply text-xs leading-6 text-muted-foreground;
-  }
-  .mock-stats {
-    @apply my-6 flex flex-wrap gap-5 text-[11px] text-muted-foreground;
-  }
-  .mock-stats > span {
-    @apply flex items-center gap-2;
-  }
-  .mock-sequence {
-    @apply my-6 list-decimal space-y-4 pl-5 text-xs;
-  }
-  .mock-sequence li {
-    @apply pl-2;
-  }
-  .mock-sequence span {
-    @apply float-right text-muted-foreground;
-  }
-  .notice {
-    @apply my-5 rounded-lg border bg-muted/50 p-4 text-xs leading-6 text-muted-foreground;
+    @apply flex min-h-14 w-full items-center gap-3 px-4 py-3 text-sm transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl hover:bg-muted/50;
   }
   .learn-layout {
-    @apply grid items-start gap-7 lg:grid-cols-[210px_1fr];
+    @apply grid gap-7 lg:grid-cols-[180px_1fr];
   }
-  .learn-layout > nav {
-    @apply flex flex-wrap gap-2 lg:flex-col;
+  .more {
+    @apply min-w-0;
   }
-  .learn-layout > nav > button {
-    @apply flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-left text-xs text-muted-foreground hover:bg-muted;
+  .disclosure-panel {
+    height: var(--collapsible-panel-height);
+    overflow: hidden;
+    transition:
+      height 220ms ease,
+      opacity 220ms ease;
   }
-  .learn-layout > nav > button[aria-current="page"] {
-    @apply bg-accent font-medium text-accent-foreground;
+  .disclosure-panel[data-starting-style],
+  .disclosure-panel[data-ending-style] {
+    height: 0;
+    opacity: 0;
   }
-  .learning-article {
-    @apply rounded-xl border bg-card p-6 md:p-9;
-  }
-  .learning-article > .eyebrow {
-    @apply mb-4;
-  }
-  .learning-article h2 {
-    @apply mb-5 text-2xl;
-  }
-  .learning-article .article-intro {
-    @apply mb-7 border-b pb-7 text-sm leading-7 text-muted-foreground;
-  }
-  .learning-article section {
-    @apply mb-7;
-  }
-  .learning-article h3 {
-    @apply mb-3 text-sm;
-  }
-  .learning-article section p {
-    @apply text-xs leading-7 text-muted-foreground;
-  }
-  .empty-state {
-    @apply mb-6 flex flex-col items-center rounded-xl border border-dashed px-6 py-16 text-center text-muted-foreground;
-  }
-  .empty-state h2 {
-    @apply mt-6 mb-3 text-xl text-foreground;
-  }
-  .empty-state p {
-    @apply text-xs;
-  }
-  .empty-state .primary {
-    @apply mt-5;
-  }
-  .history-list {
-    @apply mb-6 rounded-xl border bg-card;
-  }
-  .history-list > button {
-    @apply flex w-full items-center gap-5 border-b p-5 text-left last:border-b-0 hover:bg-muted/50;
-  }
-  .history-list h2 {
-    @apply mb-2 text-sm;
-  }
-  .history-list span {
-    @apply text-[11px] text-muted-foreground;
-  }
-  .history-list button > span {
-    @apply ml-auto hidden whitespace-nowrap sm:block;
-  }
-  .danger {
-    @apply text-destructive;
+  .page-enter {
+    animation: page-in 180ms ease-out;
   }
   .setup-page {
-    @apply mx-auto max-w-3xl px-6 py-10;
-  }
-  .setup-page .eyebrow {
-    @apply mt-4 mb-5;
-  }
-  .setup-page > .lead {
-    @apply mb-8;
+    @apply mx-auto max-w-2xl px-5 py-6;
   }
   .setup-panel {
-    @apply mb-5 rounded-xl border bg-card p-6 md:p-8;
-  }
-  .setup-panel h2 {
-    @apply mb-5 text-2xl;
+    @apply mt-6 rounded-xl border p-5;
   }
   .setup-panel > p,
   .check-row p {
     @apply text-xs leading-6 text-muted-foreground;
   }
   .check-row {
-    @apply mt-6 flex gap-5 border-t py-6;
+    @apply flex gap-4 border-b py-5;
   }
   .check-row > svg {
-    @apply mt-1 text-muted-foreground;
+    @apply mt-1 shrink-0 text-muted-foreground;
   }
   .check-row > div {
     @apply min-w-0;
   }
   .check-row h3 {
-    @apply mb-3 text-sm;
+    @apply mb-3 text-sm font-medium;
   }
   .check-row audio {
     @apply my-3 h-9 max-w-full;
@@ -685,74 +242,27 @@
   .check-label {
     @apply mt-3 flex items-center gap-2 text-xs;
   }
+  .notice {
+    @apply my-4 rounded-lg bg-muted p-3 text-xs leading-6 text-muted-foreground;
+  }
+  .muted {
+    @apply text-xs leading-6 text-muted-foreground;
+  }
   .error {
     @apply my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-xs leading-6 text-destructive;
   }
-  .review-list {
-    @apply mt-7 flex flex-col gap-3;
-  }
-  .review-item {
-    @apply rounded-lg border bg-card;
-  }
-  .review-item > summary {
-    @apply flex list-none items-center gap-3 p-4 md:gap-4 md:p-5;
-  }
-  .review-item > summary::-webkit-details-marker {
-    display: none;
-  }
-  .review-number {
-    @apply text-lg font-light text-muted-foreground;
-  }
-  .review-item strong {
-    @apply block text-xs font-medium;
-  }
-  .review-item small {
-    @apply mt-1 block text-[10px] text-muted-foreground;
-  }
-  .feedback-label {
-    @apply ml-auto rounded-md bg-muted px-2 py-1 text-[10px] whitespace-nowrap;
-  }
-  .feedback-label.correct {
-    @apply border bg-background;
-  }
-  .review-content {
-    @apply border-t p-5 text-xs leading-7 text-muted-foreground md:p-7;
-  }
-  .review-content h3 {
-    @apply mt-5 mb-2 text-xs text-foreground;
-  }
-  .answer-text {
-    @apply whitespace-pre-wrap;
-  }
-  .review-content details {
-    @apply mt-5;
-  }
-  .review-content details > p {
-    @apply mt-4;
-  }
-  .banner {
-    @apply border-b bg-muted px-6 py-4 text-xs;
-  }
-  .banner button {
-    @apply underline underline-offset-4;
-  }
-  .modal-backdrop {
-    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6;
-  }
-  .confirm-modal {
-    @apply w-full max-w-md rounded-xl border bg-background p-6;
-  }
-  .confirm-modal h2 {
-    @apply mb-4 text-xl;
-  }
-  .confirm-modal p {
-    @apply text-sm leading-7 text-muted-foreground;
-  }
-  .confirm-modal > div {
-    @apply mt-6 flex flex-wrap justify-end gap-3;
-  }
   .skip-link {
     @apply fixed -top-24 left-5 z-50 bg-background p-4 focus:top-3;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1218,5 +728,7 @@
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
   }
 }

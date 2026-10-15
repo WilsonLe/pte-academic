@@ -3,6 +3,7 @@ const subpath = process.env.PTE_TEST_SUBPATH === "1";
 export default defineConfig({
   testDir: "tests",
   testMatch: subpath ? "subpath.spec.ts" : "practice.spec.ts",
+  outputDir: subpath ? "test-results/subpath" : "test-results/practice",
   fullyParallel: false,
   workers: 1,
   timeout: 45000,

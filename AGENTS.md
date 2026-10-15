@@ -3,6 +3,7 @@
 An independent, beginner-friendly PTE Academic practice PWA. All learner-facing content is original and versioned in Git. There is no backend, CMS, account, runtime AI, analytics, external font request or runtime provider credential.
 
 ## Architecture
+- Keep the learning workspace minimal: desktop icon sidebar and header, mobile icon footer and header. Use accessible names and tooltips for icons; keep beginner guidance in animated collapsibles/accordions, success feedback in Sonner, and honor reduced motion. Do not add marketing heroes, decorative art or repeated explanatory copy.
 - React + TypeScript + Vite; use the installed lockfile and `npm ci` (Node 22.12+).
 - Tailwind v4 and shadcn's default Nova/Base UI/neutral preset. Preserve generated theme tokens in `src/style.css` and configuration in `components.json`. Learning pages use these defaults; the exam surface has isolated `.exam` styles for test conventions.
 - `content/*.json` is the source of truth, imported into the static build. `src/content.ts` owns schemas and feedback logic. Read `content/AGENTS.md` before editing content.

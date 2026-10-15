@@ -2,6 +2,7 @@
 
 A static, installable practice app for someone starting PTE Academic from zero. Learn the format, practise a question type, work through a section, or take a complete 65-question mock.
 
+- Compact desktop header/sidebar and mobile header/footer navigation. Accessible icon controls, animated shadcn guidance panels, tooltips and Sonner feedback, with reduced-motion support.
 - 22 question-type guides with instructions, strategies, pitfalls and review guidance.
 - 65 original questions, local listening audio, microphone recording, writing and selected-response tasks.
 - Timed, forward-only test runner; answers, transcripts and models appear after submission.
@@ -47,7 +48,7 @@ BASE_PATH=/pte-academic/ npm run build
 
 Keep the trailing slash. Hash navigation avoids server route rewrites. Use HTTPS for microphone and service-worker support; localhost also works for development. No hosting provider or automatic deployment is configured by this change.
 
-Open the built site online and wait for **Offline ready** before disconnecting. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
+Open the built site online and check the cloud status icon for **Offline ready** before disconnecting. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
 
 ## Content and audio management
 
