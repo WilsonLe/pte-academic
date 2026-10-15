@@ -84,12 +84,22 @@ import { Chart } from "./QuestionInput";
 import { SpeechReview } from "./speech/SpeechReview";
 import type { Transcription } from "./speech/scoring";
 const navigation = [
-  { id: "home", label: "Practice", icon: House },
+  { id: "home", label: "Practice", mobileLabel: "Practice", icon: House },
   { id: "types", label: "Question types", icon: Target },
   { id: "sections", label: "Section practice", icon: ListChecks },
   { id: "mocks", label: "Mock tests", icon: Trophy },
-  { id: "guide", label: "Learn about PTE", icon: BookOpen },
-  { id: "history", label: "My practice", icon: History },
+  {
+    id: "guide",
+    label: "Learn about PTE",
+    mobileLabel: "Learn",
+    icon: BookOpen,
+  },
+  {
+    id: "history",
+    label: "My practice",
+    mobileLabel: "History",
+    icon: History,
+  },
 ];
 const icons = { speaking: Mic, reading: BookOpen, listening: Headphones };
 const titles: Record<string, string> = {
@@ -181,31 +191,47 @@ function Nav({
   navigate: (id: string) => void;
   mobile?: boolean;
 }) {
+  const items = mobile ? navigation.filter((n) => n.mobileLabel) : navigation;
+  const current =
+    mobile && !["guide", "history"].includes(active) ? "home" : active;
   return (
     <nav
       aria-label={mobile ? "Mobile navigation" : "Main navigation"}
       className={mobile ? "mobile-nav" : "desktop-nav"}
     >
-      {navigation.map((n) => (
-        <Tooltip key={n.id}>
-          <TooltipTrigger
-            render={
-              <a
-                href={`#${n.id}`}
-                aria-label={n.label}
-                aria-current={active === n.id ? "page" : undefined}
-                onClick={() => navigate(n.id)}
-                className="nav-icon"
-              />
-            }
+      {items.map((n) =>
+        mobile ? (
+          <a
+            key={n.id}
+            href={`#${n.id}`}
+            aria-current={current === n.id ? "page" : undefined}
+            onClick={() => navigate(n.id)}
+            className="nav-icon"
           >
-            <n.icon className="size-[19px]" />
-          </TooltipTrigger>
-          <TooltipContent side={mobile ? "top" : "right"}>
-            {n.label}
-          </TooltipContent>
-        </Tooltip>
-      ))}
+            <n.icon className="size-[22px]" aria-hidden="true" />
+            <span>{n.mobileLabel}</span>
+          </a>
+        ) : (
+          <Tooltip key={n.id}>
+            <TooltipTrigger
+              render={
+                <a
+                  href={`#${n.id}`}
+                  aria-label={n.label}
+                  aria-current={active === n.id ? "page" : undefined}
+                  onClick={() => navigate(n.id)}
+                  className="nav-icon"
+                />
+              }
+            >
+              <n.icon className="size-[19px]" />
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {n.label}
+            </TooltipContent>
+          </Tooltip>
+        ),
+      )}
     </nav>
   );
 }
@@ -750,7 +776,14 @@ export default function App() {
             </div>
           </main>
         </div>
-        <Nav active={active} navigate={navigate} mobile />
+        <Nav
+          active={active}
+          navigate={(to) => {
+            if (to === "home") setHubView("play");
+            navigate(to);
+          }}
+          mobile
+        />
         <Dialog open={clearConfirm} onOpenChange={setClearConfirm}>
           <DialogContent showCloseButton={false}>
             <DialogTitle>Clear your practice history?</DialogTitle>
