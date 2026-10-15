@@ -245,6 +245,9 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
   for (const size of [
     { width: 1440, height: 900 },
     { width: 1024, height: 768 },
+    { width: 1101, height: 768 },
+    { width: 1120, height: 768 },
+    { width: 1201, height: 768 },
     { width: 390, height: 844 },
     { width: 360, height: 640 },
   ]) {
