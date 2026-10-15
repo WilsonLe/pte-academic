@@ -46,11 +46,11 @@ Browser tests use installed Google Chrome in an isolated profile and a synthetic
 BASE_PATH=/pte-academic/ npm run build
 ```
 
-Keep the trailing slash. Hash navigation avoids server route rewrites. Use HTTPS for microphone and service-worker support; localhost also works for development.
+Keep the trailing slash. Browser routing uses real paths such as `/history` and `/history/:sessionID` under the configured base path. Hosts with rewrite support should serve `index.html` for application routes; Vite preview already does this. The build also copies the app shell to [`404.html` for GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-custom-404-page-for-your-github-pages-site), so direct route entry works without server rewrites. Pages still returns HTTP 404 for that initial response, while the app handles the URL. The service worker serves cached route navigation offline. Older top-level hash links convert to real paths. Use HTTPS for microphone and service-worker support; localhost also works for development.
 
 The public app is hosted at **https://wilsonle.github.io/pte-academic/**. [GitHub Pages](.github/workflows/pages.yml) builds and deploys automatically on every push to `main`; it can also be run manually from Actions on `main`. Pull requests run the same production build without deploying. Repository Settings → Pages must use **GitHub Actions** as the publishing source. The workflow uses Node 22, `npm ci`, and `BASE_PATH=/pte-academic/ npm run build`, then uploads only `dist/`. Authoring credentials and learner data are never included. A failed build leaves the existing deployment available.
 
-Open the built site online and check the cloud status icon for **Offline ready** before disconnecting. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
+Open the built site online once to cache the practice pack, then verify a reload without a connection before relying on offline practice. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
 
 ## Content and audio management
 
@@ -84,9 +84,9 @@ npm run test:speech:browser
 
 Implementation references: [Transformers.js](https://huggingface.co/docs/transformers.js/index), [model](https://huggingface.co/onnx-community/whisper-tiny.en).
 
-## Practice game
+## Practice progress
 
-The practice home has a rotating three-question reading quest, XP levels, daily streaks, weekly activity and six unlockable achievements. Any mode counts toward the daily goal. Answering a different question earns 10 XP once per local calendar day; reaching three earns a one-time 30 XP bonus. A level takes 150 XP. Empty attempts earn zero and replaying a review or transcribing an answer never earns XP. These are effort milestones, without a proficiency claim.
+The practice home has a rotating three-question reading quest, XP levels, daily streaks, weekly activity and six practice achievements. Any mode counts toward the daily goal. Answering a different question earns 10 XP once per local calendar day; reaching three earns a one-time 30 XP bonus. A level takes 150 XP. Empty attempts earn zero and replaying a review or transcribing an answer never earns XP. These are effort milestones, without a proficiency claim.
 
 Quest progress resumes remaining questions. XP, coverage and badges stay in IndexedDB even when older attempts fall outside the ten-attempt history. Game progress starts with newly saved practice after this update; existing attempts, recordings and transcripts are preserved. Clearing history also resets game progress, as the dialog explains. Public model caches remain separate. Daily records retain up to 365 days; cumulative XP, earned badges and longest streak persist.
 
@@ -94,8 +94,12 @@ The IndexedDB upgrade creates a progress store at version 2 without rewriting ol
 
 Focused game checks: npm run test:progress and the daily-quest/browser journeys in tests/practice.spec.ts.
 
-### Screen-sized game interface
+### Practice interface
 
-Home is one large play screen, with progress and achievements behind the flame and trophy buttons. Desktop retains its header and icon sidebar; mobile retains its header and icon footer. Catalogues and saved rounds use adaptive card pages. Question guidance, beginner lessons, long responses, transcripts and word comparisons use Next/Previous reading pages sized to the actual font and available space. Review shows one question and one selected response/key/feedback/prompt/speech panel at a time. Returning from a question guide retains the catalogue page and filters.
+Home is one large practice screen, with progress and achievements behind the flame and trophy buttons. Desktop retains its header and icon sidebar; mobile retains its header and the Practice, Learn and History footer tabs, with text below icons. Question types, sections and mock tests remain within Practice. Catalogues use adaptive card pages; saved sessions use compact cards aligned at the top. Single-page pagination is hidden. Question guidance, beginner lessons, long responses, transcripts and word comparisons use Next/Previous reading pages sized to the actual font and available space. Review shows one question and one selected response/key/feedback/prompt/speech panel at a time. Returning from a question guide retains the catalogue page and filters.
 
 The ordinary learning workspace fits the device viewport without document scrolling. Windows below 450 CSS pixels high (including extreme zoom) deliberately regain scrolling so enlarged controls remain reachable. The timed test surface keeps its independent exam layout and content scrolling where needed; this redesign changes the practice workspace and post-attempt review.
+
+Screen destinations include `/progress`, `/achievements`, `/types/:guideID`, `/sections/:sectionID`, `/guide/:topicID`, `/mocks`, `/history/:sessionID` and `/practice/:mode/:practiceID`. The active runner adds `/run`; refresh or forward navigation without a live attempt returns to preflight. Routes contain IDs only, never responses or transcripts.
+
+`src/components/AudioPlayer.tsx` owns shared local playback with play/pause, keyboard seeking, time, errors and retry. It uses the existing shadcn Button and shared practice surface/control tokens in `src/screens.css`. Only one review/preflight player plays at a time. The timed runner keeps its one-play lifecycle and uses the shared start button when browser audio needs a gesture. Native controls are not exposed.

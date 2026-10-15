@@ -108,3 +108,26 @@ Focused candidate verification: production content validation/TypeScript/build; 
 During development, the first reading-page fit used an estimate that briefly overflowed at a small size; it was replaced with actual text measurement and font-ready/resize repagination. An inventory assertion originally counted distinct titles (20); it now distinguishes each section/type (22). Listening review exposed the written prompt without the separate correct audio transcript; both are now available on prompt pages. These failures were fixed without reducing visibility or coverage. Detailed commands/results are in the PR follow-up.
 
 The original single independent review remains bound to 2e9b68d / 95d8362. Later operator-requested scope is focused-tested, not independently re-reviewed. No full-suite, merge, hosted release or pixel-perfect live-test claim.
+
+## URL routing and simplified practice workspace — 16 October 2026
+
+Tracks #6 and draft PR #14. Removed hero question chips/promotional text, header offline/install/info controls, beginner footer, sidebar privacy tooltip, redundant review summary and single-page pagers. Practice/session wording replaces play/round vocabulary while retaining the requested Start daily quest action. History uses compact linked cards. React Router owns screen destinations, including persisted `/history/:sessionID`, section/topic/progress screens and route-scoped preflight/runner lifecycle. Old top-level hash links migrate on entry and during same-document navigation.
+
+Shared AudioPlayer and AudioStartButton use existing shadcn Button primitives and practice surface/control tokens. Preflight, microphone samples, recorded responses and speech review share playback/seek/time/error/retry controls; unmount stops media. Runner retains single-play authority. Content, storage schema, progress rules, speech model, provider budget and runtime network boundaries are unchanged.
+
+Integrated concurrently merged main changes through `8a865e7`: independent section filters, Practice/Learn/History mobile tabs, GitHub Pages configuration and the shared CardsList component. CardsList remains the single owner of catalogue/history/mode/achievement grids. History uses its compact 112–136px sizing configuration; intrinsic content and the scrolling accessibility escape keep larger text readable. No separate PagedList implementation remains.
+
+Direct nested routes use the configured absolute asset basename. The build generates `404.html` from the app shell for GitHub Pages without server rewrites. That initial static-host response retains HTTP 404 while the client handles the requested URL; controlled offline navigation is served by the worker. A local Pages-style HTTP server verifies direct history entry and later offline reload; no deployment was performed by this task.
+
+Final-source focused evidence:
+
+- `npm run build`: content validation, TypeScript, static output and service-worker generation pass. The existing large-chunk advisory remains; no performance benchmark is claimed.
+- Seventeen selected practice browser journeys pass across scoped runs on the integrated source. Coverage includes all card consumers/viewport thresholds, catalogue completeness and filter persistence, mobile tabs, question/section/article/progress routes, saved history and missing-session recovery, runner reload/back/forward safety, one-play listening, native recording/shared speech playback, audio keyboard seek/error/retry/navigation cleanup, daily progress, offline operation and explicit worker updates.
+- A ten-session history regression first failed on the independently reviewed candidate. It now traverses all retained sessions at 390×844, 390×900, 900×900 and 1440×900, independently checks card/pager geometry, and verifies non-overlap with longer labels/enlarged type. The regression was refreshed after shared CardsList integration.
+- `PTE_TEST_SUBPATH=1 npx playwright test tests/subpath.spec.ts --reporter=line`: both nested offline/range-media and static-404 direct-entry journeys pass.
+- `npm run test:speech`: five scoring/storage contracts pass. Fresh speech-model inference is not rerun for this presentation-only change.
+- Formatting and diff checks pass. Full-suite coverage is deferred until merge is requested.
+
+The single independent review covered base `82b402f` / head `91b0f14`, and found one P2 compact-history/pager overlap plus stale cloud-icon documentation. Both are addressed. The later fixes and base integrations are focused-validated, not independently re-reviewed; the original review is historical to that pinned candidate. No second automatic review was requested.
+
+Synthetic-browser screenshots: `overview-desktop.png`, `overview-mobile.png`, `routing-history-desktop.png`, `routing-history-populated-mobile.png`, `routing-review-desktop.png`, `routing-review-mobile.png`. Manual in-app preview confirmed an existing saved session's URL/reload and shared playback without changing that saved response. This is local/draft-PR evidence, not a merge or deployment.

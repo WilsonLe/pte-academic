@@ -13,6 +13,7 @@ export function Pager({
   onChange: (index: number) => void;
   label?: string;
 }) {
+  if (count <= 1) return null;
   return (
     <nav className="page-controls" aria-label={label}>
       <Button

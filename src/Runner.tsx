@@ -1,3 +1,4 @@
+import { AudioPlayer, AudioStartButton } from "./components/AudioPlayer";
 import {
   Dialog,
   DialogContent,
@@ -152,15 +153,9 @@ export function Preflight({
             <Volume2 size={22} />
             <div>
               <h3>Check your headphones</h3>
-              <audio
-                controls
+              <AudioPlayer
                 src={asset(plan.questions.find((q) => q.audio)!.audio!)}
-                onError={() =>
-                  setError(
-                    "Audio could not load. Connect once to download the practice pack, then retry.",
-                  )
-                }
-                aria-label="Headphone check"
+                label="Headphone check"
               />
               <label className="check-label">
                 <input
@@ -198,11 +193,7 @@ export function Preflight({
               </Button>
               {sample && (
                 <div>
-                  <audio
-                    controls
-                    src={sample}
-                    aria-label="Microphone check playback"
-                  />
+                  <AudioPlayer src={sample} label="Microphone check playback" />
                 </div>
               )}
             </div>
@@ -673,7 +664,8 @@ export function Runner({
               <small>Speak now · {formatTime(phaseSeconds)}</small>
             )}
             {phase === "blocked" && (
-              <button
+              <AudioStartButton
+                label="Start audio"
                 onClick={() => {
                   setMessage("");
                   void audio.current
@@ -688,9 +680,7 @@ export function Runner({
                       ),
                     );
                 }}
-              >
-                Start audio
-              </button>
+              />
             )}
           </div>
         )}
