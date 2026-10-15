@@ -58,7 +58,9 @@ export async function safeStore() {
   )
     fail("Credential directory contains tracked files.");
 }
+let processToken;
 async function readToken() {
+  if (processToken) return processToken;
   await safeStore();
   let handle;
   try {
@@ -66,7 +68,8 @@ async function readToken() {
     const stat = await handle.stat();
     if (!stat.isFile() || stat.uid !== process.getuid() || stat.mode & 0o077)
       fail("Token must be an owner-only regular file.");
-    return (await handle.readFile("utf8")).trim();
+    processToken = (await handle.readFile("utf8")).trim();
+    return processToken;
   } catch (e) {
     if (e.code === "ENOENT")
       fail("Not logged in. Run npm run openrouter -- login.");

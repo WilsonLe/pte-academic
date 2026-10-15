@@ -11,8 +11,12 @@ import json
 import math
 import os
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import multiprocessing as mp
+from experiment import Experiment
 import re
 import time
+from threading import Lock
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
@@ -102,7 +106,8 @@ def syllabify(phones):
 def ipa(phone):
     if phone == "AH0":
         return "ə"
-    return ARP_IPA[re.sub(r"\d", "", phone)]
+    base = re.sub(r"\d", "", phone)
+    return ARP_IPA.get(base, base)
 
 
 def script_units(text):
@@ -131,8 +136,17 @@ def script_units(text):
     return phones, syllables, unknown
 
 
+_AUDIO_DECODE_LOCK = Lock()
+
+
 def load_audio(path):
-    audio, sr = sf.read(path, dtype="float32", always_2d=True)
+    # libsndfile's bundled MPEG decoder initialization is not reentrant on macOS.
+    # Keep codec access serialized; resampling/alignment/prosody remain parallel.
+    with _AUDIO_DECODE_LOCK:
+        info = sf.info(path)
+        if info.frames / info.samplerate > 125:
+            raise ValueError("Audio exceeds the 125-second limit.")
+        audio, sr = sf.read(path, dtype="float32", always_2d=True)
     audio = audio.mean(axis=1)
     if not np.isfinite(audio).all() or not len(audio):
         raise ValueError("Audio is empty or non-finite.")
@@ -222,6 +236,8 @@ class Acoustic:
         repo, self.revision = ENCODERS[kind]
         path = DATA / "encoders" / repo.split("/")[-1]
         self.path, self.kind = path, kind
+        if torch.backends.mps.is_available():
+            torch.mps.set_per_process_memory_fraction(0.85)
         self.device = (
             "mps"
             if device == "auto" and torch.backends.mps.is_available()
@@ -239,29 +255,106 @@ class Acoustic:
         )
         self.vocab = json.loads((path / "vocab.json").read_text())
         self.inverse = {v: k for k, v in self.vocab.items()}
+        self._captured = None
+        if kind == "phones":
+            self.model.wav2vec2.encoder.layers[6].register_forward_hook(
+                self._capture_layer
+            )
         self.tokenizer = (
             Wav2Vec2CTCTokenizer.from_pretrained(path, local_files_only=True)
             if kind == "words"
             else None
         )
 
+    def _capture_layer(self, module, inputs, output):
+        self._captured = output[0]
+
     def run(self, audio):
         values = self.extractor(
             audio, sampling_rate=16000, return_tensors="pt"
         ).input_values.to(self.device)
         with torch.inference_mode():
-            result = self.model(values, output_hidden_states=self.kind == "phones")
+            result = self.model(values, output_hidden_states=False)
         logs = result.logits[0].log_softmax(-1).cpu().numpy()
-        hidden = (
-            result.hidden_states[7][0].cpu().numpy() if self.kind == "phones" else None
-        )
+        hidden = self._captured[0].cpu().numpy() if self.kind == "phones" else None
+        self._captured = None
         return logs, hidden
 
     def transcribe(self, audio):
         logs, _ = self.run(audio)
         return self.tokenizer.decode(logs.argmax(-1)).lower().strip()
 
-    def extract(self, audio, text):
+    def run_batch(self, audios):
+        batch = self.extractor(
+            audios,
+            sampling_rate=16000,
+            return_tensors="pt",
+            padding="max_length",
+            max_length=math.ceil(max(map(len, audios)) / 16000) * 16000,
+            return_attention_mask=True,
+        )
+        values = batch.input_values.to(self.device)
+        mask = batch.attention_mask.to(self.device)
+        with torch.inference_mode():
+            result = self.model(
+                values,
+                attention_mask=mask
+                if self.model.config.feat_extract_norm == "layer"
+                else None,
+                output_hidden_states=False,
+            )
+        lengths = self.model._get_feat_extract_output_lengths(
+            batch.attention_mask.sum(-1)
+        ).tolist()
+        logs = result.logits.log_softmax(-1).cpu().numpy()
+        hidden = self._captured.cpu().numpy() if self.kind == "phones" else None
+        outputs = [
+            (logs[i, :n].copy(), hidden[i, :n].copy() if hidden is not None else None)
+            for i, n in enumerate(lengths)
+        ]
+        self._captured = None
+        del result, values, mask, batch
+        if self.device == "mps":
+            torch.mps.empty_cache()
+        return outputs
+
+    def extract(self, audio, text, mode="cmu-american"):
+        logs, hidden = self.run(audio)
+        return self.extract_outputs(audio, text, logs, hidden, mode)
+
+    def extract_outputs(self, audio, text, logs, hidden, mode="cmu-american"):
+        return Aligner(self.vocab).extract_outputs(audio, text, logs, hidden, mode)
+
+
+class Aligner:
+    """CPU-only pronunciation alignment shared by inference and process workers."""
+
+    def __init__(self, vocab):
+        self.vocab = vocab
+
+    def extract_outputs(self, audio, text, logs, hidden, mode="cmu-american"):
+        if mode == "english-variants":
+            from phonetics import units
+
+            candidates = []
+            for language in ["en-us", "en-gb"]:
+                phones, syllables, unknown = units(tokenize(text), language, self.vocab)
+                if unknown or not phones:
+                    continue
+                try:
+                    aligned = self.align_units(audio, phones, syllables, logs, hidden)
+                    confidence = np.mean(
+                        [
+                            np.log(max(p["alignmentConfidence"], 1e-10))
+                            for p in aligned[1]
+                        ]
+                    )
+                    candidates.append((confidence, aligned))
+                except ValueError:
+                    pass
+            if not candidates:
+                raise ValueError("No supported pronunciation variant could be aligned.")
+            return max(candidates, key=lambda c: c[0])[1]
         phones, syllables, unknown = script_units(text)
         # Do not align through missing words: that would shift every later segment.
         if unknown:
@@ -270,7 +363,9 @@ class Acoustic:
             )
         if not phones:
             raise ValueError("No supported syllables.")
-        logs, hidden = self.run(audio)
+        return self.align_units(audio, phones, syllables, logs, hidden)
+
+    def align_units(self, audio, phones, syllables, logs, hidden):
         targets = [self.vocab[ipa(p)] for p in phones]
         spans = ctc_align(logs, targets)
         scale = len(audio) / 16000 / len(logs)
@@ -362,7 +457,8 @@ class ComparisonHead(nn.Module):
         return z, self.classifier(z)
 
 
-def reference_stream(initial, follow, expected):
+def reference_stream(initial, follow, expected, experiment=None):
+    experiment = experiment or Experiment.load()
     pending = list(initial)
     seen = set()
     while True:
@@ -381,93 +477,170 @@ def reference_stream(initial, follow, expected):
                 "Reference generation is no longer live and corpus is incomplete."
             )
         time.sleep(3)
-        pending = json.loads((CORPUS / "manifest.json").read_text())["takes"]
+        pending = experiment.manifest()["takes"]
+
+
+def prepare_reference_feature(item):
+    take, audio, result, vocab, output, mode = item
+    out = Path(output) / (take["takeId"] + ".npz")
+    try:
+        x, phones, syllables = Aligner(vocab).extract_outputs(
+            audio, take["text"], *result, mode
+        )
+        sx = syllable_features(audio, x, syllables)
+        temp = out.with_suffix(".pending.npz")
+        np.savez_compressed(
+            temp,
+            x=x,
+            sx=sx,
+            metadata=json.dumps(
+                {"take": take, "phones": phones, "syllables": syllables}
+            ),
+            audio_sha256=take["audioSha256"],
+            encoder_revision=ENCODERS["phones"][1],
+        )
+        temp.replace(out)
+        return None
+    except ValueError as error:
+        return {"takeId": take["takeId"], "error": str(error)}
+
+
+def cpu_worker_setup():
+    torch.set_num_threads(1)
 
 
 def prepare(args):
-    manifest = json.loads((CORPUS / "manifest.json").read_text())
-    config = json.loads((ROOT / "training/reference-corpus.json").read_text())
-    takes = manifest["takes"][: args.limit] if args.limit else manifest["takes"]
-    if len(manifest["takes"]) < 100:
-        raise ValueError(
-            "Generate at least 100 verified references before feature preparation."
-        )
-    output = DATA / "features-v2"
+    experiment = Experiment.load(args.config)
+    takes = experiment.manifest()["takes"]
+    if args.limit:
+        takes = takes[: args.limit]
+    output = experiment.features
     output.mkdir(parents=True, exist_ok=True)
     acoustic = Acoustic(device=args.device)
     failures = []
-    for ti, take in enumerate(
-        reference_stream(
-            takes, args.follow, len(config["passages"]) * len(config["voices"])
-        )
-    ):
-        out = output / (take["takeId"] + ".npz")
-        if out.exists():
-            with np.load(out) as cached:
-                if (
-                    "sx" in cached
-                    and str(cached["audio_sha256"]) == take["audioSha256"]
-                    and str(cached["encoder_revision"]) == acoustic.revision
-                ):
-                    continue
-            raise ValueError("Stale feature cache: " + str(out))
-        path = CORPUS / take["file"]
+    processed = 0
+    started = time.perf_counter()
+
+    def decode(take):
+        path = experiment.corpus / take["file"]
         if digest(path) != take["audioSha256"]:
             raise ValueError("Audio hash mismatch.")
-        try:
-            audio = load_audio(path)
-            if not signal_valid(audio):
-                raise ValueError("Invalid speech signal.")
-            x, phones, syllables = acoustic.extract(audio, take["text"])
-            sx = syllable_features(audio, x, syllables)
-            np.savez_compressed(
-                out,
-                x=x,
-                sx=sx,
-                metadata=json.dumps(
-                    {"take": take, "phones": phones, "syllables": syllables}
-                ),
-                audio_sha256=take["audioSha256"],
-                encoder_revision=acoustic.revision,
-            )
+        audio = load_audio(path)
+        if not signal_valid(audio):
+            raise ValueError("Invalid speech signal: " + take["takeId"])
+        return audio
+
+    with (
+        ThreadPoolExecutor(max_workers=4) as decoder,
+        ProcessPoolExecutor(
+            max_workers=args.workers,
+            mp_context=mp.get_context("spawn"),
+            initializer=cpu_worker_setup,
+        ) as pool,
+    ):
+        pending = []
+        futures = []
+
+        def drain(count):
+            nonlocal futures, processed
+            selected = futures[:count]
+            futures = futures[count:]
+            for f in selected:
+                error = f.result()
+                if error:
+                    failures.append(error)
+                processed += 1
             print(
                 json.dumps(
                     {
-                        "prepared": ti + 1,
-                        "total": len(config["passages"]) * len(config["voices"])
-                        if args.follow
-                        else len(takes),
-                        "take": take["takeId"],
-                        "phones": len(phones),
-                        "syllables": len(syllables),
+                        "preparedNew": processed,
+                        "totalPrepared": len(list(output.glob("*.npz"))),
+                        "total": experiment.expected,
+                        "batchSize": args.batch_size,
+                        "cpuProcesses": args.workers,
+                        "filesPerSecond": processed / (time.perf_counter() - started),
+                        "gpuDriverGB": torch.mps.driver_allocated_memory() / 1e9
+                        if acoustic.device == "mps"
+                        else 0,
                     }
                 ),
                 flush=True,
             )
-        except ValueError as error:
-            failures.append({"takeId": take["takeId"], "error": str(error)})
-            print(json.dumps(failures[-1]), flush=True)
+
+        def submit(takes):
+            audios = list(decoder.map(decode, takes))
+            results = acoustic.run_batch(audios)
+            futures.extend(
+                pool.submit(
+                    prepare_reference_feature,
+                    (
+                        take,
+                        audio,
+                        result,
+                        acoustic.vocab,
+                        str(output),
+                        experiment.phonetic_mode,
+                    ),
+                )
+                for take, audio, result in zip(takes, audios, results)
+            )
+            if len(futures) >= args.batch_size * 2:
+                drain(args.batch_size)
+
+        for take in reference_stream(
+            takes, args.follow, experiment.expected, experiment
+        ):
+            out = output / (take["takeId"] + ".npz")
+            if out.exists():
+                with np.load(out) as cache:
+                    if (
+                        str(cache["audio_sha256"]) == take["audioSha256"]
+                        and str(cache["encoder_revision"]) == acoustic.revision
+                    ):
+                        continue
+                raise ValueError("Stale feature cache.")
+            pending.append(take)
+            if len(pending) >= args.batch_size:
+                pending.sort(key=lambda t: t["durationSeconds"])
+                submit(pending)
+                pending = []
+        if pending:
+            submit(pending)
+        if futures:
+            drain(len(futures))
     write_json(
         output / "preparation.json",
         {
             "failures": failures,
             "encoder": ENCODERS["phones"],
             "count": len(list(output.glob("*.npz"))),
+            "processedNew": processed,
+            "wallSeconds": time.perf_counter() - started,
+            "batchSize": args.batch_size,
+            "cpuProcesses": args.workers,
         },
     )
 
 
-def verified_feature_files():
-    manifest = json.loads((CORPUS / "manifest.json").read_text())
-    config = json.loads((ROOT / "training/reference-corpus.json").read_text())
+def verified_feature_files(experiment=None):
+    experiment = experiment or Experiment.load()
+    manifest = experiment.manifest()
+    config = experiment.config
     expected = len(config["passages"]) * len(config["voices"])
     if len(manifest["takes"]) != expected:
         raise ValueError(
             "Finish the complete reference generation batch before training."
         )
-    audit = json.loads((DATA / "corpus-audit.json").read_text())
+    if config["schemaVersion"] == 2 and manifest.get("configSha256") != digest(
+        experiment.path
+    ):
+        raise ValueError(
+            "Reference manifest does not match the current experiment config."
+        )
+    audit = json.loads(experiment.audit.read_text())
     if (
-        audit.get("referenceManifestSha256") != digest(CORPUS / "manifest.json")
+        audit.get("referenceManifestSha256")
+        != digest(experiment.corpus / "manifest.json")
         or audit["count"] != expected
     ):
         raise ValueError(
@@ -478,11 +651,24 @@ def verified_feature_files():
     for take in sorted(manifest["takes"], key=lambda t: t["takeId"]):
         if take["takeId"] not in usable:
             continue
-        path = DATA / "features-v2" / (take["takeId"] + ".npz")
+        path = experiment.features / (take["takeId"] + ".npz")
         with np.load(path) as cache:
+            metadata = json.loads(str(cache["metadata"]))
             if (
                 str(cache["audio_sha256"]) != take["audioSha256"]
                 or str(cache["encoder_revision"]) != ENCODERS["phones"][1]
+                or any(
+                    metadata["take"].get(key) != take.get(key)
+                    for key in [
+                        "takeId",
+                        "text",
+                        "voice",
+                        "accent",
+                        "heldOut",
+                        "split",
+                        "familyId",
+                    ]
+                )
             ):
                 raise ValueError("Feature provenance does not match current corpus.")
         result.append(path)
@@ -491,9 +677,9 @@ def verified_feature_files():
     return result
 
 
-def load_features():
+def load_features(experiment=None):
     xs, records = [], []
-    for path in verified_feature_files():
+    for path in verified_feature_files(experiment):
         with np.load(path) as cache:
             meta = json.loads(str(cache["metadata"]))
             x = cache["x"]
@@ -507,6 +693,14 @@ def load_features():
                     "passageId": meta["take"]["id"],
                     "voice": meta["take"]["voice"],
                     "text": meta["take"]["text"],
+                    "accent": meta["take"].get("accent", "en-US"),
+                    "heldOut": meta["take"].get(
+                        "heldOut", meta["take"]["voice"] == "am_puck"
+                    ),
+                    "split": meta["take"].get(
+                        "split", passage_split(meta["take"]["id"])
+                    ),
+                    "familyId": meta["take"].get("familyId", meta["take"]["id"]),
                     "index": start + i,
                 }
             )
@@ -515,33 +709,45 @@ def load_features():
     return np.concatenate(xs), records
 
 
-def load_syllable_features():
+def load_syllable_features(experiment=None):
     xs, records = [], []
-    for path in verified_feature_files():
+    for path in verified_feature_files(experiment):
         with np.load(path) as cache:
             meta = json.loads(str(cache["metadata"]))
             sx = cache["sx"]
         xs.append(sx)
         records.extend(
             [
-                {**s, "passageId": meta["take"]["id"], "voice": meta["take"]["voice"]}
+                {
+                    **s,
+                    "passageId": meta["take"]["id"],
+                    "voice": meta["take"]["voice"],
+                    "accent": meta["take"].get("accent", "en-US"),
+                    "heldOut": meta["take"].get(
+                        "heldOut", meta["take"]["voice"] == "am_puck"
+                    ),
+                    "split": meta["take"].get(
+                        "split", passage_split(meta["take"]["id"])
+                    ),
+                    "familyId": meta["take"].get("familyId", meta["take"]["id"]),
+                }
                 for s in meta["syllables"]
             ]
         )
     return np.concatenate(xs), records
 
 
-def train_stress(seed):
-    sx, records = load_syllable_features()
+def train_stress(seed, experiment=None, device="cpu", batch_size=256):
+    sx, records = load_syllable_features(experiment)
     splits = make_splits(records)
     train = np.array([i for i in splits["train"] if records[i]["wordSyllables"] > 1])
     val = np.array([i for i in splits["validation"] if records[i]["wordSyllables"] > 1])
     mean = sx[train].mean(0)
     std = sx[train].std(0).clip(0.05)
-    x = torch.from_numpy((sx - mean) / std)
-    y = torch.tensor([int(r["stress"] > 0) for r in records])
+    x = torch.from_numpy((sx - mean) / std).to(device)
+    y = torch.tensor([int(r["stress"] > 0) for r in records], device=device)
     torch.manual_seed(seed)
-    head = StressHead(sx.shape[1])
+    head = StressHead(sx.shape[1]).to(device)
     opt = torch.optim.AdamW(head.parameters(), lr=0.001)
     best = -1
     weights = None
@@ -549,7 +755,7 @@ def train_stress(seed):
     for epoch in range(30):
         head.train()
         for ids in np.array_split(
-            train[np.random.permutation(len(train))], max(1, len(train) // 256)
+            train[np.random.permutation(len(train))], max(1, len(train) // batch_size)
         ):
             loss = F.cross_entropy(head(x[ids]), y[ids])
             opt.zero_grad()
@@ -561,7 +767,9 @@ def train_stress(seed):
         history.append({"epoch": epoch + 1, "validationStressAccuracy": acc})
         if acc > best:
             best = acc
-            weights = {k: v.detach().clone() for k, v in head.state_dict().items()}
+            weights = {
+                k: v.detach().cpu().clone() for k, v in head.state_dict().items()
+            }
     return {
         "state_dict": weights,
         "input_dim": sx.shape[1],
@@ -587,8 +795,8 @@ def make_splits(records, held_out="am_puck"):
         "voice_test": [],
     }
     for i, r in enumerate(records):
-        split = passage_split(r["passageId"])
-        if r["voice"] == held_out:
+        split = r.get("split", passage_split(r["passageId"]))
+        if r.get("heldOut", r["voice"] == held_out):
             if split in ("validation", "test"):
                 out["voice_" + split].append(i)
         else:
@@ -624,31 +832,35 @@ def auc_rank(positive, negative):
 
 
 def distribution_distances(z, labels, bank):
-    result = []
-    for v, label in zip(z, labels):
+    labels = np.asarray(labels)
+    result = np.full(len(z), np.nan)
+    for label in np.unique(labels):
         refs = bank.get(str(label))
         if refs is None:
-            result.append(np.nan)
             continue
-        # Mean of nearest references supports several valid realizations.
-        distances = 1 - v @ refs.T
-        result.append(float(np.sort(distances)[: min(8, len(distances))].mean()))
-    return np.array(result)
+        ids = np.flatnonzero(labels == label)
+        k = min(8, len(refs))
+        for off in range(0, len(ids), 4096):
+            batch = ids[off : off + 4096]
+            distances = 1 - z[batch] @ refs.T
+            result[batch] = np.partition(distances, k - 1, axis=1)[:, :k].mean(1)
+    return result
 
 
 def fit(args):
-    torch.set_num_threads(6)
+    started = time.perf_counter()
+    experiment = Experiment.load(args.config)
+    device = (
+        "mps"
+        if args.device == "auto" and torch.backends.mps.is_available()
+        else ("cpu" if args.device == "auto" else args.device)
+    )
+    torch.set_num_threads(args.threads)
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
-    x, records = load_features()
+    x, records = load_features(experiment)
     splits = make_splits(records)
-    classes = sorted(
-        {
-            r["phone"].rstrip("012")
-            for r in records
-            if passage_split(r["passageId"]) == "train" and r["voice"] != "am_puck"
-        }
-    )
+    classes = sorted({records[i]["phone"].rstrip("012") for i in splits["train"]})
     lookup = {p: i for i, p in enumerate(classes)}
     labels = np.array([lookup.get(r["phone"].rstrip("012"), -1) for r in records])
     voices = {v: i for i, v in enumerate(sorted({r["voice"] for r in records}))}
@@ -658,10 +870,10 @@ def fit(args):
     mean = x[train].mean(0)
     std = x[train].std(0).clip(0.05)
     normalized = (x - mean) / std
-    xt = torch.from_numpy(normalized)
-    yt = torch.from_numpy(labels)
-    vt = torch.from_numpy(voice_ids)
-    head = ComparisonHead(x.shape[1], args.embedding_dim, len(classes))
+    xt = torch.from_numpy(normalized).to(device)
+    yt = torch.from_numpy(labels).to(device)
+    vt = torch.from_numpy(voice_ids).to(device)
+    head = ComparisonHead(x.shape[1], args.embedding_dim, len(classes)).to(device)
     opt = torch.optim.AdamW(head.parameters(), lr=args.lr, weight_decay=0.01)
     history = []
     best = -1
@@ -669,9 +881,21 @@ def fit(args):
     for epoch in range(args.epochs):
         head.train()
         losses = []
-        order = train[np.random.permutation(len(train))]
-        for off in range(0, len(order), 256):
-            ids = order[off : off + 256]
+        if experiment.phonetic_mode == "english-variants":
+            accent_counts = __import__("collections").Counter(
+                records[i]["accent"] for i in train
+            )
+            probabilities = np.array(
+                [1 / accent_counts[records[i]["accent"]] for i in train]
+            )
+            probabilities /= probabilities.sum()
+            order = np.random.choice(
+                train, size=len(train), replace=True, p=probabilities
+            )
+        else:
+            order = train[np.random.permutation(len(train))]
+        for off in range(0, len(order), args.batch_size):
+            ids = order[off : off + args.batch_size]
             z, logits = head(xt[ids])
             loss = F.cross_entropy(logits, yt[ids]) + 0.25 * contrastive_loss(
                 z, yt[ids], vt[ids]
@@ -693,19 +917,32 @@ def fit(args):
         )
         if acc > best:
             best = acc
-            best_state = {k: v.detach().clone() for k, v in head.state_dict().items()}
+            best_state = {
+                k: v.detach().cpu().clone() for k, v in head.state_dict().items()
+            }
         if epoch == 0 or (epoch + 1) % 5 == 0:
             print(json.dumps(history[-1]), flush=True)
     head.load_state_dict(best_state)
     head.eval()
     with torch.inference_mode():
-        z = head(xt)[0].numpy()
+        z = head(xt)[0].cpu().numpy()
     # A bounded bank per phone preserves voice/context variation; all bank rows are training only.
     rng = np.random.default_rng(args.seed)
     bank = {}
     for label in range(len(classes)):
         ids = train[labels[train] == label]
-        bank[str(label)] = z[rng.choice(ids, size=min(len(ids), 256), replace=False)]
+        if experiment.phonetic_mode == "english-variants":
+            selected = []
+            for accent in sorted({records[i]["accent"] for i in ids}):
+                group = np.array([i for i in ids if records[i]["accent"] == accent])
+                selected.extend(
+                    rng.choice(group, size=min(len(group), 64), replace=False).tolist()
+                )
+            bank[str(label)] = z[selected]
+        else:
+            bank[str(label)] = z[
+                rng.choice(ids, size=min(len(ids), 256), replace=False)
+            ]
     calibration = {}
     # Global acoustic match to native examples is calibrated on separate texts, never test.
     for label in range(len(classes)):
@@ -724,7 +961,7 @@ def fit(args):
         duration[p] = [float(d.mean()), float(max(d.std(), 0.2))]
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
-    stress_model = train_stress(args.seed)
+    stress_model = train_stress(args.seed, experiment, device, args.batch_size)
     checkpoint = {
         "stress": stress_model,
         "schemaVersion": 1,
@@ -738,7 +975,14 @@ def fit(args):
         "calibration": calibration,
         "duration": duration,
         "encoder": ENCODERS["phones"],
-        "referenceVersion": "general-american-synthetic-v1",
+        "referenceManifestSha256": digest(experiment.corpus / "manifest.json"),
+        "referenceVersion": experiment.reference_version,
+        "referenceAccents": sorted(
+            {r["accent"] for r in records if r["split"] == "train"}
+        ),
+        "scoreTarget": experiment.config.get("scoreTarget", "american-reference"),
+        "phoneticMode": experiment.phonetic_mode,
+        "configPath": str(experiment.path.relative_to(ROOT)),
         "seed": args.seed,
     }
     torch.save(checkpoint, output / "model.pt")
@@ -751,19 +995,38 @@ def fit(args):
             "history": history,
             "bestValidationPhoneAccuracy": best,
             "splitCounts": {k: len(v) for k, v in splits.items()},
-            "splitPassages": {
-                "train": [f"passage-{i:03d}" for i in range(1, 71)],
-                "validation": [f"passage-{i:03d}" for i in range(71, 86)],
-                "test": [f"passage-{i:03d}" for i in range(86, 101)],
+            "splitRecordings": {
+                name: len({records[i]["takeId"] for i in ids})
+                for name, ids in splits.items()
             },
-            "heldOutVoice": "am_puck",
-            "referenceManifestSha256": digest(CORPUS / "manifest.json"),
+            "splitPassages": {
+                **{
+                    split: sorted(
+                        {r["passageId"] for r in records if r.get("split") == split}
+                    )
+                    for split in ["train", "validation", "test"]
+                },
+            },
+            "heldOutVoices": sorted({r["voice"] for r in records if r.get("heldOut")}),
+            "device": device,
+            "batchSize": args.batch_size,
+            "threads": args.threads,
+            "wallSeconds": time.perf_counter() - started,
+            "referenceManifestSha256": digest(experiment.corpus / "manifest.json"),
             "modelSha256": digest(output / "model.pt"),
             "classes": classes,
             "trainingRows": len(train),
             "parameters": sum(p.numel() for p in head.parameters()),
             "trainingCodeSha256": digest(Path(__file__)),
             "dependencyLockSha256": digest(ROOT / "training/uv.lock"),
+            "phoneticsCodeSha256": digest(ROOT / "training/phonetics.py")
+            if experiment.phonetic_mode == "english-variants"
+            else None,
+            "experimentConfigSha256": digest(experiment.path),
+            "familySplits": {
+                split: sorted({r["familyId"] for r in records if r["split"] == split})
+                for split in ["train", "validation", "test"]
+            },
             "stressValidationAccuracy": stress_model["bestValidationAccuracy"],
             "stressHistory": stress_model["history"],
         },
@@ -778,6 +1041,10 @@ def fit(args):
 
 def load_checkpoint(path):
     c = torch.load(path, map_location="cpu", weights_only=True)
+    if c.get("schemaVersion") != 1 or tuple(c.get("encoder", ())) != ENCODERS["phones"]:
+        raise ValueError(
+            "Checkpoint schema or pinned acoustic encoder does not match this pipeline."
+        )
     head = ComparisonHead(c["input_dim"], c["embedding_dim"], len(c["classes"]))
     head.load_state_dict(c["state_dict"])
     head.eval()
@@ -833,7 +1100,9 @@ def predict(args):
         "referenceVersion": checkpoint["referenceVersion"],
         "modelSha256": digest(args.model),
         "syntheticReference": True,
-        "scoreMeaning": "0-100 similarity index to generated American references; not percent correct or a proficiency score",
+        "referenceAccents": checkpoint.get("referenceAccents", ["en-US"]),
+        "scoreTarget": checkpoint.get("scoreTarget", "american-reference"),
+        "scoreMeaning": "0-100 similarity index to the generated English reference corpus; not percent correct or a proficiency score",
         "textSource": "expected" if args.text else "recognized",
         "syllables": [],
     }
@@ -849,7 +1118,9 @@ def predict(args):
         return
     acoustic = Acoustic(device=args.device)
     try:
-        x, phones, syllables = acoustic.extract(audio, text)
+        x, phones, syllables = acoustic.extract(
+            audio, text, checkpoint.get("phoneticMode", "cmu-american")
+        )
     except ValueError as e:
         base.update(status="unscored", reason=str(e))
         write_json(args.output, base)
@@ -913,8 +1184,15 @@ def predict(args):
 
 
 def evaluate(args):
+    experiment = Experiment.load(args.config)
     c, head = load_checkpoint(args.model)
-    x, records = load_features()
+    if c["referenceVersion"] != experiment.reference_version:
+        raise ValueError("Checkpoint and evaluation corpus versions differ.")
+    if c.get("referenceManifestSha256") and c["referenceManifestSha256"] != digest(
+        experiment.corpus / "manifest.json"
+    ):
+        raise ValueError("Evaluation corpus hash differs from training.")
+    x, records = load_features(experiment)
     splits = make_splits(records)
     lookup = {p: i for i, p in enumerate(c["classes"])}
     labels = np.array([lookup.get(r["phone"].rstrip("012"), -1) for r in records])
@@ -923,7 +1201,7 @@ def evaluate(args):
         z = z.numpy()
         logits = logits.numpy()
     bank = {k: v.numpy() for k, v in c["bank"].items()}
-    sx, srecords = load_syllable_features()
+    sx, srecords = load_syllable_features(experiment)
     ssplits = make_splits(srecords)
     stress = c["stress"]
     sh = StressHead(stress["input_dim"])
@@ -956,40 +1234,45 @@ def evaluate(args):
             )
         },
         "modelSha256": digest(args.model),
-        "referenceManifestSha256": digest(CORPUS / "manifest.json"),
+        "referenceManifestSha256": digest(experiment.corpus / "manifest.json"),
         "partitions": {},
         "scope": "Synthetic reference generalization and wrong-phone controls. No human learner validation.",
     }
-    for name in ["validation", "voice_validation"] + (
-        ["test", "voice_test"] if args.include_test else []
-    ):
-        ids = splits[name]
+
+    def metrics(ids):
+        total = len(ids)
         ids = ids[labels[ids] >= 0]
+        if not len(ids):
+            return None
         correct = distribution_distances(z[ids], labels[ids], bank)
-        # Harder negatives: compare vowel to different vowel, consonant to different consonant.
-        vowel = np.array(
-            [
-                p
-                in {
-                    "AA",
-                    "AE",
-                    "AH",
-                    "AO",
-                    "AW",
-                    "AY",
-                    "EH",
-                    "ER",
-                    "EY",
-                    "IH",
-                    "IY",
-                    "OW",
-                    "OY",
-                    "UH",
-                    "UW",
-                }
-                for p in c["classes"]
-            ]
-        )
+        if c.get("phoneticMode") == "english-variants":
+            from phonetics import vowel as is_vowel
+
+            vowel = np.array([is_vowel(p) for p in c["classes"]])
+        else:
+            vowel = np.array(
+                [
+                    p
+                    in {
+                        "AA",
+                        "AE",
+                        "AH",
+                        "AO",
+                        "AW",
+                        "AY",
+                        "EH",
+                        "ER",
+                        "EY",
+                        "IH",
+                        "IY",
+                        "OW",
+                        "OY",
+                        "UH",
+                        "UW",
+                    }
+                    for p in c["classes"]
+                ]
+            )
         rng = np.random.default_rng(901)
         wrong = np.array(
             [
@@ -1004,19 +1287,46 @@ def evaluate(args):
         mismatch = distribution_distances(z[ids], wrong, bank)
         scores = phone_scores(x[ids], [records[i] for i in ids], c, head)
         values = [s["similarity"] for s in scores if s["similarity"] is not None]
-        report["partitions"][name] = {
+        return {
             "phones": len(ids),
+            "totalPhones": total,
+            "unknownReferencePhones": total - len(ids),
             "phoneClassificationAccuracy": float(
                 np.mean(logits[ids].argmax(1) == labels[ids])
             ),
             "correctVsWrongPhoneAuc": auc_rank(-correct, -mismatch),
             "correctDistanceMedian": float(np.median(correct)),
             "wrongDistanceMedian": float(np.median(mismatch)),
-            "similarityMedian": float(np.median(values)),
-            "supportedScoreFraction": len(values) / len(ids),
+            "similarityMedian": float(np.median(values)) if values else None,
+            "supportedScoreFraction": len(values) / total,
             "voices": sorted({records[i]["voice"] for i in ids}),
             "passages": sorted({records[i]["passageId"] for i in ids}),
         }
+
+    report["byAccent"] = {}
+    report["stressByAccent"] = {}
+    for name in ["validation", "voice_validation"] + (
+        ["test", "voice_test"] if args.include_test else []
+    ):
+        ids = splits[name]
+        report["partitions"][name] = metrics(ids)
+        report["byAccent"][name] = {}
+        report["stressByAccent"][name] = {}
+        for accent in sorted({r["accent"] for r in records}):
+            selected = np.array(
+                [i for i in ids if records[i]["accent"] == accent], dtype=np.int64
+            )
+            report["byAccent"][name][accent] = metrics(selected)
+            si = [
+                i
+                for i in ssplits[name]
+                if srecords[i]["accent"] == accent and srecords[i]["wordSyllables"] > 1
+            ]
+            report["stressByAccent"][name][accent] = (
+                float(np.mean(sp[si] == [int(srecords[i]["stress"] > 0) for i in si]))
+                if si
+                else None
+            )
     write_json(args.output, report)
     print(json.dumps(report, indent=2))
 
@@ -1049,6 +1359,13 @@ def main():
     ev.add_argument("--output", required=True)
     ev.add_argument("--include-test", action="store_true")
     ev.set_defaults(run=evaluate)
+    for parser in [prep, train, ev]:
+        parser.add_argument("--config")
+    prep.add_argument("--batch-size", type=int, default=1)
+    prep.add_argument("--workers", type=int, default=1)
+    train.add_argument("--batch-size", type=int, default=256)
+    train.add_argument("--threads", type=int, default=6)
+    train.add_argument("--device", default="cpu")
     args = p.parse_args()
     args.run(args)
 

@@ -11,6 +11,8 @@ A trained local research model for syllable-level pronunciation similarity to th
 - `training.json`: actual fitting history, split IDs, reference hash and source/dependency hashes. Comparison head: 141,991 trainable parameters, plus a separately fitted stress head. Acoustic encoders are frozen and downloaded separately at pinned revisions; see `training/README.md`.
 - `sample-syllables.json` and `sample-audio-only.json`: actual persisted output from the held-out voice on validation passage 083, including 23 syllables with sound, stress and timing evidence.
 
+The original v1 source and dependency lock are preserved in Git commit `fb472f00d03641943e9b30afc86349e8fdd37cc1`. Its recorded source hashes describe that historical run. The later batching/variant implementation preserves v1 inference; a local compatibility check found a maximum similarity difference of 0.0 across its 23-syllable sample.
+
 ## Training and evaluation
 
 100 passages were assigned to training (70), validation/calibration (15), and final test (15) before fitting. `af_heart`, `af_bella`, and `am_michael` supplied training examples. `am_puck` was entirely excluded from training and the reference bank. Its validation and final-test passages measure held-out synthetic-voice generalization. These are four synthetic voice profiles, not four human participants.

@@ -106,6 +106,44 @@ class ComparisonContracts(unittest.TestCase):
             [0, 1],
         )
 
+    def test_parallel_native_mp3_decode_is_stable(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from comparison import ROOT, load_audio
+
+        files = sorted((ROOT / "public/audio").glob("*.mp3"))[:16]
+        self.assertEqual(len(files), 16)
+        with ThreadPoolExecutor(max_workers=16) as pool:
+            audios = list(pool.map(load_audio, files * 4))
+        self.assertEqual(len(audios), 64)
+        self.assertTrue(all(len(a) > 0 and np.isfinite(a).all() for a in audios))
+
+    def test_english_variants_preserve_nonrhotic_reference(self):
+        from phonetics import word_phones
+
+        us = word_phones("garden", "en-us")
+        gb = word_phones("garden", "en-gb")
+        self.assertTrue(any("ɹ" in p for p in us))
+        self.assertFalse(any("ɹ" in p for p in gb))
+
+    def test_explicit_family_partition_overrides_v1_numbering(self):
+        records = [
+            {
+                "passageId": "passage-101",
+                "voice": "am_puck",
+                "heldOut": False,
+                "split": "train",
+            },
+            {
+                "passageId": "passage-102",
+                "voice": "new-voice",
+                "heldOut": True,
+                "split": "validation",
+            },
+        ]
+        s = make_splits(records)
+        self.assertEqual(s["train"].tolist(), [0])
+        self.assertEqual(s["voice_validation"].tolist(), [1])
+
 
 if __name__ == "__main__":
     unittest.main()

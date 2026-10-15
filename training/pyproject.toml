@@ -10,4 +10,6 @@ dependencies = [
   "soundfile==0.13.1",
   "cmudict==1.1.1",
   "safetensors==0.6.2",
+  "phonemizer==3.3.0",
+  "espeakng-loader==0.2.4",
 ]
