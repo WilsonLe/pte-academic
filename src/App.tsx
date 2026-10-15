@@ -39,6 +39,7 @@ import {
   asset,
   type Question,
   type Answer,
+  type Section,
 } from "./content";
 import {
   Catalogue,
@@ -216,7 +217,9 @@ export default function App() {
   const [celebration, setCelebration] = useState<string | null>(null);
   const [page, setPage] = useState(location.hash.slice(1) || "home");
   const [guideId, setGuideId] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [selectedSections, setSelectedSections] = useState<Section[]>(() =>
+    sections.map((section) => section.id),
+  );
   const [catalogueIndex, setCatalogueIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [plan, setPlan] = useState<PracticePlan | null>(null);
@@ -598,39 +601,46 @@ export default function App() {
                 <div className="screen-stack catalogue-screen">
                   <div className="catalogue-toolbar flex flex-wrap items-center gap-3">
                     <div
-                      className="flex rounded-lg bg-muted p-1"
+                      className="flex gap-1 rounded-lg bg-muted p-1"
+                      role="group"
                       aria-label="Filter by section"
                     >
-                      {[
-                        { id: "all", label: "All", icon: Target },
-                        ...sections.map((s) => ({
-                          id: s.id,
-                          label: s.title,
-                          icon: icons[s.id],
-                        })),
-                      ].map((s) => (
-                        <Tooltip key={s.id}>
-                          <TooltipTrigger
-                            render={
-                              <Button
-                                size="icon"
-                                variant={
-                                  filter === s.id ? "secondary" : "ghost"
-                                }
-                                aria-label={`Filter: ${s.label}`}
-                                aria-pressed={filter === s.id}
-                                onClick={() => {
-                                  setFilter(s.id);
-                                  setCatalogueIndex(0);
-                                }}
-                              />
-                            }
-                          >
-                            <s.icon className="size-4" />
-                          </TooltipTrigger>
-                          <TooltipContent>{s.label}</TooltipContent>
-                        </Tooltip>
-                      ))}
+                      {sections
+                        .map((section) => ({
+                          id: section.id,
+                          label: section.title,
+                          icon: icons[section.id],
+                        }))
+                        .map((s) => (
+                          <Tooltip key={s.id}>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  size="icon"
+                                  className="size-12"
+                                  variant={
+                                    selectedSections.includes(s.id)
+                                      ? "default"
+                                      : "ghost"
+                                  }
+                                  aria-label={`Filter: ${s.label}`}
+                                  aria-pressed={selectedSections.includes(s.id)}
+                                  onClick={() => {
+                                    setSelectedSections((selected) =>
+                                      selected.includes(s.id)
+                                        ? selected.filter((id) => id !== s.id)
+                                        : [...selected, s.id],
+                                    );
+                                    setCatalogueIndex(0);
+                                  }}
+                                />
+                              }
+                            >
+                              <s.icon className="size-5" />
+                            </TooltipTrigger>
+                            <TooltipContent>{s.label}</TooltipContent>
+                          </Tooltip>
+                        ))}
                     </div>
                     <label className="flex min-w-40 flex-1 items-center gap-2 rounded-lg border px-3">
                       <Search className="size-4 text-muted-foreground" />
@@ -650,17 +660,19 @@ export default function App() {
                   <Catalogue
                     index={catalogueIndex}
                     onIndex={setCatalogueIndex}
-                    filter={filter}
+                    selectedSections={selectedSections}
                     search={search}
                     progress={progress}
                     onSelect={setGuideId}
                   />
-                  {(search || filter !== "all") && (
+                  {(search || selectedSections.length !== sections.length) && (
                     <Button
                       variant="ghost"
                       onClick={() => {
                         setSearch("");
-                        setFilter("all");
+                        setSelectedSections(
+                          sections.map((section) => section.id),
+                        );
                         setCatalogueIndex(0);
                       }}
                     >
