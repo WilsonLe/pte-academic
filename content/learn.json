@@ -55,7 +55,7 @@
       },
       {
         "title": "What this site can tell you",
-        "text": "This independent app compares selected answers with an original answer key, checks word counts, and lets you replay your recorded responses. Spoken responses and extended writing need self-review. The app cannot assess your English proficiency or produce a validated PTE score. A correct-answer percentage is not a prediction of a 10–90 result."
+        "text": "This independent app compares selected answers with an original answer key, checks word counts, and lets you replay your recorded responses. After a speaking task, you can transcribe your recording on this device. Read Aloud and Repeat Sentence show word match, and short answers compare with the key. Open speaking responses show a transcript and pace for self-review; extended writing also needs self-review. Transcription may mishear speech and does not assess pronunciation or fluency. The app cannot assess your English proficiency or produce a validated PTE score. A correct-answer percentage is not a prediction of a 10–90 result."
       },
       {
         "title": "Make feedback useful",
@@ -91,11 +91,11 @@
     "id": "about",
     "title": "Your data and this practice app",
     "tag": "A FEW USEFUL DETAILS",
-    "intro": "PTE Studio is an independent practice project with original content. It is not affiliated with the test provider. It uses no accounts, advertising, tracking or runtime AI services.",
+    "intro": "PTE Studio is an independent practice project with original content. It is not affiliated with the test provider. It uses no accounts, advertising, tracking or cloud AI services. Optional speech recognition runs on your device.",
     "blocks": [
       {
         "title": "What stays on your device",
-        "text": "Completed attempts are saved in this browser when browser storage is available. Responses and recordings are saved in IndexedDB when available. A small attempt index is stored in localStorage. Nothing is uploaded. Anyone using the same browser profile can see the saved history; clear it from My practice whenever you want."
+        "text": "Completed attempts are saved in this browser when browser storage is available. Responses, recordings and optional transcripts are saved in IndexedDB. A small attempt index is stored in localStorage. Nothing is uploaded. Anyone using the same browser profile can see the saved history; clear it from My practice whenever you want. Transcription first downloads public model files, then runs locally. Model files remain in browser Cache Storage; clear site storage in browser settings to remove them."
       },
       {
         "title": "Using the app offline",

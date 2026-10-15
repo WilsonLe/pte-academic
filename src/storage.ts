@@ -2,10 +2,12 @@ import { openDB, type DBSchema } from "idb";
 import { z } from "zod";
 import type { Result } from "./Runner";
 import { questions } from "./content";
+import { transcriptionSchema, type Transcription } from "./speech/scoring";
 const indexKey = "pte-studio-history-v1";
 const answerSchema = z.object({
   text: z.string().optional(),
   values: z.array(z.string()).optional(),
+  transcription: transcriptionSchema.optional(),
 });
 const resultSchema = z.object({
   id: z.string(),
@@ -53,7 +55,7 @@ export function saveAttempt(result: Result) {
         answers: Object.fromEntries(
           Object.entries(result.answers).map(([id, a]) => [
             id,
-            { text: a.text, values: a.values },
+            { text: a.text, values: a.values, transcription: a.transcription },
           ]),
         ),
       });
@@ -100,6 +102,44 @@ export function clearHistory() {
       await db.clear("attempts");
       db.close();
       localStorage.removeItem(indexKey);
+    });
+  queue = operation;
+  return operation;
+}
+
+// Use the same queue as save/clear so a late model result cannot recreate a
+// cleared or pruned attempt, or replace another question's saved response.
+export function saveTranscription(
+  attemptId: string,
+  questionId: string,
+  value: Transcription,
+) {
+  const transcription = transcriptionSchema.parse(value);
+  const operation = queue
+    .catch(() => {})
+    .then(async () => {
+      const db = await database();
+      try {
+        const tx = db.transaction("attempts", "readwrite");
+        const saved = await tx.store.get(attemptId);
+        if (
+          !saved ||
+          !saved.result.questionIds.includes(questionId) ||
+          !saved.recordings[questionId]
+        ) {
+          await tx.done;
+          return false;
+        }
+        saved.result.answers[questionId] = {
+          ...saved.result.answers[questionId],
+          transcription,
+        };
+        await tx.store.put(saved, attemptId);
+        await tx.done;
+        return true;
+      } finally {
+        db.close();
+      }
     });
   queue = operation;
   return operation;

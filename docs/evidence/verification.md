@@ -38,3 +38,30 @@ npm audit --audit-level=high
 ```
 
 Visual evidence: [desktop](overview-desktop.png), [mobile](overview-mobile.png), [test screen](exam-reading.png).
+
+## On-device transcription follow-up (issue #3)
+
+The operator replaced cloud scoring exploration with browser-local transcription. Transformers.js 4.3.1 runs pinned q8 Whisper Tiny English on single-thread WASM in a dedicated worker. Model requests are restricted to public pinned-revision GET/HEAD retrieval. Worker/runtime files are excluded from eager app precaching and cached after first use; weights use their own scoped Cache Storage. No OpenRouter scoring calls or new charges were made.
+
+- Five focused speech contracts cover word-error alignment/padding/normalization/empty input, task-specific feedback, persisted transcript/recording compatibility and clear/prune late-write races.
+- Real Chrome inference uses original local audio and native MediaRecorder output, then decodes/resamples locally. Network instrumentation checks there are no request bodies/uploads and model requests stay pinned. The first actual run (MP3 fixture) recognized the expected sentence and produced 100% word match; this is a transport/runtime fixture, not a human pronunciation benchmark.
+- A fresh-document offline second transcription and persisted feedback are verified separately from a warm in-memory model.
+- Focused browser branches cover silence without model download, failed download, cancellation/retry, missing Worker support and invalid audio. Playback remains available.
+- Root/subdirectory app and speech assets, existing microphone review, saved history, offline media and explicit pack updates are included in affected checks.
+- Dependencies audit has zero known vulnerabilities. Main application chunk is approximately 645 kB; the separate speech worker is approximately 547 kB. The on-demand WASM used in Chrome is approximately 14.3 MB; pinned model/tokenizer files bring first-use data to roughly 60 MB. The library also emits an unused alternative WASM asset in static output, excluded from eager caching.
+
+Investigation caught Transformers.js discovery probes using its default main revision even when pipeline revision was specified. The remote URL template is pinned too; the guard remains fail-closed. One test initially treated Hugging Face's same-revision resolve-cache redirects as unpinned; the assertion now validates the revision in both URL forms.
+
+No current-head independent review is claimed. The existing draft PR's one automatic cycle remains bound to the older reviewed head recorded above. Browser compatibility outside tested Chrome, human speech/accent fairness, mobile-device latency and certified proficiency scoring remain unverified.
+
+Focused follow-up commands:
+
+```sh
+npm run test:speech
+npm run test:speech:browser
+PTE_TEST_SUBPATH=1 PTE_TEST_SPEECH=1 npx playwright test tests/speech.spec.ts --grep 'real on-device'
+npx playwright test tests/practice.spec.ts --grep 'microphone preflight|manifest|single answer submits|new offline pack'
+npm run test:subpath
+```
+
+[Local speech review screenshot](local-speech-review.png).

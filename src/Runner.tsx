@@ -216,8 +216,9 @@ export function Preflight({
             <div className="space-y-3 py-3 text-xs leading-6 text-muted-foreground">
               <p>
                 Independent practice simulation. Exact live-test parity is
-                unverified. Synthetic audio is included. Speaking and extended
-                writing use self-review.
+                unverified. Synthetic audio is included. Speaking has optional
+                local transcription after practice; open responses use
+                self-review.
               </p>
               {plan.mode === "mock" && (
                 <p>

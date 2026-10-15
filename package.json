@@ -13,11 +13,14 @@
     "openrouter": "node scripts/openrouter.mjs",
     "build:subpath": "npm run validate:content && BASE_PATH=/pte-academic/ vite build --outDir dist-subpath && node scripts/build-sw.mjs dist-subpath",
     "preview:subpath": "BASE_PATH=/pte-academic/ vite preview --outDir dist-subpath --host 127.0.0.1 --port 4180",
-    "test:subpath": "PTE_TEST_SUBPATH=1 playwright test tests/subpath.spec.ts"
+    "test:subpath": "PTE_TEST_SUBPATH=1 playwright test tests/subpath.spec.ts",
+    "test:speech": "tsx --test tests/speech-scoring.test.ts tests/speech-storage.test.ts",
+    "test:speech:browser": "PTE_TEST_SPEECH=1 playwright test tests/speech.spec.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@fontsource-variable/geist": "^5.3.0",
+    "@huggingface/transformers": "4.3.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "idb": "^8.0.4",
@@ -36,6 +39,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "fake-indexeddb": "^6.2.5",
     "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.20.0",

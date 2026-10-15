@@ -3,6 +3,7 @@ import guideData from "../content/guides.json";
 import questionData from "../content/questions.json";
 import mockData from "../content/mock-tests.json";
 import sectionData from "../content/sections.json";
+import type { Transcription } from "./speech/scoring";
 export const sectionId = z.enum(["speaking", "reading", "listening"]);
 export const guideSchema = z.object({
   id: z.string(),
@@ -91,14 +92,19 @@ export type Question = z.infer<typeof questionSchema>;
 export type Section = Guide["section"];
 export const guideFor = (q: Question) => guides.find((g) => g.id === q.type)!;
 export const asset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-export type Answer = { text?: string; values?: string[]; recording?: string };
+export type Answer = {
+  text?: string;
+  values?: string[];
+  recording?: string;
+  transcription?: Transcription;
+};
 export function feedback(q: Question, a: Answer) {
   const g = guideFor(q);
   if (g.kind === "speak")
     return {
       label: a.recording ? "Listen & self-review" : "No recording",
       detail:
-        "Compare your recording with the model and the guidance. Speech is not automatically scored.",
+        "Replay your recording or transcribe it on this device for word-match feedback. Transcription does not assess pronunciation or predict a PTE score.",
     };
   if (g.kind === "write") {
     const n = wordCount(a.text || "");

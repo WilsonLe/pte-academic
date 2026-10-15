@@ -1,14 +1,25 @@
 import { defineConfig } from "@playwright/test";
+const speech = process.env.PTE_TEST_SPEECH === "1";
 const subpath = process.env.PTE_TEST_SUBPATH === "1";
 export default defineConfig({
   testDir: "tests",
-  testMatch: subpath ? "subpath.spec.ts" : "practice.spec.ts",
-  outputDir: subpath ? "test-results/subpath" : "test-results/practice",
+  testMatch: speech
+    ? "speech.spec.ts"
+    : subpath
+      ? "subpath.spec.ts"
+      : "practice.spec.ts",
+  outputDir: speech
+    ? subpath
+      ? "test-results/speech-subpath"
+      : "test-results/speech"
+    : subpath
+      ? "test-results/subpath"
+      : "test-results/practice",
   fullyParallel: false,
   workers: 1,
   timeout: 45000,
   use: {
-    baseURL: "http://127.0.0.1:4178",
+    baseURL: subpath ? "http://127.0.0.1:4180" : "http://127.0.0.1:4178",
     channel: "chrome",
     viewport: { width: 1440, height: 1000 },
     launchOptions: {

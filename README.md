@@ -22,7 +22,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:4178`. The stack is React 19.3, TypeScript 7, Vite 8.3, Tailwind 4.3, and shadcn's default Nova preset with Base UI and neutral tokens. Geist is bundled locally. Generated shadcn components and default helper CSS are committed; the scaffolding CLI is run through `npx shadcn@latest` when adding components, rather than shipped as an application dependency. There is no backend or runtime AI.
+Open `http://127.0.0.1:4178`. The stack is React 19.3, TypeScript 7, Vite 8.3, Tailwind 4.3, and shadcn's default Nova preset with Base UI and neutral tokens. Geist is bundled locally. Generated shadcn components and default helper CSS are committed; the scaffolding CLI is run through `npx shadcn@latest` when adding components, rather than shipped as an application dependency. There is no backend or cloud runtime AI. Opt-in speech recognition runs locally in a browser worker.
 
 ## Verify
 
@@ -66,3 +66,18 @@ npm run openrouter -- tts --confirm-spend --max-usd 0.25
 The operator authorized a **US$10 total project budget**. Passing or increasing it requires asking the operator. The provider key is capped without a reset, and a local cumulative reservation ledger guards each request. A per-run allowance cannot bypass the total. Credentials and ledger stay in gitignored `.cli/openrouter/`, never the site bundle. No automatic paid retries or credit purchases occur. See [audio authoring](agents/audio-author.md) for setup, supported models, macOS audio-inspector prerequisite and review requirements.
 
 Audio is synthetic; group discussions currently use a narrator identifying three speakers. Generation provenance and honest listening-review status live in `content/narration.json`. A successful API response is not evidence of pronunciation quality.
+
+## Local speaking feedback
+
+Open a speaking response in Review and select **Transcribe**. First use downloads about 60 MB of public English speech files. Quantized Whisper Tiny English and ONNX WASM run in a dedicated worker; recordings and transcripts stay on the device. The normal offline pack does not fetch speech code/weights. Once used successfully, speech assets and weights are cached for offline reuse; browser storage can be evicted. Cancel stops the worker; failures leave playback available. A changed app runtime may require another download.
+
+Read Aloud and Repeat Sentence show normalized word-match accuracy, deducting missing, substituted and extra recognized words. Short answers compare the key, ignoring punctuation/case and a leading article. Other speaking types show recognized text, word count and average words per minute including pauses; they keep content self-review. Silence gets no numeric score. Recognition can mishear accents/noise or hallucinate, so these are practice aids without pronunciation/fluency assessment or a predicted PTE score.
+
+Transcripts and model provenance are stored with attempts in IndexedDB; clearing history removes transcripts and recordings. Cache Storage retains public model/runtime files; clear site storage through browser settings to remove those too. Model: `onnx-community/whisper-tiny.en`, revision `2575352d61be1bf7225cf8f8b268a4678025fc58`, q8; Transformers.js 4.3.1, WASM single thread. Recording input is bounded to two-minute tasks (five-second tolerance) and 24 MiB encoded. Inference times out after five minutes; slower or low-memory browsers may need replay/self-review.
+
+```sh
+npm run test:speech
+npm run test:speech:browser
+```
+
+Implementation references: [Transformers.js](https://huggingface.co/docs/transformers.js/index), [model](https://huggingface.co/onnx-community/whisper-tiny.en).

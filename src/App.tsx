@@ -72,6 +72,8 @@ import {
 } from "./components/ui/dialog";
 import { Toaster } from "./components/ui/sonner";
 import { Chart } from "./QuestionInput";
+import { SpeechReview } from "./speech/SpeechReview";
+import type { Transcription } from "./speech/scoring";
 const navigation = [
   { id: "home", label: "Practice", icon: House },
   { id: "types", label: "Question types", icon: Target },
@@ -451,7 +453,25 @@ export default function App() {
               className="page-enter"
             >
               {result ? (
-                <Review result={result} />
+                <Review
+                  result={result}
+                  onTranscription={(questionId, value) =>
+                    setResult((current) =>
+                      current && current.id === result.id
+                        ? {
+                            ...current,
+                            answers: {
+                              ...current.answers,
+                              [questionId]: {
+                                ...current.answers[questionId],
+                                transcription: value,
+                              },
+                            },
+                          }
+                        : current,
+                    )
+                  }
+                />
               ) : currentGuide ? (
                 <GuideDetail
                   guide={currentGuide}
@@ -646,8 +666,8 @@ export default function App() {
                     </ul>
                     <p className="mt-4 text-xs">
                       Synthetic prompts may be shorter than live test prompts.
-                      Speaking and extended writing use self-review. Exact
-                      live-test UI parity is unverified.
+                      Speaking has optional local transcription; open responses
+                      use self-review. Exact live-test UI parity is unverified.
                     </p>
                   </More>
                 </section>
@@ -871,7 +891,13 @@ function modelAnswer(q: Question) {
     return q.answers!.map((x) => q.text!.split(/\s+/)[+x]).join(", ");
   return q.answers?.join(" · ");
 }
-function Review({ result: r }: { result: Result }) {
+function Review({
+  result: r,
+  onTranscription,
+}: {
+  result: Result;
+  onTranscription: (questionId: string, value: Transcription) => void;
+}) {
   return (
     <div className="max-w-3xl">
       <div className="mb-4 flex items-center gap-3">
@@ -938,6 +964,14 @@ function Review({ result: r }: { result: Result }) {
                     </p>
                   </section>
                 </div>
+                {guideFor(q).kind === "speak" && a.recording && (
+                  <SpeechReview
+                    question={q}
+                    answer={a}
+                    attemptId={r.id}
+                    onChange={(value) => onTranscription(id, value)}
+                  />
+                )}
                 <p className="mt-5 text-sm leading-7">{q.explanation}</p>
                 {q.text && (
                   <More label="Original prompt">
