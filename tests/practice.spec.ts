@@ -524,6 +524,7 @@ test("new offline pack offers an update without reloading or interrupting practi
       ),
     ).toBe(marker);
     await page.goto(`${origin}/#types`);
+    await page.getByRole("searchbox").fill("Multiple Choice, Single Answer");
     await page
       .getByRole("button", { name: /^Multiple Choice, Single Answer/ })
       .first()
