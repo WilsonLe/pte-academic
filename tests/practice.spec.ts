@@ -101,7 +101,10 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
         name: size.width > 767 ? "Main navigation" : "Mobile navigation",
         exact: true,
       })
-      .getByRole("link", { name: "Learn about PTE", exact: true })
+      .getByRole("link", {
+        name: size.width > 767 ? "Learn about PTE" : "Learn",
+        exact: true,
+      })
       .click();
     await page.getByRole("button", { name: "Start with the basics" }).click();
     await expect(
@@ -983,6 +986,17 @@ test("simplified workspace fits desktop and mobile, with compact history and sha
     await expect(
       page.getByText(/Three questions\.|One daily win\.|A small reading round/),
     ).toHaveCount(0);
+    if (viewport.width < 768) {
+      const nav = page.getByRole("navigation", {
+        name: "Mobile navigation",
+        exact: true,
+      });
+      await expect(nav.getByRole("link")).toHaveCount(3);
+      for (const name of ["Practice", "Learn", "History"])
+        await expect(
+          nav.getByRole("link", { name, exact: true }),
+        ).toBeVisible();
+    }
     await screenFits(page);
     await page.screenshot({
       path: `test-results/ui-home-${viewport.width}.png`,

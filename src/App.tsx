@@ -84,12 +84,22 @@ import { Chart } from "./QuestionInput";
 import { SpeechReview } from "./speech/SpeechReview";
 import type { Transcription } from "./speech/scoring";
 const navigation = [
-  { id: "home", label: "Practice", icon: House },
+  { id: "home", label: "Practice", mobileLabel: "Practice", icon: House },
   { id: "types", label: "Question types", icon: Target },
   { id: "sections", label: "Section practice", icon: ListChecks },
   { id: "mocks", label: "Mock tests", icon: Trophy },
-  { id: "guide", label: "Learn about PTE", icon: BookOpen },
-  { id: "history", label: "My practice", icon: History },
+  {
+    id: "guide",
+    label: "Learn about PTE",
+    mobileLabel: "Learn",
+    icon: BookOpen,
+  },
+  {
+    id: "history",
+    label: "My practice",
+    mobileLabel: "History",
+    icon: History,
+  },
 ];
 const icons = { speaking: Mic, reading: BookOpen, listening: Headphones };
 const titles: Record<string, string> = {
@@ -173,30 +183,43 @@ function More({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 function Nav({ active, mobile = false }: { active: string; mobile?: boolean }) {
+  const items = mobile ? navigation.filter((n) => n.mobileLabel) : navigation;
+  const current =
+    mobile && !["guide", "history"].includes(active) ? "home" : active;
   return (
     <nav
       aria-label={mobile ? "Mobile navigation" : "Main navigation"}
       className={mobile ? "mobile-nav" : "desktop-nav"}
     >
-      {navigation.map((n) => (
-        <Tooltip key={n.id}>
-          <TooltipTrigger
-            render={
-              <Link
-                to={screenPath(n.id)}
-                aria-label={n.label}
-                aria-current={active === n.id ? "page" : undefined}
-                className="nav-icon"
-              />
-            }
+      {items.map((n) =>
+        mobile ? (
+          <Link
+            key={n.id}
+            to={screenPath(n.id)}
+            aria-current={current === n.id ? "page" : undefined}
+            className="nav-icon"
           >
-            <n.icon className="size-[19px]" />
-          </TooltipTrigger>
-          <TooltipContent side={mobile ? "top" : "right"}>
-            {n.label}
-          </TooltipContent>
-        </Tooltip>
-      ))}
+            <n.icon className="size-[22px]" aria-hidden="true" />
+            <span>{n.mobileLabel}</span>
+          </Link>
+        ) : (
+          <Tooltip key={n.id}>
+            <TooltipTrigger
+              render={
+                <Link
+                  to={screenPath(n.id)}
+                  aria-label={n.label}
+                  aria-current={active === n.id ? "page" : undefined}
+                  className="nav-icon"
+                />
+              }
+            >
+              <n.icon className="size-[19px]" />
+            </TooltipTrigger>
+            <TooltipContent side="right">{n.label}</TooltipContent>
+          </Tooltip>
+        ),
+      )}
     </nav>
   );
 }

@@ -664,6 +664,16 @@
     height: calc(76px + env(safe-area-inset-bottom));
     padding: 6px 4px max(6px, env(safe-area-inset-bottom));
   }
+  .mobile-nav .nav-icon {
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 112px;
+    height: 58px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+  }
   .nav-icon {
     width: 50px;
     height: 52px;
