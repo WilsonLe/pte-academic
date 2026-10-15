@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./components/ui/button";
 
@@ -43,59 +37,6 @@ export function Pager({
         <ArrowRight />
       </Button>
     </nav>
-  );
-}
-
-// Size the number of cards to the available panel, rather than shrinking text.
-export function PagedList<T>({
-  items,
-  render,
-  label,
-  empty,
-  index,
-  onIndex,
-}: {
-  items: T[];
-  render: (item: T) => ReactNode;
-  label: string;
-  empty?: ReactNode;
-  index?: number;
-  onIndex?: (index: number) => void;
-}) {
-  const panel = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState(3);
-  const [page, setPage] = useState(0);
-  useEffect(() => {
-    const node = panel.current;
-    if (!node) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const cols = entry.contentRect.width >= 680 ? 2 : 1;
-      setSize(
-        Math.max(
-          1,
-          Math.min(6, Math.floor((entry.contentRect.height + 12) / 110) * cols),
-        ),
-      );
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-  const count = Math.max(1, Math.ceil(items.length / size));
-  const current = Math.min(index ?? page, count - 1);
-  return (
-    <div className="paged-list">
-      <div ref={panel} className="page-cards">
-        {items.length
-          ? items.slice(current * size, (current + 1) * size).map(render)
-          : empty}
-      </div>
-      <Pager
-        index={current}
-        count={count}
-        onChange={onIndex || setPage}
-        label={label}
-      />
-    </div>
   );
 }
 

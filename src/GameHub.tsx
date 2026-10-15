@@ -33,6 +33,7 @@ import {
 } from "./progress";
 import { questions, guideFor } from "./content";
 import { Button } from "./components/ui/button";
+import { CardsList } from "./components/CardsList";
 import {
   Tooltip,
   TooltipContent,
@@ -418,8 +419,16 @@ export function GameHub({
             <h3>Pick your practice</h3>
             <span>Go at your own pace</span>
           </div>
-          <div className="mode-grid">
-            {[
+          <CardsList
+            className="practice-modes"
+            gridClassName="mode-grid"
+            label="practice mode pages"
+            minCardWidth={0}
+            minCardHeight={80}
+            maxCardHeight={140}
+            maxColumns={3}
+            maxRows={1}
+            items={[
               {
                 id: "types",
                 title: "Question types",
@@ -444,7 +453,8 @@ export function GameHub({
                 icon: Trophy,
                 tone: "peach",
               },
-            ].map((mode, i) => (
+            ]}
+            render={(mode, i) => (
               <a
                 href={"#" + mode.id}
                 onClick={() => navigate(mode.id)}
@@ -468,8 +478,8 @@ export function GameHub({
                   </span>
                 </div>
               </a>
-            ))}
-          </div>
+            )}
+          />
         </>
       )}
       {view === "badges" && (
@@ -480,8 +490,17 @@ export function GameHub({
               {unlocked.length} / {badges.length} unlocked
             </span>
           </div>
-          <div className="badge-shelf">
-            {badges.map((badge, i) => {
+          <CardsList
+            className="badge-list"
+            gridClassName="badge-shelf"
+            label="achievement pages"
+            minCardWidth={140}
+            minCardHeight={128}
+            maxCardHeight={260}
+            maxColumns={3}
+            maxRows={2}
+            items={badges}
+            render={(badge, i) => {
               const Icon = badgeIcons[i],
                 earned = unlocked.includes(badge.id);
               return (
@@ -522,8 +541,8 @@ export function GameHub({
                   </TooltipContent>
                 </Tooltip>
               );
-            })}
-          </div>
+            }}
+          />
         </>
       )}
       <Dialog

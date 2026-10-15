@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
-import { PagedList, ReadingPages } from "./Pages";
+import { ReadingPages } from "./Pages";
+import { CardsList } from "./components/CardsList";
 import { guides, questions, sections, guideFor, type Guide } from "./content";
 import articles from "../content/learn.json";
 import type { Progress } from "./progress";
@@ -41,7 +42,7 @@ export function Catalogue({
       `${g.title} ${g.summary}`.toLowerCase().includes(search.toLowerCase()),
   );
   return (
-    <PagedList
+    <CardsList
       key={filter + search}
       items={filtered}
       index={index}
@@ -160,7 +161,7 @@ export function LearnScreen({ onPractice }: { onPractice: () => void }) {
     return (
       <div className="screen-stack">
         <h2 className="screen-title">Learn the game.</h2>
-        <PagedList
+        <CardsList
           items={articles}
           label="learning topics"
           render={(a) => (
@@ -301,7 +302,7 @@ export function HistoryScreen({
           </Button>
         )}
       </div>
-      <PagedList
+      <CardsList
         items={history}
         label="attempt pages"
         empty={
