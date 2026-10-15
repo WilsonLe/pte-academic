@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./components/ui/button";
 
@@ -38,97 +38,6 @@ export function Pager({
         <ArrowRight />
       </Button>
     </nav>
-  );
-}
-
-// Size the number of cards to the available panel, rather than shrinking text.
-export function PagedList<T>({
-  items,
-  render,
-  label,
-  empty,
-  index,
-  onIndex,
-  className = "",
-  compact = false,
-}: {
-  compact?: boolean;
-  className?: string;
-  items: T[];
-  render: (item: T) => ReactNode;
-  label: string;
-  empty?: ReactNode;
-  index?: number;
-  onIndex?: (index: number) => void;
-}) {
-  const panel = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState(3);
-  const [page, setPage] = useState(0);
-  // Keep a conservative measured bound as pages change, so removing a tall
-  // final card cannot repeatedly grow/shrink the page and reintroduce overlap.
-  const cardBound = useRef({ width: 0, height: 0 });
-  useLayoutEffect(() => {
-    const node = panel.current;
-    if (!node) return;
-    let live = true;
-    const resize = () => {
-      if (!live) return;
-      if (!compact) {
-        const cols = node.clientWidth >= 680 ? 2 : 1;
-        setSize(
-          Math.max(
-            1,
-            Math.min(6, Math.floor((node.clientHeight + 12) / 110) * cols),
-          ),
-        );
-        return;
-      }
-      const style = getComputedStyle(node);
-      const gap = parseFloat(style.rowGap) || 0;
-      const cols = style.gridTemplateColumns.trim().split(/\s+/).length;
-      if (cardBound.current.width !== node.clientWidth || !items.length)
-        cardBound.current = { width: node.clientWidth, height: 0 };
-      if (!items.length) return;
-      const height = Math.max(
-        ...Array.from(
-          node.children,
-          (child) => child.getBoundingClientRect().height,
-        ),
-      );
-      cardBound.current.height = Math.max(cardBound.current.height, height);
-      if (!cardBound.current.height) return;
-      const rows = Math.floor(
-        (node.clientHeight + gap) / (cardBound.current.height + gap),
-      );
-      setSize(Math.max(1, Math.min(6, rows * cols)));
-    };
-    resize();
-    const observer = new ResizeObserver(resize);
-    observer.observe(node);
-    if (compact)
-      Array.from(node.children).forEach((child) => observer.observe(child));
-    void document.fonts.ready.then(resize);
-    return () => {
-      live = false;
-      observer.disconnect();
-    };
-  }, [compact, items, size, index, page]);
-  const count = Math.max(1, Math.ceil(items.length / size));
-  const current = Math.min(index ?? page, count - 1);
-  return (
-    <div className={`paged-list ${className}`}>
-      <div ref={panel} className="page-cards">
-        {items.length
-          ? items.slice(current * size, (current + 1) * size).map(render)
-          : empty}
-      </div>
-      <Pager
-        index={current}
-        count={count}
-        onChange={onIndex || setPage}
-        label={label}
-      />
-    </div>
   );
 }
 

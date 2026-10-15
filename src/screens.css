@@ -169,10 +169,6 @@
 .mode-heading {
   display: none;
 }
-.mode-grid {
-  flex: 0 0 140px;
-  gap: 18px;
-}
 .game-mode {
   min-height: 0;
   padding: 22px;
@@ -274,14 +270,6 @@
 .badge-heading > span {
   font-size: 18px;
 }
-.badge-shelf {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 22px;
-}
 .achievement {
   min-height: 0;
   font-size: 18px;
@@ -313,20 +301,53 @@
   font-size: 18px;
   height: 52px;
 }
-.paged-list {
+.cards-list {
+  min-width: 0;
   min-height: 0;
   flex: 1;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  /* Keep focus rings visible inside the scrolling accessibility escape. */
+  padding: 6px;
+  margin: -6px;
 }
-.page-cards {
-  min-height: 0;
+.cards-list-grid {
+  flex-shrink: 0;
+  min-width: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
-  align-content: stretch;
+  grid-template-columns: repeat(var(--cards-columns), minmax(0, 1fr));
+  grid-auto-rows: minmax(min-content, var(--cards-height));
+  align-content: start;
   gap: 12px;
+}
+.cards-list-grid > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cards-list-grid .type-row > .flex-1 {
+  min-width: 0;
+}
+.cards-list > .page-controls {
+  margin-top: auto;
+}
+.practice-modes {
+  flex: 0 0 140px;
+}
+.cards-list-grid.mode-grid {
+  flex: none;
+  grid-template-columns: repeat(var(--cards-columns), minmax(0, 1fr));
+  gap: 12px;
+}
+.cards-list-grid.badge-shelf {
+  padding: 0;
+  gap: 12px;
+  border: 0;
+  background: none;
+  grid-template-columns: repeat(var(--cards-columns), minmax(0, 1fr));
+  grid-template-rows: none;
+  flex: none;
 }
 .type-row {
   min-height: 0;
@@ -607,6 +628,12 @@
   font-size: 18px;
   line-height: 1.7;
 }
+@media (max-width: 1200px) {
+  .mode-bottom p,
+  .mode-arrow {
+    display: none;
+  }
+}
 @media (max-width: 1000px) {
   .main-content {
     padding: 22px;
@@ -614,10 +641,6 @@
   .game-mode {
     padding: 16px;
     gap: 12px;
-  }
-  .mode-bottom p,
-  .mode-arrow {
-    display: none;
   }
   .mode-bottom h4 {
     font-size: 18px;
@@ -749,8 +772,8 @@
     height: 54px;
     font-size: 18px;
   }
-  .mode-grid {
-    flex-basis: 90px;
+  .practice-modes {
+    flex-basis: 128px;
     gap: 10px;
   }
   .game-mode {
@@ -800,11 +823,6 @@
     width: 32px;
     height: 32px;
   }
-  .badge-shelf {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 12px;
-  }
   .badge-heading > span {
     font-size: 14px;
   }
@@ -823,9 +841,6 @@
   .achievement-icon > .lucide {
     width: 28px;
     height: 28px;
-  }
-  .page-cards {
-    grid-template-columns: 1fr;
   }
   .type-row {
     padding: 14px;
@@ -990,8 +1005,8 @@
   .quest-start {
     height: 48px;
   }
-  .mode-grid {
-    flex-basis: 80px;
+  .practice-modes {
+    flex-basis: 128px;
   }
   .game-mode {
     padding: 10px;
@@ -1002,9 +1017,6 @@
   .activity-heading,
   .xp-meter-label {
     margin-top: 16px;
-  }
-  .badge-shelf {
-    gap: 10px;
   }
   .achievement {
     padding: 8px;
@@ -1088,9 +1100,6 @@
   }
   .hub-heading h2 {
     font-size: clamp(24px, 6.8vw, 29px);
-  }
-  .mode-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .game-mode {
     min-width: 0;
@@ -1316,11 +1325,6 @@
 .quest-body {
   justify-content: center;
   flex: 1;
-}
-.history-list .page-cards {
-  overflow-y: auto;
-  align-content: start;
-  grid-auto-rows: auto;
 }
 .history-row {
   height: auto;

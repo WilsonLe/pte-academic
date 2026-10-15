@@ -59,6 +59,189 @@ async function screenFits(page: Page) {
     );
   expect(bad).toEqual([]);
 }
+test("shared cards list fits responsive panels and exposes every question type", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 980, height: 960 },
+    { width: 820, height: 768 },
+    { width: 767, height: 844 },
+    { width: 640, height: 844 },
+    { width: 390, height: 844 },
+    { width: 360, height: 640 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/#types");
+    await page.reload();
+    await expect(page.locator(".type-row").first()).toBeVisible();
+    const titles = new Set<string>();
+    for (let i = 0; i < 22; i++) {
+      await screenFits(page);
+      const cards = await page.locator(".type-row").evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const box = node.getBoundingClientRect();
+          const title = node.querySelector(".flex-1") as HTMLElement;
+          return {
+            title: node.getAttribute("data-track") + ":" + title.textContent!,
+            width: box.width,
+            height: box.height,
+            fits:
+              title.scrollWidth <= title.clientWidth &&
+              title.scrollHeight <= node.clientHeight,
+          };
+        }),
+      );
+      for (const card of cards) {
+        titles.add(card.title);
+        expect(card.width).toBeGreaterThan(270);
+        expect(card.height).toBeGreaterThanOrEqual(119);
+        expect(card.height).toBeLessThanOrEqual(177);
+        expect(card.fits).toBe(true);
+      }
+      const next = page.getByRole("button", {
+        name: "Next question type pages",
+      });
+      if (await next.isDisabled()) break;
+      await next.click();
+    }
+    expect(titles.size).toBe(22);
+  }
+});
+
+test("shared cards list hides unnecessary pagination and preserves navigation on resize", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/#types");
+  const next = page.getByRole("button", { name: "Next question type pages" });
+  await next.click();
+  const anchor = await page
+    .locator(".type-row > .flex-1")
+    .first()
+    .textContent();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".cards-list-grid")).toContainText(anchor!);
+  const title = await page.locator(".type-row > .flex-1").first().textContent();
+  await page.locator(".type-row").first().click();
+  await page.getByRole("button", { name: "All question types" }).click();
+  await expect(page.locator(".type-row > .flex-1").first()).toHaveText(title!);
+  await page.getByRole("searchbox").fill("Read Aloud");
+  await expect(page.locator(".type-row")).toHaveCount(1);
+  await expect(
+    page.getByRole("navigation", { name: "question type pages", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("searchbox").fill("no matching question type");
+  await expect(page.getByText("No question types found.")).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "question type pages", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(
+    page.getByRole("button", { name: "Previous question type pages" }),
+  ).toBeDisabled();
+  await page.goto("/#history");
+  await expect(page.getByText("No attempts yet.")).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "attempt pages", exact: true }),
+  ).toHaveCount(0);
+  await page.goto("/#guide");
+  await expect(
+    page.locator(".cards-list-grid .type-row").first(),
+  ).toBeVisible();
+  await page.goto("/#home");
+  await expect(page.locator(".cards-list-grid .game-mode")).toHaveCount(3);
+  await expect(
+    page.getByRole("navigation", { name: "practice mode pages", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "View achievements" }).click();
+  await expect(page.locator(".cards-list-grid .achievement")).toHaveCount(4);
+  const achievementNext = page.getByRole("button", {
+    name: "Next achievement pages",
+  });
+  await achievementNext.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("navigation", { name: "achievement pages", exact: true }),
+  ).toContainText("2 / 2");
+  await expect(page.locator(".achievement")).toHaveCount(2);
+  await page.locator(".achievement").first().click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(page.locator(".achievement")).toHaveCount(6);
+  await expect(
+    page.getByRole("navigation", { name: "achievement pages", exact: true }),
+  ).toHaveCount(0);
+  await screenFits(page);
+});
+
+test("shared cards list pages learning topics and history and retains a short-window escape", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto("/#guide");
+  const topics = new Set<string>();
+  for (let i = 0; i < 10; i++) {
+    for (const title of await page.locator(".type-row").allTextContents())
+      topics.add(title);
+    await screenFits(page);
+    const next = page.getByRole("button", { name: "Next learning topics" });
+    if (!(await next.count()) || (await next.isDisabled())) break;
+    await next.click();
+  }
+  const { readFile } = await import("node:fs/promises");
+  const sourceTopics = JSON.parse(
+    await readFile(new URL("../content/learn.json", import.meta.url), "utf8"),
+  );
+  expect(topics.size).toBe(sourceTopics.length);
+  await page.locator(".type-row").first().click();
+  await expect(page.locator(".reading-copy")).toBeVisible();
+  await page.getByRole("button", { name: "All learning topics" }).click();
+  await expect(page.locator(".cards-list-grid")).toBeVisible();
+
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "pte-studio-history-v1",
+      JSON.stringify(
+        Array.from({ length: 10 }, (_, i) => ({
+          id: `cards-fixture-${i}`,
+          label: `Practice round ${i + 1}`,
+          date: "2026-10-15T00:00:00.000Z",
+          questionIds: ["reading-single-01"],
+          answers: {},
+          finished: true,
+        })),
+      ),
+    ),
+  );
+  await page.goto("/#history");
+  await page.reload();
+  const rounds = new Set<string>();
+  for (let i = 0; i < 10; i++) {
+    for (const title of await page
+      .locator(".history-row .flex-1")
+      .allTextContents())
+      rounds.add(title);
+    await screenFits(page);
+    const next = page.getByRole("button", { name: "Next attempt pages" });
+    if (await next.isDisabled()) break;
+    await next.click();
+  }
+  expect(rounds.size).toBe(10);
+  await page.setViewportSize({ width: 360, height: 400 });
+  await page.goto("/#types");
+  const next = page.getByRole("button", { name: "Next question type pages" });
+  await next.scrollIntoViewIfNeeded();
+  await next.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("navigation", { name: "question type pages", exact: true }),
+  ).toContainText("2 /");
+});
+
 test("screen-sized game navigation, all question pages and beginner guidance", async ({
   page,
 }) => {
@@ -66,6 +249,9 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
   for (const size of [
     { width: 1440, height: 900 },
     { width: 1024, height: 768 },
+    { width: 1101, height: 768 },
+    { width: 1120, height: 768 },
+    { width: 1201, height: 768 },
     { width: 390, height: 844 },
     { width: 360, height: 640 },
   ]) {
@@ -81,6 +267,15 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
       await page.goto("/#" + route);
       await expect(page.locator("main")).toBeVisible();
       await screenFits(page);
+      await expect
+        .poll(() =>
+          page
+            .locator(".cards-list")
+            .evaluateAll((nodes) =>
+              nodes.every((node) => node.scrollHeight <= node.clientHeight + 1),
+            ),
+        )
+        .toBe(true);
     }
     await page.goto("/#home");
     await page.getByRole("button", { name: "View level and streak" }).click();
@@ -1098,11 +1293,15 @@ test("populated compact history pages fit without overlapping pagination", async
     do {
       await expect
         .poll(() =>
-          page.locator(".history-list .page-cards").evaluate((panel) => {
-            const bounds = panel.getBoundingClientRect();
+          page.locator(".history-list .cards-list-grid").evaluate((panel) => {
+            const host = panel.parentElement!;
+            const pager = host.querySelector(":scope > .page-controls");
+            const limit = Math.min(
+              host.getBoundingClientRect().bottom,
+              pager?.getBoundingClientRect().top ?? Infinity,
+            );
             return Array.from(panel.children).every(
-              (card) =>
-                card.getBoundingClientRect().bottom <= bounds.bottom + 1,
+              (card) => card.getBoundingClientRect().bottom <= limit + 1,
             );
           }),
         )
@@ -1128,10 +1327,13 @@ test("populated compact history pages fit without overlapping pagination", async
   await page.addStyleTag({ content: ".history-row { font-size: 28px; }" });
   await expect
     .poll(() =>
-      page.locator(".history-list .page-cards").evaluate((panel) => {
-        const bounds = panel.getBoundingClientRect();
+      page.locator(".history-list .cards-list-grid").evaluate((panel) => {
+        const pager = panel.parentElement!.querySelector(
+          ":scope > .page-controls",
+        );
+        const limit = pager?.getBoundingClientRect().top ?? Infinity;
         return Array.from(panel.children).every(
-          (card) => card.getBoundingClientRect().bottom <= bounds.bottom + 1,
+          (card) => card.getBoundingClientRect().bottom <= limit + 1,
         );
       }),
     )

@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
-import { PagedList, ReadingPages } from "./Pages";
+import { ReadingPages } from "./Pages";
+import { CardsList } from "./components/CardsList";
 import {
   guides,
   questions,
@@ -49,7 +50,7 @@ export function Catalogue({
       `${g.title} ${g.summary}`.toLowerCase().includes(search.toLowerCase()),
   );
   return (
-    <PagedList
+    <CardsList
       key={selectedSections.join(",") + search}
       items={filtered}
       index={index}
@@ -182,7 +183,7 @@ export function LearnScreen({
     return (
       <div className="screen-stack">
         <h2 className="screen-title">Learn about PTE.</h2>
-        <PagedList
+        <CardsList
           items={articles}
           label="learning topics"
           render={(a) => (
@@ -321,9 +322,10 @@ export function HistoryScreen({
           </Button>
         )}
       </div>
-      <PagedList
+      <CardsList
         items={history}
-        compact
+        minCardHeight={112}
+        maxCardHeight={136}
         className="history-list"
         label="attempt pages"
         empty={
