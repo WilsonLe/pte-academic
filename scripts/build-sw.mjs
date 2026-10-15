@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile, copyFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 async function files(dir) {
   return (
@@ -10,6 +10,9 @@ async function files(dir) {
   ).flat();
 }
 const outDir = process.argv[2] || "dist";
+// GitHub Pages serves this shell for direct browser-route entries. Asset URLs
+// already include the configured absolute deployment base.
+await copyFile(`${outDir}/index.html`, `${outDir}/404.html`);
 const paths = (await files(outDir)).filter((p) => !p.endsWith("sw.js"));
 const onDemand = paths.filter((p) => /\/(speech\.worker-|ort-wasm-)/.test(p));
 const eager = paths.filter((p) => !onDemand.includes(p));

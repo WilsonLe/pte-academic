@@ -36,3 +36,88 @@ test("subdirectory static build retains manifest, audio and offline navigation",
   expect(audio.length).toBe(128);
   expect(audio.range).toMatch(/^bytes 0-127\//);
 });
+
+test("static 404 shell supports direct history routes without rewrites", async ({
+  page,
+  context,
+}) => {
+  const { createServer } = await import("node:http");
+  const { readFile } = await import("node:fs/promises");
+  const { resolve, extname, sep } = await import("node:path");
+  const root = resolve("dist-subpath");
+  expect(await readFile(resolve(root, "404.html"), "utf8")).toBe(
+    await readFile(resolve(root, "index.html"), "utf8"),
+  );
+  const mime: Record<string, string> = {
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".css": "text/css",
+    ".json": "application/json",
+    ".webmanifest": "application/manifest+json",
+    ".mp3": "audio/mpeg",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",
+  };
+  const server = createServer(async (request, response) => {
+    const path = new URL(request.url!, "http://localhost").pathname;
+    if (!path.startsWith("/pte-academic/")) {
+      response.writeHead(404).end();
+      return;
+    }
+    let file = resolve(
+        root,
+        path.slice("/pte-academic/".length) || "index.html",
+      ),
+      status = 200;
+    if (!file.startsWith(root + sep)) {
+      response.writeHead(403).end();
+      return;
+    }
+    let body: Buffer;
+    try {
+      body = await readFile(file);
+    } catch {
+      if (!request.headers.accept?.includes("text/html")) {
+        response.writeHead(404).end();
+        return;
+      }
+      file = resolve(root, "404.html");
+      status = 404;
+      body = await readFile(file);
+    }
+    response
+      .writeHead(status, {
+        "Content-Type": mime[extname(file)] || "application/octet-stream",
+      })
+      .end(body);
+  });
+  await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+  const address = server.address();
+  if (!address || typeof address === "string")
+    throw new Error("Missing test server");
+  const origin = `http://127.0.0.1:${address.port}`;
+  try {
+    const response = await page.goto(
+      origin + "/pte-academic/history/missing-session",
+    );
+    expect(response?.status()).toBe(404);
+    await expect(
+      page.getByText("This session is no longer available on this device."),
+    ).toBeVisible();
+    await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+    await page
+      .getByRole("button", { name: "Back to history", exact: true })
+      .click();
+    await expect(page).toHaveURL(origin + "/pte-academic/history");
+    await expect(page.getByText("No attempts yet.")).toBeVisible();
+    await context.setOffline(true);
+    await page.reload();
+    await expect(page.getByText("No attempts yet.")).toBeVisible();
+  } finally {
+    await context.setOffline(false);
+    await new Promise<void>((done, reject) =>
+      server.close((error) => (error ? reject(error) : done())),
+    );
+  }
+});
