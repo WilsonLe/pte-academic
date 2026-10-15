@@ -48,7 +48,7 @@ BASE_PATH=/pte-academic/ npm run build
 
 Keep the trailing slash. Browser routing uses real paths such as `/history` and `/history/:sessionID` (under the configured base path). Configure the static host to rewrite application routes to `index.html`; Vite preview already does this. The service worker handles cached route navigation offline. Older `#history` and other top-level hash links are converted on entry. Use HTTPS for microphone and service-worker support; localhost also works for development. No hosting provider or automatic deployment is configured by this change.
 
-Open the built site online and check the cloud status icon for **Offline ready** before disconnecting. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
+Open the built site online once to cache the practice pack, then verify a reload without a connection before relying on offline practice. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
 
 ## Content and audio management
 

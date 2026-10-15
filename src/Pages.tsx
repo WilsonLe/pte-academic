@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./components/ui/button";
 
@@ -56,7 +50,9 @@ export function PagedList<T>({
   index,
   onIndex,
   className = "",
+  compact = false,
 }: {
+  compact?: boolean;
   className?: string;
   items: T[];
   render: (item: T) => ReactNode;
@@ -68,21 +64,55 @@ export function PagedList<T>({
   const panel = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState(3);
   const [page, setPage] = useState(0);
-  useEffect(() => {
+  // Keep a conservative measured bound as pages change, so removing a tall
+  // final card cannot repeatedly grow/shrink the page and reintroduce overlap.
+  const cardBound = useRef({ width: 0, height: 0 });
+  useLayoutEffect(() => {
     const node = panel.current;
     if (!node) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const cols = entry.contentRect.width >= 680 ? 2 : 1;
-      setSize(
-        Math.max(
-          1,
-          Math.min(6, Math.floor((entry.contentRect.height + 12) / 110) * cols),
+    let live = true;
+    const resize = () => {
+      if (!live) return;
+      if (!compact) {
+        const cols = node.clientWidth >= 680 ? 2 : 1;
+        setSize(
+          Math.max(
+            1,
+            Math.min(6, Math.floor((node.clientHeight + 12) / 110) * cols),
+          ),
+        );
+        return;
+      }
+      const style = getComputedStyle(node);
+      const gap = parseFloat(style.rowGap) || 0;
+      const cols = style.gridTemplateColumns.trim().split(/\s+/).length;
+      if (cardBound.current.width !== node.clientWidth || !items.length)
+        cardBound.current = { width: node.clientWidth, height: 0 };
+      if (!items.length) return;
+      const height = Math.max(
+        ...Array.from(
+          node.children,
+          (child) => child.getBoundingClientRect().height,
         ),
       );
-    });
+      cardBound.current.height = Math.max(cardBound.current.height, height);
+      if (!cardBound.current.height) return;
+      const rows = Math.floor(
+        (node.clientHeight + gap) / (cardBound.current.height + gap),
+      );
+      setSize(Math.max(1, Math.min(6, rows * cols)));
+    };
+    resize();
+    const observer = new ResizeObserver(resize);
     observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
+    if (compact)
+      Array.from(node.children).forEach((child) => observer.observe(child));
+    void document.fonts.ready.then(resize);
+    return () => {
+      live = false;
+      observer.disconnect();
+    };
+  }, [compact, items, size, index, page]);
   const count = Math.max(1, Math.ceil(items.length / size));
   const current = Math.min(index ?? page, count - 1);
   return (

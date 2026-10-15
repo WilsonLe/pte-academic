@@ -1318,6 +1318,7 @@
   flex: 1;
 }
 .history-list .page-cards {
+  overflow-y: auto;
   align-content: start;
   grid-auto-rows: auto;
 }

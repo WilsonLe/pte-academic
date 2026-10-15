@@ -323,6 +323,7 @@ export function HistoryScreen({
       </div>
       <PagedList
         items={history}
+        compact
         className="history-list"
         label="attempt pages"
         empty={

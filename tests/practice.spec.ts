@@ -1066,3 +1066,78 @@ test("section filters remain independent across routed question guides", async (
   for (const filter of [reading, listening, speaking])
     await expect(filter).toHaveAttribute("aria-pressed", "true");
 });
+
+test("populated compact history pages fit without overlapping pagination", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    const entries = Array.from({ length: 10 }, (_, index) => ({
+      id: `history-layout-${index}`,
+      label:
+        index % 2
+          ? "Multiple Choice, Multiple Answers"
+          : "Speaking & Writing practice",
+      date: "2026-10-16T01:00:00.000Z",
+      questionIds: ["read-aloud-01"],
+      answers: {},
+      finished: true,
+    }));
+    localStorage.setItem("pte-studio-history-v1", JSON.stringify(entries));
+  });
+  for (const size of [
+    { width: 390, height: 844 },
+    { width: 390, height: 900 },
+    { width: 1440, height: 900 },
+    { width: 900, height: 900 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/history");
+    await expect(page.locator(".history-row").first()).toBeVisible();
+    const seen = new Set<string>();
+    do {
+      await expect
+        .poll(() =>
+          page.locator(".history-list .page-cards").evaluate((panel) => {
+            const bounds = panel.getBoundingClientRect();
+            return Array.from(panel.children).every(
+              (card) =>
+                card.getBoundingClientRect().bottom <= bounds.bottom + 1,
+            );
+          }),
+        )
+        .toBe(true);
+      for (const id of await page
+        .locator(".history-row")
+        .evaluateAll((cards) =>
+          cards.map((card) => card.getAttribute("href")!),
+        ))
+        seen.add(id);
+      await screenFits(page);
+      const next = page.getByRole("button", {
+        name: "Next attempt pages",
+        exact: true,
+      });
+      if (!(await next.count()) || (await next.isDisabled())) break;
+      await next.click();
+    } while (true);
+    expect(seen.size).toBe(10);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/history");
+  await page.addStyleTag({ content: ".history-row { font-size: 28px; }" });
+  await expect
+    .poll(() =>
+      page.locator(".history-list .page-cards").evaluate((panel) => {
+        const bounds = panel.getBoundingClientRect();
+        return Array.from(panel.children).every(
+          (card) => card.getBoundingClientRect().bottom <= bounds.bottom + 1,
+        );
+      }),
+    )
+    .toBe(true);
+  await page.screenshot({
+    path: "docs/evidence/routing-history-populated-mobile.png",
+    animations: "disabled",
+  });
+});
