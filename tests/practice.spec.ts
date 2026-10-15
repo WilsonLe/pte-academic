@@ -1002,3 +1002,53 @@ test("simplified workspace fits desktop and mobile, with compact history and sha
     ).toBe(viewport.width);
   }
 });
+
+test("section filters remain independent across routed question guides", async ({
+  page,
+}) => {
+  await page.goto("/types");
+  const filters = page.getByRole("group", {
+    name: "Filter by section",
+    exact: true,
+  });
+  const reading = filters.getByRole("button", {
+    name: "Filter: Reading",
+    exact: true,
+  });
+  const listening = filters.getByRole("button", {
+    name: "Filter: Listening",
+    exact: true,
+  });
+  const speaking = filters.getByRole("button", {
+    name: "Filter: Speaking & Writing",
+    exact: true,
+  });
+  for (const filter of [reading, listening, speaking])
+    await expect(filter).toHaveAttribute("aria-pressed", "true");
+  await reading.click();
+  await expect(reading).toHaveAttribute("aria-pressed", "false");
+  await expect(listening).toHaveAttribute("aria-pressed", "true");
+  await expect(speaking).toHaveAttribute("aria-pressed", "true");
+  await listening.click();
+  await page.getByRole("searchbox").fill("Read Aloud");
+  await expect(page.locator(".type-row")).toHaveCount(1);
+  await expect(
+    page.getByRole("navigation", { name: "question type pages", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: /^Read Aloud/ }).click();
+  await expect(page).toHaveURL(/\/types\/read-aloud$/);
+  await page
+    .getByRole("button", { name: "All question types", exact: true })
+    .click();
+  await expect(reading).toHaveAttribute("aria-pressed", "false");
+  await expect(listening).toHaveAttribute("aria-pressed", "false");
+  await expect(speaking).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("searchbox")).toHaveValue("Read Aloud");
+  await speaking.click();
+  await expect(page.getByText("No question types found.")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Clear filters", exact: true })
+    .click();
+  for (const filter of [reading, listening, speaking])
+    await expect(filter).toHaveAttribute("aria-pressed", "true");
+});

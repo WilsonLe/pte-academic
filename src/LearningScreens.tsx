@@ -15,21 +15,28 @@ import {
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
 import { PagedList, ReadingPages } from "./Pages";
-import { guides, questions, sections, guideFor, type Guide } from "./content";
+import {
+  guides,
+  questions,
+  sections,
+  guideFor,
+  type Guide,
+  type Section,
+} from "./content";
 import articles from "../content/learn.json";
 import type { Progress } from "./progress";
 import type { Result } from "./Runner";
 import { TrackProgress } from "./GameHub";
 const icons = { speaking: Mic, reading: BookOpen, listening: Headphones };
 export function Catalogue({
-  filter,
+  selectedSections,
   search,
   progress,
   onSelect,
   index,
   onIndex,
 }: {
-  filter: string;
+  selectedSections: Section[];
   search: string;
   progress: Progress;
   onSelect: (id: string) => void;
@@ -38,12 +45,12 @@ export function Catalogue({
 }) {
   const filtered = guides.filter(
     (g) =>
-      (filter === "all" || g.section === filter) &&
+      selectedSections.includes(g.section) &&
       `${g.title} ${g.summary}`.toLowerCase().includes(search.toLowerCase()),
   );
   return (
     <PagedList
-      key={filter + search}
+      key={selectedSections.join(",") + search}
       items={filtered}
       index={index}
       onIndex={onIndex}
