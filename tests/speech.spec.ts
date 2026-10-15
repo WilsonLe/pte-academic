@@ -393,15 +393,25 @@ test("small phone speech review pages stay readable without scrolling", async ({
     "Speech",
   ]) {
     await page.getByRole("button", { name: panel, exact: true }).click();
-    await expect
-      .poll(() =>
-        page
-          .locator(".reading-copy")
-          .evaluate((e) => e.scrollHeight <= e.clientHeight),
-      )
-      .toBe(true);
+    if (panel === "Your response") {
+      await expect(
+        page.getByRole("group", {
+          name: "Your recording for question 1",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(page.locator(".reading-copy")).toHaveCount(0);
+    } else {
+      await expect
+        .poll(() =>
+          page
+            .locator(".reading-copy")
+            .evaluate((e) => e.scrollHeight <= e.clientHeight),
+        )
+        .toBe(true);
+    }
     const overflow = await page
-      .locator("main button, main audio")
+      .locator("main button, main audio, main input")
       .evaluateAll((nodes) =>
         nodes
           .filter((node) => {
