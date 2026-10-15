@@ -1,0 +1,26 @@
+[
+  {
+    "id": "speaking",
+    "title": "Speaking & Writing",
+    "duration": "76–84 minutes",
+    "minutes": 80,
+    "description": "Speak into a microphone, then write summaries and an essay.",
+    "icon": "mic"
+  },
+  {
+    "id": "reading",
+    "title": "Reading",
+    "duration": "23–30 minutes",
+    "minutes": 30,
+    "description": "Understand passages, connect ideas and choose words in context.",
+    "icon": "book"
+  },
+  {
+    "id": "listening",
+    "title": "Listening",
+    "duration": "31–39 minutes",
+    "minutes": 39,
+    "description": "Listen once, then select, type or summarize what you heard.",
+    "icon": "headphones"
+  }
+]

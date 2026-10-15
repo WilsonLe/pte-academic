@@ -1,0 +1,442 @@
+[
+  {
+    "id": "read-aloud",
+    "title": "Read Aloud",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 35,
+    "answerSeconds": 40,
+    "skills": "Speaking",
+    "summary": "Read a short passage aloud.",
+    "instructions": "Read the text silently during preparation. After the tone, read it aloud exactly as written.",
+    "tips": [
+      "Notice punctuation and group words into meaningful phrases.",
+      "Keep a comfortable pace and make the last word of each phrase clear.",
+      "Listen back against the text and mark omissions."
+    ],
+    "pitfall": "Do not restart the whole sentence after a small slip.",
+    "scoring": "Content, pronunciation and oral fluency. Focus on intelligibility, not imitating an accent.",
+    "verified": "2026-10-15",
+    "order": 1
+  },
+  {
+    "id": "repeat-sentence",
+    "title": "Repeat Sentence",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 0,
+    "answerSeconds": 15,
+    "skills": "Listening · Speaking",
+    "summary": "Listen once, then repeat the sentence.",
+    "instructions": "Listen without writing a full transcript. When recording begins, repeat the sentence in the same order.",
+    "tips": [
+      "Hold the meaning in short chunks.",
+      "Follow the stress of the original sentence.",
+      "Say the words you remember in sequence."
+    ],
+    "pitfall": "Adding your own ending changes the content.",
+    "scoring": "Correct word sequences, pronunciation and oral fluency.",
+    "verified": "2026-10-15",
+    "order": 2
+  },
+  {
+    "id": "describe-image",
+    "title": "Describe Image",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 25,
+    "answerSeconds": 40,
+    "skills": "Speaking",
+    "summary": "Turn a visual into a clear spoken description.",
+    "instructions": "Study the image for 25 seconds. After the tone, describe its main features and relationships.",
+    "tips": [
+      "Identify the topic and units first.",
+      "Select two important comparisons or changes.",
+      "End with an observation supported by the image."
+    ],
+    "pitfall": "Do not invent causes that the visual does not show.",
+    "scoring": "Relevant, specific content, pronunciation and oral fluency.",
+    "verified": "2026-10-15",
+    "order": 3
+  },
+  {
+    "id": "retell-lecture",
+    "title": "Retell Lecture",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 10,
+    "answerSeconds": 40,
+    "skills": "Listening · Speaking",
+    "summary": "Explain a short lecture in your own words.",
+    "instructions": "Listen once and take brief notes. After 10 seconds of preparation, retell the main ideas.",
+    "tips": [
+      "Write a topic, two supporting points and a conclusion.",
+      "Use links such as because and however to preserve relationships.",
+      "Practise turning notes into complete spoken sentences."
+    ],
+    "pitfall": "A list of isolated keywords is difficult to follow.",
+    "scoring": "Accuracy and coverage of ideas, pronunciation and oral fluency.",
+    "verified": "2026-10-15",
+    "order": 4
+  },
+  {
+    "id": "answer-short-question",
+    "title": "Answer Short Question",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 0,
+    "answerSeconds": 10,
+    "skills": "Listening",
+    "summary": "Give a short factual answer to an audio question.",
+    "instructions": "Listen to the question. As soon as recording opens, answer with one word or a short phrase.",
+    "tips": [
+      "Identify the category being asked for.",
+      "Use the simplest accurate term.",
+      "Speak promptly and clearly."
+    ],
+    "pitfall": "A longer explanation does not earn extra credit.",
+    "scoring": "Whether your answer correctly addresses the question; this task contributes to Listening.",
+    "verified": "2026-10-15",
+    "order": 5
+  },
+  {
+    "id": "summarize-group-discussion",
+    "title": "Summarize Group Discussion",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 10,
+    "answerSeconds": 120,
+    "skills": "Listening · Speaking",
+    "summary": "Connect the views of three speakers.",
+    "instructions": "Listen to the three-person discussion. Prepare for 10 seconds, then summarize it in your own words in up to two minutes.",
+    "tips": [
+      "Make three columns for speaker notes.",
+      "Capture agreement, disagreement and the final direction.",
+      "Introduce the topic, connect the views, and finish with the outcome."
+    ],
+    "pitfall": "Do not attribute one speaker’s opinion to someone else.",
+    "scoring": "Coverage, accurate relationships between ideas, pronunciation and oral fluency.",
+    "verified": "2026-10-15",
+    "order": 6
+  },
+  {
+    "id": "respond-to-situation",
+    "title": "Respond to a Situation",
+    "section": "speaking",
+    "kind": "speak",
+    "prepSeconds": 10,
+    "answerSeconds": 40,
+    "skills": "Speaking",
+    "summary": "Say what you would actually say in a situation.",
+    "instructions": "Read and listen to the situation. After 10 seconds, speak directly to the person described.",
+    "tips": [
+      "Identify who you are speaking to and what you need.",
+      "Use a suitable level of politeness.",
+      "Include the important practical details and a clear request."
+    ],
+    "pitfall": "Do not narrate what you would do instead of speaking to the person.",
+    "scoring": "Relevance, effective communication, pronunciation and oral fluency.",
+    "verified": "2026-10-15",
+    "order": 7
+  },
+  {
+    "id": "summarize-written-text",
+    "title": "Summarize Written Text",
+    "section": "speaking",
+    "kind": "write",
+    "prepSeconds": 0,
+    "answerSeconds": 600,
+    "skills": "Reading · Writing",
+    "summary": "Summarize a passage in one sentence.",
+    "instructions": "Read the passage and write one complete sentence of 5–75 words. You have 10 minutes.",
+    "tips": [
+      "Find the main claim and its essential support.",
+      "Join related ideas with an appropriate conjunction.",
+      "Check that the result is one grammatical sentence."
+    ],
+    "pitfall": "Multiple sentences or a list do not meet the required form.",
+    "scoring": "Content, form, grammar and vocabulary. This app provides a model, not an official score.",
+    "verified": "2026-10-15",
+    "order": 8
+  },
+  {
+    "id": "write-essay",
+    "title": "Write Essay",
+    "section": "speaking",
+    "kind": "write",
+    "prepSeconds": 0,
+    "answerSeconds": 1200,
+    "skills": "Writing",
+    "summary": "Develop an argument in 200–300 words.",
+    "instructions": "Write an essay responding to the prompt. You have 20 minutes, including planning and checking.",
+    "tips": [
+      "Take a position that answers the exact question.",
+      "Develop each main point with a reason and an example.",
+      "Reserve time to check grammar and word count."
+    ],
+    "pitfall": "Memorized generic paragraphs may fail to address the prompt.",
+    "scoring": "Content, form, organization, language range, grammar, vocabulary and spelling.",
+    "verified": "2026-10-15",
+    "order": 9
+  },
+  {
+    "id": "reading-dropdown",
+    "title": "Fill in the Blanks (Dropdown)",
+    "section": "reading",
+    "kind": "dropdown",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Reading",
+    "summary": "Choose a word for each gap in a passage.",
+    "instructions": "Select the option that fits each blank. Use grammar and the meaning of the whole passage.",
+    "tips": [
+      "Predict the part of speech before opening the options.",
+      "Check common word partnerships.",
+      "Reread the completed sentence."
+    ],
+    "pitfall": "A word can be grammatically possible but wrong in context.",
+    "scoring": "Each correct blank earns credit. This task focuses on reading comprehension and vocabulary in context.",
+    "verified": "2026-10-15",
+    "order": 10
+  },
+  {
+    "id": "reading-multiple",
+    "title": "Multiple Choice, Multiple Answers",
+    "section": "reading",
+    "kind": "multi",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Reading",
+    "summary": "Select every answer supported by a passage.",
+    "instructions": "Read the passage and select more than one correct option.",
+    "tips": [
+      "Read the question before looking for evidence.",
+      "Evaluate each option separately.",
+      "Select only claims supported by the text."
+    ],
+    "pitfall": "Incorrect selections deduct points within this item, with a minimum of zero.",
+    "scoring": "Correct choices minus incorrect choices, floored at zero.",
+    "verified": "2026-10-15",
+    "order": 11
+  },
+  {
+    "id": "reorder-paragraphs",
+    "title": "Reorder Paragraphs",
+    "section": "reading",
+    "kind": "order",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Reading",
+    "summary": "Put a scrambled passage back in order.",
+    "instructions": "Move the text boxes from the left into the correct order on the right.",
+    "tips": [
+      "Find an opening that does not depend on earlier information.",
+      "Track pronouns and repeated nouns.",
+      "Check time, cause and contrast between adjacent sentences."
+    ],
+    "pitfall": "A sentence starting with this result usually needs a preceding cause.",
+    "scoring": "Credit for correct adjacent pairs, not just a correct opening.",
+    "verified": "2026-10-15",
+    "order": 12
+  },
+  {
+    "id": "reading-blanks",
+    "title": "Fill in the Blanks (Drag and Drop)",
+    "section": "reading",
+    "kind": "bank",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Reading",
+    "summary": "Complete a passage from a shared word bank.",
+    "instructions": "Drag words into the gaps. You can also select a word and then a gap using the keyboard.",
+    "tips": [
+      "Read the whole passage first.",
+      "Use grammar to narrow the word bank.",
+      "Check meaning after every placement."
+    ],
+    "pitfall": "There are extra words; you do not need to use all of them.",
+    "scoring": "Each correctly completed gap earns credit.",
+    "verified": "2026-10-15",
+    "order": 13
+  },
+  {
+    "id": "reading-single",
+    "title": "Multiple Choice, Single Answer",
+    "section": "reading",
+    "kind": "single",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Reading",
+    "summary": "Find the one best answer to a reading question.",
+    "instructions": "Read the text and choose one answer.",
+    "tips": [
+      "Identify whether the question asks for a main idea or a detail.",
+      "Eliminate answers contradicted by the text.",
+      "Choose the option that answers the whole question."
+    ],
+    "pitfall": "A true detail may still fail to answer the question asked.",
+    "scoring": "One correct answer; no partial credit.",
+    "verified": "2026-10-15",
+    "order": 14
+  },
+  {
+    "id": "summarize-spoken-text",
+    "title": "Summarize Spoken Text",
+    "section": "listening",
+    "kind": "write",
+    "prepSeconds": 0,
+    "answerSeconds": 600,
+    "skills": "Listening · Writing",
+    "summary": "Write a concise summary of a recording.",
+    "instructions": "Listen once and write a 50–70 word summary. The 10 minutes include listening and writing.",
+    "tips": [
+      "Note the central claim and essential support.",
+      "Use your own connected sentences.",
+      "Leave time to check spelling and the 50–70 word target."
+    ],
+    "pitfall": "Do not spend all your time transcribing examples and miss the conclusion.",
+    "scoring": "Content, form, grammar, vocabulary and spelling; model-based self-review here.",
+    "verified": "2026-10-15",
+    "order": 15
+  },
+  {
+    "id": "listening-multiple",
+    "title": "Multiple Choice, Multiple Answers",
+    "section": "listening",
+    "kind": "multi",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening",
+    "summary": "Select all the claims supported by audio.",
+    "instructions": "Listen once, then choose every correct answer.",
+    "tips": [
+      "Preview the question during the countdown.",
+      "Listen for changes of opinion and qualifications.",
+      "Evaluate the meaning of each option."
+    ],
+    "pitfall": "Incorrect choices subtract credit, so avoid selecting everything.",
+    "scoring": "Correct selections minus incorrect selections, with a zero minimum.",
+    "verified": "2026-10-15",
+    "order": 16
+  },
+  {
+    "id": "listening-blanks",
+    "title": "Fill in the Blanks (Type In)",
+    "section": "listening",
+    "kind": "blanks",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening",
+    "summary": "Type the missing words in a transcript.",
+    "instructions": "Listen to the recording and type the exact missing word into each gap.",
+    "tips": [
+      "Follow the transcript while listening.",
+      "Move through gaps with Tab.",
+      "Check plurals and spelling before moving on."
+    ],
+    "pitfall": "A correct-sounding word with the wrong spelling loses credit.",
+    "scoring": "Each correctly spelled missing word earns credit.",
+    "verified": "2026-10-15",
+    "order": 17
+  },
+  {
+    "id": "highlight-summary",
+    "title": "Highlight Correct Summary",
+    "section": "listening",
+    "kind": "single",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening · Reading",
+    "summary": "Choose the summary that captures the recording.",
+    "instructions": "Listen once and select the paragraph that best summarizes the main ideas.",
+    "tips": [
+      "Note the topic and the speaker’s conclusion.",
+      "Check that the summary preserves cause and contrast.",
+      "Reject options that add unsupported conclusions."
+    ],
+    "pitfall": "An option repeating several words can still reverse the meaning.",
+    "scoring": "One correct summary; no partial credit.",
+    "verified": "2026-10-15",
+    "order": 18
+  },
+  {
+    "id": "listening-single",
+    "title": "Multiple Choice, Single Answer",
+    "section": "listening",
+    "kind": "single",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening",
+    "summary": "Choose one answer after listening.",
+    "instructions": "Listen once and select the best answer to the question.",
+    "tips": [
+      "Preview the question during the countdown.",
+      "Listen for the requested detail or purpose.",
+      "Wait for the full recording before settling on an option."
+    ],
+    "pitfall": "The speaker may mention an option only to reject it.",
+    "scoring": "One correct choice; no partial credit.",
+    "verified": "2026-10-15",
+    "order": 19
+  },
+  {
+    "id": "select-missing-word",
+    "title": "Select Missing Word",
+    "section": "listening",
+    "kind": "single",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening",
+    "summary": "Predict the end of an audio passage.",
+    "instructions": "Listen to the recording, which ends before the final word or phrase. Select the missing ending.",
+    "tips": [
+      "Follow the topic and direction of the argument.",
+      "Use meaning as well as grammar.",
+      "Choose the ending that completes the speaker’s thought."
+    ],
+    "pitfall": "Picking an option just because it was mentioned earlier can mislead you.",
+    "scoring": "One correct ending; no partial credit.",
+    "verified": "2026-10-15",
+    "order": 20
+  },
+  {
+    "id": "highlight-incorrect",
+    "title": "Highlight Incorrect Words",
+    "section": "listening",
+    "kind": "highlight",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening · Reading",
+    "summary": "Find differences between speech and a transcript.",
+    "instructions": "Listen once while reading. Select words in the text that differ from the audio.",
+    "tips": [
+      "Follow the text at the speaker’s pace.",
+      "Click only when you hear a mismatch.",
+      "Use surrounding words to keep your place."
+    ],
+    "pitfall": "Extra selections lose credit; do not highlight unfamiliar words at random.",
+    "scoring": "Correctly identified differences minus incorrect selections, floored at zero.",
+    "verified": "2026-10-15",
+    "order": 21
+  },
+  {
+    "id": "write-dictation",
+    "title": "Write from Dictation",
+    "section": "listening",
+    "kind": "dictation",
+    "prepSeconds": 0,
+    "answerSeconds": 0,
+    "skills": "Listening · Writing",
+    "summary": "Type a sentence exactly as you hear it.",
+    "instructions": "Listen once and type the sentence. Check your spelling before moving on.",
+    "tips": [
+      "Remember short meaningful phrases.",
+      "Reconstruct the sentence in the correct order.",
+      "Check articles, endings and plural nouns."
+    ],
+    "pitfall": "Do not omit small grammatical words such as the or a.",
+    "scoring": "Correctly spelled words receive credit. Local feedback checks the full sentence; it is not an official scoring engine.",
+    "verified": "2026-10-15",
+    "order": 22
+  }
+]

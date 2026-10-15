@@ -1,0 +1,118 @@
+[
+  {
+    "id": "what-is-pte",
+    "title": "Start with the basics",
+    "tag": "01 · UNDERSTAND",
+    "intro": "PTE stands for Pearson Test of English. PTE Academic is a computer-based English test used for study, professional registration and some migration purposes. You answer by speaking into a microphone, typing and selecting answers.",
+    "blocks": [
+      {
+        "title": "Four skills. Three test sections.",
+        "text": "The test assesses speaking, writing, reading and listening. Speaking & Writing come together in the first section, followed by Reading and then Listening. Some questions combine skills: for example, listening to a sentence and typing it uses both listening and writing."
+      },
+      {
+        "title": "What does a question type mean?",
+        "text": "A question type is a repeatable task with its own instructions. Read Aloud asks you to speak a written passage. Write from Dictation asks you to type a sentence you hear. There are 22 types to learn; understanding their rules makes practice much less overwhelming."
+      },
+      {
+        "title": "Which PTE test am I preparing for?",
+        "text": "This site covers PTE Academic. Other tests, including PTE Core and PTE Home, serve different purposes and have different formats. Confirm the exact test and required scores with the organization receiving your results before booking."
+      }
+    ]
+  },
+  {
+    "id": "test-day",
+    "title": "Know what happens on test day",
+    "tag": "02 · GET FAMILIAR",
+    "intro": "The exam is taken on a computer at a test centre. You use a headset, microphone and keyboard. Expect other candidates to be speaking in the same room, so practise staying focused with some background speech.",
+    "blocks": [
+      {
+        "title": "Before the scored questions",
+        "text": "Check the identification and arrival requirements in your booking. At your workstation, check the headphones and microphone. There is an unscored personal introduction. The practice runner here starts with scored question types; it does not recreate check-in or the personal introduction."
+      },
+      {
+        "title": "Move forward with care",
+        "text": "Once you select Next, you cannot go back to the previous question. Most audio plays once. In speaking tasks, the recording opens automatically after the preparation period. Watch the status box and begin when it says Recording."
+      },
+      {
+        "title": "Pace by section and task",
+        "text": "Speaking & Writing is approximately 76–84 minutes, Reading 23–30 minutes, and Listening 31–39 minutes. Many reading and listening items share section time, while summaries and the essay have individual limits. Do not assume you have an equal amount of time for every item."
+      },
+      {
+        "title": "Practise the small physical things",
+        "text": "Get comfortable typing, selecting text, using headphones and taking brief paper notes. Set the microphone at a consistent distance. In several short speaking tasks, about three seconds of silence can end a response. Here a local sound-level approximation applies that cutoff; it can react differently to background noise."
+      }
+    ]
+  },
+  {
+    "id": "scores",
+    "title": "Understand scores and feedback",
+    "tag": "03 · MAKE SENSE OF RESULTS",
+    "intro": "PTE Academic reports an overall score and four skill scores on a 10–90 scale. The overall score is not simply the average of the four skill scores. Required scores depend on the organization and purpose.",
+    "blocks": [
+      {
+        "title": "Accuracy is only part of the picture",
+        "text": "Selected-answer questions have answer keys. Speaking and writing also involve qualities such as relevant content, understandable pronunciation, fluency, grammar and organization. Some tasks can earn partial credit; certain multiple-answer and word-highlighting tasks also deduct credit for incorrect selections within the item, with a minimum of zero."
+      },
+      {
+        "title": "What this site can tell you",
+        "text": "This independent app compares selected answers with an original answer key, checks word counts, and lets you replay your recorded responses. After a speaking task, you can transcribe your recording on this device. Read Aloud and Repeat Sentence show word match, and short answers compare with the key. Open speaking responses show a transcript and pace for self-review; extended writing also needs self-review. Transcription may mishear speech and does not assess pronunciation or fluency. The app cannot assess your English proficiency or produce a validated PTE score. A correct-answer percentage is not a prediction of a 10–90 result."
+      },
+      {
+        "title": "Make feedback useful",
+        "text": "After a drill, identify one specific issue: a missing plural, a weak connection between ideas, or a pause that interrupts meaning. Practise that issue again. For a spoken answer, listen without looking at the script first, then compare against the key points. A model answer shows one valid approach, not the only acceptable wording."
+      },
+      {
+        "title": "What do XP and levels mean?",
+        "text": "XP means experience points. Answering a different question earns 10 XP once per day; answering three earns a 30 XP daily bonus. Every 150 XP opens the next practice level. Streaks count consecutive practice days, and badges mark small milestones. These reward showing up and trying tasks, not language proficiency. You can get a question wrong and still earn effort XP. None of these points predicts a test score."
+      }
+    ]
+  },
+  {
+    "id": "first-week",
+    "title": "Your first week of practice",
+    "tag": "04 · BUILD A ROUTINE",
+    "intro": "Start by learning what the tasks ask you to do. You do not need to begin with a full test. Short, focused sessions make it easier to notice why an answer works.",
+    "blocks": [
+      {
+        "title": "Days 1–2: learn the controls",
+        "text": "Read this guide, then try one Read Aloud, one reading question and one dictation. Read the instructions before starting. Check the word counter, the recording status and the one-way Next button. Review each answer carefully."
+      },
+      {
+        "title": "Days 3–4: build accuracy",
+        "text": "Choose two unfamiliar question types. Read their strategies, practise a few items and write down one improvement. Use your own words for summaries. For vocabulary gaps, explain why each correct word fits the sentence instead of memorizing the answer alone."
+      },
+      {
+        "title": "Days 5–6: connect a section",
+        "text": "Try a complete section with the timer running. Notice whether you lose time on particular tasks. Review the missed questions and your spoken recordings. Repeating the same items builds familiarity, but it does not prove improvement on unseen material."
+      },
+      {
+        "title": "Day 7: try the full sequence",
+        "text": "When the controls feel familiar, attempt the full mock in a quiet space. Keep the three sections in order and avoid pausing. This starter bank has one 65-question form, shared with drills and section practice, so a later attempt may contain questions you remember."
+      }
+    ]
+  },
+  {
+    "id": "about",
+    "title": "Your data and this practice app",
+    "tag": "A FEW USEFUL DETAILS",
+    "intro": "PTE Studio is an independent practice project with original content. It is not affiliated with the test provider. It uses no accounts, advertising, tracking or cloud AI services. Optional speech recognition runs on your device.",
+    "blocks": [
+      {
+        "title": "What stays on your device",
+        "text": "Completed attempts are saved in this browser when browser storage is available. Responses, recordings and optional transcripts are saved in IndexedDB. A small attempt index is stored in localStorage. Nothing is uploaded. Anyone using the same browser profile can see the saved history; clear it from My practice whenever you want. Transcription first downloads public model files, then runs locally. Model files remain in browser Cache Storage; clear site storage in browser settings to remove them. XP, streaks and badges are also saved locally. Clearing practice history resets these too; older attempts may be pruned without removing earned progress."
+      },
+      {
+        "title": "Using the app offline",
+        "text": "Open the app online once and wait for Offline ready before disconnecting. That status means the app and bundled media have been cached. Browser storage can still be cleared or evicted. Installation requires a supported browser and HTTPS, or localhost for development. On iPhone or iPad, use the browser share menu and Add to Home Screen."
+      },
+      {
+        "title": "What is simulated",
+        "text": "The runner provides task-specific layouts, preparation periods, single-play audio, recording, writing tools, section timing and forward-only navigation. Exact visual parity with live test software is unverified. The original listening audio is synthetic and sometimes shorter than a live prompt. Group discussion uses a narrator identifying three speakers, rather than three distinct voices."
+      },
+      {
+        "title": "How content grows",
+        "text": "Questions, explanations and test forms live in Git. Authors and agents follow repository instructions, validate each item, and submit changes for review. The app serves the resulting static build. It does not generate questions while you practise."
+      }
+    ]
+  }
+]

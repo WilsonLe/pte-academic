@@ -1,0 +1,10 @@
+{
+  "audioProvider": "OpenRouter",
+  "defaultModel": "mistralai/voxtral-mini-tts-2603",
+  "defaultVoice": "en_paul_neutral",
+  "spendingLimitUsd": 10,
+  "budgetScope": "total-project-key-usage",
+  "requiresOperatorApprovalToIncrease": true,
+  "credentialsPath": ".cli/openrouter/token",
+  "ledgerPath": ".cli/openrouter/spending.json"
+}
