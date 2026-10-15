@@ -9,11 +9,27 @@ from comparison import (
     ComparisonHead,
     contrastive_loss,
     distribution_distances,
+    reference_stream,
 )
 import torch
 
 
 class ComparisonContracts(unittest.TestCase):
+    def test_final_manifest_is_consumed_after_generator_releases_lock(self):
+        from types import SimpleNamespace
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        from unittest.mock import patch
+
+        first, last = {"takeId": "first"}, {"takeId": "last"}
+        experiment = SimpleNamespace(manifest=lambda: {"takes": [first, last]})
+        with TemporaryDirectory() as folder, patch("comparison.ROOT", Path(folder)):
+            self.assertEqual(
+                list(reference_stream([first], True, 2, experiment)), [first, last]
+            )
+            with self.assertRaisesRegex(RuntimeError, "no longer live"):
+                list(reference_stream([first], True, 3, experiment))
+
     def test_phone_intervals_include_short_gaps_and_exclude_long_pauses(self):
         self.assertEqual(
             phone_intervals([(2, 3, 0.9), (6, 7, 0.9)], 10), [(0, 4), (4, 9)]

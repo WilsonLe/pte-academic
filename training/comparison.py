@@ -17,6 +17,7 @@ from experiment import Experiment
 import re
 import time
 from threading import Lock
+from weakref import ref
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
@@ -257,17 +258,19 @@ class Acoustic:
         self.inverse = {v: k for k, v in self.vocab.items()}
         self._captured = None
         if kind == "phones":
-            self.model.wav2vec2.encoder.layers[6].register_forward_hook(
-                self._capture_layer
-            )
+            owner = ref(self)
+
+            def capture_layer(module, inputs, output):
+                instance = owner()
+                if instance is not None:
+                    instance._captured = output[0]
+
+            self.model.wav2vec2.encoder.layers[6].register_forward_hook(capture_layer)
         self.tokenizer = (
             Wav2Vec2CTCTokenizer.from_pretrained(path, local_files_only=True)
             if kind == "words"
             else None
         )
-
-    def _capture_layer(self, module, inputs, output):
-        self._captured = output[0]
 
     def run(self, audio):
         values = self.extractor(
@@ -468,11 +471,19 @@ def reference_stream(initial, follow, expected, experiment=None):
                 yield take
         if not follow or len(seen) >= expected:
             return
+        pending = experiment.manifest()["takes"]
+        if any(t["takeId"] not in seen for t in pending):
+            continue
         lock = ROOT / ".cli/openrouter/generation.lock"
         try:
             pid = int(lock.read_text())
             os.kill(pid, 0)
         except (FileNotFoundError, ProcessLookupError, ValueError):
+            # The final manifest is written before the generator releases its lock.
+            # Refresh once more to cover completion between the read and lock probe.
+            pending = experiment.manifest()["takes"]
+            if any(t["takeId"] not in seen for t in pending):
+                continue
             raise RuntimeError(
                 "Reference generation is no longer live and corpus is incomplete."
             )
