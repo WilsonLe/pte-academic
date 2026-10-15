@@ -1,3 +1,4 @@
+import { AudioPlayer } from "../components/AudioPlayer";
 import { useEffect, useRef, useState } from "react";
 import {
   AudioLines,
@@ -146,10 +147,9 @@ export function SpeechReview({
           </p>
         )}
       </div>
-      <audio
-        controls
-        src={answer.recording}
-        aria-label={`Your recording for question ${questionNumber}`}
+      <AudioPlayer
+        src={answer.recording!}
+        label={`Your recording for question ${questionNumber}`}
       />
       {!transcription && !progress && (
         <p className="mt-2 text-xs text-muted-foreground">

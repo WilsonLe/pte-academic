@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { useState } from "react";
 import {
   BookOpen,
@@ -77,11 +78,18 @@ export function Catalogue({
 export function SectionSelect({
   progress,
   onStart,
+  sectionId,
+  onSelect,
 }: {
+  sectionId?: string;
+  onSelect: (id: string) => void;
   progress: Progress;
   onStart: (id: string) => void;
 }) {
-  const [selected, setSelected] = useState(0);
+  const selected = Math.max(
+    0,
+    sections.findIndex((s) => s.id === sectionId),
+  );
   const [details, setDetails] = useState(false);
   const section = sections[selected],
     Icon = icons[section.id];
@@ -97,7 +105,7 @@ export function SectionSelect({
               aria-label={s.title}
               aria-pressed={i === selected}
               onClick={() => {
-                setSelected(i);
+                onSelect(s.id);
                 setDetails(false);
               }}
             >
@@ -146,20 +154,27 @@ export function SectionSelect({
           onClick={() => onStart(section.id)}
         >
           <Play />
-          Play section
+          Start section
         </Button>
       </section>
     </div>
   );
 }
-export function LearnScreen({ onPractice }: { onPractice: () => void }) {
-  const [topic, setTopic] = useState<string | null>(null);
+export function LearnScreen({
+  onPractice,
+  topic,
+  onTopic,
+}: {
+  onPractice: () => void;
+  topic?: string;
+  onTopic: (id?: string) => void;
+}) {
   const [block, setBlock] = useState(-1);
   const article = articles.find((a) => a.id === topic);
   if (!article)
     return (
       <div className="screen-stack">
-        <h2 className="screen-title">Learn the game.</h2>
+        <h2 className="screen-title">Learn about PTE.</h2>
         <PagedList
           items={articles}
           label="learning topics"
@@ -168,7 +183,7 @@ export function LearnScreen({ onPractice }: { onPractice: () => void }) {
               className="type-row"
               key={a.id}
               onClick={() => {
-                setTopic(a.id);
+                onTopic(a.id);
                 setBlock(-1);
               }}
             >
@@ -186,7 +201,7 @@ export function LearnScreen({ onPractice }: { onPractice: () => void }) {
         <Button
           variant="outline"
           aria-label="All learning topics"
-          onClick={() => setTopic(null)}
+          onClick={() => onTopic()}
         >
           Back
         </Button>
@@ -277,19 +292,17 @@ export function GuideScreen({
 }
 export function HistoryScreen({
   history,
-  onOpen,
   onClear,
   onPractice,
 }: {
   history: Result[];
-  onOpen: (id: string) => void;
   onClear: () => void;
   onPractice: () => void;
 }) {
   return (
     <div className="screen-stack">
       <div className="screen-toolbar">
-        <h2 className="screen-title">Your rounds.</h2>
+        <h2 className="screen-title">Your sessions.</h2>
         {!!history.length && (
           <Button
             variant="outline"
@@ -303,6 +316,7 @@ export function HistoryScreen({
       </div>
       <PagedList
         items={history}
+        className="history-list"
         label="attempt pages"
         empty={
           <div className="empty-state">
@@ -315,10 +329,10 @@ export function HistoryScreen({
           </div>
         }
         render={(r) => (
-          <button
+          <Link
             key={r.id}
             className="type-row history-row"
-            onClick={() => onOpen(r.id)}
+            to={`/history/${encodeURIComponent(r.id)}`}
           >
             <History />
             <span className="flex-1 text-left">
@@ -332,7 +346,7 @@ export function HistoryScreen({
             </span>
             <Badge variant="secondary">{r.questionIds.length}</Badge>
             <ChevronRight />
-          </button>
+          </Link>
         )}
       />
     </div>

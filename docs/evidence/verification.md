@@ -108,3 +108,21 @@ Focused candidate verification: production content validation/TypeScript/build; 
 During development, the first reading-page fit used an estimate that briefly overflowed at a small size; it was replaced with actual text measurement and font-ready/resize repagination. An inventory assertion originally counted distinct titles (20); it now distinguishes each section/type (22). Listening review exposed the written prompt without the separate correct audio transcript; both are now available on prompt pages. These failures were fixed without reducing visibility or coverage. Detailed commands/results are in the PR follow-up.
 
 The original single independent review remains bound to 2e9b68d / 95d8362. Later operator-requested scope is focused-tested, not independently re-reviewed. No full-suite, merge, hosted release or pixel-perfect live-test claim.
+
+## URL routing and simplified practice workspace — 16 October 2026
+
+Tracks #6. Removed the hero question chips and promotional text, header offline/install/info controls, beginner footer, sidebar privacy tooltip, redundant review summary and single-page pagers. Practice/session wording replaces play/round vocabulary while retaining the requested Start daily quest action. History uses compact linked cards. React Router owns screen destinations, including persisted `/history/:sessionID`, section/topic/progress screens and route-scoped preflight/runner lifecycle. Old top-level hash links migrate on entry and during same-document navigation. Nested asset paths use the configured build basename; static hosts need an index fallback for online deep links.
+
+Shared AudioPlayer and AudioStartButton use existing shadcn Button primitives and practice surface/control tokens. Preflight, microphone samples, recorded responses and speech review share playback/seek/time/error/retry controls; unmount stops media. Runner retains single-play authority. No content, storage schema, progress rules, speech model, provider budget or runtime network boundary changes.
+
+Current-source focused evidence:
+
+- `npm run build`: content validation, TypeScript and static/service-worker generation pass. Existing large-chunk advisory remains; no performance benchmark is claimed.
+- Twelve selected practice browser journeys pass across scoped runs: responsive six-screen/catalogue/guidance navigation; answer persistence; single-play listening; native microphone/recording review and shared speech playback; offline app/media; safe explicit worker updates; daily progress/reload/reset; empty/partial practice; direct history and other screen routes; runner refresh/back/forward recovery; shared playback/keyboard seek/failure/retry/navigation cleanup; simplified desktop/mobile layouts.
+- `PTE_TEST_SUBPATH=1 npx playwright test tests/subpath.spec.ts --reporter=line`: passes, including offline nested `/pte-academic/types` reload and HTTP 206 media ranges.
+- `npm run test:speech`: five focused speech/scoring/storage contracts pass. Fresh model inference is not rerun for this presentation-only speech-panel change.
+- Prettier checks and `git diff --check` pass. Full-suite coverage is deferred until merge is requested.
+
+The first runs exposed test helpers reading the previous screen before a router transition committed; helpers now wait for the visible preflight/runner or detached playback state. A keyboard seek of one 0.1-second step correctly reaches 0.1 seconds. The offline legacy-hash journey also found the missing same-document hash migration, which was fixed without changing service-worker caching.
+
+Synthetic-browser screenshots: `overview-desktop.png`, `overview-mobile.png`, `routing-history-desktop.png`, `routing-review-desktop.png`, `routing-review-mobile.png`. Manual in-app preview confirmed an existing saved session's URL/reload and shared playback, without modifying that saved response. This is local/draft-PR evidence, not a merge or deployment.

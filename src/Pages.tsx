@@ -19,6 +19,7 @@ export function Pager({
   onChange: (index: number) => void;
   label?: string;
 }) {
+  if (count <= 1) return null;
   return (
     <nav className="page-controls" aria-label={label}>
       <Button
@@ -54,7 +55,9 @@ export function PagedList<T>({
   empty,
   index,
   onIndex,
+  className = "",
 }: {
+  className?: string;
   items: T[];
   render: (item: T) => ReactNode;
   label: string;
@@ -83,7 +86,7 @@ export function PagedList<T>({
   const count = Math.max(1, Math.ceil(items.length / size));
   const current = Math.min(index ?? page, count - 1);
   return (
-    <div className="paged-list">
+    <div className={`paged-list ${className}`}>
       <div ref={panel} className="page-cards">
         {items.length
           ? items.slice(current * size, (current + 1) * size).map(render)
