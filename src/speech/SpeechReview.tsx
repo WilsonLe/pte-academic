@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { AudioLines, LoaderCircle, X, Info, RotateCw } from "lucide-react";
+import {
+  AudioLines,
+  LoaderCircle,
+  X,
+  Info,
+  RotateCw,
+  ListChecks,
+} from "lucide-react";
 import type { Answer, Question } from "../content";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "../components/ui/collapsible";
+import { ReadingPages } from "../Pages";
 import { transcribeRecording } from "./client";
 import { speechFeedback, type Transcription } from "./scoring";
 import { saveTranscription } from "../storage";
@@ -16,13 +19,16 @@ export function SpeechReview({
   question,
   answer,
   attemptId,
+  questionNumber,
   onChange,
 }: {
   question: Question;
   answer: Answer;
   attemptId: string;
+  questionNumber: number;
   onChange: (value: Transcription) => void;
 }) {
+  const [panel, setPanel] = useState("transcript");
   const [transcription, setTranscription] = useState(answer.transcription);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
@@ -51,6 +57,7 @@ export function SpeechReview({
       const value = await operation.promise;
       if (!alive.current || job.current !== operation) return;
       setTranscription(value);
+      setPanel("transcript");
       try {
         const saved = await saveTranscription(attemptId, question.id, value);
         if (!alive.current || job.current !== operation) return;
@@ -88,7 +95,7 @@ export function SpeechReview({
   return (
     <section
       aria-label="On-device speech feedback"
-      className="mt-5 border-t pt-4"
+      className="local-speech-screen"
     >
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -139,88 +146,92 @@ export function SpeechReview({
           </p>
         )}
       </div>
+      <audio
+        controls
+        src={answer.recording}
+        aria-label={`Your recording for question ${questionNumber}`}
+      />
       {!transcription && !progress && (
         <p className="mt-2 text-xs text-muted-foreground">
           First use downloads ~60 MB. Audio stays on this device.
         </p>
       )}
-      <Collapsible className="more mt-1">
-        <CollapsibleTrigger className="flex min-h-10 items-center gap-2 text-xs text-muted-foreground">
-          <Info className="size-3.5" />
-          How local feedback works
-        </CollapsibleTrigger>
-        <CollapsibleContent className="disclosure-panel">
-          <div className="space-y-2 pb-3 text-xs leading-6 text-muted-foreground">
-            <p>
-              First use downloads about 60 MB of speech files, then caches them
-              for offline use. Your recording stays on this device. Transcribe
-              only when you are ready to download; slower devices may take
-              longer.
-            </p>
-            <p>
-              Word match compares recognized words with the reference, counting
-              missing, changed and extra words. Short answers ignore case,
-              punctuation and a leading article. Other speaking tasks show a
-              transcript and pace for self-review.
-            </p>
-            <p>
-              The recognizer can mishear words or invent speech from noise.
-              Empty or silent responses get no score. This does not assess
-              pronunciation, accent, fluency or English proficiency, and is not
-              a PTE score. Pace includes pauses and has no pass/fail target.
-            </p>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      <div className="speech-tabs">
+        <Button
+          aria-label="How local feedback works"
+          variant={panel === "help" ? "secondary" : "ghost"}
+          onClick={() => setPanel(panel === "help" ? "transcript" : "help")}
+        >
+          <Info />
+          <span>How local feedback works</span>
+        </Button>
+        {f?.comparison && (
+          <Button
+            aria-label={`Word comparison · ${f.comparison.errors} word errors`}
+            variant={panel === "comparison" ? "secondary" : "ghost"}
+            onClick={() =>
+              setPanel(panel === "comparison" ? "transcript" : "comparison")
+            }
+          >
+            <ListChecks />
+            <span>Word comparison · {f.comparison.errors} word errors</span>
+          </Button>
+        )}
+      </div>
       {error && (
-        <p role="alert" className="my-2 text-xs text-destructive">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}
-      {transcription && (
-        <div className="mt-2 space-y-3" aria-label="Local transcript result">
-          <p className="whitespace-pre-wrap text-sm leading-7">
-            {transcription.text ||
-              "No speech recognized. Replay your recording and try again."}
-          </p>
+      {panel === "help" ? (
+        <ReadingPages
+          label="speech help pages"
+          texts={[
+            "First use downloads about 60 MB of speech files, then caches them for offline use. Your recording stays on this device. Transcribe only when you are ready to download; slower devices may take longer.",
+            "Word match compares recognized words with the reference, counting missing, changed and extra words. Short answers ignore case, punctuation and a leading article. Other speaking tasks show a transcript and pace for self-review.",
+            "The recognizer can mishear words or invent speech from noise. Empty or silent responses get no score. This does not assess pronunciation, accent, fluency or English proficiency, and is not a PTE score. Pace includes pauses and has no pass/fail target.",
+          ]}
+        />
+      ) : panel === "comparison" && f?.comparison ? (
+        <div className="speech-reading" aria-label="Compared words">
+          <ReadingPages
+            label="word comparison pages"
+            texts={[
+              f.comparison.alignment
+                .map((word) =>
+                  word.kind === "match"
+                    ? word.heard
+                    : word.kind === "missing"
+                      ? `Missing: ${word.expected}`
+                      : word.kind === "extra"
+                        ? `Extra: ${word.heard}`
+                        : `${word.heard} → ${word.expected}`,
+                )
+                .join(" · "),
+            ]}
+          />
+        </div>
+      ) : transcription ? (
+        <div className="speech-reading" aria-label="Local transcript result">
           {f && f.words > 0 && (
-            <p className="text-xs text-muted-foreground">
+            <p className="speech-stats">
               {f.words} recognized words · {Math.round(transcription.seconds)}s
               recording · {f.wordsPerMinute} words/min
             </p>
           )}
-          {f?.comparison && (
-            <Collapsible className="more">
-              <CollapsibleTrigger className="min-h-10 text-xs text-muted-foreground">
-                Word comparison · {f.comparison.errors} word errors
-              </CollapsibleTrigger>
-              <CollapsibleContent className="disclosure-panel">
-                <ol
-                  className="flex flex-wrap gap-x-2 gap-y-1 pb-3 text-xs leading-7"
-                  aria-label="Compared words"
-                >
-                  {f.comparison.alignment.map((word, index) => (
-                    <li
-                      key={index}
-                      className={
-                        word.kind === "match"
-                          ? "text-muted-foreground"
-                          : "rounded bg-muted px-1 font-medium"
-                      }
-                    >
-                      {word.kind === "match"
-                        ? word.heard
-                        : word.kind === "missing"
-                          ? `Missing: ${word.expected}`
-                          : word.kind === "extra"
-                            ? `Extra: ${word.heard}`
-                            : `${word.heard} → ${word.expected}`}
-                    </li>
-                  ))}
-                </ol>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
+          <ReadingPages
+            key={transcription.text}
+            label="transcript pages"
+            texts={[
+              transcription.text ||
+                "No speech recognized. Replay your recording and try again.",
+            ]}
+          />
+        </div>
+      ) : (
+        <div className="speech-idle">
+          <AudioLines />
+          <p>Listen back, then transcribe when you’re ready.</p>
         </div>
       )}
     </section>

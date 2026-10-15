@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 async function drill(page: Page, name: string) {
   await page.goto("/#types");
+  await page.getByRole("searchbox").fill(name.replaceAll("\\", ""));
   await page
     .getByRole("button", { name: new RegExp(`^${name}`) })
     .first()
@@ -25,95 +26,144 @@ async function end(page: Page) {
     page.getByRole("heading", { name: "Review", exact: true }),
   ).toBeVisible();
 }
-test("beginner navigation, all guides, mobile layout and original branding", async ({
+async function screenFits(page: Page) {
+  expect(
+    await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight,
+    })),
+  ).toEqual(
+    await page.evaluate(() => ({ width: innerWidth, height: innerHeight })),
+  );
+  const bad = await page
+    .locator("main button, main a, main input, main select")
+    .evaluateAll((nodes) =>
+      nodes
+        .filter((node) => {
+          const r = node.getBoundingClientRect(),
+            parent = document.querySelector("main")!.getBoundingClientRect();
+          return (
+            r.width > 0 &&
+            r.height > 0 &&
+            (r.top < parent.top - 1 ||
+              r.bottom > parent.bottom + 1 ||
+              r.left < parent.left - 1 ||
+              r.right > parent.right + 1)
+          );
+        })
+        .map((n) => n.textContent || n.getAttribute("aria-label")),
+    );
+  expect(bad).toEqual([]);
+}
+test("screen-sized game navigation, all question pages and beginner guidance", async ({
   page,
 }) => {
-  await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "Practice", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Main navigation", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Mobile navigation" }),
-  ).toBeHidden();
-  await expect(page.getByText(/PTE Academic tests speaking/)).toBeHidden();
-  await settleView(page);
-  await page.screenshot({
-    path: "docs/evidence/overview-desktop.png",
-    fullPage: true,
-    animations: "disabled",
-  });
-  await page.getByRole("button", { name: "Install app" }).hover();
-  await expect(page.locator('[data-slot="tooltip-content"]')).toContainText(
-    "Install app",
-  );
-  await page.getByRole("button", { name: "Install app" }).click();
-  await expect(
-    page.getByText(/Use your browser’s Install option/),
-  ).toBeVisible();
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "New to PTE Academic?" }).click();
-  await page.getByRole("button", { name: "Learn the basics" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Start with the basics" }),
-  ).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 1024, height: 768 },
+    { width: 390, height: 844 },
+    { width: 360, height: 640 },
+  ]) {
+    await page.setViewportSize(size);
+    for (const route of [
+      "home",
+      "types",
+      "sections",
+      "mocks",
+      "guide",
+      "history",
+    ]) {
+      await page.goto("/#" + route);
+      await expect(page.locator("main")).toBeVisible();
+      await screenFits(page);
+    }
+    await page.goto("/#home");
+    await page.getByRole("button", { name: "View level and streak" }).click();
+    await expect(
+      page.getByRole("region", { name: "Practice level" }),
+    ).toBeVisible();
+    await screenFits(page);
+    await page.getByRole("button", { name: "View achievements" }).click();
+    await expect(
+      page.getByRole("button", {
+        name: "First spark, locked. View achievement",
+      }),
+    ).toBeVisible();
+    await screenFits(page);
+    await page.getByRole("button", { name: "Play screen" }).click();
+    await page.getByRole("button", { name: "New to PTE Academic?" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByText(/PTE Academic tests speaking/)).toBeVisible();
+    await page.getByRole("button", { name: "Learn the basics" }).click();
+    await page.getByRole("button", { name: "Start with the basics" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Start with the basics" }),
+    ).toBeVisible();
+    await expect(page.locator(".reading-copy")).toBeVisible();
+    await screenFits(page);
+    await expect
+      .poll(() =>
+        page
+          .locator(".reading-copy")
+          .evaluate((e) => e.scrollHeight <= e.clientHeight),
+      )
+      .toBe(true);
+  }
   await page.goto("/#types");
-  await expect(page.locator(".type-row")).toHaveCount(22);
+  const titles = new Set<string>();
+  do {
+    for (const text of await page
+      .locator(".type-row")
+      .evaluateAll((nodes) =>
+        nodes.map(
+          (node) =>
+            node.getAttribute("data-track") +
+            ":" +
+            node.querySelector("span.flex-1")?.textContent,
+        ),
+      ))
+      titles.add(text);
+    const next = page.getByRole("button", { name: "Next question type pages" });
+    if (await next.isDisabled()) break;
+    await next.click();
+  } while (true);
+  expect(titles.size).toBe(22);
+  const lastType = await page
+    .locator(".type-row > span.flex-1")
+    .first()
+    .textContent();
+  await page.locator(".type-row").first().click();
+  await page.getByRole("button", { name: "All question types" }).click();
+  await expect(page.locator(".type-row > span.flex-1").first()).toHaveText(
+    lastType!,
+  );
   await page.getByRole("searchbox").fill("nonsense");
-  await expect(page.getByText("No question types found")).toBeVisible();
+  await expect(page.getByText("No question types found.")).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
   await page.getByRole("button", { name: /^Read Aloud/ }).click();
-  await expect(page.getByText(/Read the passage aloud clearly/)).toBeHidden();
+  await expect(page.getByText(/Read the text silently/)).toBeHidden();
   await page.getByRole("button", { name: "Instructions", exact: true }).click();
-  await expect(page.locator('[data-slot="accordion-content"]')).toBeVisible();
-  expect(
-    await page
-      .locator('[data-slot="accordion-content"]')
-      .evaluate((el) => getComputedStyle(el).animationName),
-  ).toBe("accordion-down");
+  await expect(page.getByText(/Read the text silently/)).toBeVisible();
   await page
     .getByRole("button", { name: "Strategy & tips", exact: true })
     .click();
-  await expect(page.locator('[data-slot="accordion-content"]')).toHaveCount(2);
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "Practice", exact: true }),
-  ).toBeVisible();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await expect(
-    page.getByRole("navigation", { name: "Main navigation", exact: true }),
-  ).toBeHidden();
-  const mobile = page.getByRole("navigation", { name: "Mobile navigation" });
-  await expect(mobile).toBeVisible();
-  await expect(mobile.getByRole("link")).toHaveCount(6);
-  await mobile.getByRole("link", { name: "Section practice" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Sections", exact: true }),
-  ).toBeVisible();
-  await mobile.getByRole("link", { name: "Practice", exact: true }).click();
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.getByRole("button", { name: "New to PTE Academic?" }).click();
-  await expect(page.getByText(/PTE Academic tests speaking/)).toBeVisible();
-  expect(
-    await page
-      .locator(".page-enter")
-      .evaluate((el) => getComputedStyle(el).animationName),
-  ).toBe("none");
-  await page.getByRole("button", { name: "New to PTE Academic?" }).click();
-  await settleView(page);
-  await page.screenshot({
-    path: "docs/evidence/overview-mobile.png",
-    fullPage: false,
-    animations: "disabled",
-  });
+  await screenFits(page);
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/#home");
+    await settleView(page);
+    await page.screenshot({
+      path:
+        "docs/evidence/overview-" +
+        (size.width > 767 ? "desktop" : "mobile") +
+        ".png",
+      animations: "disabled",
+    });
+  }
 });
 test("single answer submits once and persisted review survives reload", async ({
   page,
@@ -135,17 +185,15 @@ test("single answer submits once and persisted review survives reload", async ({
     })
     .check();
   await page.getByRole("button", { name: "Next", exact: true }).click();
-  await expect(page.getByText("Correct", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "My practice" }).click();
   await page.reload();
-  await page.locator(".history-list>button").first().click();
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
+  await page.locator(".history-row").first().click();
   await expect(
     page.getByText("Difficulty scheduling early meetings", { exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
   await page.getByRole("button", { name: "My practice" }).click();
   await page.getByRole("button", { name: "Clear practice history" }).click();
   await page.getByRole("button", { name: "Keep history" }).press("Escape");
@@ -164,13 +212,9 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
     .getByRole("combobox", { name: "Blank 2" })
     .selectOption("reliability");
   await end(page);
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
   await expect(
     page.getByText("support · reliability", { exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
 });
 test("word bank and paragraph controls are keyboard operable", async ({
   page,
@@ -234,15 +278,8 @@ test("listening is single play, transcript hidden, highlight input available", a
     page.getByRole("button", { name: "Next", exact: true }),
   ).toBeEnabled({ timeout: 35000 });
   await end(page);
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
-  await page
-    .locator(".review-item")
-    .first()
-    .getByText("Read the audio transcript")
-    .click();
+  await page.getByRole("button", { name: "Prompt", exact: true }).click();
+  await page.getByRole("button", { name: "Next feedback pages" }).click();
   await expect(page.getByText(/surveys the site carefully/)).toBeVisible();
 });
 test("microphone preflight, timed recording and persistent audio review", async ({
@@ -263,29 +300,18 @@ test("microphone preflight, timed recording and persistent audio review", async 
   await page.clock.resume();
   await page.waitForTimeout(1200);
   await end(page);
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
   await expect(page.getByLabel("Your recording for question 1")).toBeVisible();
   await page.getByRole("button", { name: "My practice" }).click();
   await page.reload();
-  await page.locator(".history-list>button").first().click();
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
+  await page.locator(".history-row").first().click();
   await expect(page.getByLabel("Your recording for question 1")).toBeVisible();
 });
 test("section mode has full scope; shared timer finishes without a backward action", async ({
   page,
 }) => {
   await page.goto("/#sections");
-  await page
-    .locator(".section-card")
-    .nth(1)
-    .getByRole("button", { name: "Start Reading practice" })
-    .click();
+  await page.getByRole("button", { name: "Reading", exact: true }).click();
+  await page.getByRole("button", { name: "Start Reading practice" }).click();
   await expect(
     page.getByRole("heading", { name: "Reading practice", exact: true }),
   ).toBeVisible();
@@ -296,7 +322,9 @@ test("section mode has full scope; shared timer finishes without a backward acti
   await expect(
     page.getByRole("heading", { name: "Review", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".review-item")).toHaveCount(15);
+  await expect(
+    page.getByRole("navigation", { name: "review questions" }),
+  ).toContainText("1 / 15");
 });
 test("full mock has all 65 questions and advances into Reading after section timeout", async ({
   page,
@@ -320,7 +348,9 @@ test("full mock has all 65 questions and advances into Reading after section tim
   await expect(page.getByText("36 of 65", { exact: true })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Blank 1" })).toBeVisible();
   await end(page);
-  await expect(page.locator(".review-item")).toHaveCount(65);
+  await expect(
+    page.getByRole("navigation", { name: "review questions" }),
+  ).toContainText("1 / 65");
 });
 test("manifest, cached media and navigation work offline", async ({
   page,
@@ -364,16 +394,8 @@ test("multiple choices deduct incorrect selections and explain the result", asyn
   await start(page);
   for (const box of await page.getByRole("checkbox").all()) await box.check();
   await end(page);
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
-  await expect(
-    page
-      .locator(".review-item")
-      .first()
-      .getByText(/Local item credit: 0\/2/),
-  ).toBeVisible();
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
+  await expect(page.getByText(/Local item credit: 0\/2/)).toBeVisible();
 });
 test("listening typed gaps and dictation accept exact text after audio", async ({
   page,
@@ -386,13 +408,9 @@ test("listening typed gaps and dictation accept exact text after audio", async (
   await page.getByRole("textbox", { name: "Blank 1" }).fill("society");
   await page.getByRole("textbox", { name: "Blank 2" }).fill("discarded");
   await end(page);
-  await page
-    .locator('.review-item [data-slot="accordion-trigger"]')
-    .first()
-    .click();
   await expect(
     page.getByText("society · discarded", { exact: true }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
   await page.getByRole("button", { name: "My practice" }).click();
   await drill(page, "Write from Dictation");
   await start(page);
@@ -588,11 +606,13 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
   await expect(
     page.getByRole("button", { name: "0 XP, level 1. View progress" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "View achievements" }).click();
   await page
     .getByRole("button", { name: "First spark, locked. View achievement" })
     .click();
   await expect(page.getByRole("dialog")).toContainText("0 / 1 so far");
   await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Play screen" }).click();
   await page.getByRole("button", { name: "Start quest", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Daily quest", exact: true }),
@@ -621,6 +641,7 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
     .getByRole("link", { name: "Practice", exact: true })
     .click();
   await expect(page.getByText("GOAL COMPLETE", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "View achievements" }).click();
   await expect(
     page.getByRole("button", {
       name: "First spark, unlocked. View achievement",
@@ -635,6 +656,7 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
   await expect(
     page.getByRole("button", { name: "60 XP, level 1. View progress" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "View level and streak" }).click();
   await settleView(page);
   await page.screenshot({
     path: "docs/evidence/game-progress.png",
@@ -645,7 +667,7 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
     .getByRole("navigation", { name: "Main navigation", exact: true })
     .getByRole("link", { name: "My practice", exact: true })
     .click();
-  await page.locator(".history-list>button").first().click();
+  await page.locator(".history-row").first().click();
   await expect(
     page.getByRole("region", { name: "Practice rewards" }),
   ).toContainText("+60");
@@ -684,6 +706,7 @@ test("an empty quest earns no XP; a partial quest resumes remaining questions; r
   await page
     .getByRole("button", { name: "0 XP, level 1. View progress" })
     .click();
+  await page.getByRole("button", { name: "Play screen" }).click();
   await page.getByRole("button", { name: "Start quest", exact: true }).click();
   await start(page);
   await answerReading(page);
@@ -695,6 +718,7 @@ test("an empty quest earns no XP; a partial quest resumes remaining questions; r
   await page
     .getByRole("button", { name: "10 XP, level 1. View progress" })
     .click();
+  await page.getByRole("button", { name: "Play screen" }).click();
   await expect(
     page.getByLabel("1 of 3 daily questions answered"),
   ).toBeVisible();

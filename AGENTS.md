@@ -3,7 +3,8 @@
 An independent, beginner-friendly PTE Academic practice PWA. All learner-facing content is original and versioned in Git. There is no backend, CMS, account, cloud runtime AI, analytics, external font request or runtime provider credential.
 
 ## Architecture
-- Keep the learning workspace minimal: desktop icon sidebar and header, mobile icon footer and header. Use accessible names and tooltips for icons; keep beginner guidance in animated collapsibles/accordions, success feedback in Sonner, and honor reduced motion. The operator subsequently requested a more playful, gamified design: allow purposeful violet/lime game cards, XP, streaks, badges and finite celebration motion. Keep the timed runner focused and avoid marketing heroes or repeated explanatory copy.
+
+- Keep the learning workspace minimal: desktop icon sidebar and header, mobile icon footer and header. Use accessible names and tooltips for icons; keep beginner guidance in animated collapsibles/accordions, success feedback in Sonner, and honor reduced motion. The operator subsequently requested a more playful, gamified design: allow purposeful violet/lime game cards, XP, streaks, badges and finite celebration motion. The operator then requested larger game UI without a scrolling dashboard: use a viewport-sized play screen, large controls, button-selected progress/collection screens and paged catalogues, guidance, history and review. Measure reading pages against the actual font/panel; never clip text to force a fit. Preserve a scrolling accessibility escape for extreme zoom or very short windows. Keep the timed runner focused and avoid marketing heroes or repeated explanatory copy.
 - React + TypeScript + Vite; use the installed lockfile and `npm ci` (Node 22.12+).
 - Tailwind v4 and shadcn's default Nova/Base UI/neutral preset. Preserve generated theme tokens in `src/style.css` and configuration in `components.json`. Learning pages use these defaults; the exam surface has isolated `.exam` styles for test conventions.
 - `content/*.json` is the source of truth, imported into the static build. `src/content.ts` owns schemas and feedback logic. Read `content/AGENTS.md` before editing content.
@@ -13,6 +14,7 @@ An independent, beginner-friendly PTE Academic practice PWA. All learner-facing 
 - `scripts/build-sw.mjs` precaches only build output, scopes cache cleanup by registration scope and serves local media byte ranges. Do not automatically activate updates during an attempt.
 
 ## Commands
+
 - `npm run dev` — local development on 127.0.0.1:4178.
 - `npm run validate:content` — content contracts, question references and media hashes.
 - `npm run test:content` — focused content/feedback checks.
@@ -24,11 +26,13 @@ An independent, beginner-friendly PTE Academic practice PWA. All learner-facing 
 - `npm run test:speech` — local speech scoring/storage contracts. `npm run test:speech:browser` — focused Chrome inference/offline/failure checks; first use downloads public weights, with no paid calls.
 
 ## Authority and privacy
+
 The operator authorized OpenRouter audio authoring with a US$10 TOTAL project budget. Exceeding or increasing this limit requires asking the operator. Do not change `content/authoring.json`, reset the local ledger, create another key to evade the cap, or raise the provider key limit without that explicit approval. No automatic retries of paid calls. Reconcile uncertain calls before resuming. Provider-side usage and the conservative local ledger both gate requests.
 
 Credentials belong only in gitignored `.cli/openrouter/token`, directories mode 0700, token/ledger mode 0600. Never display tokens, pass them in command arguments, commit them, or include `.cli/` in a build or artifact. The CLI reads the credential internally and suppresses provider error bodies. Copy project credentials into new same-project worktrees using safe owner-only copies; never read or print their contents.
 
 ## Content and product boundaries
+
 - Assume learners know nothing about the test. Explain terms before using abbreviations.
 - Provide all three modes: question type, section and full mock.
 - Do not refer to or link official Pearson material; this is an explicit operator request. Do not copy official questions, instructions, screenshots or branding. Preserve brief independent-practice and scoring limitations.

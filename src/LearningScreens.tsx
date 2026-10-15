@@ -1,0 +1,340 @@
+import { useState } from "react";
+import {
+  BookOpen,
+  ChevronRight,
+  Mic,
+  Headphones,
+  Play,
+  Target,
+  Check,
+  History,
+  Trash2,
+  Info,
+} from "lucide-react";
+import { Button } from "./components/ui/button";
+import { Badge } from "./components/ui/badge";
+import { PagedList, ReadingPages } from "./Pages";
+import { guides, questions, sections, guideFor, type Guide } from "./content";
+import articles from "../content/learn.json";
+import type { Progress } from "./progress";
+import type { Result } from "./Runner";
+import { TrackProgress } from "./GameHub";
+const icons = { speaking: Mic, reading: BookOpen, listening: Headphones };
+export function Catalogue({
+  filter,
+  search,
+  progress,
+  onSelect,
+  index,
+  onIndex,
+}: {
+  filter: string;
+  search: string;
+  progress: Progress;
+  onSelect: (id: string) => void;
+  index: number;
+  onIndex: (index: number) => void;
+}) {
+  const filtered = guides.filter(
+    (g) =>
+      (filter === "all" || g.section === filter) &&
+      `${g.title} ${g.summary}`.toLowerCase().includes(search.toLowerCase()),
+  );
+  return (
+    <PagedList
+      key={filter + search}
+      items={filtered}
+      index={index}
+      onIndex={onIndex}
+      label="question type pages"
+      empty={<p className="empty-state">No question types found.</p>}
+      render={(g) => {
+        const Icon = icons[g.section];
+        return (
+          <button
+            key={g.id}
+            className="type-row"
+            data-track={g.section}
+            onClick={() => onSelect(g.id)}
+          >
+            <span className="type-icon">
+              <Icon />
+            </span>
+            <span className="flex-1 text-left">{g.title}</span>
+            {questions.some(
+              (q) => q.type === g.id && progress.seen.includes(q.id),
+            ) && <Check aria-label="Practised" />}
+            <Badge variant="secondary">
+              {questions.filter((q) => q.type === g.id).length}
+            </Badge>
+            <ChevronRight />
+          </button>
+        );
+      }}
+    />
+  );
+}
+export function SectionSelect({
+  progress,
+  onStart,
+}: {
+  progress: Progress;
+  onStart: (id: string) => void;
+}) {
+  const [selected, setSelected] = useState(0);
+  const [details, setDetails] = useState(false);
+  const section = sections[selected],
+    Icon = icons[section.id];
+  return (
+    <div className="section-select screen-stack">
+      <div className="screen-tabs" role="group" aria-label="Choose a section">
+        {sections.map((s, i) => {
+          const I = icons[s.id];
+          return (
+            <Button
+              key={s.id}
+              variant={i === selected ? "secondary" : "outline"}
+              aria-label={s.title}
+              aria-pressed={i === selected}
+              onClick={() => {
+                setSelected(i);
+                setDetails(false);
+              }}
+            >
+              <I />
+              <span>{s.title.replace("Speaking & Writing", "Speaking")}</span>
+            </Button>
+          );
+        })}
+      </div>
+      <section className="section-stage" data-track={section.id}>
+        <div className="section-details-action">
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Section details"
+            aria-pressed={details}
+            onClick={() => setDetails(!details)}
+          >
+            <Info />
+          </Button>
+        </div>
+        {!details && <Icon className="stage-icon" />}
+        <h2>{section.title}</h2>
+        <p>
+          {section.duration} ·{" "}
+          {questions.filter((q) => guideFor(q).section === section.id).length}{" "}
+          questions
+        </p>
+        {details ? (
+          <ReadingPages
+            key={section.id}
+            texts={[
+              section.description,
+              ...guides
+                .filter((g) => g.section === section.id)
+                .map((g) => g.title),
+            ]}
+            label="section information pages"
+          />
+        ) : (
+          <TrackProgress progress={progress} section={section.id} />
+        )}
+        <Button
+          className="big-play"
+          aria-label={`Start ${section.title} practice`}
+          onClick={() => onStart(section.id)}
+        >
+          <Play />
+          Play section
+        </Button>
+      </section>
+    </div>
+  );
+}
+export function LearnScreen({ onPractice }: { onPractice: () => void }) {
+  const [topic, setTopic] = useState<string | null>(null);
+  const [block, setBlock] = useState(-1);
+  const article = articles.find((a) => a.id === topic);
+  if (!article)
+    return (
+      <div className="screen-stack">
+        <h2 className="screen-title">Learn the game.</h2>
+        <PagedList
+          items={articles}
+          label="learning topics"
+          render={(a) => (
+            <button
+              className="type-row"
+              key={a.id}
+              onClick={() => {
+                setTopic(a.id);
+                setBlock(-1);
+              }}
+            >
+              <BookOpen />
+              <span className="flex-1 text-left">{a.title}</span>
+              <ChevronRight />
+            </button>
+          )}
+        />
+      </div>
+    );
+  return (
+    <div className="screen-stack lesson-screen">
+      <div className="screen-toolbar">
+        <Button
+          variant="outline"
+          aria-label="All learning topics"
+          onClick={() => setTopic(null)}
+        >
+          Back
+        </Button>
+        <Button variant="outline" onClick={onPractice}>
+          <Target />
+          Practise
+        </Button>
+      </div>
+      <h2 className="screen-title">{article.title}</h2>
+      <label className="topic-select">
+        <span className="sr-only">Learning topic</span>
+        <select
+          aria-label="Learning topic"
+          value={block}
+          onChange={(e) => setBlock(+e.target.value)}
+        >
+          <option value={-1}>Overview</option>
+          {article.blocks.map((b, i) => (
+            <option key={b.title} value={i}>
+              {b.title}
+            </option>
+          ))}
+        </select>
+      </label>
+      <ReadingPages
+        key={article.id + block}
+        texts={[block < 0 ? article.intro : article.blocks[block].text]}
+      />
+    </div>
+  );
+}
+export function GuideScreen({
+  guide: g,
+  onStart,
+}: {
+  guide: Guide;
+  onStart: () => void;
+}) {
+  const [tab, setTab] = useState<string | null>(null);
+  const texts =
+    tab === "Instructions"
+      ? [
+          g.instructions,
+          `${g.prepSeconds ? g.prepSeconds + "s preparation. " : ""}${g.answerSeconds ? g.answerSeconds + "s response." : "Shared section timer."} ${g.skills}`,
+        ]
+      : tab === "Strategy & tips"
+        ? [...g.tips, g.pitfall]
+        : [
+            g.scoring,
+            "Compare an open response with the model. This app does not predict a PTE score.",
+          ];
+  return (
+    <div className="screen-stack guide-screen">
+      <div className="guide-start">
+        <p>{questions.filter((q) => q.type === g.id).length} questions</p>
+        <Button
+          className="big-play"
+          aria-label="Start practice"
+          onClick={onStart}
+        >
+          <Play />
+          Start
+        </Button>
+      </div>
+      <div className="screen-tabs" role="group" aria-label="Question guidance">
+        {["Instructions", "Strategy & tips", "How to review"].map((t) => (
+          <Button
+            key={t}
+            variant={t === tab ? "secondary" : "outline"}
+            aria-pressed={t === tab}
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </Button>
+        ))}
+      </div>
+      {tab ? (
+        <ReadingPages key={g.id + tab} texts={texts} />
+      ) : (
+        <div className="guide-ready">
+          <Target />
+          <h2>One skill at a time.</h2>
+          <p>Open a guide, or jump straight in.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+export function HistoryScreen({
+  history,
+  onOpen,
+  onClear,
+  onPractice,
+}: {
+  history: Result[];
+  onOpen: (id: string) => void;
+  onClear: () => void;
+  onPractice: () => void;
+}) {
+  return (
+    <div className="screen-stack">
+      <div className="screen-toolbar">
+        <h2 className="screen-title">Your rounds.</h2>
+        {!!history.length && (
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Clear practice history"
+            onClick={onClear}
+          >
+            <Trash2 />
+          </Button>
+        )}
+      </div>
+      <PagedList
+        items={history}
+        label="attempt pages"
+        empty={
+          <div className="empty-state">
+            <History />
+            <p>No attempts yet.</p>
+            <Button onClick={onPractice}>
+              <Play />
+              Practise
+            </Button>
+          </div>
+        }
+        render={(r) => (
+          <button
+            key={r.id}
+            className="type-row history-row"
+            onClick={() => onOpen(r.id)}
+          >
+            <History />
+            <span className="flex-1 text-left">
+              {r.label}
+              <small>
+                {new Date(r.date).toLocaleString("en-AU", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </small>
+            </span>
+            <Badge variant="secondary">{r.questionIds.length}</Badge>
+            <ChevronRight />
+          </button>
+        )}
+      />
+    </div>
+  );
+}

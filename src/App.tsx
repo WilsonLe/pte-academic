@@ -1,4 +1,6 @@
 import {
+  Children,
+  isValidElement,
   useEffect,
   useRef,
   useState,
@@ -9,14 +11,13 @@ import {
   ArrowLeft,
   BookOpen,
   Check,
-  ChevronDown,
-  ChevronRight,
   CloudCheck,
   Download,
   Headphones,
   History,
   House,
   Info,
+  Image as ImageIcon,
   ListChecks,
   Mic,
   Play,
@@ -24,7 +25,6 @@ import {
   Search,
   ShieldCheck,
   Target,
-  Trash2,
   Trophy,
   WifiOff,
 } from "lucide-react";
@@ -37,11 +37,17 @@ import {
   guideFor,
   feedback,
   asset,
-  type Guide,
   type Question,
   type Answer,
 } from "./content";
-import articles from "../content/learn.json";
+import {
+  Catalogue,
+  SectionSelect,
+  LearnScreen,
+  GuideScreen,
+  HistoryScreen,
+} from "./LearningScreens";
+import { Pager, ReadingPages } from "./Pages";
 import { Preflight, Runner, type PracticePlan, type Result } from "./Runner";
 import {
   readHistory,
@@ -60,24 +66,13 @@ import {
   TooltipProvider,
 } from "./components/ui/tooltip";
 import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "./components/ui/accordion";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "./components/ui/collapsible";
-import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
 } from "./components/ui/dialog";
 import { Toaster } from "./components/ui/sonner";
-import { GameHub, GameStatus, RewardMoment, TrackProgress } from "./GameHub";
+import { GameHub, GameStatus, RewardMoment } from "./GameHub";
 import {
   emptyProgress,
   localDay,
@@ -140,23 +135,40 @@ function IconAction({
     </Tooltip>
   );
 }
+function nodeText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (isValidElement<{ children?: ReactNode }>(node))
+    return nodeText(node.props.children);
+  return Children.toArray(node)
+    .map((child) => (isValidElement(child) ? nodeText(child) : String(child)))
+    .join(" ");
+}
 function More({ label, children }: { label: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const nodes = Children.toArray(children);
+  const actions = nodes.filter(
+    (node) => isValidElement(node) && node.type === Button,
+  );
+  const texts = nodes
+    .filter((node) => !(isValidElement(node) && node.type === Button))
+    .map(nodeText);
   return (
-    <Collapsible className="more">
-      <CollapsibleTrigger
-        className="group flex min-h-10 items-center gap-2 text-xs text-muted-foreground"
-        aria-label={label}
-      >
-        <Info className="size-3.5" />
+    <>
+      <Button variant="ghost" className="more" onClick={() => setOpen(true)}>
+        <Info />
         {label}
-        <ChevronDown className="size-3.5 transition-transform duration-200 group-data-open:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="disclosure-panel">
-        <div className="pb-4 pt-2 text-sm leading-7 text-muted-foreground">
-          {children}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="info-dialog">
+          <DialogTitle>{label}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Practice information
+          </DialogDescription>
+          <ReadingPages texts={texts} label="information pages" />
+          {actions}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 function Nav({
@@ -198,14 +210,15 @@ function Nav({
 }
 export default function App() {
   const [progress, setProgress] = useState<Progress>(emptyProgress);
+  const [hubView, setHubView] = useState("play");
   const [progressReady, setProgressReady] = useState(false);
   const [today, setToday] = useState(localDay);
   const [celebration, setCelebration] = useState<string | null>(null);
   const [page, setPage] = useState(location.hash.slice(1) || "home");
   const [guideId, setGuideId] = useState("");
   const [filter, setFilter] = useState("all");
+  const [catalogueIndex, setCatalogueIndex] = useState(0);
   const [search, setSearch] = useState("");
-  const [article, setArticle] = useState("what-is-pte");
   const [plan, setPlan] = useState<PracticePlan | null>(null);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
@@ -255,7 +268,7 @@ export default function App() {
   useEffect(() => {
     main.current?.focus();
     window.scrollTo(0, 0);
-  }, [page, guideId, article, result, plan]);
+  }, [page, guideId, result, plan]);
   useEffect(
     () => () => stream.current?.getTracks().forEach((t) => t.stop()),
     [],
@@ -380,11 +393,6 @@ export default function App() {
         onCancel={() => setPlan(null)}
       />
     );
-  const filtered = guides.filter(
-    (g) =>
-      (filter === "all" || g.section === filter) &&
-      `${g.title} ${g.summary}`.toLowerCase().includes(search.toLowerCase()),
-  );
   return (
     <TooltipProvider delay={150}>
       <div className="app-shell">
@@ -452,7 +460,10 @@ export default function App() {
               <GameStatus
                 progress={progress}
                 today={today}
-                onClick={() => navigate("home")}
+                onClick={() => {
+                  setHubView("progress");
+                  navigate("home");
+                }}
               />
               <Tooltip>
                 <TooltipTrigger
@@ -527,10 +538,7 @@ export default function App() {
             tabIndex={-1}
             className="main-content"
           >
-            <div
-              key={result?.id || guideId || `${active}-${article}`}
-              className="page-enter"
-            >
+            <div key={result?.id || guideId || active} className="page-enter">
               {result ? (
                 <Review
                   result={result}
@@ -553,20 +561,22 @@ export default function App() {
                   }
                 />
               ) : currentGuide ? (
-                <GuideDetail
+                <GuideScreen
                   guide={currentGuide}
                   onStart={() => begin("type", currentGuide.id)}
                 />
               ) : active === "home" ? (
-                <div>
+                <div className="home-screen">
                   <GameHub
+                    view={hubView}
+                    onViewChange={setHubView}
                     progress={progress}
                     today={today}
                     ready={progressReady}
                     onQuest={startQuest}
                     navigate={navigate}
                   />
-                  <div className="mt-6">
+                  <div className="beginner-entry">
                     <More label="New to PTE Academic?">
                       <p>
                         PTE Academic tests speaking, writing, reading and
@@ -585,8 +595,8 @@ export default function App() {
                   </div>
                 </div>
               ) : active === "types" ? (
-                <>
-                  <div className="mb-5 flex flex-wrap items-center gap-3">
+                <div className="screen-stack catalogue-screen">
+                  <div className="catalogue-toolbar flex flex-wrap items-center gap-3">
                     <div
                       className="flex rounded-lg bg-muted p-1"
                       aria-label="Filter by section"
@@ -609,7 +619,10 @@ export default function App() {
                                 }
                                 aria-label={`Filter: ${s.label}`}
                                 aria-pressed={filter === s.id}
-                                onClick={() => setFilter(s.id)}
+                                onClick={() => {
+                                  setFilter(s.id);
+                                  setCatalogueIndex(0);
+                                }}
                               />
                             }
                           >
@@ -626,104 +639,40 @@ export default function App() {
                         aria-label="Find a question type"
                         placeholder="Search"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => {
+                          setSearch(e.target.value);
+                          setCatalogueIndex(0);
+                        }}
                         className="h-9 min-w-0 flex-1 bg-transparent text-sm outline-none"
                       />
                     </label>
                   </div>
-                  <div className="divide-y rounded-xl border">
-                    {filtered.map((g) => {
-                      const Icon = icons[g.section];
-                      return (
-                        <button
-                          key={g.id}
-                          className="type-row"
-                          data-track={g.section}
-                          onClick={() => setGuideId(g.id)}
-                        >
-                          <span className="type-icon">
-                            <Icon className="size-4" />
-                          </span>
-                          <span className="flex-1 text-left">{g.title}</span>
-                          {questions.some(
-                            (q) =>
-                              q.type === g.id && progress.seen.includes(q.id),
-                          ) && (
-                            <span
-                              className="tried-marker"
-                              aria-label="Practised"
-                            >
-                              <Check className="size-3" />
-                            </span>
-                          )}
-                          <Badge variant="secondary" className="tabular-nums">
-                            {questions.filter((q) => q.type === g.id).length}
-                          </Badge>
-                          <ChevronRight className="size-4 text-muted-foreground" />
-                        </button>
-                      );
-                    })}
-                    {filtered.length === 0 && (
-                      <div className="p-8 text-center text-sm">
-                        <p className="mb-3 text-muted-foreground">
-                          No question types found.
-                        </p>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setSearch("");
-                            setFilter("all");
-                          }}
-                        >
-                          Clear filters
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : active === "sections" ? (
-                <div className="max-w-3xl space-y-3">
-                  {sections.map((s) => {
-                    const Icon = icons[s.id];
-                    const count = questions.filter(
-                      (q) => guideFor(q).section === s.id,
-                    ).length;
-                    return (
-                      <section
-                        key={s.id}
-                        className="section-card rounded-xl border px-4"
-                        data-track={s.id}
-                      >
-                        <div className="flex min-h-18 items-center gap-3">
-                          <Icon className="size-5 text-muted-foreground" />
-                          <h2 className="flex-1 text-sm font-medium">
-                            {s.title}
-                          </h2>
-                          <Badge variant="secondary">{count}</Badge>
-                          <IconAction
-                            label={`Start ${s.title} practice`}
-                            icon={Play}
-                            onClick={() => begin("section", s.id)}
-                          />
-                        </div>
-                        <TrackProgress progress={progress} section={s.id} />
-                        <More label={`${s.title} details`}>
-                          <p className="mb-2 text-xs">
-                            {s.duration} · {count} questions
-                          </p>
-                          <p>{s.description}</p>
-                          <ul className="mt-3 space-y-1 text-xs">
-                            {guides
-                              .filter((g) => g.section === s.id)
-                              .map((g) => (
-                                <li key={g.id}>{g.title}</li>
-                              ))}
-                          </ul>
-                        </More>
-                      </section>
-                    );
-                  })}
+                  <Catalogue
+                    index={catalogueIndex}
+                    onIndex={setCatalogueIndex}
+                    filter={filter}
+                    search={search}
+                    progress={progress}
+                    onSelect={setGuideId}
+                  />
+                  {(search || filter !== "all") && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setSearch("");
+                        setFilter("all");
+                        setCatalogueIndex(0);
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
                 </div>
+              ) : active === "sections" ? (
+                <SectionSelect
+                  progress={progress}
+                  onStart={(id) => begin("section", id)}
+                />
               ) : active === "mocks" ? (
                 <section className="mock-arena max-w-3xl">
                   <div className="mock-heading">
@@ -777,110 +726,14 @@ export default function App() {
                   </More>
                 </section>
               ) : active === "guide" ? (
-                <div className="learn-layout">
-                  <nav
-                    aria-label="Learning guide"
-                    className="flex flex-wrap gap-1 lg:flex-col"
-                  >
-                    {articles.map((a) => (
-                      <Button
-                        key={a.id}
-                        variant={article === a.id ? "secondary" : "ghost"}
-                        className="h-auto justify-start whitespace-normal py-2 text-left text-xs"
-                        aria-current={article === a.id ? "page" : undefined}
-                        onClick={() => setArticle(a.id)}
-                      >
-                        {a.title}
-                      </Button>
-                    ))}
-                  </nav>
-                  <article className="min-w-0">
-                    <h2 className="mb-4 text-base font-medium">
-                      {articles.find((a) => a.id === article)!.title}
-                    </h2>
-                    <p className="mb-5 text-sm leading-7 text-muted-foreground">
-                      {articles.find((a) => a.id === article)!.intro}
-                    </p>
-                    <Accordion multiple>
-                      {articles
-                        .find((a) => a.id === article)!
-                        .blocks.map((b) => (
-                          <AccordionItem key={b.title} value={b.title}>
-                            <AccordionTrigger>{b.title}</AccordionTrigger>
-                            <AccordionContent className="text-muted-foreground">
-                              <p className="leading-7">{b.text}</p>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                    </Accordion>
-                    <Button
-                      variant="outline"
-                      className="mt-6"
-                      onClick={() => navigate("types")}
-                    >
-                      <Target />
-                      Question types
-                    </Button>
-                  </article>
-                </div>
+                <LearnScreen onPractice={() => navigate("types")} />
               ) : (
-                <div className="max-w-3xl">
-                  {history.length === 0 ? (
-                    <div className="flex flex-col items-center gap-4 py-12 text-sm text-muted-foreground">
-                      <History className="size-7" />
-                      <p>No attempts yet.</p>
-                      <Button
-                        variant="outline"
-                        onClick={() => navigate("types")}
-                      >
-                        <Play />
-                        Practise
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mb-3 flex justify-end">
-                        <IconAction
-                          label="Clear practice history"
-                          icon={Trash2}
-                          onClick={() => setClearConfirm(true)}
-                        />
-                      </div>
-                      <div className="history-list divide-y rounded-xl border">
-                        {history.map((r) => (
-                          <button
-                            key={r.id}
-                            className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50"
-                            onClick={() => void openAttempt(r.id)}
-                          >
-                            <History className="size-4 text-muted-foreground" />
-                            <span className="flex-1 text-sm">
-                              {r.label}
-                              <small className="mt-1 block text-[11px] text-muted-foreground">
-                                {new Date(r.date).toLocaleString("en-AU", {
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
-                                })}
-                              </small>
-                            </span>
-                            <Badge variant="secondary">
-                              {r.questionIds.length}
-                            </Badge>
-                            <ChevronRight className="size-4 text-muted-foreground" />
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  <More label="On-device storage">
-                    <p className="text-xs">
-                      Up to 10 attempts and their recordings stay in this
-                      browser. localStorage stores the index; IndexedDB stores
-                      responses and game progress. Nothing is uploaded. Clear
-                      history to reset progress and remove them.
-                    </p>
-                  </More>
-                </div>
+                <HistoryScreen
+                  history={history}
+                  onOpen={(id) => void openAttempt(id)}
+                  onClear={() => setClearConfirm(true)}
+                  onPractice={() => navigate("types")}
+                />
               )}
             </div>
           </main>
@@ -906,70 +759,6 @@ export default function App() {
         <Toaster theme="light" position="top-center" />
       </div>
     </TooltipProvider>
-  );
-}
-function GuideDetail({
-  guide: g,
-  onStart,
-}: {
-  guide: Guide;
-  onStart: () => void;
-}) {
-  return (
-    <div className="max-w-3xl">
-      <div className="mb-6 flex items-center gap-3 rounded-xl border p-4">
-        <span className="flex-1 text-xs text-muted-foreground">
-          {questions.filter((q) => q.type === g.id).length} questions
-        </span>
-        <Tooltip>
-          <TooltipTrigger
-            render={<Button aria-label="Start practice" onClick={onStart} />}
-          >
-            <Play className="size-4" />
-            Start
-          </TooltipTrigger>
-          <TooltipContent>Start {g.title} practice</TooltipContent>
-        </Tooltip>
-      </div>
-      <Accordion multiple>
-        <AccordionItem value="instructions">
-          <AccordionTrigger>Instructions</AccordionTrigger>
-          <AccordionContent>
-            <p className="mb-3 leading-7 text-muted-foreground">
-              {g.instructions}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {g.prepSeconds ? `${g.prepSeconds}s preparation · ` : ""}
-              {g.answerSeconds
-                ? `${g.answerSeconds >= 60 ? `${g.answerSeconds / 60} min` : `${g.answerSeconds}s`} response`
-                : "Shared section timer"}{" "}
-              · {g.skills}
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="strategy">
-          <AccordionTrigger>Strategy & tips</AccordionTrigger>
-          <AccordionContent>
-            <ol className="list-decimal space-y-3 pl-5 text-muted-foreground">
-              {g.tips.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ol>
-            <p className="mt-4 rounded-lg bg-muted p-3 text-xs">{g.pitfall}</p>
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="feedback">
-          <AccordionTrigger>How to review</AccordionTrigger>
-          <AccordionContent>
-            <p className="leading-7 text-muted-foreground">{g.scoring}</p>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Compare an open response with the model. This app does not predict
-              a PTE score.
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
   );
 }
 function showAnswer(q: Question, a: Answer) {
@@ -1005,104 +794,135 @@ function Review({
   result: Result;
   onTranscription: (questionId: string, value: Transcription) => void;
 }) {
+  const [index, setIndex] = useState(0);
+  const [tab, setTab] = useState("Your response");
+  const id = r.questionIds[index],
+    q = questions.find((x) => x.id === id)!,
+    a = r.answers[id] || {};
+  const f = feedback(q, a);
+  const tabs = [
+    "Your response",
+    "Answer key",
+    "Feedback",
+    "Prompt",
+    ...(q.chart ? ["Image"] : []),
+    ...(a.recording ? ["Speech"] : []),
+  ];
+  const texts =
+    tab === "Your response"
+      ? [showAnswer(q, a)]
+      : tab === "Answer key"
+        ? [modelAnswer(q) || "Compare your response with the guidance."]
+        : tab === "Feedback"
+          ? [f.detail, q.explanation, ...guideFor(q).tips]
+          : [q.prompt, q.text, q.audioText].filter(
+              (text): text is string => !!text,
+            );
   return (
-    <div className="max-w-3xl">
+    <div className="screen-stack review-screen">
       {r.reward && <RewardMoment reward={r.reward} celebrate={celebrate} />}
-      <div className="mb-4 flex items-center gap-3">
-        <span className="text-sm">{r.label}</span>
+      <div className="review-heading">
+        <span>{r.label}</span>
         <Badge variant="secondary">
           {r.finished ? "Completed" : "Ended early"}
         </Badge>
+        <More label="About feedback">
+          <p>
+            Answer keys and self-review guidance are provided, without a
+            predicted PTE score. Responses and recordings stay on this device.
+          </p>
+        </More>
       </div>
-      <More label="About feedback">
-        <p className="text-xs">
-          Answer keys and self-review guidance are provided, without a predicted
-          PTE score. Responses and recordings are saved on this device when
-          browser storage is available.
-        </p>
-      </More>
-      <Accordion multiple className="review-list">
-        {r.questionIds.map((id, i) => {
-          const q = questions.find((x) => x.id === id)!;
-          const a = r.answers[id] || {};
-          const f = feedback(q, a);
-          const correct = ["Correct", "Exact match"].includes(f.label);
+      <div className="review-question">
+        <span className="question-number">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <h2>{guideFor(q).title}</h2>
+        <Badge variant="outline">{f.label}</Badge>
+      </div>
+      <div
+        className="screen-tabs review-tabs"
+        role="group"
+        aria-label="Review panels"
+      >
+        {tabs.map((t) => {
+          const Icon =
+            t === "Your response"
+              ? Play
+              : t === "Answer key"
+                ? Check
+                : t === "Feedback"
+                  ? Info
+                  : t === "Prompt"
+                    ? BookOpen
+                    : t === "Image"
+                      ? ImageIcon
+                      : Mic;
           return (
-            <AccordionItem key={id} value={id} className="review-item">
-              <AccordionTrigger className="items-center gap-3">
-                <span className="w-5 text-xs tabular-nums text-muted-foreground">
-                  {i + 1}
-                </span>
-                <span className="flex-1 text-left text-xs">
-                  {guideFor(q).title}
-                </span>
-                <span className="sr-only">{f.label}</span>
-                {correct ? (
-                  <Check className="size-4" />
-                ) : (
-                  <Info className="size-4 text-muted-foreground" />
-                )}
-              </AccordionTrigger>
-              <AccordionContent className="review-content">
-                <p className="mb-4 text-xs text-muted-foreground">{f.detail}</p>
-                {q.chart && <Chart q={q} />}
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <section>
-                    <h3 className="mb-2 text-xs font-medium">Your response</h3>
-                    <p className="whitespace-pre-wrap text-sm leading-7 text-muted-foreground">
-                      {showAnswer(q, a)}
-                    </p>
-                    {a.recording && (
-                      <audio
-                        controls
-                        src={a.recording}
-                        aria-label={`Your recording for question ${i + 1}`}
-                        className="mt-3 max-w-full"
-                      />
-                    )}
-                  </section>
-                  <section>
-                    <h3 className="mb-2 text-xs font-medium">
-                      {["write", "speak"].includes(guideFor(q).kind)
-                        ? "Model / key points"
-                        : "Answer key"}
-                    </h3>
-                    <p className="whitespace-pre-wrap text-sm leading-7 text-muted-foreground">
-                      {modelAnswer(q)}
-                    </p>
-                  </section>
-                </div>
-                {guideFor(q).kind === "speak" && a.recording && (
-                  <SpeechReview
-                    question={q}
-                    answer={a}
-                    attemptId={r.id}
-                    onChange={(value) => onTranscription(id, value)}
+            <Tooltip key={t}>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant={tab === t ? "secondary" : "outline"}
+                    aria-label={t}
+                    aria-pressed={tab === t}
+                    onClick={() => setTab(t)}
                   />
-                )}
-                <p className="mt-5 text-sm leading-7">{q.explanation}</p>
-                {q.text && (
-                  <More label="Original prompt">
-                    <p>{q.text}</p>
-                  </More>
-                )}
-                {q.audioText && (
-                  <More label="Read the audio transcript">
-                    <p>{q.audioText}</p>
-                  </More>
-                )}
-                <More label="Review the strategy">
-                  <ul className="list-disc space-y-2 pl-4">
-                    {guideFor(q).tips.map((t) => (
-                      <li key={t}>{t}</li>
-                    ))}
-                  </ul>
-                </More>
-              </AccordionContent>
-            </AccordionItem>
+                }
+              >
+                <Icon />
+                <span>{t}</span>
+              </TooltipTrigger>
+              <TooltipContent>{t}</TooltipContent>
+            </Tooltip>
           );
         })}
-      </Accordion>
+      </div>
+      {tab === "Speech" && a.recording ? (
+        <div className="speech-panel">
+          <SpeechReview
+            key={id}
+            question={q}
+            answer={a}
+            attemptId={r.id}
+            questionNumber={index + 1}
+            onChange={(value) => onTranscription(id, value)}
+          />
+        </div>
+      ) : tab === "Image" && q.chart ? (
+        <div className="review-chart">
+          <Chart q={q} responsive />
+        </div>
+      ) : (
+        <>
+          {tab === "Your response" && a.recording && (
+            <audio
+              controls
+              src={a.recording}
+              aria-label={`Your recording for question ${index + 1}`}
+            />
+          )}
+          <ReadingPages key={id + tab} texts={texts} label="feedback pages" />
+        </>
+      )}
+      {r.questionIds.length > 1 && (
+        <Pager
+          index={index}
+          count={r.questionIds.length}
+          label="review questions"
+          onChange={(n) => {
+            setIndex(n);
+            const next = questions.find(
+              (question) => question.id === r.questionIds[n],
+            )!;
+            if (
+              (tab === "Speech" && !r.answers[next.id]?.recording) ||
+              (tab === "Image" && !next.chart)
+            )
+              setTab("Your response");
+          }}
+        />
+      )}
     </div>
   );
 }

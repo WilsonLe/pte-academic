@@ -91,3 +91,9 @@ Quest progress resumes remaining questions. XP, coverage and badges stay in Inde
 The IndexedDB upgrade creates a progress store at version 2 without rewriting old attempts. To roll back the game UI, retain the version-2 database opener; browsers cannot downgrade the database to version 1. Refresh other older app tabs after the update. Rewards appear after saving, with finite celebrations and reduced-motion support; no game effects run inside a timed test.
 
 Focused game checks: npm run test:progress and the daily-quest/browser journeys in tests/practice.spec.ts.
+
+### Screen-sized game interface
+
+Home is one large play screen, with progress and achievements behind the flame and trophy buttons. Desktop retains its header and icon sidebar; mobile retains its header and icon footer. Catalogues and saved rounds use adaptive card pages. Question guidance, beginner lessons, long responses, transcripts and word comparisons use Next/Previous reading pages sized to the actual font and available space. Review shows one question and one selected response/key/feedback/prompt/speech panel at a time. Returning from a question guide retains the catalogue page and filters.
+
+The ordinary learning workspace fits the device viewport without document scrolling. Windows below 450 CSS pixels high (including extreme zoom) deliberately regain scrolling so enlarged controls remain reachable. The timed test surface keeps its independent exam layout and content scrolling where needed; this redesign changes the practice workspace and post-attempt review.

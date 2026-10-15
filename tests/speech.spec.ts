@@ -96,11 +96,8 @@ async function seed(page: Page, { silence = false, recorded = false } = {}) {
 async function openReview(page: Page) {
   await page.goto(appBase + "#history");
   await page.reload();
-  await page.locator(".history-list>button").first().click();
-  await page
-    .locator(".review-item [data-slot=accordion-trigger]")
-    .first()
-    .click();
+  await page.locator(".history-row").first().click();
+  await page.getByRole("button", { name: "Speech", exact: true }).click();
 }
 test("real on-device recognition, private transport, saved feedback and offline fresh-document reuse", async ({
   page,
@@ -344,4 +341,138 @@ test("undecodable recording reports an error without downloading models", async 
     }),
   ).toBeEnabled();
   expect(external).toHaveLength(0);
+});
+
+test("small phone speech review pages stay readable without scrolling", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seed(page);
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("pte-studio");
+      request.onsuccess = () => {
+        const db = request.result,
+          tx = db.transaction("attempts", "readwrite"),
+          store = tx.objectStore("attempts"),
+          get = store.get("local-speech-fixture");
+        get.onsuccess = () => {
+          const stored = get.result;
+          stored.result.answers["repeat-sentence-01"] = {
+            transcription: {
+              text: Array.from(
+                { length: 35 },
+                (_, i) =>
+                  "Practice sentence " + i + " has several recognized words.",
+              ).join(" "),
+              seconds: 100,
+              engine: "layout fixture",
+              model: "fixture",
+              revision: "fixture",
+            },
+          };
+          store.put(stored, "local-speech-fixture");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+    });
+  });
+  await openReview(page);
+  await page.setViewportSize({ width: 360, height: 640 });
+  for (const panel of [
+    "Your response",
+    "Answer key",
+    "Feedback",
+    "Prompt",
+    "Speech",
+  ]) {
+    await page.getByRole("button", { name: panel, exact: true }).click();
+    await expect
+      .poll(() =>
+        page
+          .locator(".reading-copy")
+          .evaluate((e) => e.scrollHeight <= e.clientHeight),
+      )
+      .toBe(true);
+    const overflow = await page
+      .locator("main button, main audio")
+      .evaluateAll((nodes) =>
+        nodes
+          .filter((node) => {
+            const r = node.getBoundingClientRect(),
+              m = document.querySelector("main")!.getBoundingClientRect();
+            return (
+              r.height > 0 &&
+              (r.bottom > m.bottom + 1 ||
+                r.right > m.right + 1 ||
+                r.top < m.top - 1)
+            );
+          })
+          .map((n) => n.getAttribute("aria-label") || n.textContent),
+      );
+    expect(overflow).toEqual([]);
+  }
+  let count = 0;
+  const words: string[] = [];
+  do {
+    words.push((await page.locator(".reading-copy").textContent())!);
+    const next = page.getByRole("button", { name: "Next transcript pages" });
+    if (await next.isDisabled()) break;
+    await next.click();
+    count++;
+  } while (count < 100);
+  expect(count).toBeGreaterThan(1);
+  expect(words.join(" ")).toContain(
+    "Practice sentence 34 has several recognized words.",
+  );
+  await page.getByRole("button", { name: "How local feedback works" }).click();
+  await expect
+    .poll(() =>
+      page
+        .locator(".reading-copy")
+        .evaluate((e) => e.scrollHeight <= e.clientHeight),
+    )
+    .toBe(true);
+  await expect(
+    page.getByRole("button", { name: "Next speech help pages" }),
+  ).toBeEnabled();
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => {
+      const request = indexedDB.open("pte-studio");
+      request.onsuccess = () => {
+        const db = request.result,
+          tx = db.transaction("attempts", "readwrite"),
+          store = tx.objectStore("attempts"),
+          get = store.get("local-speech-fixture");
+        get.onsuccess = () => {
+          const stored = get.result;
+          stored.result.questionIds.push("describe-image-01");
+          store.put(stored, "local-speech-fixture");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+      };
+    });
+  });
+  await openReview(page);
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await page.getByRole("button", { name: "Image", exact: true }).click();
+  await expect(page.getByRole("figure")).toBeVisible();
+  expect(
+    await page
+      .locator(".review-chart .chart, .review-chart .chart *")
+      .evaluateAll((nodes) =>
+        nodes.every((node) => {
+          const r = node.getBoundingClientRect(),
+            main = document.querySelector("main")!.getBoundingClientRect();
+          return r.bottom <= main.bottom + 1 && r.right <= main.right + 1;
+        }),
+      ),
+  ).toBe(true);
 });

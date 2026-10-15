@@ -2,7 +2,13 @@ import { Textarea } from "./components/ui/textarea";
 import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from "lucide-react";
 import { type Answer, type Question, guideFor, wordCount } from "./content";
-export function Chart({ q }: { q: Question }) {
+export function Chart({
+  q,
+  responsive = false,
+}: {
+  q: Question;
+  responsive?: boolean;
+}) {
   const c = q.chart!;
   const max = Math.max(...c.values) * 1.15;
   return (
@@ -18,7 +24,11 @@ export function Chart({ q }: { q: Question }) {
             <span>{c.values[i]}</span>
             <div
               className="bar"
-              style={{ height: `${(c.values[i] / max) * 200}px` }}
+              style={{
+                height: responsive
+                  ? `calc((100% - 48px) * ${c.values[i] / max})`
+                  : `${(c.values[i] / max) * 200}px`,
+              }}
             />
             <span>{x}</span>
           </div>

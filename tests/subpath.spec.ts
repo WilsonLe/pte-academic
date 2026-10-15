@@ -19,7 +19,10 @@ test("subdirectory static build retains manifest, audio and offline navigation",
     .getByRole("navigation", { name: "Main navigation", exact: true })
     .getByRole("link", { name: "Question types", exact: true })
     .click();
-  await expect(page.locator(".type-row")).toHaveCount(22);
+  await expect(page.locator(".type-row").first()).toContainText("Read Aloud");
+  await page.getByRole("searchbox").fill("Write from Dictation");
+  await expect(page.locator(".type-row")).toHaveCount(1);
+  await expect(page.locator(".type-row")).toContainText("Write from Dictation");
   const audio = await page.evaluate(async () => {
     const r = await fetch("./audio/repeat-sentence-01.mp3", {
       headers: { Range: "bytes=0-127" },
