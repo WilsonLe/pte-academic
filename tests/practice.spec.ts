@@ -601,6 +601,7 @@ test("full mock has all 65 questions and advances into Reading after section tim
   });
   await page.clock.install();
   await page.getByRole("button", { name: "Begin mock test" }).click();
+  await expect(page.locator(".exam")).toBeVisible();
   await page.clock.fastForward(4800500);
   await expect(page.getByText("36 of 65", { exact: true })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Blank 1" })).toBeVisible();
