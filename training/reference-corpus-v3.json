@@ -1,0 +1,3449 @@
+{
+  "schemaVersion": 2,
+  "referenceVersion": "blended-english-synthetic-v3",
+  "outputDirectory": "reference-v3",
+  "featureDirectory": "features-v4",
+  "scoreTarget": "blended-english-reference",
+  "seed": 20261016,
+  "voices": [
+    {
+      "key": "af_heart",
+      "voice": "af_heart",
+      "model": "hexgrad/kokoro-82m",
+      "accent": "en-US",
+      "heldOut": false
+    },
+    {
+      "key": "am_michael",
+      "voice": "am_michael",
+      "model": "hexgrad/kokoro-82m",
+      "accent": "en-US",
+      "heldOut": false
+    },
+    {
+      "key": "am_puck",
+      "voice": "am_puck",
+      "model": "hexgrad/kokoro-82m",
+      "accent": "en-US",
+      "heldOut": true
+    },
+    {
+      "key": "bf_emma",
+      "voice": "bf_emma",
+      "model": "hexgrad/kokoro-82m",
+      "accent": "en-GB",
+      "heldOut": false
+    },
+    {
+      "key": "bm_george",
+      "voice": "bm_george",
+      "model": "hexgrad/kokoro-82m",
+      "accent": "en-GB",
+      "heldOut": true
+    },
+    {
+      "key": "gb_harry",
+      "voice": "en-GB-Harry:MAI-Voice-2.1-Flash",
+      "model": "microsoft/mai-voice-2.1-flash",
+      "accent": "en-GB",
+      "heldOut": false
+    },
+    {
+      "key": "au_isla",
+      "voice": "en-AU-Isla:MAI-Voice-2.1-Flash",
+      "model": "microsoft/mai-voice-2.1-flash",
+      "accent": "en-AU",
+      "heldOut": false
+    },
+    {
+      "key": "in_priya",
+      "voice": "en-IN-Priya:MAI-Voice-2.1-Flash",
+      "model": "microsoft/mai-voice-2.1-flash",
+      "accent": "en-IN",
+      "heldOut": false
+    },
+    {
+      "key": "in_dhruv",
+      "voice": "en-IN-Dhruv:MAI-Voice-2.1-Flash",
+      "model": "microsoft/mai-voice-2.1-flash",
+      "accent": "en-IN",
+      "heldOut": true
+    },
+    {
+      "key": "au_bloke",
+      "voice": "English_Aussie_Bloke",
+      "model": "minimax/speech-2.8-turbo",
+      "accent": "en-AU",
+      "heldOut": true
+    }
+  ],
+  "passages": [
+    {
+      "id": "passage-001",
+      "text": "The morning sunlight reached the kitchen window while Julia carefully prepared breakfast for her family.",
+      "familyId": "original-001",
+      "split": "train"
+    },
+    {
+      "id": "passage-002",
+      "text": "A curious student asked the librarian whether the new science books would arrive before Friday.",
+      "familyId": "original-002",
+      "split": "train"
+    },
+    {
+      "id": "passage-003",
+      "text": "Please leave the blue folder beside the computer and close the office door when you finish.",
+      "familyId": "original-003",
+      "split": "train"
+    },
+    {
+      "id": "passage-004",
+      "text": "Our neighborhood garden produces fresh tomatoes, sweet peppers, and enough herbs for everyone to share.",
+      "familyId": "original-004",
+      "split": "train"
+    },
+    {
+      "id": "passage-005",
+      "text": "Michael checked the weather forecast before choosing a comfortable jacket for the walk across town.",
+      "familyId": "original-005",
+      "split": "train"
+    },
+    {
+      "id": "passage-006",
+      "text": "The young musician practiced a difficult rhythm until every note sounded clear and confident.",
+      "familyId": "original-006",
+      "split": "train"
+    },
+    {
+      "id": "passage-007",
+      "text": "Several volunteers gathered near the station to discuss a practical solution to the traffic problem.",
+      "familyId": "original-007",
+      "split": "train"
+    },
+    {
+      "id": "passage-008",
+      "text": "After a quiet dinner, Rachel described the beautiful mountains she had visited during her vacation.",
+      "familyId": "original-008",
+      "split": "train"
+    },
+    {
+      "id": "passage-009",
+      "text": "The friendly mechanic explained why the engine needed a small adjustment before the journey.",
+      "familyId": "original-009",
+      "split": "train"
+    },
+    {
+      "id": "passage-010",
+      "text": "We should compare the available information before making a decision about the research project.",
+      "familyId": "original-010",
+      "split": "train"
+    },
+    {
+      "id": "passage-011",
+      "text": "A silver airplane crossed the cloudy sky as children watched from the crowded observation deck.",
+      "familyId": "original-011",
+      "split": "train"
+    },
+    {
+      "id": "passage-012",
+      "text": "The teacher encouraged her students to explain their answers using simple words and complete sentences.",
+      "familyId": "original-012",
+      "split": "train"
+    },
+    {
+      "id": "passage-013",
+      "text": "Someone left a pair of yellow gloves on the wooden bench outside the community center.",
+      "familyId": "original-013",
+      "split": "train"
+    },
+    {
+      "id": "passage-014",
+      "text": "David usually drinks a glass of water before taking a short walk through the park.",
+      "familyId": "original-014",
+      "split": "train"
+    },
+    {
+      "id": "passage-015",
+      "text": "The little bakery on the corner sells warm bread, fresh cookies, and delicious apple pies.",
+      "familyId": "original-015",
+      "split": "train"
+    },
+    {
+      "id": "passage-016",
+      "text": "An experienced engineer inspected the bridge carefully and recorded each measurement in a small notebook.",
+      "familyId": "original-016",
+      "split": "train"
+    },
+    {
+      "id": "passage-017",
+      "text": "During the afternoon meeting, Amanda suggested a different approach to organizing the annual festival.",
+      "familyId": "original-017",
+      "split": "train"
+    },
+    {
+      "id": "passage-018",
+      "text": "The museum guide pointed toward an unusual painting and explained the story behind its creation.",
+      "familyId": "original-018",
+      "split": "train"
+    },
+    {
+      "id": "passage-019",
+      "text": "Every participant received a printed schedule with clear directions to the main conference room.",
+      "familyId": "original-019",
+      "split": "train"
+    },
+    {
+      "id": "passage-020",
+      "text": "A gentle breeze moved through the branches while the neighbors enjoyed their lunch outside.",
+      "familyId": "original-020",
+      "split": "train"
+    },
+    {
+      "id": "passage-021",
+      "text": "The photographer waited patiently for the perfect moment to capture the colorful birds in flight.",
+      "familyId": "original-021",
+      "split": "train"
+    },
+    {
+      "id": "passage-022",
+      "text": "My brother borrowed a bicycle yesterday because his car was being repaired at the garage.",
+      "familyId": "original-022",
+      "split": "train"
+    },
+    {
+      "id": "passage-023",
+      "text": "The doctor recommended regular exercise, balanced meals, and enough sleep to support a healthy routine.",
+      "familyId": "original-023",
+      "split": "train"
+    },
+    {
+      "id": "passage-024",
+      "text": "Across the river, a narrow path leads visitors toward a peaceful village surrounded by trees.",
+      "familyId": "original-024",
+      "split": "train"
+    },
+    {
+      "id": "passage-025",
+      "text": "Before submitting the application, check that your address and telephone number are written correctly.",
+      "familyId": "original-025",
+      "split": "train"
+    },
+    {
+      "id": "passage-026",
+      "text": "The manager thanked the entire team for completing such a challenging assignment ahead of schedule.",
+      "familyId": "original-026",
+      "split": "train"
+    },
+    {
+      "id": "passage-027",
+      "text": "We heard a sudden knock at the door just as the evening news began.",
+      "familyId": "original-027",
+      "split": "train"
+    },
+    {
+      "id": "passage-028",
+      "text": "A thoughtful question can encourage a conversation and help people understand another point of view.",
+      "familyId": "original-028",
+      "split": "train"
+    },
+    {
+      "id": "passage-029",
+      "text": "The restaurant serves grilled vegetables with brown rice and a refreshing glass of lemon water.",
+      "familyId": "original-029",
+      "split": "train"
+    },
+    {
+      "id": "passage-030",
+      "text": "Our train arrived early, so we had plenty of time to explore the station.",
+      "familyId": "original-030",
+      "split": "train"
+    },
+    {
+      "id": "passage-031",
+      "text": "The scientist placed the sample inside a transparent container and observed the gradual change.",
+      "familyId": "original-031",
+      "split": "train"
+    },
+    {
+      "id": "passage-032",
+      "text": "She chose a bright purple notebook to keep track of important ideas and useful expressions.",
+      "familyId": "original-032",
+      "split": "train"
+    },
+    {
+      "id": "passage-033",
+      "text": "The audience remained silent as the actor delivered the final sentence of the dramatic speech.",
+      "familyId": "original-033",
+      "split": "train"
+    },
+    {
+      "id": "passage-034",
+      "text": "A small wooden boat floated beside the shore while fishermen prepared their equipment for tomorrow.",
+      "familyId": "original-034",
+      "split": "train"
+    },
+    {
+      "id": "passage-035",
+      "text": "You can improve your pronunciation by listening carefully and repeating short phrases at a natural pace.",
+      "familyId": "original-035",
+      "split": "train"
+    },
+    {
+      "id": "passage-036",
+      "text": "The software update includes several useful features that make everyday tasks easier to complete.",
+      "familyId": "original-036",
+      "split": "train"
+    },
+    {
+      "id": "passage-037",
+      "text": "At the farmers market, customers discussed the difference between local peaches and imported fruit.",
+      "familyId": "original-037",
+      "split": "train"
+    },
+    {
+      "id": "passage-038",
+      "text": "The children built an impressive castle using cardboard boxes, colored paper, and a little imagination.",
+      "familyId": "original-038",
+      "split": "train"
+    },
+    {
+      "id": "passage-039",
+      "text": "Please remember to switch off the lights before leaving the building at the end of the day.",
+      "familyId": "original-039",
+      "split": "train"
+    },
+    {
+      "id": "passage-040",
+      "text": "The mountain trail becomes steeper after the first mile, but the view is worth the effort.",
+      "familyId": "original-040",
+      "split": "train"
+    },
+    {
+      "id": "passage-041",
+      "text": "A reliable public transportation system helps residents travel safely and reduces unnecessary traffic downtown.",
+      "familyId": "original-041",
+      "split": "train"
+    },
+    {
+      "id": "passage-042",
+      "text": "The chef added a little butter to the pan before gently stirring the chopped onions.",
+      "familyId": "original-042",
+      "split": "train"
+    },
+    {
+      "id": "passage-043",
+      "text": "Her presentation included a clear introduction, several practical examples, and a brief explanation of the results.",
+      "familyId": "original-043",
+      "split": "train"
+    },
+    {
+      "id": "passage-044",
+      "text": "The winter storm forced the airport to delay several flights until conditions improved the following morning.",
+      "familyId": "original-044",
+      "split": "train"
+    },
+    {
+      "id": "passage-045",
+      "text": "A curious puppy followed the family into the garden and discovered a tiny frog near the fountain.",
+      "familyId": "original-045",
+      "split": "train"
+    },
+    {
+      "id": "passage-046",
+      "text": "The school orchestra rehearsed together every Thursday afternoon in preparation for the spring concert.",
+      "familyId": "original-046",
+      "split": "train"
+    },
+    {
+      "id": "passage-047",
+      "text": "When the package arrives, please check the contents carefully and keep the receipt in a safe place.",
+      "familyId": "original-047",
+      "split": "train"
+    },
+    {
+      "id": "passage-048",
+      "text": "The city council proposed a new library with quiet study areas and accessible entrances for everyone.",
+      "familyId": "original-048",
+      "split": "train"
+    },
+    {
+      "id": "passage-049",
+      "text": "A generous neighbor offered to water our plants while we traveled to visit relatives in another state.",
+      "familyId": "original-049",
+      "split": "train"
+    },
+    {
+      "id": "passage-050",
+      "text": "The documentary explained how changes in ocean temperature can influence weather patterns around the world.",
+      "familyId": "original-050",
+      "split": "train"
+    },
+    {
+      "id": "passage-051",
+      "text": "Three thirsty travelers stopped at a roadside cafe to order sandwiches and freshly squeezed orange juice.",
+      "familyId": "original-051",
+      "split": "train"
+    },
+    {
+      "id": "passage-052",
+      "text": "The first chapter introduces a mysterious character who lives alone in a house beside the railway.",
+      "familyId": "original-052",
+      "split": "train"
+    },
+    {
+      "id": "passage-053",
+      "text": "Students should review their notes regularly instead of waiting until the night before an important examination.",
+      "familyId": "original-053",
+      "split": "train"
+    },
+    {
+      "id": "passage-054",
+      "text": "The red ship moved slowly past the green fishing boat as waves rolled toward the beach.",
+      "familyId": "original-054",
+      "split": "train"
+    },
+    {
+      "id": "passage-055",
+      "text": "A bowl of fresh fruit stood beside the refrigerator, beneath a photograph of the family picnic.",
+      "familyId": "original-055",
+      "split": "train"
+    },
+    {
+      "id": "passage-056",
+      "text": "The speaker emphasized the second syllable of the word and asked the class to repeat it together.",
+      "familyId": "original-056",
+      "split": "train"
+    },
+    {
+      "id": "passage-057",
+      "text": "Our company supports flexible working hours because employees have different responsibilities outside the office.",
+      "familyId": "original-057",
+      "split": "train"
+    },
+    {
+      "id": "passage-058",
+      "text": "The careful driver reduced her speed when she noticed several cyclists approaching the narrow intersection.",
+      "familyId": "original-058",
+      "split": "train"
+    },
+    {
+      "id": "passage-059",
+      "text": "A successful experiment often begins with a specific question and a method that others can repeat.",
+      "familyId": "original-059",
+      "split": "train"
+    },
+    {
+      "id": "passage-060",
+      "text": "The hotel receptionist provided a map and suggested a pleasant walking route through the historic district.",
+      "familyId": "original-060",
+      "split": "train"
+    },
+    {
+      "id": "passage-061",
+      "text": "The bright street lamps reflected in the puddles after a brief shower passed through the neighborhood.",
+      "familyId": "original-061",
+      "split": "train"
+    },
+    {
+      "id": "passage-062",
+      "text": "Before the race, the coach reminded each athlete to breathe steadily and maintain a comfortable rhythm.",
+      "familyId": "original-062",
+      "split": "train"
+    },
+    {
+      "id": "passage-063",
+      "text": "The artist mixed shades of green and yellow to paint the leaves around the old stone house.",
+      "familyId": "original-063",
+      "split": "train"
+    },
+    {
+      "id": "passage-064",
+      "text": "A detailed budget helps families prepare for unexpected expenses and make steady progress toward their goals.",
+      "familyId": "original-064",
+      "split": "train"
+    },
+    {
+      "id": "passage-065",
+      "text": "The passenger searched his pockets for the ticket while the conductor waited beside the open door.",
+      "familyId": "original-065",
+      "split": "train"
+    },
+    {
+      "id": "passage-066",
+      "text": "The university offers evening classes for adults who want to develop new skills while continuing to work.",
+      "familyId": "original-066",
+      "split": "train"
+    },
+    {
+      "id": "passage-067",
+      "text": "A group of friends shared stories around the kitchen table as a pot of vegetable soup simmered.",
+      "familyId": "original-067",
+      "split": "train"
+    },
+    {
+      "id": "passage-068",
+      "text": "The shop assistant carefully wrapped the fragile glass vase and placed it inside a sturdy cardboard box.",
+      "familyId": "original-068",
+      "split": "train"
+    },
+    {
+      "id": "passage-069",
+      "text": "Every summer, the town celebrates its history with music, dancing, and a parade along the main street.",
+      "familyId": "original-069",
+      "split": "train"
+    },
+    {
+      "id": "passage-070",
+      "text": "The researcher noticed a significant difference between the original sample and the material collected later.",
+      "familyId": "original-070",
+      "split": "train"
+    },
+    {
+      "id": "passage-071",
+      "text": "The dog slept beneath the dining room table while a gentle rain tapped against the windows.",
+      "familyId": "original-071",
+      "split": "validation"
+    },
+    {
+      "id": "passage-072",
+      "text": "A clear explanation of the rules helps new players feel comfortable before the game begins.",
+      "familyId": "original-072",
+      "split": "validation"
+    },
+    {
+      "id": "passage-073",
+      "text": "The park ranger advised visitors to carry drinking water and remain on the marked walking paths.",
+      "familyId": "original-073",
+      "split": "validation"
+    },
+    {
+      "id": "passage-074",
+      "text": "The newspaper published an interesting article about a young inventor who designed an affordable water filter.",
+      "familyId": "original-074",
+      "split": "validation"
+    },
+    {
+      "id": "passage-075",
+      "text": "After replacing the batteries, he tested the flashlight to make sure it would work during the trip.",
+      "familyId": "original-075",
+      "split": "validation"
+    },
+    {
+      "id": "passage-076",
+      "text": "The music gradually became softer as the dancers moved toward the center of the stage.",
+      "familyId": "original-076",
+      "split": "validation"
+    },
+    {
+      "id": "passage-077",
+      "text": "A warm scarf and a thick pair of socks can make a cold morning feel much more comfortable.",
+      "familyId": "original-077",
+      "split": "validation"
+    },
+    {
+      "id": "passage-078",
+      "text": "The customer requested a receipt and asked whether the store accepted returns within thirty days.",
+      "familyId": "original-078",
+      "split": "validation"
+    },
+    {
+      "id": "passage-079",
+      "text": "The lecturer paused briefly before explaining how the evidence supported a different interpretation of the event.",
+      "familyId": "original-079",
+      "split": "validation"
+    },
+    {
+      "id": "passage-080",
+      "text": "The empty classroom was quiet except for the soft sound of a clock above the whiteboard.",
+      "familyId": "original-080",
+      "split": "validation"
+    },
+    {
+      "id": "passage-081",
+      "text": "A fresh coat of paint transformed the small bedroom into a bright and welcoming place to study.",
+      "familyId": "original-081",
+      "split": "validation"
+    },
+    {
+      "id": "passage-082",
+      "text": "The team selected a simple design that could be repaired easily with materials available in most towns.",
+      "familyId": "original-082",
+      "split": "validation"
+    },
+    {
+      "id": "passage-083",
+      "text": "The nurse spoke calmly and answered every question before showing the patient where to wait.",
+      "familyId": "original-083",
+      "split": "validation"
+    },
+    {
+      "id": "passage-084",
+      "text": "The river bends sharply near the village, where a narrow footbridge connects the two grassy banks.",
+      "familyId": "original-084",
+      "split": "validation"
+    },
+    {
+      "id": "passage-085",
+      "text": "During the workshop, participants practiced giving short instructions and checking whether their partners understood them.",
+      "familyId": "original-085",
+      "split": "validation"
+    },
+    {
+      "id": "passage-086",
+      "text": "A busy schedule can still include a few minutes each day for reading, stretching, or quiet reflection.",
+      "familyId": "original-086",
+      "split": "validation"
+    },
+    {
+      "id": "passage-087",
+      "text": "The curious child wondered why the moon appeared larger when it was close to the horizon.",
+      "familyId": "original-087",
+      "split": "validation"
+    },
+    {
+      "id": "passage-088",
+      "text": "The repair technician discovered a loose wire behind the control panel and replaced the damaged connection.",
+      "familyId": "original-088",
+      "split": "validation"
+    },
+    {
+      "id": "passage-089",
+      "text": "A soft blanket lay across the sofa beside a collection of travel magazines and old photographs.",
+      "familyId": "original-089",
+      "split": "validation"
+    },
+    {
+      "id": "passage-090",
+      "text": "The market opened early to give local farmers enough time to arrange their vegetables and flowers.",
+      "familyId": "original-090",
+      "split": "validation"
+    },
+    {
+      "id": "passage-091",
+      "text": "The volunteer coordinator explained the schedule twice so that everyone knew when and where to meet.",
+      "familyId": "original-091",
+      "split": "validation"
+    },
+    {
+      "id": "passage-092",
+      "text": "A carefully chosen example can make an unfamiliar concept easier to understand and remember later.",
+      "familyId": "original-092",
+      "split": "validation"
+    },
+    {
+      "id": "passage-093",
+      "text": "The ferry crossed the bay beneath a clear sky while passengers enjoyed the cool morning air.",
+      "familyId": "original-093",
+      "split": "validation"
+    },
+    {
+      "id": "passage-094",
+      "text": "Our new neighbor speaks quietly, listens patiently, and always remembers to greet people by name.",
+      "familyId": "original-094",
+      "split": "validation"
+    },
+    {
+      "id": "passage-095",
+      "text": "The director asked the performers to slow down slightly without losing the energy of the scene.",
+      "familyId": "original-095",
+      "split": "validation"
+    },
+    {
+      "id": "passage-096",
+      "text": "A small change in the arrangement of the furniture made the room feel surprisingly spacious.",
+      "familyId": "original-096",
+      "split": "validation"
+    },
+    {
+      "id": "passage-097",
+      "text": "The researcher compared the recorded speech with several examples produced by speakers from different regions.",
+      "familyId": "original-097",
+      "split": "validation"
+    },
+    {
+      "id": "passage-098",
+      "text": "The final paragraph should connect the main ideas and explain why the findings matter to the reader.",
+      "familyId": "original-098",
+      "split": "validation"
+    },
+    {
+      "id": "passage-099",
+      "text": "The bus stopped outside the hospital before continuing toward the university and the central shopping district.",
+      "familyId": "original-099",
+      "split": "validation"
+    },
+    {
+      "id": "passage-100",
+      "text": "At the end of the lesson, each learner recorded another attempt and listened for changes in rhythm.",
+      "familyId": "original-100",
+      "split": "validation"
+    },
+    {
+      "id": "passage-101",
+      "text": "The guide explained that the carpenter measured the doorway twice before cutting the final wooden panel.",
+      "familyId": "expanded-001",
+      "split": "train"
+    },
+    {
+      "id": "passage-102",
+      "text": "We noticed that the carpenter measured the doorway twice before cutting the final wooden panel.",
+      "familyId": "expanded-001",
+      "split": "train"
+    },
+    {
+      "id": "passage-103",
+      "text": "A visitor mentioned that the carpenter measured the doorway twice before cutting the final wooden panel.",
+      "familyId": "expanded-001",
+      "split": "train"
+    },
+    {
+      "id": "passage-104",
+      "text": "The recording describes how the carpenter measured the doorway twice before cutting the final wooden panel.",
+      "familyId": "expanded-001",
+      "split": "train"
+    },
+    {
+      "id": "passage-105",
+      "text": "The guide explained that a sailing instructor checked the ropes before the students climbed aboard.",
+      "familyId": "expanded-002",
+      "split": "train"
+    },
+    {
+      "id": "passage-106",
+      "text": "We noticed that a sailing instructor checked the ropes before the students climbed aboard.",
+      "familyId": "expanded-002",
+      "split": "train"
+    },
+    {
+      "id": "passage-107",
+      "text": "A visitor mentioned that a sailing instructor checked the ropes before the students climbed aboard.",
+      "familyId": "expanded-002",
+      "split": "train"
+    },
+    {
+      "id": "passage-108",
+      "text": "The recording describes how a sailing instructor checked the ropes before the students climbed aboard.",
+      "familyId": "expanded-002",
+      "split": "train"
+    },
+    {
+      "id": "passage-109",
+      "text": "The guide explained that the ceramic bowl cracked when hot water touched its cold surface.",
+      "familyId": "expanded-003",
+      "split": "train"
+    },
+    {
+      "id": "passage-110",
+      "text": "We noticed that the ceramic bowl cracked when hot water touched its cold surface.",
+      "familyId": "expanded-003",
+      "split": "train"
+    },
+    {
+      "id": "passage-111",
+      "text": "A visitor mentioned that the ceramic bowl cracked when hot water touched its cold surface.",
+      "familyId": "expanded-003",
+      "split": "train"
+    },
+    {
+      "id": "passage-112",
+      "text": "The recording describes how the ceramic bowl cracked when hot water touched its cold surface.",
+      "familyId": "expanded-003",
+      "split": "train"
+    },
+    {
+      "id": "passage-113",
+      "text": "The guide explained that an urban planner compared several routes for the proposed bicycle lane.",
+      "familyId": "expanded-004",
+      "split": "train"
+    },
+    {
+      "id": "passage-114",
+      "text": "We noticed that an urban planner compared several routes for the proposed bicycle lane.",
+      "familyId": "expanded-004",
+      "split": "train"
+    },
+    {
+      "id": "passage-115",
+      "text": "A visitor mentioned that an urban planner compared several routes for the proposed bicycle lane.",
+      "familyId": "expanded-004",
+      "split": "train"
+    },
+    {
+      "id": "passage-116",
+      "text": "The recording describes how an urban planner compared several routes for the proposed bicycle lane.",
+      "familyId": "expanded-004",
+      "split": "train"
+    },
+    {
+      "id": "passage-117",
+      "text": "The guide explained that the drummer kept a steady beat while the singer adjusted the microphone.",
+      "familyId": "expanded-005",
+      "split": "train"
+    },
+    {
+      "id": "passage-118",
+      "text": "We noticed that the drummer kept a steady beat while the singer adjusted the microphone.",
+      "familyId": "expanded-005",
+      "split": "train"
+    },
+    {
+      "id": "passage-119",
+      "text": "A visitor mentioned that the drummer kept a steady beat while the singer adjusted the microphone.",
+      "familyId": "expanded-005",
+      "split": "train"
+    },
+    {
+      "id": "passage-120",
+      "text": "The recording describes how the drummer kept a steady beat while the singer adjusted the microphone.",
+      "familyId": "expanded-005",
+      "split": "train"
+    },
+    {
+      "id": "passage-121",
+      "text": "The guide explained that a handwritten note explained which seeds would grow well in shallow soil.",
+      "familyId": "expanded-006",
+      "split": "train"
+    },
+    {
+      "id": "passage-122",
+      "text": "We noticed that a handwritten note explained which seeds would grow well in shallow soil.",
+      "familyId": "expanded-006",
+      "split": "train"
+    },
+    {
+      "id": "passage-123",
+      "text": "A visitor mentioned that a handwritten note explained which seeds would grow well in shallow soil.",
+      "familyId": "expanded-006",
+      "split": "train"
+    },
+    {
+      "id": "passage-124",
+      "text": "The recording describes how a handwritten note explained which seeds would grow well in shallow soil.",
+      "familyId": "expanded-006",
+      "split": "train"
+    },
+    {
+      "id": "passage-125",
+      "text": "The guide explained that the rescue crew carried extra blankets for passengers waiting beside the road.",
+      "familyId": "expanded-007",
+      "split": "train"
+    },
+    {
+      "id": "passage-126",
+      "text": "We noticed that the rescue crew carried extra blankets for passengers waiting beside the road.",
+      "familyId": "expanded-007",
+      "split": "train"
+    },
+    {
+      "id": "passage-127",
+      "text": "A visitor mentioned that the rescue crew carried extra blankets for passengers waiting beside the road.",
+      "familyId": "expanded-007",
+      "split": "train"
+    },
+    {
+      "id": "passage-128",
+      "text": "The recording describes how the rescue crew carried extra blankets for passengers waiting beside the road.",
+      "familyId": "expanded-007",
+      "split": "train"
+    },
+    {
+      "id": "passage-129",
+      "text": "The guide explained that an unusual rock formation attracted hikers from several nearby villages.",
+      "familyId": "expanded-008",
+      "split": "train"
+    },
+    {
+      "id": "passage-130",
+      "text": "We noticed that an unusual rock formation attracted hikers from several nearby villages.",
+      "familyId": "expanded-008",
+      "split": "train"
+    },
+    {
+      "id": "passage-131",
+      "text": "A visitor mentioned that an unusual rock formation attracted hikers from several nearby villages.",
+      "familyId": "expanded-008",
+      "split": "train"
+    },
+    {
+      "id": "passage-132",
+      "text": "The recording describes how an unusual rock formation attracted hikers from several nearby villages.",
+      "familyId": "expanded-008",
+      "split": "train"
+    },
+    {
+      "id": "passage-133",
+      "text": "The guide explained that the coffee beans developed a richer flavor after a slightly longer roast.",
+      "familyId": "expanded-009",
+      "split": "train"
+    },
+    {
+      "id": "passage-134",
+      "text": "We noticed that the coffee beans developed a richer flavor after a slightly longer roast.",
+      "familyId": "expanded-009",
+      "split": "train"
+    },
+    {
+      "id": "passage-135",
+      "text": "A visitor mentioned that the coffee beans developed a richer flavor after a slightly longer roast.",
+      "familyId": "expanded-009",
+      "split": "train"
+    },
+    {
+      "id": "passage-136",
+      "text": "The recording describes how the coffee beans developed a richer flavor after a slightly longer roast.",
+      "familyId": "expanded-009",
+      "split": "train"
+    },
+    {
+      "id": "passage-137",
+      "text": "The guide explained that a language teacher recorded short dialogues for students to practice at home.",
+      "familyId": "expanded-010",
+      "split": "train"
+    },
+    {
+      "id": "passage-138",
+      "text": "We noticed that a language teacher recorded short dialogues for students to practice at home.",
+      "familyId": "expanded-010",
+      "split": "train"
+    },
+    {
+      "id": "passage-139",
+      "text": "A visitor mentioned that a language teacher recorded short dialogues for students to practice at home.",
+      "familyId": "expanded-010",
+      "split": "train"
+    },
+    {
+      "id": "passage-140",
+      "text": "The recording describes how a language teacher recorded short dialogues for students to practice at home.",
+      "familyId": "expanded-010",
+      "split": "train"
+    },
+    {
+      "id": "passage-141",
+      "text": "The guide explained that the delivery driver placed the heavier parcels beneath the fragile packages.",
+      "familyId": "expanded-011",
+      "split": "train"
+    },
+    {
+      "id": "passage-142",
+      "text": "We noticed that the delivery driver placed the heavier parcels beneath the fragile packages.",
+      "familyId": "expanded-011",
+      "split": "train"
+    },
+    {
+      "id": "passage-143",
+      "text": "A visitor mentioned that the delivery driver placed the heavier parcels beneath the fragile packages.",
+      "familyId": "expanded-011",
+      "split": "train"
+    },
+    {
+      "id": "passage-144",
+      "text": "The recording describes how the delivery driver placed the heavier parcels beneath the fragile packages.",
+      "familyId": "expanded-011",
+      "split": "train"
+    },
+    {
+      "id": "passage-145",
+      "text": "The guide explained that a wildlife camera captured clear images of a fox crossing the field.",
+      "familyId": "expanded-012",
+      "split": "train"
+    },
+    {
+      "id": "passage-146",
+      "text": "We noticed that a wildlife camera captured clear images of a fox crossing the field.",
+      "familyId": "expanded-012",
+      "split": "train"
+    },
+    {
+      "id": "passage-147",
+      "text": "A visitor mentioned that a wildlife camera captured clear images of a fox crossing the field.",
+      "familyId": "expanded-012",
+      "split": "train"
+    },
+    {
+      "id": "passage-148",
+      "text": "The recording describes how a wildlife camera captured clear images of a fox crossing the field.",
+      "familyId": "expanded-012",
+      "split": "train"
+    },
+    {
+      "id": "passage-149",
+      "text": "The guide explained that the old telescope needed careful cleaning before the evening observation session.",
+      "familyId": "expanded-013",
+      "split": "train"
+    },
+    {
+      "id": "passage-150",
+      "text": "We noticed that the old telescope needed careful cleaning before the evening observation session.",
+      "familyId": "expanded-013",
+      "split": "train"
+    },
+    {
+      "id": "passage-151",
+      "text": "A visitor mentioned that the old telescope needed careful cleaning before the evening observation session.",
+      "familyId": "expanded-013",
+      "split": "train"
+    },
+    {
+      "id": "passage-152",
+      "text": "The recording describes how the old telescope needed careful cleaning before the evening observation session.",
+      "familyId": "expanded-013",
+      "split": "train"
+    },
+    {
+      "id": "passage-153",
+      "text": "The guide explained that an automatic timer switched the hallway lights off after midnight.",
+      "familyId": "expanded-014",
+      "split": "train"
+    },
+    {
+      "id": "passage-154",
+      "text": "We noticed that an automatic timer switched the hallway lights off after midnight.",
+      "familyId": "expanded-014",
+      "split": "train"
+    },
+    {
+      "id": "passage-155",
+      "text": "A visitor mentioned that an automatic timer switched the hallway lights off after midnight.",
+      "familyId": "expanded-014",
+      "split": "train"
+    },
+    {
+      "id": "passage-156",
+      "text": "The recording describes how an automatic timer switched the hallway lights off after midnight.",
+      "familyId": "expanded-014",
+      "split": "train"
+    },
+    {
+      "id": "passage-157",
+      "text": "The guide explained that the hiking group followed the stream until they reached a narrow waterfall.",
+      "familyId": "expanded-015",
+      "split": "train"
+    },
+    {
+      "id": "passage-158",
+      "text": "We noticed that the hiking group followed the stream until they reached a narrow waterfall.",
+      "familyId": "expanded-015",
+      "split": "train"
+    },
+    {
+      "id": "passage-159",
+      "text": "A visitor mentioned that the hiking group followed the stream until they reached a narrow waterfall.",
+      "familyId": "expanded-015",
+      "split": "train"
+    },
+    {
+      "id": "passage-160",
+      "text": "The recording describes how the hiking group followed the stream until they reached a narrow waterfall.",
+      "familyId": "expanded-015",
+      "split": "train"
+    },
+    {
+      "id": "passage-161",
+      "text": "The guide explained that a public notice described the temporary changes to the recycling collection schedule.",
+      "familyId": "expanded-016",
+      "split": "train"
+    },
+    {
+      "id": "passage-162",
+      "text": "We noticed that a public notice described the temporary changes to the recycling collection schedule.",
+      "familyId": "expanded-016",
+      "split": "train"
+    },
+    {
+      "id": "passage-163",
+      "text": "A visitor mentioned that a public notice described the temporary changes to the recycling collection schedule.",
+      "familyId": "expanded-016",
+      "split": "train"
+    },
+    {
+      "id": "passage-164",
+      "text": "The recording describes how a public notice described the temporary changes to the recycling collection schedule.",
+      "familyId": "expanded-016",
+      "split": "train"
+    },
+    {
+      "id": "passage-165",
+      "text": "The guide explained that the designer chose a softer fabric for the inside of the jacket.",
+      "familyId": "expanded-017",
+      "split": "train"
+    },
+    {
+      "id": "passage-166",
+      "text": "We noticed that the designer chose a softer fabric for the inside of the jacket.",
+      "familyId": "expanded-017",
+      "split": "train"
+    },
+    {
+      "id": "passage-167",
+      "text": "A visitor mentioned that the designer chose a softer fabric for the inside of the jacket.",
+      "familyId": "expanded-017",
+      "split": "train"
+    },
+    {
+      "id": "passage-168",
+      "text": "The recording describes how the designer chose a softer fabric for the inside of the jacket.",
+      "familyId": "expanded-017",
+      "split": "train"
+    },
+    {
+      "id": "passage-169",
+      "text": "The guide explained that a visiting historian discovered several interesting letters in the local archive.",
+      "familyId": "expanded-018",
+      "split": "train"
+    },
+    {
+      "id": "passage-170",
+      "text": "We noticed that a visiting historian discovered several interesting letters in the local archive.",
+      "familyId": "expanded-018",
+      "split": "train"
+    },
+    {
+      "id": "passage-171",
+      "text": "A visitor mentioned that a visiting historian discovered several interesting letters in the local archive.",
+      "familyId": "expanded-018",
+      "split": "train"
+    },
+    {
+      "id": "passage-172",
+      "text": "The recording describes how a visiting historian discovered several interesting letters in the local archive.",
+      "familyId": "expanded-018",
+      "split": "train"
+    },
+    {
+      "id": "passage-173",
+      "text": "The guide explained that the classroom windows remained open while the students painted their paper models.",
+      "familyId": "expanded-019",
+      "split": "train"
+    },
+    {
+      "id": "passage-174",
+      "text": "We noticed that the classroom windows remained open while the students painted their paper models.",
+      "familyId": "expanded-019",
+      "split": "train"
+    },
+    {
+      "id": "passage-175",
+      "text": "A visitor mentioned that the classroom windows remained open while the students painted their paper models.",
+      "familyId": "expanded-019",
+      "split": "train"
+    },
+    {
+      "id": "passage-176",
+      "text": "The recording describes how the classroom windows remained open while the students painted their paper models.",
+      "familyId": "expanded-019",
+      "split": "train"
+    },
+    {
+      "id": "passage-177",
+      "text": "The guide explained that an experienced translator checked whether the unfamiliar expression had another meaning.",
+      "familyId": "expanded-020",
+      "split": "train"
+    },
+    {
+      "id": "passage-178",
+      "text": "We noticed that an experienced translator checked whether the unfamiliar expression had another meaning.",
+      "familyId": "expanded-020",
+      "split": "train"
+    },
+    {
+      "id": "passage-179",
+      "text": "A visitor mentioned that an experienced translator checked whether the unfamiliar expression had another meaning.",
+      "familyId": "expanded-020",
+      "split": "train"
+    },
+    {
+      "id": "passage-180",
+      "text": "The recording describes how an experienced translator checked whether the unfamiliar expression had another meaning.",
+      "familyId": "expanded-020",
+      "split": "train"
+    },
+    {
+      "id": "passage-181",
+      "text": "The guide explained that the tennis coach demonstrated a relaxed grip and a smooth forward swing.",
+      "familyId": "expanded-021",
+      "split": "train"
+    },
+    {
+      "id": "passage-182",
+      "text": "We noticed that the tennis coach demonstrated a relaxed grip and a smooth forward swing.",
+      "familyId": "expanded-021",
+      "split": "train"
+    },
+    {
+      "id": "passage-183",
+      "text": "A visitor mentioned that the tennis coach demonstrated a relaxed grip and a smooth forward swing.",
+      "familyId": "expanded-021",
+      "split": "train"
+    },
+    {
+      "id": "passage-184",
+      "text": "The recording describes how the tennis coach demonstrated a relaxed grip and a smooth forward swing.",
+      "familyId": "expanded-021",
+      "split": "train"
+    },
+    {
+      "id": "passage-185",
+      "text": "The guide explained that a damaged wheel made the shopping cart difficult to push across the floor.",
+      "familyId": "expanded-022",
+      "split": "train"
+    },
+    {
+      "id": "passage-186",
+      "text": "We noticed that a damaged wheel made the shopping cart difficult to push across the floor.",
+      "familyId": "expanded-022",
+      "split": "train"
+    },
+    {
+      "id": "passage-187",
+      "text": "A visitor mentioned that a damaged wheel made the shopping cart difficult to push across the floor.",
+      "familyId": "expanded-022",
+      "split": "train"
+    },
+    {
+      "id": "passage-188",
+      "text": "The recording describes how a damaged wheel made the shopping cart difficult to push across the floor.",
+      "familyId": "expanded-022",
+      "split": "train"
+    },
+    {
+      "id": "passage-189",
+      "text": "The guide explained that the film crew returned early to record the quiet sounds of the forest.",
+      "familyId": "expanded-023",
+      "split": "train"
+    },
+    {
+      "id": "passage-190",
+      "text": "We noticed that the film crew returned early to record the quiet sounds of the forest.",
+      "familyId": "expanded-023",
+      "split": "train"
+    },
+    {
+      "id": "passage-191",
+      "text": "A visitor mentioned that the film crew returned early to record the quiet sounds of the forest.",
+      "familyId": "expanded-023",
+      "split": "train"
+    },
+    {
+      "id": "passage-192",
+      "text": "The recording describes how the film crew returned early to record the quiet sounds of the forest.",
+      "familyId": "expanded-023",
+      "split": "train"
+    },
+    {
+      "id": "passage-193",
+      "text": "The guide explained that a small sensor measured changes in temperature throughout the greenhouse.",
+      "familyId": "expanded-024",
+      "split": "train"
+    },
+    {
+      "id": "passage-194",
+      "text": "We noticed that a small sensor measured changes in temperature throughout the greenhouse.",
+      "familyId": "expanded-024",
+      "split": "train"
+    },
+    {
+      "id": "passage-195",
+      "text": "A visitor mentioned that a small sensor measured changes in temperature throughout the greenhouse.",
+      "familyId": "expanded-024",
+      "split": "train"
+    },
+    {
+      "id": "passage-196",
+      "text": "The recording describes how a small sensor measured changes in temperature throughout the greenhouse.",
+      "familyId": "expanded-024",
+      "split": "train"
+    },
+    {
+      "id": "passage-197",
+      "text": "The guide explained that the dentist explained each step before adjusting the uncomfortable metal bracket.",
+      "familyId": "expanded-025",
+      "split": "train"
+    },
+    {
+      "id": "passage-198",
+      "text": "We noticed that the dentist explained each step before adjusting the uncomfortable metal bracket.",
+      "familyId": "expanded-025",
+      "split": "train"
+    },
+    {
+      "id": "passage-199",
+      "text": "A visitor mentioned that the dentist explained each step before adjusting the uncomfortable metal bracket.",
+      "familyId": "expanded-025",
+      "split": "train"
+    },
+    {
+      "id": "passage-200",
+      "text": "The recording describes how the dentist explained each step before adjusting the uncomfortable metal bracket.",
+      "familyId": "expanded-025",
+      "split": "train"
+    },
+    {
+      "id": "passage-201",
+      "text": "The guide explained that a local charity collected warm coats for families arriving during winter.",
+      "familyId": "expanded-026",
+      "split": "train"
+    },
+    {
+      "id": "passage-202",
+      "text": "We noticed that a local charity collected warm coats for families arriving during winter.",
+      "familyId": "expanded-026",
+      "split": "train"
+    },
+    {
+      "id": "passage-203",
+      "text": "A visitor mentioned that a local charity collected warm coats for families arriving during winter.",
+      "familyId": "expanded-026",
+      "split": "train"
+    },
+    {
+      "id": "passage-204",
+      "text": "The recording describes how a local charity collected warm coats for families arriving during winter.",
+      "familyId": "expanded-026",
+      "split": "train"
+    },
+    {
+      "id": "passage-205",
+      "text": "The guide explained that the elevator stopped briefly before opening its doors on the fourth floor.",
+      "familyId": "expanded-027",
+      "split": "train"
+    },
+    {
+      "id": "passage-206",
+      "text": "We noticed that the elevator stopped briefly before opening its doors on the fourth floor.",
+      "familyId": "expanded-027",
+      "split": "train"
+    },
+    {
+      "id": "passage-207",
+      "text": "A visitor mentioned that the elevator stopped briefly before opening its doors on the fourth floor.",
+      "familyId": "expanded-027",
+      "split": "train"
+    },
+    {
+      "id": "passage-208",
+      "text": "The recording describes how the elevator stopped briefly before opening its doors on the fourth floor.",
+      "familyId": "expanded-027",
+      "split": "train"
+    },
+    {
+      "id": "passage-209",
+      "text": "The guide explained that a careful editor removed a sentence that repeated an earlier explanation.",
+      "familyId": "expanded-028",
+      "split": "train"
+    },
+    {
+      "id": "passage-210",
+      "text": "We noticed that a careful editor removed a sentence that repeated an earlier explanation.",
+      "familyId": "expanded-028",
+      "split": "train"
+    },
+    {
+      "id": "passage-211",
+      "text": "A visitor mentioned that a careful editor removed a sentence that repeated an earlier explanation.",
+      "familyId": "expanded-028",
+      "split": "train"
+    },
+    {
+      "id": "passage-212",
+      "text": "The recording describes how a careful editor removed a sentence that repeated an earlier explanation.",
+      "familyId": "expanded-028",
+      "split": "train"
+    },
+    {
+      "id": "passage-213",
+      "text": "The guide explained that the swimming instructor asked the beginners to practice breathing near the edge.",
+      "familyId": "expanded-029",
+      "split": "train"
+    },
+    {
+      "id": "passage-214",
+      "text": "We noticed that the swimming instructor asked the beginners to practice breathing near the edge.",
+      "familyId": "expanded-029",
+      "split": "train"
+    },
+    {
+      "id": "passage-215",
+      "text": "A visitor mentioned that the swimming instructor asked the beginners to practice breathing near the edge.",
+      "familyId": "expanded-029",
+      "split": "train"
+    },
+    {
+      "id": "passage-216",
+      "text": "The recording describes how the swimming instructor asked the beginners to practice breathing near the edge.",
+      "familyId": "expanded-029",
+      "split": "train"
+    },
+    {
+      "id": "passage-217",
+      "text": "The guide explained that a handwritten recipe recommended adding the chopped garlic after the onions softened.",
+      "familyId": "expanded-030",
+      "split": "train"
+    },
+    {
+      "id": "passage-218",
+      "text": "We noticed that a handwritten recipe recommended adding the chopped garlic after the onions softened.",
+      "familyId": "expanded-030",
+      "split": "train"
+    },
+    {
+      "id": "passage-219",
+      "text": "A visitor mentioned that a handwritten recipe recommended adding the chopped garlic after the onions softened.",
+      "familyId": "expanded-030",
+      "split": "train"
+    },
+    {
+      "id": "passage-220",
+      "text": "The recording describes how a handwritten recipe recommended adding the chopped garlic after the onions softened.",
+      "familyId": "expanded-030",
+      "split": "train"
+    },
+    {
+      "id": "passage-221",
+      "text": "The guide explained that the railway engineer inspected a loose connection beneath the control switch.",
+      "familyId": "expanded-031",
+      "split": "train"
+    },
+    {
+      "id": "passage-222",
+      "text": "We noticed that the railway engineer inspected a loose connection beneath the control switch.",
+      "familyId": "expanded-031",
+      "split": "train"
+    },
+    {
+      "id": "passage-223",
+      "text": "A visitor mentioned that the railway engineer inspected a loose connection beneath the control switch.",
+      "familyId": "expanded-031",
+      "split": "train"
+    },
+    {
+      "id": "passage-224",
+      "text": "The recording describes how the railway engineer inspected a loose connection beneath the control switch.",
+      "familyId": "expanded-031",
+      "split": "train"
+    },
+    {
+      "id": "passage-225",
+      "text": "The guide explained that a distant thunderstorm interrupted the outdoor concert shortly before sunset.",
+      "familyId": "expanded-032",
+      "split": "train"
+    },
+    {
+      "id": "passage-226",
+      "text": "We noticed that a distant thunderstorm interrupted the outdoor concert shortly before sunset.",
+      "familyId": "expanded-032",
+      "split": "train"
+    },
+    {
+      "id": "passage-227",
+      "text": "A visitor mentioned that a distant thunderstorm interrupted the outdoor concert shortly before sunset.",
+      "familyId": "expanded-032",
+      "split": "train"
+    },
+    {
+      "id": "passage-228",
+      "text": "The recording describes how a distant thunderstorm interrupted the outdoor concert shortly before sunset.",
+      "familyId": "expanded-032",
+      "split": "train"
+    },
+    {
+      "id": "passage-229",
+      "text": "The guide explained that the mountain guide carried a paper map in case the phone battery failed.",
+      "familyId": "expanded-033",
+      "split": "train"
+    },
+    {
+      "id": "passage-230",
+      "text": "We noticed that the mountain guide carried a paper map in case the phone battery failed.",
+      "familyId": "expanded-033",
+      "split": "train"
+    },
+    {
+      "id": "passage-231",
+      "text": "A visitor mentioned that the mountain guide carried a paper map in case the phone battery failed.",
+      "familyId": "expanded-033",
+      "split": "train"
+    },
+    {
+      "id": "passage-232",
+      "text": "The recording describes how the mountain guide carried a paper map in case the phone battery failed.",
+      "familyId": "expanded-033",
+      "split": "train"
+    },
+    {
+      "id": "passage-233",
+      "text": "The guide explained that a cheerful shopkeeper described how the handmade baskets were woven.",
+      "familyId": "expanded-034",
+      "split": "train"
+    },
+    {
+      "id": "passage-234",
+      "text": "We noticed that a cheerful shopkeeper described how the handmade baskets were woven.",
+      "familyId": "expanded-034",
+      "split": "train"
+    },
+    {
+      "id": "passage-235",
+      "text": "A visitor mentioned that a cheerful shopkeeper described how the handmade baskets were woven.",
+      "familyId": "expanded-034",
+      "split": "train"
+    },
+    {
+      "id": "passage-236",
+      "text": "The recording describes how a cheerful shopkeeper described how the handmade baskets were woven.",
+      "familyId": "expanded-034",
+      "split": "train"
+    },
+    {
+      "id": "passage-237",
+      "text": "The guide explained that the printed diagram showed where each cable should connect to the monitor.",
+      "familyId": "expanded-035",
+      "split": "train"
+    },
+    {
+      "id": "passage-238",
+      "text": "We noticed that the printed diagram showed where each cable should connect to the monitor.",
+      "familyId": "expanded-035",
+      "split": "train"
+    },
+    {
+      "id": "passage-239",
+      "text": "A visitor mentioned that the printed diagram showed where each cable should connect to the monitor.",
+      "familyId": "expanded-035",
+      "split": "train"
+    },
+    {
+      "id": "passage-240",
+      "text": "The recording describes how the printed diagram showed where each cable should connect to the monitor.",
+      "familyId": "expanded-035",
+      "split": "train"
+    },
+    {
+      "id": "passage-241",
+      "text": "The guide explained that a reliable alarm clock helped the travelers catch their early flight.",
+      "familyId": "expanded-036",
+      "split": "train"
+    },
+    {
+      "id": "passage-242",
+      "text": "We noticed that a reliable alarm clock helped the travelers catch their early flight.",
+      "familyId": "expanded-036",
+      "split": "train"
+    },
+    {
+      "id": "passage-243",
+      "text": "A visitor mentioned that a reliable alarm clock helped the travelers catch their early flight.",
+      "familyId": "expanded-036",
+      "split": "train"
+    },
+    {
+      "id": "passage-244",
+      "text": "The recording describes how a reliable alarm clock helped the travelers catch their early flight.",
+      "familyId": "expanded-036",
+      "split": "train"
+    },
+    {
+      "id": "passage-245",
+      "text": "The guide explained that the soccer referee explained why the final goal had been disallowed.",
+      "familyId": "expanded-037",
+      "split": "train"
+    },
+    {
+      "id": "passage-246",
+      "text": "We noticed that the soccer referee explained why the final goal had been disallowed.",
+      "familyId": "expanded-037",
+      "split": "train"
+    },
+    {
+      "id": "passage-247",
+      "text": "A visitor mentioned that the soccer referee explained why the final goal had been disallowed.",
+      "familyId": "expanded-037",
+      "split": "train"
+    },
+    {
+      "id": "passage-248",
+      "text": "The recording describes how the soccer referee explained why the final goal had been disallowed.",
+      "familyId": "expanded-037",
+      "split": "train"
+    },
+    {
+      "id": "passage-249",
+      "text": "The guide explained that a geologist examined layers of pale stone beside the river bank.",
+      "familyId": "expanded-038",
+      "split": "train"
+    },
+    {
+      "id": "passage-250",
+      "text": "We noticed that a geologist examined layers of pale stone beside the river bank.",
+      "familyId": "expanded-038",
+      "split": "train"
+    },
+    {
+      "id": "passage-251",
+      "text": "A visitor mentioned that a geologist examined layers of pale stone beside the river bank.",
+      "familyId": "expanded-038",
+      "split": "train"
+    },
+    {
+      "id": "passage-252",
+      "text": "The recording describes how a geologist examined layers of pale stone beside the river bank.",
+      "familyId": "expanded-038",
+      "split": "train"
+    },
+    {
+      "id": "passage-253",
+      "text": "The guide explained that the community choir rehearsed a gentle melody with a challenging final phrase.",
+      "familyId": "expanded-039",
+      "split": "train"
+    },
+    {
+      "id": "passage-254",
+      "text": "We noticed that the community choir rehearsed a gentle melody with a challenging final phrase.",
+      "familyId": "expanded-039",
+      "split": "train"
+    },
+    {
+      "id": "passage-255",
+      "text": "A visitor mentioned that the community choir rehearsed a gentle melody with a challenging final phrase.",
+      "familyId": "expanded-039",
+      "split": "train"
+    },
+    {
+      "id": "passage-256",
+      "text": "The recording describes how the community choir rehearsed a gentle melody with a challenging final phrase.",
+      "familyId": "expanded-039",
+      "split": "train"
+    },
+    {
+      "id": "passage-257",
+      "text": "The guide explained that a narrow staircase led visitors to the small exhibition above the gallery.",
+      "familyId": "expanded-040",
+      "split": "train"
+    },
+    {
+      "id": "passage-258",
+      "text": "We noticed that a narrow staircase led visitors to the small exhibition above the gallery.",
+      "familyId": "expanded-040",
+      "split": "train"
+    },
+    {
+      "id": "passage-259",
+      "text": "A visitor mentioned that a narrow staircase led visitors to the small exhibition above the gallery.",
+      "familyId": "expanded-040",
+      "split": "train"
+    },
+    {
+      "id": "passage-260",
+      "text": "The recording describes how a narrow staircase led visitors to the small exhibition above the gallery.",
+      "familyId": "expanded-040",
+      "split": "train"
+    },
+    {
+      "id": "passage-261",
+      "text": "The guide explained that the science club designed a simple experiment using magnets and paper clips.",
+      "familyId": "expanded-041",
+      "split": "train"
+    },
+    {
+      "id": "passage-262",
+      "text": "We noticed that the science club designed a simple experiment using magnets and paper clips.",
+      "familyId": "expanded-041",
+      "split": "train"
+    },
+    {
+      "id": "passage-263",
+      "text": "A visitor mentioned that the science club designed a simple experiment using magnets and paper clips.",
+      "familyId": "expanded-041",
+      "split": "train"
+    },
+    {
+      "id": "passage-264",
+      "text": "The recording describes how the science club designed a simple experiment using magnets and paper clips.",
+      "familyId": "expanded-041",
+      "split": "train"
+    },
+    {
+      "id": "passage-265",
+      "text": "The guide explained that a skilled gardener moved the delicate plants away from the direct afternoon sun.",
+      "familyId": "expanded-042",
+      "split": "train"
+    },
+    {
+      "id": "passage-266",
+      "text": "We noticed that a skilled gardener moved the delicate plants away from the direct afternoon sun.",
+      "familyId": "expanded-042",
+      "split": "train"
+    },
+    {
+      "id": "passage-267",
+      "text": "A visitor mentioned that a skilled gardener moved the delicate plants away from the direct afternoon sun.",
+      "familyId": "expanded-042",
+      "split": "train"
+    },
+    {
+      "id": "passage-268",
+      "text": "The recording describes how a skilled gardener moved the delicate plants away from the direct afternoon sun.",
+      "familyId": "expanded-042",
+      "split": "train"
+    },
+    {
+      "id": "passage-269",
+      "text": "The guide explained that the empty bottle rolled beneath the seat when the bus turned sharply.",
+      "familyId": "expanded-043",
+      "split": "train"
+    },
+    {
+      "id": "passage-270",
+      "text": "We noticed that the empty bottle rolled beneath the seat when the bus turned sharply.",
+      "familyId": "expanded-043",
+      "split": "train"
+    },
+    {
+      "id": "passage-271",
+      "text": "A visitor mentioned that the empty bottle rolled beneath the seat when the bus turned sharply.",
+      "familyId": "expanded-043",
+      "split": "train"
+    },
+    {
+      "id": "passage-272",
+      "text": "The recording describes how the empty bottle rolled beneath the seat when the bus turned sharply.",
+      "familyId": "expanded-043",
+      "split": "train"
+    },
+    {
+      "id": "passage-273",
+      "text": "The guide explained that a short announcement reminded passengers to keep their belongings close.",
+      "familyId": "expanded-044",
+      "split": "train"
+    },
+    {
+      "id": "passage-274",
+      "text": "We noticed that a short announcement reminded passengers to keep their belongings close.",
+      "familyId": "expanded-044",
+      "split": "train"
+    },
+    {
+      "id": "passage-275",
+      "text": "A visitor mentioned that a short announcement reminded passengers to keep their belongings close.",
+      "familyId": "expanded-044",
+      "split": "train"
+    },
+    {
+      "id": "passage-276",
+      "text": "The recording describes how a short announcement reminded passengers to keep their belongings close.",
+      "familyId": "expanded-044",
+      "split": "train"
+    },
+    {
+      "id": "passage-277",
+      "text": "The guide explained that the laboratory assistant labeled every container before the samples were refrigerated.",
+      "familyId": "expanded-045",
+      "split": "train"
+    },
+    {
+      "id": "passage-278",
+      "text": "We noticed that the laboratory assistant labeled every container before the samples were refrigerated.",
+      "familyId": "expanded-045",
+      "split": "train"
+    },
+    {
+      "id": "passage-279",
+      "text": "A visitor mentioned that the laboratory assistant labeled every container before the samples were refrigerated.",
+      "familyId": "expanded-045",
+      "split": "train"
+    },
+    {
+      "id": "passage-280",
+      "text": "The recording describes how the laboratory assistant labeled every container before the samples were refrigerated.",
+      "familyId": "expanded-045",
+      "split": "train"
+    },
+    {
+      "id": "passage-281",
+      "text": "The guide explained that a friendly dog waited patiently outside the bakery for its owner.",
+      "familyId": "expanded-046",
+      "split": "train"
+    },
+    {
+      "id": "passage-282",
+      "text": "We noticed that a friendly dog waited patiently outside the bakery for its owner.",
+      "familyId": "expanded-046",
+      "split": "train"
+    },
+    {
+      "id": "passage-283",
+      "text": "A visitor mentioned that a friendly dog waited patiently outside the bakery for its owner.",
+      "familyId": "expanded-046",
+      "split": "train"
+    },
+    {
+      "id": "passage-284",
+      "text": "The recording describes how a friendly dog waited patiently outside the bakery for its owner.",
+      "familyId": "expanded-046",
+      "split": "train"
+    },
+    {
+      "id": "passage-285",
+      "text": "The guide explained that the volunteer carefully repaired a torn page in the old picture book.",
+      "familyId": "expanded-047",
+      "split": "train"
+    },
+    {
+      "id": "passage-286",
+      "text": "We noticed that the volunteer carefully repaired a torn page in the old picture book.",
+      "familyId": "expanded-047",
+      "split": "train"
+    },
+    {
+      "id": "passage-287",
+      "text": "A visitor mentioned that the volunteer carefully repaired a torn page in the old picture book.",
+      "familyId": "expanded-047",
+      "split": "train"
+    },
+    {
+      "id": "passage-288",
+      "text": "The recording describes how the volunteer carefully repaired a torn page in the old picture book.",
+      "familyId": "expanded-047",
+      "split": "train"
+    },
+    {
+      "id": "passage-289",
+      "text": "The guide explained that a group of architects discussed how natural light could brighten the entrance.",
+      "familyId": "expanded-048",
+      "split": "train"
+    },
+    {
+      "id": "passage-290",
+      "text": "We noticed that a group of architects discussed how natural light could brighten the entrance.",
+      "familyId": "expanded-048",
+      "split": "train"
+    },
+    {
+      "id": "passage-291",
+      "text": "A visitor mentioned that a group of architects discussed how natural light could brighten the entrance.",
+      "familyId": "expanded-048",
+      "split": "train"
+    },
+    {
+      "id": "passage-292",
+      "text": "The recording describes how a group of architects discussed how natural light could brighten the entrance.",
+      "familyId": "expanded-048",
+      "split": "train"
+    },
+    {
+      "id": "passage-293",
+      "text": "The guide explained that the outdoor market closed early because a strong wind damaged several stalls.",
+      "familyId": "expanded-049",
+      "split": "train"
+    },
+    {
+      "id": "passage-294",
+      "text": "We noticed that the outdoor market closed early because a strong wind damaged several stalls.",
+      "familyId": "expanded-049",
+      "split": "train"
+    },
+    {
+      "id": "passage-295",
+      "text": "A visitor mentioned that the outdoor market closed early because a strong wind damaged several stalls.",
+      "familyId": "expanded-049",
+      "split": "train"
+    },
+    {
+      "id": "passage-296",
+      "text": "The recording describes how the outdoor market closed early because a strong wind damaged several stalls.",
+      "familyId": "expanded-049",
+      "split": "train"
+    },
+    {
+      "id": "passage-297",
+      "text": "The guide explained that a flexible timetable allowed the musicians to rehearse around their other commitments.",
+      "familyId": "expanded-050",
+      "split": "train"
+    },
+    {
+      "id": "passage-298",
+      "text": "We noticed that a flexible timetable allowed the musicians to rehearse around their other commitments.",
+      "familyId": "expanded-050",
+      "split": "train"
+    },
+    {
+      "id": "passage-299",
+      "text": "A visitor mentioned that a flexible timetable allowed the musicians to rehearse around their other commitments.",
+      "familyId": "expanded-050",
+      "split": "train"
+    },
+    {
+      "id": "passage-300",
+      "text": "The recording describes how a flexible timetable allowed the musicians to rehearse around their other commitments.",
+      "familyId": "expanded-050",
+      "split": "train"
+    },
+    {
+      "id": "passage-301",
+      "text": "The guide explained that the camera lens became cloudy when the photographer entered the warm building.",
+      "familyId": "expanded-051",
+      "split": "train"
+    },
+    {
+      "id": "passage-302",
+      "text": "We noticed that the camera lens became cloudy when the photographer entered the warm building.",
+      "familyId": "expanded-051",
+      "split": "train"
+    },
+    {
+      "id": "passage-303",
+      "text": "A visitor mentioned that the camera lens became cloudy when the photographer entered the warm building.",
+      "familyId": "expanded-051",
+      "split": "train"
+    },
+    {
+      "id": "passage-304",
+      "text": "The recording describes how the camera lens became cloudy when the photographer entered the warm building.",
+      "familyId": "expanded-051",
+      "split": "train"
+    },
+    {
+      "id": "passage-305",
+      "text": "The guide explained that a local author described the childhood experiences that inspired her first novel.",
+      "familyId": "expanded-052",
+      "split": "train"
+    },
+    {
+      "id": "passage-306",
+      "text": "We noticed that a local author described the childhood experiences that inspired her first novel.",
+      "familyId": "expanded-052",
+      "split": "train"
+    },
+    {
+      "id": "passage-307",
+      "text": "A visitor mentioned that a local author described the childhood experiences that inspired her first novel.",
+      "familyId": "expanded-052",
+      "split": "train"
+    },
+    {
+      "id": "passage-308",
+      "text": "The recording describes how a local author described the childhood experiences that inspired her first novel.",
+      "familyId": "expanded-052",
+      "split": "train"
+    },
+    {
+      "id": "passage-309",
+      "text": "The guide explained that the delivery instructions included a clear photograph of the correct entrance.",
+      "familyId": "expanded-053",
+      "split": "train"
+    },
+    {
+      "id": "passage-310",
+      "text": "We noticed that the delivery instructions included a clear photograph of the correct entrance.",
+      "familyId": "expanded-053",
+      "split": "train"
+    },
+    {
+      "id": "passage-311",
+      "text": "A visitor mentioned that the delivery instructions included a clear photograph of the correct entrance.",
+      "familyId": "expanded-053",
+      "split": "train"
+    },
+    {
+      "id": "passage-312",
+      "text": "The recording describes how the delivery instructions included a clear photograph of the correct entrance.",
+      "familyId": "expanded-053",
+      "split": "train"
+    },
+    {
+      "id": "passage-313",
+      "text": "The guide explained that a patient coach encouraged the runner to recover before beginning another session.",
+      "familyId": "expanded-054",
+      "split": "train"
+    },
+    {
+      "id": "passage-314",
+      "text": "We noticed that a patient coach encouraged the runner to recover before beginning another session.",
+      "familyId": "expanded-054",
+      "split": "train"
+    },
+    {
+      "id": "passage-315",
+      "text": "A visitor mentioned that a patient coach encouraged the runner to recover before beginning another session.",
+      "familyId": "expanded-054",
+      "split": "train"
+    },
+    {
+      "id": "passage-316",
+      "text": "The recording describes how a patient coach encouraged the runner to recover before beginning another session.",
+      "familyId": "expanded-054",
+      "split": "train"
+    },
+    {
+      "id": "passage-317",
+      "text": "The guide explained that the bridge lights created a colorful reflection across the calm water.",
+      "familyId": "expanded-055",
+      "split": "train"
+    },
+    {
+      "id": "passage-318",
+      "text": "We noticed that the bridge lights created a colorful reflection across the calm water.",
+      "familyId": "expanded-055",
+      "split": "train"
+    },
+    {
+      "id": "passage-319",
+      "text": "A visitor mentioned that the bridge lights created a colorful reflection across the calm water.",
+      "familyId": "expanded-055",
+      "split": "train"
+    },
+    {
+      "id": "passage-320",
+      "text": "The recording describes how the bridge lights created a colorful reflection across the calm water.",
+      "familyId": "expanded-055",
+      "split": "train"
+    },
+    {
+      "id": "passage-321",
+      "text": "The guide explained that a professional cook showed the class how to slice a ripe avocado safely.",
+      "familyId": "expanded-056",
+      "split": "train"
+    },
+    {
+      "id": "passage-322",
+      "text": "We noticed that a professional cook showed the class how to slice a ripe avocado safely.",
+      "familyId": "expanded-056",
+      "split": "train"
+    },
+    {
+      "id": "passage-323",
+      "text": "A visitor mentioned that a professional cook showed the class how to slice a ripe avocado safely.",
+      "familyId": "expanded-056",
+      "split": "train"
+    },
+    {
+      "id": "passage-324",
+      "text": "The recording describes how a professional cook showed the class how to slice a ripe avocado safely.",
+      "familyId": "expanded-056",
+      "split": "train"
+    },
+    {
+      "id": "passage-325",
+      "text": "The guide explained that the museum staff moved the delicate sculpture into a climate controlled room.",
+      "familyId": "expanded-057",
+      "split": "train"
+    },
+    {
+      "id": "passage-326",
+      "text": "We noticed that the museum staff moved the delicate sculpture into a climate controlled room.",
+      "familyId": "expanded-057",
+      "split": "train"
+    },
+    {
+      "id": "passage-327",
+      "text": "A visitor mentioned that the museum staff moved the delicate sculpture into a climate controlled room.",
+      "familyId": "expanded-057",
+      "split": "train"
+    },
+    {
+      "id": "passage-328",
+      "text": "The recording describes how the museum staff moved the delicate sculpture into a climate controlled room.",
+      "familyId": "expanded-057",
+      "split": "train"
+    },
+    {
+      "id": "passage-329",
+      "text": "The guide explained that a short cable connected the portable keyboard to the recording equipment.",
+      "familyId": "expanded-058",
+      "split": "train"
+    },
+    {
+      "id": "passage-330",
+      "text": "We noticed that a short cable connected the portable keyboard to the recording equipment.",
+      "familyId": "expanded-058",
+      "split": "train"
+    },
+    {
+      "id": "passage-331",
+      "text": "A visitor mentioned that a short cable connected the portable keyboard to the recording equipment.",
+      "familyId": "expanded-058",
+      "split": "train"
+    },
+    {
+      "id": "passage-332",
+      "text": "The recording describes how a short cable connected the portable keyboard to the recording equipment.",
+      "familyId": "expanded-058",
+      "split": "train"
+    },
+    {
+      "id": "passage-333",
+      "text": "The guide explained that the school principal announced a new program for students interested in astronomy.",
+      "familyId": "expanded-059",
+      "split": "train"
+    },
+    {
+      "id": "passage-334",
+      "text": "We noticed that the school principal announced a new program for students interested in astronomy.",
+      "familyId": "expanded-059",
+      "split": "train"
+    },
+    {
+      "id": "passage-335",
+      "text": "A visitor mentioned that the school principal announced a new program for students interested in astronomy.",
+      "familyId": "expanded-059",
+      "split": "train"
+    },
+    {
+      "id": "passage-336",
+      "text": "The recording describes how the school principal announced a new program for students interested in astronomy.",
+      "familyId": "expanded-059",
+      "split": "train"
+    },
+    {
+      "id": "passage-337",
+      "text": "The guide explained that a sudden change in pressure caused the sealed container to expand slightly.",
+      "familyId": "expanded-060",
+      "split": "train"
+    },
+    {
+      "id": "passage-338",
+      "text": "We noticed that a sudden change in pressure caused the sealed container to expand slightly.",
+      "familyId": "expanded-060",
+      "split": "train"
+    },
+    {
+      "id": "passage-339",
+      "text": "A visitor mentioned that a sudden change in pressure caused the sealed container to expand slightly.",
+      "familyId": "expanded-060",
+      "split": "train"
+    },
+    {
+      "id": "passage-340",
+      "text": "The recording describes how a sudden change in pressure caused the sealed container to expand slightly.",
+      "familyId": "expanded-060",
+      "split": "train"
+    },
+    {
+      "id": "passage-341",
+      "text": "The guide explained that the farmers planted a row of trees to shelter the young fruit plants.",
+      "familyId": "expanded-061",
+      "split": "train"
+    },
+    {
+      "id": "passage-342",
+      "text": "We noticed that the farmers planted a row of trees to shelter the young fruit plants.",
+      "familyId": "expanded-061",
+      "split": "train"
+    },
+    {
+      "id": "passage-343",
+      "text": "A visitor mentioned that the farmers planted a row of trees to shelter the young fruit plants.",
+      "familyId": "expanded-061",
+      "split": "train"
+    },
+    {
+      "id": "passage-344",
+      "text": "The recording describes how the farmers planted a row of trees to shelter the young fruit plants.",
+      "familyId": "expanded-061",
+      "split": "train"
+    },
+    {
+      "id": "passage-345",
+      "text": "The guide explained that a narrow strip of sunlight crossed the floor beside the sleeping cat.",
+      "familyId": "expanded-062",
+      "split": "train"
+    },
+    {
+      "id": "passage-346",
+      "text": "We noticed that a narrow strip of sunlight crossed the floor beside the sleeping cat.",
+      "familyId": "expanded-062",
+      "split": "train"
+    },
+    {
+      "id": "passage-347",
+      "text": "A visitor mentioned that a narrow strip of sunlight crossed the floor beside the sleeping cat.",
+      "familyId": "expanded-062",
+      "split": "train"
+    },
+    {
+      "id": "passage-348",
+      "text": "The recording describes how a narrow strip of sunlight crossed the floor beside the sleeping cat.",
+      "familyId": "expanded-062",
+      "split": "train"
+    },
+    {
+      "id": "passage-349",
+      "text": "The guide explained that the workshop instructor explained how to sharpen a blade without damaging its edge.",
+      "familyId": "expanded-063",
+      "split": "train"
+    },
+    {
+      "id": "passage-350",
+      "text": "We noticed that the workshop instructor explained how to sharpen a blade without damaging its edge.",
+      "familyId": "expanded-063",
+      "split": "train"
+    },
+    {
+      "id": "passage-351",
+      "text": "A visitor mentioned that the workshop instructor explained how to sharpen a blade without damaging its edge.",
+      "familyId": "expanded-063",
+      "split": "train"
+    },
+    {
+      "id": "passage-352",
+      "text": "The recording describes how the workshop instructor explained how to sharpen a blade without damaging its edge.",
+      "familyId": "expanded-063",
+      "split": "train"
+    },
+    {
+      "id": "passage-353",
+      "text": "The guide explained that a thoughtful student asked whether the same method would work with another material.",
+      "familyId": "expanded-064",
+      "split": "train"
+    },
+    {
+      "id": "passage-354",
+      "text": "We noticed that a thoughtful student asked whether the same method would work with another material.",
+      "familyId": "expanded-064",
+      "split": "train"
+    },
+    {
+      "id": "passage-355",
+      "text": "A visitor mentioned that a thoughtful student asked whether the same method would work with another material.",
+      "familyId": "expanded-064",
+      "split": "train"
+    },
+    {
+      "id": "passage-356",
+      "text": "The recording describes how a thoughtful student asked whether the same method would work with another material.",
+      "familyId": "expanded-064",
+      "split": "train"
+    },
+    {
+      "id": "passage-357",
+      "text": "The guide explained that the concert pianist waited until the audience settled before playing the first chord.",
+      "familyId": "expanded-065",
+      "split": "train"
+    },
+    {
+      "id": "passage-358",
+      "text": "We noticed that the concert pianist waited until the audience settled before playing the first chord.",
+      "familyId": "expanded-065",
+      "split": "train"
+    },
+    {
+      "id": "passage-359",
+      "text": "A visitor mentioned that the concert pianist waited until the audience settled before playing the first chord.",
+      "familyId": "expanded-065",
+      "split": "train"
+    },
+    {
+      "id": "passage-360",
+      "text": "The recording describes how the concert pianist waited until the audience settled before playing the first chord.",
+      "familyId": "expanded-065",
+      "split": "train"
+    },
+    {
+      "id": "passage-361",
+      "text": "The guide explained that a printed checklist helped the volunteers prepare the room for the public meeting.",
+      "familyId": "expanded-066",
+      "split": "train"
+    },
+    {
+      "id": "passage-362",
+      "text": "We noticed that a printed checklist helped the volunteers prepare the room for the public meeting.",
+      "familyId": "expanded-066",
+      "split": "train"
+    },
+    {
+      "id": "passage-363",
+      "text": "A visitor mentioned that a printed checklist helped the volunteers prepare the room for the public meeting.",
+      "familyId": "expanded-066",
+      "split": "train"
+    },
+    {
+      "id": "passage-364",
+      "text": "The recording describes how a printed checklist helped the volunteers prepare the room for the public meeting.",
+      "familyId": "expanded-066",
+      "split": "train"
+    },
+    {
+      "id": "passage-365",
+      "text": "The guide explained that the tailor shortened the sleeves and replaced a missing button on the coat.",
+      "familyId": "expanded-067",
+      "split": "train"
+    },
+    {
+      "id": "passage-366",
+      "text": "We noticed that the tailor shortened the sleeves and replaced a missing button on the coat.",
+      "familyId": "expanded-067",
+      "split": "train"
+    },
+    {
+      "id": "passage-367",
+      "text": "A visitor mentioned that the tailor shortened the sleeves and replaced a missing button on the coat.",
+      "familyId": "expanded-067",
+      "split": "train"
+    },
+    {
+      "id": "passage-368",
+      "text": "The recording describes how the tailor shortened the sleeves and replaced a missing button on the coat.",
+      "familyId": "expanded-067",
+      "split": "train"
+    },
+    {
+      "id": "passage-369",
+      "text": "The guide explained that a simple diagram explained how rainwater moved through the underground storage system.",
+      "familyId": "expanded-068",
+      "split": "train"
+    },
+    {
+      "id": "passage-370",
+      "text": "We noticed that a simple diagram explained how rainwater moved through the underground storage system.",
+      "familyId": "expanded-068",
+      "split": "train"
+    },
+    {
+      "id": "passage-371",
+      "text": "A visitor mentioned that a simple diagram explained how rainwater moved through the underground storage system.",
+      "familyId": "expanded-068",
+      "split": "train"
+    },
+    {
+      "id": "passage-372",
+      "text": "The recording describes how a simple diagram explained how rainwater moved through the underground storage system.",
+      "familyId": "expanded-068",
+      "split": "train"
+    },
+    {
+      "id": "passage-373",
+      "text": "The guide explained that the fishing boat returned slowly because one of its engines had stopped working.",
+      "familyId": "expanded-069",
+      "split": "train"
+    },
+    {
+      "id": "passage-374",
+      "text": "We noticed that the fishing boat returned slowly because one of its engines had stopped working.",
+      "familyId": "expanded-069",
+      "split": "train"
+    },
+    {
+      "id": "passage-375",
+      "text": "A visitor mentioned that the fishing boat returned slowly because one of its engines had stopped working.",
+      "familyId": "expanded-069",
+      "split": "train"
+    },
+    {
+      "id": "passage-376",
+      "text": "The recording describes how the fishing boat returned slowly because one of its engines had stopped working.",
+      "familyId": "expanded-069",
+      "split": "train"
+    },
+    {
+      "id": "passage-377",
+      "text": "The guide explained that a friendly librarian recommended a collection of short stories for new readers.",
+      "familyId": "expanded-070",
+      "split": "train"
+    },
+    {
+      "id": "passage-378",
+      "text": "We noticed that a friendly librarian recommended a collection of short stories for new readers.",
+      "familyId": "expanded-070",
+      "split": "train"
+    },
+    {
+      "id": "passage-379",
+      "text": "A visitor mentioned that a friendly librarian recommended a collection of short stories for new readers.",
+      "familyId": "expanded-070",
+      "split": "train"
+    },
+    {
+      "id": "passage-380",
+      "text": "The recording describes how a friendly librarian recommended a collection of short stories for new readers.",
+      "familyId": "expanded-070",
+      "split": "train"
+    },
+    {
+      "id": "passage-381",
+      "text": "The guide explained that the cycling team adjusted their plans when the mountain road became slippery.",
+      "familyId": "expanded-071",
+      "split": "validation"
+    },
+    {
+      "id": "passage-382",
+      "text": "We noticed that the cycling team adjusted their plans when the mountain road became slippery.",
+      "familyId": "expanded-071",
+      "split": "validation"
+    },
+    {
+      "id": "passage-383",
+      "text": "A visitor mentioned that the cycling team adjusted their plans when the mountain road became slippery.",
+      "familyId": "expanded-071",
+      "split": "validation"
+    },
+    {
+      "id": "passage-384",
+      "text": "The recording describes how the cycling team adjusted their plans when the mountain road became slippery.",
+      "familyId": "expanded-071",
+      "split": "validation"
+    },
+    {
+      "id": "passage-385",
+      "text": "The guide explained that a portable radio provided useful updates during the temporary power failure.",
+      "familyId": "expanded-072",
+      "split": "validation"
+    },
+    {
+      "id": "passage-386",
+      "text": "We noticed that a portable radio provided useful updates during the temporary power failure.",
+      "familyId": "expanded-072",
+      "split": "validation"
+    },
+    {
+      "id": "passage-387",
+      "text": "A visitor mentioned that a portable radio provided useful updates during the temporary power failure.",
+      "familyId": "expanded-072",
+      "split": "validation"
+    },
+    {
+      "id": "passage-388",
+      "text": "The recording describes how a portable radio provided useful updates during the temporary power failure.",
+      "familyId": "expanded-072",
+      "split": "validation"
+    },
+    {
+      "id": "passage-389",
+      "text": "The guide explained that the new exhibition included several photographs taken beneath the ocean surface.",
+      "familyId": "expanded-073",
+      "split": "validation"
+    },
+    {
+      "id": "passage-390",
+      "text": "We noticed that the new exhibition included several photographs taken beneath the ocean surface.",
+      "familyId": "expanded-073",
+      "split": "validation"
+    },
+    {
+      "id": "passage-391",
+      "text": "A visitor mentioned that the new exhibition included several photographs taken beneath the ocean surface.",
+      "familyId": "expanded-073",
+      "split": "validation"
+    },
+    {
+      "id": "passage-392",
+      "text": "The recording describes how the new exhibition included several photographs taken beneath the ocean surface.",
+      "familyId": "expanded-073",
+      "split": "validation"
+    },
+    {
+      "id": "passage-393",
+      "text": "The guide explained that a careful researcher repeated the measurement before recording an unexpected result.",
+      "familyId": "expanded-074",
+      "split": "validation"
+    },
+    {
+      "id": "passage-394",
+      "text": "We noticed that a careful researcher repeated the measurement before recording an unexpected result.",
+      "familyId": "expanded-074",
+      "split": "validation"
+    },
+    {
+      "id": "passage-395",
+      "text": "A visitor mentioned that a careful researcher repeated the measurement before recording an unexpected result.",
+      "familyId": "expanded-074",
+      "split": "validation"
+    },
+    {
+      "id": "passage-396",
+      "text": "The recording describes how a careful researcher repeated the measurement before recording an unexpected result.",
+      "familyId": "expanded-074",
+      "split": "validation"
+    },
+    {
+      "id": "passage-397",
+      "text": "The guide explained that the restaurant owner offered a smaller portion to customers with lighter appetites.",
+      "familyId": "expanded-075",
+      "split": "validation"
+    },
+    {
+      "id": "passage-398",
+      "text": "We noticed that the restaurant owner offered a smaller portion to customers with lighter appetites.",
+      "familyId": "expanded-075",
+      "split": "validation"
+    },
+    {
+      "id": "passage-399",
+      "text": "A visitor mentioned that the restaurant owner offered a smaller portion to customers with lighter appetites.",
+      "familyId": "expanded-075",
+      "split": "validation"
+    },
+    {
+      "id": "passage-400",
+      "text": "The recording describes how the restaurant owner offered a smaller portion to customers with lighter appetites.",
+      "familyId": "expanded-075",
+      "split": "validation"
+    },
+    {
+      "id": "passage-401",
+      "text": "The guide explained that a soft cushion made the wooden chair more comfortable during the long rehearsal.",
+      "familyId": "expanded-076",
+      "split": "validation"
+    },
+    {
+      "id": "passage-402",
+      "text": "We noticed that a soft cushion made the wooden chair more comfortable during the long rehearsal.",
+      "familyId": "expanded-076",
+      "split": "validation"
+    },
+    {
+      "id": "passage-403",
+      "text": "A visitor mentioned that a soft cushion made the wooden chair more comfortable during the long rehearsal.",
+      "familyId": "expanded-076",
+      "split": "validation"
+    },
+    {
+      "id": "passage-404",
+      "text": "The recording describes how a soft cushion made the wooden chair more comfortable during the long rehearsal.",
+      "familyId": "expanded-076",
+      "split": "validation"
+    },
+    {
+      "id": "passage-405",
+      "text": "The guide explained that the travel guide suggested taking the ferry before the afternoon crowds arrived.",
+      "familyId": "expanded-077",
+      "split": "validation"
+    },
+    {
+      "id": "passage-406",
+      "text": "We noticed that the travel guide suggested taking the ferry before the afternoon crowds arrived.",
+      "familyId": "expanded-077",
+      "split": "validation"
+    },
+    {
+      "id": "passage-407",
+      "text": "A visitor mentioned that the travel guide suggested taking the ferry before the afternoon crowds arrived.",
+      "familyId": "expanded-077",
+      "split": "validation"
+    },
+    {
+      "id": "passage-408",
+      "text": "The recording describes how the travel guide suggested taking the ferry before the afternoon crowds arrived.",
+      "familyId": "expanded-077",
+      "split": "validation"
+    },
+    {
+      "id": "passage-409",
+      "text": "The guide explained that a young engineer designed a quieter fan for the portable cooling unit.",
+      "familyId": "expanded-078",
+      "split": "validation"
+    },
+    {
+      "id": "passage-410",
+      "text": "We noticed that a young engineer designed a quieter fan for the portable cooling unit.",
+      "familyId": "expanded-078",
+      "split": "validation"
+    },
+    {
+      "id": "passage-411",
+      "text": "A visitor mentioned that a young engineer designed a quieter fan for the portable cooling unit.",
+      "familyId": "expanded-078",
+      "split": "validation"
+    },
+    {
+      "id": "passage-412",
+      "text": "The recording describes how a young engineer designed a quieter fan for the portable cooling unit.",
+      "familyId": "expanded-078",
+      "split": "validation"
+    },
+    {
+      "id": "passage-413",
+      "text": "The guide explained that the exhibition curator explained why the photographs were arranged in chronological order.",
+      "familyId": "expanded-079",
+      "split": "validation"
+    },
+    {
+      "id": "passage-414",
+      "text": "We noticed that the exhibition curator explained why the photographs were arranged in chronological order.",
+      "familyId": "expanded-079",
+      "split": "validation"
+    },
+    {
+      "id": "passage-415",
+      "text": "A visitor mentioned that the exhibition curator explained why the photographs were arranged in chronological order.",
+      "familyId": "expanded-079",
+      "split": "validation"
+    },
+    {
+      "id": "passage-416",
+      "text": "The recording describes how the exhibition curator explained why the photographs were arranged in chronological order.",
+      "familyId": "expanded-079",
+      "split": "validation"
+    },
+    {
+      "id": "passage-417",
+      "text": "The guide explained that a patient instructor showed the class how to fold a fitted sheet.",
+      "familyId": "expanded-080",
+      "split": "validation"
+    },
+    {
+      "id": "passage-418",
+      "text": "We noticed that a patient instructor showed the class how to fold a fitted sheet.",
+      "familyId": "expanded-080",
+      "split": "validation"
+    },
+    {
+      "id": "passage-419",
+      "text": "A visitor mentioned that a patient instructor showed the class how to fold a fitted sheet.",
+      "familyId": "expanded-080",
+      "split": "validation"
+    },
+    {
+      "id": "passage-420",
+      "text": "The recording describes how a patient instructor showed the class how to fold a fitted sheet.",
+      "familyId": "expanded-080",
+      "split": "validation"
+    },
+    {
+      "id": "passage-421",
+      "text": "The guide explained that the changing position of the shadow helped the children estimate the time.",
+      "familyId": "expanded-081",
+      "split": "validation"
+    },
+    {
+      "id": "passage-422",
+      "text": "We noticed that the changing position of the shadow helped the children estimate the time.",
+      "familyId": "expanded-081",
+      "split": "validation"
+    },
+    {
+      "id": "passage-423",
+      "text": "A visitor mentioned that the changing position of the shadow helped the children estimate the time.",
+      "familyId": "expanded-081",
+      "split": "validation"
+    },
+    {
+      "id": "passage-424",
+      "text": "The recording describes how the changing position of the shadow helped the children estimate the time.",
+      "familyId": "expanded-081",
+      "split": "validation"
+    },
+    {
+      "id": "passage-425",
+      "text": "The guide explained that a small delivery truck blocked the entrance while the workers unloaded fresh supplies.",
+      "familyId": "expanded-082",
+      "split": "validation"
+    },
+    {
+      "id": "passage-426",
+      "text": "We noticed that a small delivery truck blocked the entrance while the workers unloaded fresh supplies.",
+      "familyId": "expanded-082",
+      "split": "validation"
+    },
+    {
+      "id": "passage-427",
+      "text": "A visitor mentioned that a small delivery truck blocked the entrance while the workers unloaded fresh supplies.",
+      "familyId": "expanded-082",
+      "split": "validation"
+    },
+    {
+      "id": "passage-428",
+      "text": "The recording describes how a small delivery truck blocked the entrance while the workers unloaded fresh supplies.",
+      "familyId": "expanded-082",
+      "split": "validation"
+    },
+    {
+      "id": "passage-429",
+      "text": "The guide explained that the photographer chose a wider angle to include the whole mountain range.",
+      "familyId": "expanded-083",
+      "split": "validation"
+    },
+    {
+      "id": "passage-430",
+      "text": "We noticed that the photographer chose a wider angle to include the whole mountain range.",
+      "familyId": "expanded-083",
+      "split": "validation"
+    },
+    {
+      "id": "passage-431",
+      "text": "A visitor mentioned that the photographer chose a wider angle to include the whole mountain range.",
+      "familyId": "expanded-083",
+      "split": "validation"
+    },
+    {
+      "id": "passage-432",
+      "text": "The recording describes how the photographer chose a wider angle to include the whole mountain range.",
+      "familyId": "expanded-083",
+      "split": "validation"
+    },
+    {
+      "id": "passage-433",
+      "text": "The guide explained that a volunteer guide described the plants that could survive in the dry landscape.",
+      "familyId": "expanded-084",
+      "split": "validation"
+    },
+    {
+      "id": "passage-434",
+      "text": "We noticed that a volunteer guide described the plants that could survive in the dry landscape.",
+      "familyId": "expanded-084",
+      "split": "validation"
+    },
+    {
+      "id": "passage-435",
+      "text": "A visitor mentioned that a volunteer guide described the plants that could survive in the dry landscape.",
+      "familyId": "expanded-084",
+      "split": "validation"
+    },
+    {
+      "id": "passage-436",
+      "text": "The recording describes how a volunteer guide described the plants that could survive in the dry landscape.",
+      "familyId": "expanded-084",
+      "split": "validation"
+    },
+    {
+      "id": "passage-437",
+      "text": "The guide explained that the basketball players practiced short passes before attempting the more complicated routine.",
+      "familyId": "expanded-085",
+      "split": "validation"
+    },
+    {
+      "id": "passage-438",
+      "text": "We noticed that the basketball players practiced short passes before attempting the more complicated routine.",
+      "familyId": "expanded-085",
+      "split": "validation"
+    },
+    {
+      "id": "passage-439",
+      "text": "A visitor mentioned that the basketball players practiced short passes before attempting the more complicated routine.",
+      "familyId": "expanded-085",
+      "split": "validation"
+    },
+    {
+      "id": "passage-440",
+      "text": "The recording describes how the basketball players practiced short passes before attempting the more complicated routine.",
+      "familyId": "expanded-085",
+      "split": "validation"
+    },
+    {
+      "id": "passage-441",
+      "text": "The guide explained that a clear written agreement prevented confusion about who would maintain the shared garden.",
+      "familyId": "expanded-086",
+      "split": "validation"
+    },
+    {
+      "id": "passage-442",
+      "text": "We noticed that a clear written agreement prevented confusion about who would maintain the shared garden.",
+      "familyId": "expanded-086",
+      "split": "validation"
+    },
+    {
+      "id": "passage-443",
+      "text": "A visitor mentioned that a clear written agreement prevented confusion about who would maintain the shared garden.",
+      "familyId": "expanded-086",
+      "split": "validation"
+    },
+    {
+      "id": "passage-444",
+      "text": "The recording describes how a clear written agreement prevented confusion about who would maintain the shared garden.",
+      "familyId": "expanded-086",
+      "split": "validation"
+    },
+    {
+      "id": "passage-445",
+      "text": "The guide explained that the optician adjusted the frame until the glasses rested comfortably on the nose.",
+      "familyId": "expanded-087",
+      "split": "validation"
+    },
+    {
+      "id": "passage-446",
+      "text": "We noticed that the optician adjusted the frame until the glasses rested comfortably on the nose.",
+      "familyId": "expanded-087",
+      "split": "validation"
+    },
+    {
+      "id": "passage-447",
+      "text": "A visitor mentioned that the optician adjusted the frame until the glasses rested comfortably on the nose.",
+      "familyId": "expanded-087",
+      "split": "validation"
+    },
+    {
+      "id": "passage-448",
+      "text": "The recording describes how the optician adjusted the frame until the glasses rested comfortably on the nose.",
+      "familyId": "expanded-087",
+      "split": "validation"
+    },
+    {
+      "id": "passage-449",
+      "text": "The guide explained that a quiet reading corner gave the children somewhere to relax after lunch.",
+      "familyId": "expanded-088",
+      "split": "validation"
+    },
+    {
+      "id": "passage-450",
+      "text": "We noticed that a quiet reading corner gave the children somewhere to relax after lunch.",
+      "familyId": "expanded-088",
+      "split": "validation"
+    },
+    {
+      "id": "passage-451",
+      "text": "A visitor mentioned that a quiet reading corner gave the children somewhere to relax after lunch.",
+      "familyId": "expanded-088",
+      "split": "validation"
+    },
+    {
+      "id": "passage-452",
+      "text": "The recording describes how a quiet reading corner gave the children somewhere to relax after lunch.",
+      "familyId": "expanded-088",
+      "split": "validation"
+    },
+    {
+      "id": "passage-453",
+      "text": "The guide explained that the railway station displayed updated departure times on a large electronic board.",
+      "familyId": "expanded-089",
+      "split": "validation"
+    },
+    {
+      "id": "passage-454",
+      "text": "We noticed that the railway station displayed updated departure times on a large electronic board.",
+      "familyId": "expanded-089",
+      "split": "validation"
+    },
+    {
+      "id": "passage-455",
+      "text": "A visitor mentioned that the railway station displayed updated departure times on a large electronic board.",
+      "familyId": "expanded-089",
+      "split": "validation"
+    },
+    {
+      "id": "passage-456",
+      "text": "The recording describes how the railway station displayed updated departure times on a large electronic board.",
+      "familyId": "expanded-089",
+      "split": "validation"
+    },
+    {
+      "id": "passage-457",
+      "text": "The guide explained that a long wooden spoon kept the cook away from the rising steam.",
+      "familyId": "expanded-090",
+      "split": "validation"
+    },
+    {
+      "id": "passage-458",
+      "text": "We noticed that a long wooden spoon kept the cook away from the rising steam.",
+      "familyId": "expanded-090",
+      "split": "validation"
+    },
+    {
+      "id": "passage-459",
+      "text": "A visitor mentioned that a long wooden spoon kept the cook away from the rising steam.",
+      "familyId": "expanded-090",
+      "split": "validation"
+    },
+    {
+      "id": "passage-460",
+      "text": "The recording describes how a long wooden spoon kept the cook away from the rising steam.",
+      "familyId": "expanded-090",
+      "split": "validation"
+    },
+    {
+      "id": "passage-461",
+      "text": "The guide explained that the craft teacher demonstrated how to join the pieces without visible glue.",
+      "familyId": "expanded-091",
+      "split": "validation"
+    },
+    {
+      "id": "passage-462",
+      "text": "We noticed that the craft teacher demonstrated how to join the pieces without visible glue.",
+      "familyId": "expanded-091",
+      "split": "validation"
+    },
+    {
+      "id": "passage-463",
+      "text": "A visitor mentioned that the craft teacher demonstrated how to join the pieces without visible glue.",
+      "familyId": "expanded-091",
+      "split": "validation"
+    },
+    {
+      "id": "passage-464",
+      "text": "The recording describes how the craft teacher demonstrated how to join the pieces without visible glue.",
+      "familyId": "expanded-091",
+      "split": "validation"
+    },
+    {
+      "id": "passage-465",
+      "text": "The guide explained that a temporary barrier protected pedestrians while the workers repaired the pavement.",
+      "familyId": "expanded-092",
+      "split": "validation"
+    },
+    {
+      "id": "passage-466",
+      "text": "We noticed that a temporary barrier protected pedestrians while the workers repaired the pavement.",
+      "familyId": "expanded-092",
+      "split": "validation"
+    },
+    {
+      "id": "passage-467",
+      "text": "A visitor mentioned that a temporary barrier protected pedestrians while the workers repaired the pavement.",
+      "familyId": "expanded-092",
+      "split": "validation"
+    },
+    {
+      "id": "passage-468",
+      "text": "The recording describes how a temporary barrier protected pedestrians while the workers repaired the pavement.",
+      "familyId": "expanded-092",
+      "split": "validation"
+    },
+    {
+      "id": "passage-469",
+      "text": "The guide explained that the jazz ensemble experimented with a slower version of the familiar melody.",
+      "familyId": "expanded-093",
+      "split": "validation"
+    },
+    {
+      "id": "passage-470",
+      "text": "We noticed that the jazz ensemble experimented with a slower version of the familiar melody.",
+      "familyId": "expanded-093",
+      "split": "validation"
+    },
+    {
+      "id": "passage-471",
+      "text": "A visitor mentioned that the jazz ensemble experimented with a slower version of the familiar melody.",
+      "familyId": "expanded-093",
+      "split": "validation"
+    },
+    {
+      "id": "passage-472",
+      "text": "The recording describes how the jazz ensemble experimented with a slower version of the familiar melody.",
+      "familyId": "expanded-093",
+      "split": "validation"
+    },
+    {
+      "id": "passage-473",
+      "text": "The guide explained that a young botanist photographed the unusual pattern on the underside of the leaf.",
+      "familyId": "expanded-094",
+      "split": "validation"
+    },
+    {
+      "id": "passage-474",
+      "text": "We noticed that a young botanist photographed the unusual pattern on the underside of the leaf.",
+      "familyId": "expanded-094",
+      "split": "validation"
+    },
+    {
+      "id": "passage-475",
+      "text": "A visitor mentioned that a young botanist photographed the unusual pattern on the underside of the leaf.",
+      "familyId": "expanded-094",
+      "split": "validation"
+    },
+    {
+      "id": "passage-476",
+      "text": "The recording describes how a young botanist photographed the unusual pattern on the underside of the leaf.",
+      "familyId": "expanded-094",
+      "split": "validation"
+    },
+    {
+      "id": "passage-477",
+      "text": "The guide explained that the rowing crew moved together as the boat approached the final bend.",
+      "familyId": "expanded-095",
+      "split": "validation"
+    },
+    {
+      "id": "passage-478",
+      "text": "We noticed that the rowing crew moved together as the boat approached the final bend.",
+      "familyId": "expanded-095",
+      "split": "validation"
+    },
+    {
+      "id": "passage-479",
+      "text": "A visitor mentioned that the rowing crew moved together as the boat approached the final bend.",
+      "familyId": "expanded-095",
+      "split": "validation"
+    },
+    {
+      "id": "passage-480",
+      "text": "The recording describes how the rowing crew moved together as the boat approached the final bend.",
+      "familyId": "expanded-095",
+      "split": "validation"
+    },
+    {
+      "id": "passage-481",
+      "text": "The guide explained that a handwritten sign directed visitors toward the entrance behind the old theater.",
+      "familyId": "expanded-096",
+      "split": "validation"
+    },
+    {
+      "id": "passage-482",
+      "text": "We noticed that a handwritten sign directed visitors toward the entrance behind the old theater.",
+      "familyId": "expanded-096",
+      "split": "validation"
+    },
+    {
+      "id": "passage-483",
+      "text": "A visitor mentioned that a handwritten sign directed visitors toward the entrance behind the old theater.",
+      "familyId": "expanded-096",
+      "split": "validation"
+    },
+    {
+      "id": "passage-484",
+      "text": "The recording describes how a handwritten sign directed visitors toward the entrance behind the old theater.",
+      "familyId": "expanded-096",
+      "split": "validation"
+    },
+    {
+      "id": "passage-485",
+      "text": "The guide explained that the mechanic compared the worn part with a replacement from the sealed package.",
+      "familyId": "expanded-097",
+      "split": "validation"
+    },
+    {
+      "id": "passage-486",
+      "text": "We noticed that the mechanic compared the worn part with a replacement from the sealed package.",
+      "familyId": "expanded-097",
+      "split": "validation"
+    },
+    {
+      "id": "passage-487",
+      "text": "A visitor mentioned that the mechanic compared the worn part with a replacement from the sealed package.",
+      "familyId": "expanded-097",
+      "split": "validation"
+    },
+    {
+      "id": "passage-488",
+      "text": "The recording describes how the mechanic compared the worn part with a replacement from the sealed package.",
+      "familyId": "expanded-097",
+      "split": "validation"
+    },
+    {
+      "id": "passage-489",
+      "text": "The guide explained that a local newspaper interviewed the volunteers who had restored the riverside walking trail.",
+      "familyId": "expanded-098",
+      "split": "validation"
+    },
+    {
+      "id": "passage-490",
+      "text": "We noticed that a local newspaper interviewed the volunteers who had restored the riverside walking trail.",
+      "familyId": "expanded-098",
+      "split": "validation"
+    },
+    {
+      "id": "passage-491",
+      "text": "A visitor mentioned that a local newspaper interviewed the volunteers who had restored the riverside walking trail.",
+      "familyId": "expanded-098",
+      "split": "validation"
+    },
+    {
+      "id": "passage-492",
+      "text": "The recording describes how a local newspaper interviewed the volunteers who had restored the riverside walking trail.",
+      "familyId": "expanded-098",
+      "split": "validation"
+    },
+    {
+      "id": "passage-493",
+      "text": "The guide explained that the students organized their research notes before writing the first draft together.",
+      "familyId": "expanded-099",
+      "split": "validation"
+    },
+    {
+      "id": "passage-494",
+      "text": "We noticed that the students organized their research notes before writing the first draft together.",
+      "familyId": "expanded-099",
+      "split": "validation"
+    },
+    {
+      "id": "passage-495",
+      "text": "A visitor mentioned that the students organized their research notes before writing the first draft together.",
+      "familyId": "expanded-099",
+      "split": "validation"
+    },
+    {
+      "id": "passage-496",
+      "text": "The recording describes how the students organized their research notes before writing the first draft together.",
+      "familyId": "expanded-099",
+      "split": "validation"
+    },
+    {
+      "id": "passage-497",
+      "text": "The guide explained that a gentle exercise routine helped the dancer recover movement after a long break.",
+      "familyId": "expanded-100",
+      "split": "validation"
+    },
+    {
+      "id": "passage-498",
+      "text": "We noticed that a gentle exercise routine helped the dancer recover movement after a long break.",
+      "familyId": "expanded-100",
+      "split": "validation"
+    },
+    {
+      "id": "passage-499",
+      "text": "A visitor mentioned that a gentle exercise routine helped the dancer recover movement after a long break.",
+      "familyId": "expanded-100",
+      "split": "validation"
+    },
+    {
+      "id": "passage-500",
+      "text": "The recording describes how a gentle exercise routine helped the dancer recover movement after a long break.",
+      "familyId": "expanded-100",
+      "split": "validation"
+    },
+    {
+      "id": "passage-501",
+      "text": "The theatre manager counted the empty seats before opening the side entrance for late visitors.",
+      "familyId": "fresh-v3-501",
+      "split": "test"
+    },
+    {
+      "id": "passage-502",
+      "text": "A yellow umbrella dried beside the door while the neighbours discussed their weekend plans.",
+      "familyId": "fresh-v3-502",
+      "split": "test"
+    },
+    {
+      "id": "passage-503",
+      "text": "The railway engineer tested the warning lights after replacing a damaged cable near the crossing.",
+      "familyId": "fresh-v3-503",
+      "split": "test"
+    },
+    {
+      "id": "passage-504",
+      "text": "Our local baker saved the last warm loaf for a customer returning from the night shift.",
+      "familyId": "fresh-v3-504",
+      "split": "test"
+    },
+    {
+      "id": "passage-505",
+      "text": "The curious child traced the shape of an island on a faded map of the Pacific Ocean.",
+      "familyId": "fresh-v3-505",
+      "split": "test"
+    },
+    {
+      "id": "passage-506",
+      "text": "A silver spoon slipped behind the cupboard when the kitchen drawer came off its runners.",
+      "familyId": "fresh-v3-506",
+      "split": "test"
+    },
+    {
+      "id": "passage-507",
+      "text": "The volunteer nurse brought a fresh blanket and quietly asked whether the room was warm enough.",
+      "familyId": "fresh-v3-507",
+      "split": "test"
+    },
+    {
+      "id": "passage-508",
+      "text": "Several hikers waited beneath a rock ledge until the heavy shower moved across the valley.",
+      "familyId": "fresh-v3-508",
+      "split": "test"
+    },
+    {
+      "id": "passage-509",
+      "text": "The young pianist repeated the difficult section slowly before playing the whole piece again.",
+      "familyId": "fresh-v3-509",
+      "split": "test"
+    },
+    {
+      "id": "passage-510",
+      "text": "A handwritten sign asked passengers to keep the narrow path clear for arriving bicycles.",
+      "familyId": "fresh-v3-510",
+      "split": "test"
+    },
+    {
+      "id": "passage-511",
+      "text": "The hotel receptionist found a quiet room overlooking the courtyard rather than the busy road.",
+      "familyId": "fresh-v3-511",
+      "split": "test"
+    },
+    {
+      "id": "passage-512",
+      "text": "An experienced farmer showed the visitors how to recognise healthy roots beneath dry soil.",
+      "familyId": "fresh-v3-512",
+      "split": "test"
+    },
+    {
+      "id": "passage-513",
+      "text": "The swimming coach moved the lesson indoors because strong winds made the outdoor pool unsafe.",
+      "familyId": "fresh-v3-513",
+      "split": "test"
+    },
+    {
+      "id": "passage-514",
+      "text": "A small delivery van stopped beside the florist just as the morning market began to open.",
+      "familyId": "fresh-v3-514",
+      "split": "test"
+    },
+    {
+      "id": "passage-515",
+      "text": "The librarian wrapped the damaged cover carefully and placed the book on a separate shelf.",
+      "familyId": "fresh-v3-515",
+      "split": "test"
+    },
+    {
+      "id": "passage-516",
+      "text": "Our guide described the old bridge while a fishing boat passed silently beneath its stone arches.",
+      "familyId": "fresh-v3-516",
+      "split": "test"
+    },
+    {
+      "id": "passage-517",
+      "text": "The researcher compared the results twice before sending the revised table to her colleagues.",
+      "familyId": "fresh-v3-517",
+      "split": "test"
+    },
+    {
+      "id": "passage-518",
+      "text": "A nervous puppy followed the scent of breakfast through the hallway and into the sunny kitchen.",
+      "familyId": "fresh-v3-518",
+      "split": "test"
+    },
+    {
+      "id": "passage-519",
+      "text": "The mechanic explained why the engine made a soft clicking sound during cold weather.",
+      "familyId": "fresh-v3-519",
+      "split": "test"
+    },
+    {
+      "id": "passage-520",
+      "text": "A local artist arranged several blue glass bowls beneath a single bright lamp in the gallery.",
+      "familyId": "fresh-v3-520",
+      "split": "test"
+    },
+    {
+      "id": "passage-521",
+      "text": "The school secretary checked the visitor list before giving each parent a paper name badge.",
+      "familyId": "fresh-v3-521",
+      "split": "test"
+    },
+    {
+      "id": "passage-522",
+      "text": "Two passengers exchanged seats so that a family could watch the coastline from the same window.",
+      "familyId": "fresh-v3-522",
+      "split": "test"
+    },
+    {
+      "id": "passage-523",
+      "text": "The shop assistant placed the fragile package inside a larger box lined with folded newspaper.",
+      "familyId": "fresh-v3-523",
+      "split": "test"
+    },
+    {
+      "id": "passage-524",
+      "text": "A gentle breeze carried the smell of fresh coffee across the square towards the station steps.",
+      "familyId": "fresh-v3-524",
+      "split": "test"
+    },
+    {
+      "id": "passage-525",
+      "text": "The gardener left a shallow dish of water beneath the hedge for birds during the summer heat.",
+      "familyId": "fresh-v3-525",
+      "split": "test"
+    },
+    {
+      "id": "passage-526",
+      "text": "Our youngest player noticed the missing ball under a bench near the changing room entrance.",
+      "familyId": "fresh-v3-526",
+      "split": "test"
+    },
+    {
+      "id": "passage-527",
+      "text": "The village council approved a simple plan to repair the footpath before the winter rains.",
+      "familyId": "fresh-v3-527",
+      "split": "test"
+    },
+    {
+      "id": "passage-528",
+      "text": "A patient teacher listened to each explanation before drawing a useful example on the board.",
+      "familyId": "fresh-v3-528",
+      "split": "test"
+    },
+    {
+      "id": "passage-529",
+      "text": "The restaurant owner asked the musicians to finish their final song before the kitchen closed.",
+      "familyId": "fresh-v3-529",
+      "split": "test"
+    },
+    {
+      "id": "passage-530",
+      "text": "An orange light appeared on the control panel shortly after the cooling fan stopped turning.",
+      "familyId": "fresh-v3-530",
+      "split": "test"
+    },
+    {
+      "id": "passage-531",
+      "text": "The architect adjusted the window height to bring more afternoon sunlight into the reading room.",
+      "familyId": "fresh-v3-531",
+      "split": "test"
+    },
+    {
+      "id": "passage-532",
+      "text": "A group of students collected clean jars for an experiment about how seeds respond to light.",
+      "familyId": "fresh-v3-532",
+      "split": "test"
+    },
+    {
+      "id": "passage-533",
+      "text": "The museum attendant pointed out a tiny signature hidden near the edge of the painted frame.",
+      "familyId": "fresh-v3-533",
+      "split": "test"
+    },
+    {
+      "id": "passage-534",
+      "text": "Our neighbour borrowed a long ladder to remove a branch resting against the upstairs window.",
+      "familyId": "fresh-v3-534",
+      "split": "test"
+    },
+    {
+      "id": "passage-535",
+      "text": "The bus driver waited until the elderly passenger had found a seat before leaving the stop.",
+      "familyId": "fresh-v3-535",
+      "split": "test"
+    },
+    {
+      "id": "passage-536",
+      "text": "A careful editor removed an unclear sentence while preserving the meaning of the original report.",
+      "familyId": "fresh-v3-536",
+      "split": "test"
+    },
+    {
+      "id": "passage-537",
+      "text": "The captain checked the weather forecast again before allowing the smaller boats to leave the bay.",
+      "familyId": "fresh-v3-537",
+      "split": "test"
+    },
+    {
+      "id": "passage-538",
+      "text": "A cheerful vendor offered slices of ripe pear to people waiting beside the crowded fruit stall.",
+      "familyId": "fresh-v3-538",
+      "split": "test"
+    },
+    {
+      "id": "passage-539",
+      "text": "The laboratory assistant labelled every bottle before placing the samples in a locked cabinet.",
+      "familyId": "fresh-v3-539",
+      "split": "test"
+    },
+    {
+      "id": "passage-540",
+      "text": "Our walking group reached the lookout just as the clouds began to reveal the distant mountains.",
+      "familyId": "fresh-v3-540",
+      "split": "test"
+    },
+    {
+      "id": "passage-541",
+      "text": "The new employee learned to measure the fabric twice before making a single cut along the edge.",
+      "familyId": "fresh-v3-541",
+      "split": "test"
+    },
+    {
+      "id": "passage-542",
+      "text": "A wooden gate swung open when the delivery driver turned the handle with his free hand.",
+      "familyId": "fresh-v3-542",
+      "split": "test"
+    },
+    {
+      "id": "passage-543",
+      "text": "The radio presenter spoke clearly while explaining where listeners could find the evening event.",
+      "familyId": "fresh-v3-543",
+      "split": "test"
+    },
+    {
+      "id": "passage-544",
+      "text": "A row of wet shoes stood outside the classroom after the children returned from their forest walk.",
+      "familyId": "fresh-v3-544",
+      "split": "test"
+    },
+    {
+      "id": "passage-545",
+      "text": "The park ranger reminded visitors to carry their rubbish back to the bins near the main car park.",
+      "familyId": "fresh-v3-545",
+      "split": "test"
+    },
+    {
+      "id": "passage-546",
+      "text": "Our neighbour carefully divided the herbs into small pots and gave one to every new resident.",
+      "familyId": "fresh-v3-546",
+      "split": "test"
+    },
+    {
+      "id": "passage-547",
+      "text": "The photographer waited for the crowd to move before taking a picture of the restored clock tower.",
+      "familyId": "fresh-v3-547",
+      "split": "test"
+    },
+    {
+      "id": "passage-548",
+      "text": "A young swimmer practised breathing steadily while moving from one end of the shallow pool to the other.",
+      "familyId": "fresh-v3-548",
+      "split": "test"
+    },
+    {
+      "id": "passage-549",
+      "text": "The customer checked the receipt and realised that the discount had already been included in the total.",
+      "familyId": "fresh-v3-549",
+      "split": "test"
+    },
+    {
+      "id": "passage-550",
+      "text": "An empty chair beside the open window gave the tired traveller a quiet place to read the letter.",
+      "familyId": "fresh-v3-550",
+      "split": "test"
+    },
+    {
+      "id": "passage-551",
+      "text": "The electrician returned before lunch to explain how the new switch controlled the outside lights.",
+      "familyId": "fresh-v3-551",
+      "split": "test"
+    },
+    {
+      "id": "passage-552",
+      "text": "A tiny frog rested on a broad green leaf above the slow moving water near the edge of the pond.",
+      "familyId": "fresh-v3-552",
+      "split": "test"
+    },
+    {
+      "id": "passage-553",
+      "text": "The community organiser thanked the neighbours who had stayed late to fold the tables and chairs.",
+      "familyId": "fresh-v3-553",
+      "split": "test"
+    },
+    {
+      "id": "passage-554",
+      "text": "Our guide lowered her voice as the group entered a room filled with sleeping rescue animals.",
+      "familyId": "fresh-v3-554",
+      "split": "test"
+    },
+    {
+      "id": "passage-555",
+      "text": "A warm scarf was left hanging from the coat rack after the final visitor had said goodnight.",
+      "familyId": "fresh-v3-555",
+      "split": "test"
+    },
+    {
+      "id": "passage-556",
+      "text": "The parcel arrived early enough for the technician to install the replacement part that afternoon.",
+      "familyId": "fresh-v3-556",
+      "split": "test"
+    },
+    {
+      "id": "passage-557",
+      "text": "A musician opened the old case and discovered a carefully folded note beneath the violin.",
+      "familyId": "fresh-v3-557",
+      "split": "test"
+    },
+    {
+      "id": "passage-558",
+      "text": "The volunteer coordinator suggested a short break before the team began sorting the remaining boxes.",
+      "familyId": "fresh-v3-558",
+      "split": "test"
+    },
+    {
+      "id": "passage-559",
+      "text": "An attentive waiter noticed the spilled water and brought a clean cloth without being asked.",
+      "familyId": "fresh-v3-559",
+      "split": "test"
+    },
+    {
+      "id": "passage-560",
+      "text": "The student read the instructions once more before choosing the correct cable for the experiment.",
+      "familyId": "fresh-v3-560",
+      "split": "test"
+    }
+  ],
+  "passageDesign": "100 original baseline passages plus 100 new scene families with four introductory contexts each. All variants of a scene family remain in one split.",
+  "auditFile": "corpus-audit-v3.json",
+  "featureRepresentation": "hidden-ctc-v1",
+  "reuseDirectories": [
+    "reference-v2"
+  ],
+  "evaluationPolicy": "Previous final test is development validation; fresh families 501-560 are sealed final test. Existing four held-out profiles stay excluded from training."
+}

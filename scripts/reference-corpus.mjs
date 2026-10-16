@@ -256,15 +256,24 @@ async function main() {
     }
     if (manifest.referenceVersion !== config.referenceVersion)
       throw Error("Existing corpus version differs.");
-    let old = [];
-    if (directory !== "reference-v1") {
+    const old = [];
+    for (const reuseDirectory of config.reuseDirectories ||
+      (directory !== "reference-v1" ? ["reference-v1"] : [])) {
+      if (!/^[a-z0-9-]+$/.test(reuseDirectory) || reuseDirectory === directory)
+        throw Error("Unsafe corpus reuse directory.");
       try {
-        old = JSON.parse(
+        const source = JSON.parse(
           await readFile(
-            join(ROOT, "artifacts/pronunciation/reference-v1/manifest.json"),
+            join(
+              ROOT,
+              "artifacts/pronunciation",
+              reuseDirectory,
+              "manifest.json",
+            ),
             "utf8",
           ),
         ).takes;
+        old.push(...source.map((take) => ({ ...take, reuseDirectory })));
       } catch (e) {
         if (e.code !== "ENOENT") throw e;
       }
@@ -299,7 +308,7 @@ async function main() {
       if (reusable) {
         const source = join(
           ROOT,
-          "artifacts/pronunciation/reference-v1",
+          "artifacts/pronunciation/" + reusable.reuseDirectory,
           reusable.file,
         );
         if (hash(await readFile(source)) !== reusable.audioSha256)
@@ -313,7 +322,11 @@ async function main() {
           )
             throw e;
         }
-        const record = { ...reusable, ...take, reusedFrom: "reference-v1" };
+        const record = {
+          ...reusable,
+          ...take,
+          reusedFrom: reusable.reuseDirectory,
+        };
         manifest.takes.push(record);
         existing.set(take.takeId, record);
         continue;

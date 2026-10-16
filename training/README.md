@@ -87,3 +87,28 @@ The experiment tests synthetic unseen-text/voice generalization, sound discrimin
 Synthetic positives establish the chosen generators' reference distribution. They cannot establish human English pronunciation validity, intelligibility, proficiency, or certified exam scores. Human listening review of references and a separate consented human-speaker evaluation remain necessary before learner-facing diagnostic claims. Similarity to this corpus can change with context and is not evidence that every accent difference is an error. The prototype does not validate mouth/tongue correction advice.
 
 The trained model is a Python research artifact. No browser export, mobile performance claim, practice-screen integration, merge or deployment is included. The pinned pretrained encoders are larger than the trained comparison heads; model setup downloads them separately. See the checked-in model card/evidence for the actual completed run and measured limitations.
+
+## Australian/Indian generalization iteration (v3)
+
+`reference-corpus-v3.json` preserves the existing ten profiles and all 5,000 audio files. It adds 60 fresh, independent final-test passages (600 recordings), reuses the existing 350 training passages and treats all 150 previously exposed validation/test passages as development validation. The original held-out profiles remain excluded from fitted data and the reference bank. Do not use the fresh final test to select a model. Live provider discovery did not expose additional distinct Australian/Indian identities; the pipeline does not relabel the same voice on another synthesis model as an independent speaker.
+
+The versioned `hidden-ctc-v1` feature concatenates the original layer-7 representation with the **full observed phonetic log-probability vector**, pooled over the same aligned frames. No expected sound ID, accent ID, target one-hot vector or accent-specific score offset is appended. Preparation and prediction share `sound_feature`; checkpoints and caches record the representation, and mismatches fail closed. Legacy checkpoints default to `hidden7`, retaining their original prediction behavior. Balanced training/banks remain; v3 epoch selection uses macro-average validation sound accuracy with equal weight for each accent group.
+
+```sh
+node scripts/reference-corpus.mjs plan --config training/reference-corpus-v3.json
+node scripts/reference-corpus.mjs generate --config training/reference-corpus-v3.json --concurrency 16 --requests-per-second 4 --confirm-spend --max-usd 7
+uv run --project training python training/comparison.py prepare --config training/reference-corpus-v3.json --batch-size 16 --workers 8
+uv run --project training python training/audit_corpus.py --config training/reference-corpus-v3.json --device cpu --threads 8 --batch-size 8 --workers 4
+uv run --project training python training/comparison.py train --config training/reference-corpus-v3.json --output artifacts/pronunciation/runs/accent-candidate-1 --epochs 30 --device auto --threads 16 --batch-size 2048
+uv run --project training python training/comparison.py evaluate --config training/reference-corpus-v3.json --model artifacts/pronunciation/runs/accent-candidate-1/model.pt --output artifacts/pronunciation/runs/accent-candidate-1/validation.json
+```
+
+The generator's batch ceiling describes the full configuration estimate (including already paid/reused audio). The ledger/provider guards still check only missing requests against the cumulative project cap. Reusing a corpus verifies model, voice, script and audio hashes before copying and records its source. `auditFile` isolates v3 audit state from v2; matching old audit rows may be reused only with matching raw audio hashes.
+
+After validation and actual inference checks, freeze the checkpoint, then evaluate it and v2 on exactly the same fresh test recordings. Baseline transfer evaluation requires explicit `--transfer`; it does not update the checkpoint. Only the documented `hidden-ctc-v1` → `hidden7` prefix conversion is allowed, preserving the last three relative stress features separately. Different phonetic label systems are rejected. Normal evaluation still requires matching training corpus/version identities. Reports distinguish training and evaluation manifest hashes.
+
+```sh
+uv run --project training python training/comparison.py evaluate --config training/reference-corpus-v3.json --model training/checkpoints/blended-english-v2/model.pt --output artifacts/pronunciation/runs/accent-candidate-1/baseline-validation.json --transfer
+```
+
+See the new model card for actual paired results, budget, timings and limits. Synthetic sound discrimination and reference similarity remain distinct from human pronunciation-score validity; no raw audio or new runtime model is shipped in the PWA.

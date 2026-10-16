@@ -129,3 +129,42 @@ test("expanded corpus isolates scene families and includes four accents", async 
   broken.passages[1].split = "test";
   assert.throws(() => validateCorpus(broken), /family crosses/);
 });
+
+test("v3 preserves held-out profiles and seals fresh final families", async () => {
+  const v2 = JSON.parse(
+    await readFile(
+      new URL("../training/reference-corpus-v2.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const v3 = JSON.parse(
+    await readFile(
+      new URL("../training/reference-corpus-v3.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  assert.equal(validateCorpus(v3).length, 5600);
+  assert.equal(v3.featureRepresentation, "hidden-ctc-v1");
+  assert.deepEqual(v3.voices, v2.voices);
+  assert.deepEqual(v3.reuseDirectories, ["reference-v2"]);
+  assert.equal(v3.passages.filter((p) => p.split === "train").length, 350);
+  assert.equal(v3.passages.filter((p) => p.split === "validation").length, 150);
+  const fresh = v3.passages.filter((p) => p.split === "test");
+  assert.equal(fresh.length, 60);
+  assert.ok(
+    fresh.every(
+      (p) =>
+        !v2.passages.some(
+          (old) => old.text === p.text || old.familyId === p.familyId,
+        ),
+    ),
+  );
+  const oldTests = new Set(
+    v2.passages.filter((p) => p.split === "test").map((p) => p.id),
+  );
+  assert.ok(
+    v3.passages
+      .filter((p) => oldTests.has(p.id))
+      .every((p) => p.split === "validation"),
+  );
+});

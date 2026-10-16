@@ -10,11 +10,34 @@ from comparison import (
     contrastive_loss,
     distribution_distances,
     reference_stream,
+    sound_feature,
+    evaluation_features,
 )
 import torch
 
 
 class ComparisonContracts(unittest.TestCase):
+    def test_phonetic_features_preserve_legacy_prefix_and_full_observed_distribution(
+        self,
+    ):
+        hidden = np.arange(3 * 1024, dtype=np.float32).reshape(3, 1024)
+        logs = np.array([[-1, -2, -3], [-4, -5, -6], [-7, -8, -9]], dtype=np.float32)
+        legacy = sound_feature(hidden, logs, 1, 3)
+        enhanced = sound_feature(hidden, logs, 1, 3, "hidden-ctc-v1")
+        np.testing.assert_array_equal(enhanced[:1024], legacy)
+        np.testing.assert_array_equal(enhanced[1024:], [-5.5, -6.5, -7.5])
+        np.testing.assert_array_equal(
+            evaluation_features(enhanced[None], "hidden-ctc-v1", "hidden7"),
+            legacy[None],
+        )
+        stress = np.concatenate([enhanced, [10, 20, 30]])[None]
+        np.testing.assert_array_equal(
+            evaluation_features(stress, "hidden-ctc-v1", "hidden7", True)[0, -3:],
+            [10, 20, 30],
+        )
+        with self.assertRaisesRegex(ValueError, "Incompatible"):
+            evaluation_features(legacy[None], "hidden7", "hidden-ctc-v1")
+
     def test_final_manifest_is_consumed_after_generator_releases_lock(self):
         from types import SimpleNamespace
         from tempfile import TemporaryDirectory
