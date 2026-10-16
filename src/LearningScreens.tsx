@@ -9,7 +9,6 @@ import {
   Target,
   Check,
   History,
-  Trash2,
   Info,
 } from "lucide-react";
 import { Button } from "./components/ui/button";
@@ -183,10 +182,11 @@ export function LearnScreen({
   if (!article)
     return (
       <div className="screen-stack">
-        <h2 className="screen-title">Learn about PTE.</h2>
+        <h2 className="screen-title">About PTE.</h2>
         <CardsList
           items={articles}
           label="learning topics"
+          scroll
           render={(a) => (
             <button
               className="type-row"
@@ -238,6 +238,8 @@ export function LearnScreen({
       <ReadingPages
         key={article.id + block}
         texts={[block < 0 ? article.intro : article.blocks[block].text]}
+        label="Learning article"
+        scroll
       />
     </div>
   );
@@ -290,28 +292,14 @@ export function GuideScreen({
 }
 export function HistoryScreen({
   history,
-  onClear,
   onPractice,
 }: {
   history: Result[];
-  onClear: () => void;
   onPractice: () => void;
 }) {
   return (
     <div className="screen-stack">
-      <div className="screen-toolbar">
-        <h2 className="screen-title">Your sessions.</h2>
-        {!!history.length && (
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Clear practice history"
-            onClick={onClear}
-          >
-            <Trash2 />
-          </Button>
-        )}
-      </div>
+      <h2 className="screen-title">Sessions.</h2>
       <CardsList
         items={history}
         minCardHeight={112}

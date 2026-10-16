@@ -49,8 +49,8 @@ async function screenFits(page: Page) {
           return (
             r.width > 0 &&
             r.height > 0 &&
-            (r.top < parent.top - 1 ||
-              r.bottom > parent.bottom + 1 ||
+            ((!node.closest(".cards-list-scroll") &&
+              (r.top < parent.top - 1 || r.bottom > parent.bottom + 1)) ||
               r.left < parent.left - 1 ||
               r.right > parent.right + 1)
           );
@@ -144,6 +144,9 @@ test("shared cards list hides unnecessary pagination and preserves navigation on
   await page.goto("/#history");
   await expect(page.getByText("No attempts yet.")).toBeVisible();
   await expect(
+    page.getByRole("button", { name: /Clear.*history/i }),
+  ).toHaveCount(0);
+  await expect(
     page.getByRole("navigation", { name: "attempt pages", exact: true }),
   ).toHaveCount(0);
   await page.goto("/#guide");
@@ -177,30 +180,96 @@ test("shared cards list hides unnecessary pagination and preserves navigation on
   await screenFits(page);
 });
 
-test("shared cards list pages learning topics and history and retains a short-window escape", async ({
+test("Learn scrolls all topics and article text while History keeps paging", async ({
   page,
-}) => {
+}, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 360, height: 640 });
   await page.goto("/#guide");
-  const topics = new Set<string>();
-  for (let i = 0; i < 10; i++) {
-    for (const title of await page.locator(".type-row").allTextContents())
-      topics.add(title);
-    await screenFits(page);
-    const next = page.getByRole("button", { name: "Next learning topics" });
-    if (!(await next.count()) || (await next.isDisabled())) break;
-    await next.click();
-  }
   const { readFile } = await import("node:fs/promises");
   const sourceTopics = JSON.parse(
     await readFile(new URL("../content/learn.json", import.meta.url), "utf8"),
-  );
-  expect(topics.size).toBe(sourceTopics.length);
-  await page.locator(".type-row").first().click();
-  await expect(page.locator(".reading-copy")).toBeVisible();
-  await page.getByRole("button", { name: "All learning topics" }).click();
-  await expect(page.locator(".cards-list-grid")).toBeVisible();
+  ) as {
+    id: string;
+    title: string;
+    intro: string;
+    blocks: { title: string; text: string }[];
+  }[];
+  for (const viewport of [
+    { width: 360, height: 640 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/guide");
+    await expect(
+      page.getByRole("heading", { name: "About PTE.", exact: true }),
+    ).toBeVisible();
+    const topics = page.getByRole("region", {
+      name: "learning topics",
+      exact: true,
+    });
+    await expect(topics.getByRole("button")).toHaveCount(sourceTopics.length);
+    await expect(page.locator(".page-controls")).toHaveCount(0);
+    await page.screenshot({
+      path: info.outputPath(`learn-topics-${viewport.width}.png`),
+    });
+    if (viewport.width === 360) {
+      await topics.focus();
+      await topics.press("End");
+      await expect
+        .poll(() => topics.evaluate((node) => node.scrollTop))
+        .toBeGreaterThan(0);
+      await expect(topics.getByRole("button").last()).toBeInViewport();
+    }
+    await topics.getByRole("button").last().click();
+    await expect(
+      page.getByRole("heading", {
+        name: sourceTopics.at(-1)!.title,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "All learning topics" }).click();
+    await expect(topics).toBeVisible();
+    for (const article of sourceTopics) {
+      await topics
+        .getByRole("button", { name: article.title, exact: true })
+        .click();
+      const copy = page.getByRole("region", {
+        name: "Learning article",
+        exact: true,
+      });
+      await expect(copy).toHaveText(article.intro);
+      for (let i = 0; i < article.blocks.length; i++) {
+        await page
+          .getByRole("combobox", { name: "Learning topic" })
+          .selectOption(String(i));
+        await expect(copy).toHaveText(article.blocks[i].text);
+        await expect(page.locator(".page-controls")).toHaveCount(0);
+      }
+      await page.getByRole("button", { name: "All learning topics" }).click();
+    }
+    await screenFits(page);
+  }
+  // Enlarged text remains complete and can be scrolled by keyboard.
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto(`/guide/${sourceTopics[0].id}`);
+  await page.addStyleTag({
+    content: ".reading-copy { font-size: 32px; line-height: 1.7; }",
+  });
+  const copy = page.getByRole("region", {
+    name: "Learning article",
+    exact: true,
+  });
+  await copy.focus();
+  await copy.press("End");
+  await expect
+    .poll(() => copy.evaluate((node) => node.scrollTop))
+    .toBeGreaterThan(0);
+  await expect(copy).toHaveText(sourceTopics[0].intro);
+  await expect(page.locator(".page-controls")).toHaveCount(0);
+  await page.screenshot({
+    path: info.outputPath("learn-article-enlarged-mobile.png"),
+  });
 
   await page.evaluate(() =>
     localStorage.setItem(
@@ -270,7 +339,7 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
       await expect
         .poll(() =>
           page
-            .locator(".cards-list")
+            .locator(".cards-list:not(.cards-list-scroll)")
             .evaluateAll((nodes) =>
               nodes.every((node) => node.scrollHeight <= node.clientHeight + 1),
             ),
@@ -411,14 +480,15 @@ test("single answer submits once and persisted review survives reload", async ({
     page.getByText("Difficulty scheduling early meetings", { exact: true }),
   ).toHaveCount(1);
   await page.getByRole("button", { name: "My practice" }).click();
-  await page.getByRole("button", { name: "Clear practice history" }).click();
-  await page.getByRole("button", { name: "Keep history" }).press("Escape");
+  await expect(
+    page.getByRole("heading", { name: "Sessions.", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Clear.*history/i }),
+  ).toHaveCount(0);
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("button", { name: "Clear practice history" }).click();
-  await page
-    .getByRole("button", { name: "Clear history", exact: true })
-    .click();
-  await expect(page.getByText("No attempts yet.")).toBeVisible();
+  await page.reload();
+  await expect(page.locator(".history-row")).toHaveCount(1);
 });
 test("dropdown inputs preserve answers and explanation", async ({ page }) => {
   await drill(page, "Fill in the Blanks \\(Dropdown\\)");
@@ -861,7 +931,7 @@ async function answerReading(page: Page) {
     await exam.getByRole("button", { name: "Blank 1", exact: true }).click();
   }
 }
-test("daily quest earns real XP and badges, persists after reload and resets with history", async ({
+test("daily quest earns real XP and badges and stays saved in history", async ({
   page,
 }) => {
   await page.goto("/");
@@ -946,17 +1016,13 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
     page.getByRole("button", { name: "60 XP, level 1. View progress" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "My practice", exact: true }).click();
-  await page.getByRole("button", { name: "Clear practice history" }).click();
-  await expect(page.getByRole("dialog")).toContainText("XP, streaks, badges");
-  await page
-    .getByRole("button", { name: "Clear history", exact: true })
-    .click();
   await expect(
-    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
-  ).toBeVisible();
+    page.getByRole("button", { name: /Clear.*history/i }),
+  ).toHaveCount(0);
   await page.reload();
+  await expect(page.locator(".history-row")).toHaveCount(1);
   await expect(
-    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+    page.getByRole("button", { name: "60 XP, level 1. View progress" }),
   ).toBeVisible();
 });
 test("an empty quest earns no XP; a partial quest resumes remaining questions; reduced motion suppresses celebrations", async ({
@@ -1294,7 +1360,7 @@ test("section filters remain independent across routed question guides", async (
 
 test("populated compact history pages fit without overlapping pagination", async ({
   page,
-}) => {
+}, info) => {
   await page.goto("/");
   await page.evaluate(() => {
     const entries = Array.from({ length: 10 }, (_, index) => ({
@@ -1319,6 +1385,15 @@ test("populated compact history pages fit without overlapping pagination", async
     await page.setViewportSize(size);
     await page.goto("/history");
     await expect(page.locator(".history-row").first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Sessions.", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Clear.*history/i }),
+    ).toHaveCount(0);
+    if (size.width === 390 && size.height === 844) {
+      await page.screenshot({ path: info.outputPath("sessions-mobile.png") });
+    }
     const seen = new Set<string>();
     do {
       await expect
@@ -1374,7 +1449,7 @@ test("populated compact history pages fit without overlapping pagination", async
   });
 });
 
-test("TanStack local state saves, reviews and clears an answered session fully offline", async ({
+test("TanStack local state saves and reviews an answered session fully offline", async ({
   page,
   context,
   baseURL,
@@ -1408,16 +1483,14 @@ test("TanStack local state saves, reviews and clears an answered session fully o
   ).toBeVisible();
   await page.getByRole("button", { name: "My practice", exact: true }).click();
   await expect(page.locator(".history-row")).toHaveCount(1);
-  await page.getByRole("button", { name: "Clear practice history" }).click();
-  await page
-    .getByRole("button", { name: "Clear history", exact: true })
-    .click();
-  await expect(page.getByText("No attempts yet.")).toBeVisible();
-  await page.reload();
   await expect(
-    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+    page.getByRole("button", { name: /Clear.*history/i }),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator(".history-row")).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "10 XP, level 1. View progress" }),
   ).toBeVisible();
-  await expect(page.getByText("No attempts yet.")).toBeVisible();
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
 });
