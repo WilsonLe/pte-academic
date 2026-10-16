@@ -1,3 +1,6 @@
+import { Link, useLocation, useNavigate } from "react-router";
+import { screenPath, useScreen } from "./routing";
+import { AudioPlayer } from "./components/AudioPlayer";
 import {
   Children,
   isValidElement,
@@ -11,8 +14,6 @@ import {
   ArrowLeft,
   BookOpen,
   Check,
-  CloudCheck,
-  Download,
   Headphones,
   History,
   House,
@@ -23,10 +24,8 @@ import {
   Play,
   RefreshCw,
   Search,
-  ShieldCheck,
   Target,
   Trophy,
-  WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -49,7 +48,8 @@ import {
   HistoryScreen,
 } from "./LearningScreens";
 import { Pager, ReadingPages } from "./Pages";
-import { Preflight, Runner, type PracticePlan, type Result } from "./Runner";
+import { type PracticePlan, type Result } from "./Runner";
+import { PracticeSession } from "./PracticeSession";
 import {
   readHistory,
   saveAttempt,
@@ -182,15 +182,7 @@ function More({ label, children }: { label: string; children: ReactNode }) {
     </>
   );
 }
-function Nav({
-  active,
-  navigate,
-  mobile = false,
-}: {
-  active: string;
-  navigate: (id: string) => void;
-  mobile?: boolean;
-}) {
+function Nav({ active, mobile = false }: { active: string; mobile?: boolean }) {
   const items = mobile ? navigation.filter((n) => n.mobileLabel) : navigation;
   const current =
     mobile && !["guide", "history"].includes(active) ? "home" : active;
@@ -201,34 +193,30 @@ function Nav({
     >
       {items.map((n) =>
         mobile ? (
-          <a
+          <Link
             key={n.id}
-            href={`#${n.id}`}
+            to={screenPath(n.id)}
             aria-current={current === n.id ? "page" : undefined}
-            onClick={() => navigate(n.id)}
             className="nav-icon"
           >
             <n.icon className="size-[22px]" aria-hidden="true" />
             <span>{n.mobileLabel}</span>
-          </a>
+          </Link>
         ) : (
           <Tooltip key={n.id}>
             <TooltipTrigger
               render={
-                <a
-                  href={`#${n.id}`}
+                <Link
+                  to={screenPath(n.id)}
                   aria-label={n.label}
                   aria-current={active === n.id ? "page" : undefined}
-                  onClick={() => navigate(n.id)}
                   className="nav-icon"
                 />
               }
             >
               <n.icon className="size-[19px]" />
             </TooltipTrigger>
-            <TooltipContent side="right">
-              {n.label}
-            </TooltipContent>
+            <TooltipContent side="right">{n.label}</TooltipContent>
           </Tooltip>
         ),
       )}
@@ -237,25 +225,36 @@ function Nav({
 }
 export default function App() {
   const [progress, setProgress] = useState<Progress>(emptyProgress);
-  const [hubView, setHubView] = useState("play");
+  const route = useScreen();
+  const location = useLocation();
+  const go = useNavigate();
+  const page = route.page;
+  const guideId = route.guideId || "";
+  const hubView = route.view || "play";
+  const setHubView = (view: string) =>
+    go(
+      view === "play"
+        ? "/"
+        : view === "progress"
+          ? "/progress"
+          : "/achievements",
+    );
   const [progressReady, setProgressReady] = useState(false);
   const [today, setToday] = useState(localDay);
   const [celebration, setCelebration] = useState<string | null>(null);
-  const [page, setPage] = useState(location.hash.slice(1) || "home");
-  const [guideId, setGuideId] = useState("");
   const [selectedSections, setSelectedSections] = useState<Section[]>(() =>
     sections.map((section) => section.id),
   );
   const [catalogueIndex, setCatalogueIndex] = useState(0);
   const [search, setSearch] = useState("");
-  const [plan, setPlan] = useState<PracticePlan | null>(null);
-  const [running, setRunning] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  const resultRef = useRef(result);
+  resultRef.current = result;
+  const [attemptError, setAttemptError] = useState("");
   const [history, setHistory] = useState<Result[]>(readHistory);
   const [storageError, setStorageError] = useState("");
   const [saving, setSaving] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
-  const stream = useRef<MediaStream | null>(null);
   const main = useRef<HTMLElement>(null);
   const pwa = usePwa();
   useEffect(() => {
@@ -269,7 +268,7 @@ export default function App() {
         .catch(() => {
           if (live)
             setStorageError(
-              "Game progress could not load. Your practice controls are still available.",
+              "Practice progress could not load. Your practice controls are still available.",
             );
         })
         .finally(() => {
@@ -287,70 +286,96 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const route = () => {
-      setPage(location.hash.slice(1) || "home");
-      setGuideId("");
+    const migrateHash = () => {
+      const legacy = window.location.hash.slice(1);
+      if (navigation.some((item) => item.id === legacy))
+        void go(screenPath(legacy), { replace: true });
     };
-    window.addEventListener("hashchange", route);
-    return () => window.removeEventListener("hashchange", route);
-  }, []);
+    window.addEventListener("hashchange", migrateHash);
+    return () => window.removeEventListener("hashchange", migrateHash);
+  }, [go]);
+
+  // The URL owns screen identity; async storage reads cannot override later navigation.
+  useEffect(() => {
+    let live = true;
+    setAttemptError("");
+    if (!route.attemptId) {
+      setResult(null);
+      return;
+    }
+    if (resultRef.current?.id === route.attemptId) return;
+    setResult(null);
+    void loadAttempt(route.attemptId)
+      .then((saved) => {
+        if (live) setResult(saved);
+        else releaseRecordings(saved);
+      })
+      .catch(() => {
+        if (live)
+          setAttemptError(
+            "This session is no longer available on this device.",
+          );
+      });
+    return () => {
+      live = false;
+    };
+  }, [route.attemptId]);
+  useEffect(() => {
+    const current = result;
+    return () => releaseRecordings(current);
+  }, [result?.id]);
   useEffect(() => {
     main.current?.focus();
     window.scrollTo(0, 0);
-  }, [page, guideId, result, plan]);
-  useEffect(
-    () => () => stream.current?.getTracks().forEach((t) => t.stop()),
-    [],
-  );
-  function navigate(to: string) {
     setCelebration(null);
-    releaseRecordings(result);
-    setResult(null);
-    setGuideId("");
-    setPage(to);
-    location.hash = to;
+  }, [location.pathname]);
+  function navigate(to: string) {
+    void go(screenPath(to));
   }
-  function begin(mode: PracticePlan["mode"], id: string) {
-    const qs =
-      mode === "mock"
-        ? mocks[0].questionIds.map((id) => questions.find((q) => q.id === id)!)
-        : mode === "section"
-          ? questions.filter((q) => guideFor(q).section === id)
-          : questions.filter((q) => q.type === id);
-    releaseRecordings(result);
-    setResult(null);
-    setPlan({
-      mode,
+  function makePlan(mode?: string, id?: string): PracticePlan | null {
+    if (id === "daily" && mode === "type")
+      return {
+        mode: "type",
+        label: "Daily practice",
+        questions: questQuestions(progress, today),
+        minutes: mocks[0].sectionMinutes,
+      };
+    if (!["type", "section", "mock"].includes(mode || "")) return null;
+    if (mode === "type" && !guides.some((g) => g.id === id)) return null;
+    if (mode === "section" && !sections.some((s) => s.id === id)) return null;
+    if (mode === "mock" && id !== "mock-01") return null;
+    return {
+      mode: mode as PracticePlan["mode"],
       label:
         mode === "mock"
           ? mocks[0].title
           : mode === "section"
             ? `${sections.find((s) => s.id === id)!.title} practice`
             : guides.find((g) => g.id === id)!.title,
-      questions: qs,
+      questions:
+        mode === "mock"
+          ? mocks[0].questionIds.map((qid) =>
+              questions.find((q) => q.id === qid)!,
+            )
+          : mode === "section"
+            ? questions.filter((q) => guideFor(q).section === id)
+            : questions.filter((q) => q.type === id),
       minutes: mocks[0].sectionMinutes,
-    });
+    };
+  }
+  function begin(mode: PracticePlan["mode"], id: string) {
+    void go(`/practice/${mode}/${encodeURIComponent(id)}`);
   }
   function startQuest() {
-    const qs = questQuestions(progress, today);
-    if (!qs.length) {
+    if (!questQuestions(progress, today).length) {
       navigate("types");
       return;
     }
-    releaseRecordings(result);
-    setResult(null);
-    setCelebration(null);
-    setPlan({
-      mode: "type",
-      label: "Daily quest",
-      questions: qs,
-      minutes: mocks[0].sectionMinutes,
-    });
+    begin("type", "daily");
   }
   function finish(r: Result) {
-    setRunning(false);
-    setPlan(null);
     setResult(r);
+    void go(`/history/${encodeURIComponent(r.id)}`);
     setStorageError("");
     setSaving(true);
     void saveAttempt(r)
@@ -375,20 +400,6 @@ export default function App() {
       })
       .finally(() => setSaving(false));
   }
-  async function openAttempt(id: string) {
-    setCelebration(null);
-    try {
-      const saved = await loadAttempt(id);
-      releaseRecordings(result);
-      setResult(saved);
-      setStorageError("");
-    } catch (e) {
-      const message =
-        e instanceof Error ? e.message : "Unable to open this attempt.";
-      setStorageError(message);
-      toast.error(message);
-    }
-  }
   async function removeHistory() {
     try {
       await clearHistory();
@@ -409,17 +420,16 @@ export default function App() {
   const currentGuide = guides.find((g) => g.id === guideId);
   const active = titles[page] ? page : "home";
   const title = result ? "Review" : currentGuide?.title || titles[active];
-  if (running && plan)
-    return <Runner plan={plan} stream={stream.current} onComplete={finish} />;
-  if (plan)
+  const practicePlan =
+    page === "practice" && progressReady
+      ? makePlan(route.mode, route.practiceId)
+      : null;
+  if (practicePlan?.questions.length)
     return (
-      <Preflight
-        plan={plan}
-        onStart={(s) => {
-          stream.current = s;
-          setRunning(true);
-        }}
-        onCancel={() => setPlan(null)}
+      <PracticeSession
+        key={route.mode + "/" + route.practiceId}
+        plan={practicePlan}
+        onComplete={finish}
       />
     );
   return (
@@ -429,55 +439,27 @@ export default function App() {
           Skip to content
         </a>
         <aside className="sidebar" aria-label="Sidebar">
-          <a
-            href="#home"
-            className="rail-logo"
-            aria-label="PTE Studio home"
-            onClick={() => navigate("home")}
-          >
+          <Link to="/" className="rail-logo" aria-label="PTE Studio home">
             <img src={asset("icon.svg")} alt="" className="size-9 rounded-xl" />
-          </a>
-          <Nav active={active} navigate={navigate} />
-          <div className="mt-auto">
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <span
-                    tabIndex={0}
-                    aria-label="Your practice stays on this device"
-                    className="nav-icon text-muted-foreground"
-                  />
-                }
-              >
-                <ShieldCheck className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                Responses stay on this device.
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          </Link>
+          <Nav active={active} />
         </aside>
         <div className="workspace">
           <header className="topbar">
             <div className="flex min-w-0 items-center gap-3">
-              <a
-                href="#home"
-                aria-label="PTE Studio home"
-                className="md:hidden"
-                onClick={() => navigate("home")}
-              >
+              <Link to="/" aria-label="PTE Studio home" className="md:hidden">
                 <img
                   src={asset("icon.svg")}
                   alt=""
                   className="size-8 rounded-lg"
                 />
-              </a>
+              </Link>
               {(result || currentGuide) && (
                 <IconAction
                   label={result ? "My practice" : "All question types"}
                   icon={ArrowLeft}
                   onClick={() =>
-                    result ? navigate("history") : setGuideId("")
+                    result ? navigate("history") : navigate("types")
                   }
                 />
               )}
@@ -491,40 +473,8 @@ export default function App() {
                 today={today}
                 onClick={() => {
                   setHubView("progress");
-                  navigate("home");
                 }}
               />
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <span
-                      tabIndex={0}
-                      role="status"
-                      aria-label={
-                        pwa.offline
-                          ? "Offline"
-                          : pwa.ready
-                            ? "Offline ready"
-                            : "Preparing offline pack"
-                      }
-                      className="flex size-8 items-center justify-center text-muted-foreground"
-                    />
-                  }
-                >
-                  {pwa.offline ? (
-                    <WifiOff className="size-4" />
-                  ) : (
-                    <CloudCheck className="size-4" />
-                  )}
-                </TooltipTrigger>
-                <TooltipContent>
-                  {pwa.offline
-                    ? "Offline"
-                    : pwa.ready
-                      ? "Offline ready"
-                      : "Preparing offline pack"}
-                </TooltipContent>
-              </Tooltip>
               {pwa.update && (
                 <IconAction
                   label={
@@ -537,20 +487,6 @@ export default function App() {
                   onClick={pwa.update}
                 />
               )}
-              <IconAction
-                label="Install app"
-                icon={Download}
-                onClick={() => {
-                  void pwa.install().then((message) => {
-                    if (message) toast.info(message, { duration: 10000 });
-                  });
-                }}
-              />
-              <IconAction
-                label="Learn about PTE"
-                icon={Info}
-                onClick={() => navigate("guide")}
-              />
             </div>
           </header>
           {(storageError || pwa.error) && (
@@ -568,7 +504,29 @@ export default function App() {
             className="main-content"
           >
             <div key={result?.id || guideId || active} className="page-enter">
-              {result ? (
+              {route.attemptId && result?.id !== route.attemptId ? (
+                <div className="empty-state" role="status">
+                  <p>{attemptError || "Opening session…"}</p>
+                  {attemptError && (
+                    <Button onClick={() => navigate("history")}>
+                      Back to history
+                    </Button>
+                  )}
+                </div>
+              ) : page === "missing" ||
+                (guideId && !currentGuide) ||
+                page === "practice" ? (
+                <div className="empty-state">
+                  <p>
+                    {page === "practice" && !progressReady
+                      ? "Loading practice…"
+                      : "This page is unavailable."}
+                  </p>
+                  <Button onClick={() => navigate("home")}>
+                    Back to practice
+                  </Button>
+                </div>
+              ) : result && result.id === route.attemptId ? (
                 <Review
                   result={result}
                   celebrate={celebration === result.id}
@@ -605,23 +563,6 @@ export default function App() {
                     onQuest={startQuest}
                     navigate={navigate}
                   />
-                  <div className="beginner-entry">
-                    <More label="New to PTE Academic?">
-                      <p>
-                        PTE Academic tests speaking, writing, reading and
-                        listening on a computer. Start with one question type,
-                        move to a section, then try a full mock.
-                      </p>
-                      <Button
-                        variant="outline"
-                        className="mt-3"
-                        onClick={() => navigate("guide")}
-                      >
-                        <BookOpen />
-                        Learn the basics
-                      </Button>
-                    </More>
-                  </div>
                 </div>
               ) : active === "types" ? (
                 <div className="screen-stack catalogue-screen">
@@ -689,7 +630,7 @@ export default function App() {
                     selectedSections={selectedSections}
                     search={search}
                     progress={progress}
-                    onSelect={setGuideId}
+                    onSelect={(id) => void go(`/types/${id}`)}
                   />
                   {(search || selectedSections.length !== sections.length) && (
                     <Button
@@ -708,6 +649,8 @@ export default function App() {
                 </div>
               ) : active === "sections" ? (
                 <SectionSelect
+                  sectionId={route.sectionId}
+                  onSelect={(id) => void go(`/sections/${id}`)}
                   progress={progress}
                   onStart={(id) => begin("section", id)}
                 />
@@ -718,7 +661,7 @@ export default function App() {
                       <Trophy className="size-6" />
                     </span>
                     <div className="flex-1">
-                      <p className="game-eyebrow">THE FULL RUN</p>
+                      <p className="game-eyebrow">FULL MOCK TEST</p>
                       <h2 className="text-lg font-semibold">Mock 01</h2>
                     </div>
                     <Badge variant="secondary">65</Badge>
@@ -764,11 +707,15 @@ export default function App() {
                   </More>
                 </section>
               ) : active === "guide" ? (
-                <LearnScreen onPractice={() => navigate("types")} />
+                <LearnScreen
+                  key={route.topicId}
+                  topic={route.topicId}
+                  onTopic={(id) => void go(id ? `/guide/${id}` : "/guide")}
+                  onPractice={() => navigate("types")}
+                />
               ) : (
                 <HistoryScreen
                   history={history}
-                  onOpen={(id) => void openAttempt(id)}
                   onClear={() => setClearConfirm(true)}
                   onPractice={() => navigate("types")}
                 />
@@ -776,14 +723,7 @@ export default function App() {
             </div>
           </main>
         </div>
-        <Nav
-          active={active}
-          navigate={(to) => {
-            if (to === "home") setHubView("play");
-            navigate(to);
-          }}
-          mobile
-        />
+        <Nav active={active} mobile />
         <Dialog open={clearConfirm} onOpenChange={setClearConfirm}>
           <DialogContent showCloseButton={false}>
             <DialogTitle>Clear your practice history?</DialogTitle>
@@ -866,18 +806,6 @@ function Review({
   return (
     <div className="screen-stack review-screen">
       {r.reward && <RewardMoment reward={r.reward} celebrate={celebrate} />}
-      <div className="review-heading">
-        <span>{r.label}</span>
-        <Badge variant="secondary">
-          {r.finished ? "Completed" : "Ended early"}
-        </Badge>
-        <More label="About feedback">
-          <p>
-            Answer keys and self-review guidance are provided, without a
-            predicted PTE score. Responses and recordings stay on this device.
-          </p>
-        </More>
-      </div>
       <div className="review-question">
         <span className="question-number">
           {String(index + 1).padStart(2, "0")}
@@ -941,13 +869,19 @@ function Review({
       ) : (
         <>
           {tab === "Your response" && a.recording && (
-            <audio
-              controls
+            <AudioPlayer
               src={a.recording}
-              aria-label={`Your recording for question ${index + 1}`}
+              label={`Your recording for question ${index + 1}`}
             />
           )}
-          <ReadingPages key={id + tab} texts={texts} label="feedback pages" />
+          {!(
+            tab === "Your response" &&
+            a.recording &&
+            !a.text &&
+            !a.values?.length
+          ) && (
+            <ReadingPages key={id + tab} texts={texts} label="feedback pages" />
+          )}
         </>
       )}
       {r.questionIds.length > 1 && (
