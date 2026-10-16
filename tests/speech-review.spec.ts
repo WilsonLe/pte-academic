@@ -187,8 +187,10 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
     "data-question-id",
     "describe-image-01",
   );
-  await page.getByText("Question details", { exact: true }).click();
+  await page.getByRole("button", { name: "Source", exact: true }).click();
   await expect(page.getByRole("figure")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.getByRole("group", { name: "Your recording", exact: true }),
   ).toBeVisible();
@@ -282,8 +284,8 @@ test("expanded long legacy transcripts remain complete on desktop and short phon
     await page.setViewportSize(viewport);
     await page.goto(base + "history/feedback");
     await page.getByText("Saved transcript", { exact: true }).click();
-    const copy = page.locator(".legacy-transcript .reading-copy"),
-      next = page.getByRole("button", { name: "Next saved transcript pages" });
+    const copy = page.getByRole("dialog").locator(".reading-copy"),
+      next = page.getByRole("button", { name: "Next detail pages" });
     const parts: string[] = [];
     for (let i = 0; i < 150; i++) {
       await expect

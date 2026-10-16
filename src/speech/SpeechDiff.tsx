@@ -146,13 +146,12 @@ export function SpeechDiff({
     <button
       key={word.index}
       className={`feedback-word${word.omitted ? " omitted-word" : ""}`}
-      disabled={word.omitted}
       type="button"
       aria-label={
         measuring
           ? undefined
           : word.omitted
-            ? `Not heard: ${word.word}`
+            ? `Not heard: ${word.word}. Explain`
             : `Practise word ${word.index + 1}: ${word.word}`
       }
       aria-describedby={
