@@ -110,7 +110,6 @@ export function GameStatus({
 }
 export function GameHub({
   view,
-  onViewChange,
   progress: p,
   today,
   ready,
@@ -118,14 +117,12 @@ export function GameHub({
   navigate,
 }: {
   view: string;
-  onViewChange: (view: string) => void;
   progress: Progress;
   today: string;
   ready: boolean;
   onQuest: () => void;
   navigate: (page: ScreenId) => void;
 }) {
-  const setView = onViewChange;
   const [selected, setSelected] = useState<string | null>(null);
   const done = Math.min(3, dayCount(p, today)),
     complete = done >= 3,
@@ -142,25 +139,6 @@ export function GameHub({
             {view === "progress" ? "Your progress" : "Your achievements"}
             <span className="accent-dot">.</span>
           </h2>
-          <div className="hub-tools">
-            {view !== "badges" && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      aria-label="View achievements"
-                      onClick={() => setView("badges")}
-                    />
-                  }
-                >
-                  <Trophy />
-                </TooltipTrigger>
-                <TooltipContent>Achievements</TooltipContent>
-              </Tooltip>
-            )}
-          </div>
         </div>
       )}
       <div className="quest-grid">
@@ -174,22 +152,6 @@ export function GameHub({
                 <Sparkles className="size-3.5" />
                 DAILY PRACTICE
               </span>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="quest-achievements"
-                      aria-label="View achievements"
-                      onClick={() => setView("badges")}
-                    />
-                  }
-                >
-                  <Trophy />
-                </TooltipTrigger>
-                <TooltipContent>Achievements</TooltipContent>
-              </Tooltip>
             </div>
             <div className="quest-body">
               <div

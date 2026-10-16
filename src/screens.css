@@ -30,7 +30,8 @@
   height: 25px;
 }
 .topbar {
-  position: relative;
+  position: sticky;
+  top: 0;
   flex: 0 0 80px;
   height: 80px;
   padding: 0 32px;
@@ -1491,19 +1492,6 @@
 }
 .hub-play .quest-topline {
   flex-shrink: 0;
-}
-.quest-achievements[data-size="icon"] {
-  color: #fff;
-  background: #ffffff14;
-  border: 1px solid #ffffff30;
-  border-radius: 14px;
-  width: 44px;
-  min-width: 44px;
-  min-height: 44px;
-}
-.quest-achievements[data-size="icon"]:hover {
-  color: #fff;
-  background: #ffffff28;
 }
 .hub-play .quest-body {
   flex: 1;

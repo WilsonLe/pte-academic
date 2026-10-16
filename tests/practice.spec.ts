@@ -1,4 +1,30 @@
 import { test, expect, type Page } from "@playwright/test";
+async function openAchievements(page: Page) {
+  const mobile = page.viewportSize()!.width < 768;
+  await page
+    .getByRole("navigation", {
+      name: mobile ? "Mobile navigation" : "Main navigation",
+      exact: true,
+    })
+    .getByRole("link", {
+      name: mobile ? "History" : "My practice",
+      exact: true,
+    })
+    .click();
+  await page.getByRole("link", { name: "Achievements", exact: true }).click();
+  await expect(page).toHaveURL(/\/achievements$/);
+  await expect(
+    page
+      .getByRole("navigation", {
+        name: mobile ? "Mobile navigation" : "Main navigation",
+        exact: true,
+      })
+      .getByRole("link", {
+        name: mobile ? "History" : "My practice",
+        exact: true,
+      }),
+  ).toHaveAttribute("aria-current", "page");
+}
 async function drill(page: Page, name: string) {
   await page.goto("/#types");
   await page.getByRole("searchbox").fill(name.replaceAll("\\", ""));
@@ -155,7 +181,7 @@ test("shared cards list hides unnecessary pagination and preserves navigation on
   await expect(
     page.getByRole("navigation", { name: "practice mode pages", exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "View achievements" }).click();
+  await openAchievements(page);
   await expect(page.locator(".cards-list-grid .achievement")).toHaveCount(4);
   const achievementNext = page.getByRole("button", {
     name: "Next achievement pages",
@@ -285,7 +311,7 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
       page.getByRole("region", { name: "Practice level" }),
     ).toBeVisible();
     await screenFits(page);
-    await page.getByRole("button", { name: "View achievements" }).click();
+    await openAchievements(page);
     await expect(
       page.getByRole("button", {
         name: "First spark, not earned. View achievement",
@@ -868,7 +894,7 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
   await expect(
     page.getByRole("button", { name: "0 XP, level 1. View progress" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "View achievements" }).click();
+  await openAchievements(page);
   await page
     .getByRole("button", { name: "First spark, not earned. View achievement" })
     .click();
@@ -911,7 +937,7 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
   await expect(
     page.getByRole("heading", { name: "Daily goal complete", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "View achievements" }).click();
+  await openAchievements(page);
   await expect(
     page.getByRole("button", {
       name: "First spark, earned. View achievement",
@@ -1332,7 +1358,7 @@ test("daily home groups progress and actions across fresh, partial and completed
       await expect(action).toBeEnabled();
       await expect(
         daily.getByRole("button", { name: "View achievements" }),
-      ).toBeVisible();
+      ).toHaveCount(0);
       await expect(page.locator(".practice-modes a")).toHaveCount(3);
       await screenFits(page);
       const bounds = await daily.evaluate((node) => {
@@ -1366,7 +1392,7 @@ test("daily home groups progress and actions across fresh, partial and completed
   await expect(
     page.getByRole("button", { name: "How practice XP works" }),
   ).toBeFocused();
-  await page.getByRole("button", { name: "View achievements" }).click();
+  await openAchievements(page);
   await expect(
     page.getByRole("heading", { name: "Your achievements" }),
   ).toBeVisible();
