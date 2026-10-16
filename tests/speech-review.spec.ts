@@ -241,3 +241,67 @@ test("reference playback follows the saved pronunciation variant when syllable c
     .getAttribute("src");
   expect(duration).toContain("read-aloud-01-reference.mp3");
 });
+
+test("expanded long legacy transcripts remain complete on desktop and short phones", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page);
+  const text =
+    "A saved learner transcript remains available for reading. ".repeat(130) +
+    "FINAL SAVED TRANSCRIPT WORDS";
+  await page.evaluate(async (text) => {
+    await new Promise<void>((resolve, reject) => {
+      const r = indexedDB.open("pte-studio", 2);
+      r.onerror = () => reject(r.error);
+      r.onsuccess = () => {
+        const db = r.result,
+          tx = db.transaction("attempts", "readwrite"),
+          store = tx.objectStore("attempts"),
+          get = store.get("feedback");
+        get.onsuccess = () => {
+          const saved = get.result;
+          saved.result.questionIds = ["repeat-sentence-01"];
+          saved.result.answers["repeat-sentence-01"].transcription.text = text;
+          store.put(saved, "feedback");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+    });
+  }, text);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(base + "history/feedback");
+    await page.getByText("Saved transcript", { exact: true }).click();
+    const copy = page.locator(".legacy-transcript .reading-copy"),
+      next = page.getByRole("button", { name: "Next saved transcript pages" });
+    const parts: string[] = [];
+    for (let i = 0; i < 150; i++) {
+      await expect
+        .poll(() =>
+          copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+        )
+        .toBe(true);
+      parts.push(await copy.innerText());
+      if (!(await next.count()) || (await next.isDisabled())) break;
+      await next.click();
+    }
+    expect(parts.join(" ").replace(/\s+/g, " ").trim()).toBe(text.trim());
+    await expect(copy).toContainText(/WORDS\s*$/);
+    await copy.scrollIntoViewIfNeeded();
+    await expect(copy).toBeInViewport({ ratio: 1 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+  }
+});

@@ -2038,3 +2038,16 @@ body {
   flex: 1 1 0;
   min-width: 0;
 }
+
+/* Legacy text shares measured pages; short panels retain contained scrolling. */
+.legacy-transcript {
+  flex-shrink: 0;
+}
+.legacy-transcript > .reading-pages {
+  height: clamp(160px, 30dvh, 260px);
+  flex: none;
+  margin-top: 8px;
+}
+.local-speech-screen:has(.legacy-transcript[open]) {
+  overflow-y: auto;
+}

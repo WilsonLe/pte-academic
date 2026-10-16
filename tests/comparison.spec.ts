@@ -492,3 +492,109 @@ test("direct practice entry starts the required model preparation before the wor
     page.getByRole("button", { name: "Begin practice", exact: true }),
   ).toBeVisible();
 });
+
+test("an open word refreshes its learner clips when delayed initial grading completes", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(120000);
+  await context.addInitScript(() => {
+    const Original = window.Worker;
+    (window as any).Worker = class extends Original {
+      set onmessage(handler: any) {
+        super.onmessage = (event) => {
+          if (event.data?.type === "complete")
+            (window as any).__releaseInitialGrade = () =>
+              handler?.call(this, event);
+          else handler?.call(this, event);
+        };
+      }
+    };
+  });
+  await seed(page, false);
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(
+    dialog.getByRole("group", { name: "Your word", exact: true }),
+  ).toHaveCount(0);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () => typeof (window as any).__releaseInitialGrade === "function",
+        ),
+      { timeout: 90000 },
+    )
+    .toBe(true);
+  await page.evaluate(() => (window as any).__releaseInitialGrade());
+  await expect(
+    dialog.getByRole("group", { name: "Your word", exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("group", { name: "Your syllable", exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Record syllable", exact: true }),
+  ).toBeEnabled();
+});
+
+test("post-ready missing and corrupt model metadata recover through notifications and initial-feedback retry", async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  await seed(page);
+  for (const corrupt of [false, true]) {
+    await page.evaluate(async (corrupt) => {
+      const name = (await caches.keys()).find((n) =>
+        n.startsWith("pte-comparison:"),
+      )!;
+      const cache = await caches.open(name);
+      const url = (await cache.keys()).find((r) =>
+        r.url.endsWith("/comparison.json"),
+      )!;
+      if (corrupt) await cache.put(url, new Response("corrupt"));
+      else await cache.delete(url);
+      await new Promise<void>((resolve) => {
+        const r = indexedDB.open("pte-studio", 2);
+        r.onsuccess = () => {
+          const db = r.result,
+            tx = db.transaction("attempts", "readwrite"),
+            store = tx.objectStore("attempts"),
+            get = store.get("comparison-fixture");
+          get.onsuccess = () => {
+            const saved = get.result;
+            delete saved.result.answers["repeat-sentence-01"].pronunciation;
+            store.put(saved, "comparison-fixture");
+          };
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+        };
+      });
+    }, corrupt);
+    await page
+      .getByRole("button", { name: "My practice", exact: true })
+      .click();
+    await page.locator(".history-row").first().click();
+    await page
+      .getByRole("button", { name: "Notifications", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Retry model download" })
+      .click({ timeout: 30000 });
+    await page.keyboard.press("Escape");
+    const retry = page.getByRole("button", {
+      name: "Retry feedback",
+      exact: true,
+    });
+    await expect(retry).toBeEnabled({ timeout: 60000 });
+    await retry.click();
+    await expect(page.getByLabel(/^Reference similarity/)).toBeVisible({
+      timeout: 60000,
+    });
+    await expect(
+      page.getByRole("button", { name: "Cancel speech scoring" }),
+    ).toHaveCount(0);
+  }
+});

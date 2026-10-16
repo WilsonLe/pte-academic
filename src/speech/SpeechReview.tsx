@@ -20,7 +20,7 @@ import { savePronunciation } from "../storage";
 import { scoreRecording } from "./comparison-client";
 import { modelStatus, subscribeModel } from "./comparison-assets";
 import { pronunciationSummary, type Pronunciation } from "./comparison-schema";
-import { SpeechDiff, feedbackWords, type FeedbackWord } from "./SpeechDiff";
+import { SpeechDiff, feedbackWords } from "./SpeechDiff";
 const SyllablePractice = lazy(() =>
   import("./SyllablePractice").then((module) => ({
     default: module.SyllablePractice,
@@ -38,7 +38,7 @@ export function SpeechReview({
   onPronunciation: (value: Pronunciation) => void;
 }) {
   const [pronunciation, setPronunciation] = useState(answer.pronunciation);
-  const [selected, setSelected] = useState<FeedbackWord>();
+  const [selectedIndex, setSelectedIndex] = useState<number>();
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const model = useSyncExternalStore(subscribeModel, modelStatus);
@@ -117,6 +117,7 @@ export function SpeechReview({
     () => feedbackWords(expected || "", pronunciation),
     [expected, pronunciation],
   );
+  const selected = words.find((word) => word.index === selectedIndex);
   const similarity = pronunciation ? pronunciationSummary(pronunciation) : null;
   return (
     <section
@@ -193,16 +194,22 @@ export function SpeechReview({
             your audio with the prompt sounds; they do not transcribe what you
             said.
           </p>
-          <SpeechDiff words={words} onSelect={setSelected} />
+          <SpeechDiff
+            words={words}
+            onSelect={(word) => setSelectedIndex(word.index)}
+          />
           {!answer.recording && (
             <p>No recording was saved. You can still practise each syllable.</p>
           )}
           {answer.transcription && (
-            <details>
+            <details className="legacy-transcript">
               <summary>Saved transcript</summary>
-              <p>
-                {answer.transcription.text || "The saved transcript is empty."}
-              </p>
+              <ReadingPages
+                label="saved transcript pages"
+                texts={[
+                  answer.transcription.text || "The saved transcript is empty.",
+                ]}
+              />
             </details>
           )}
           <p className="speech-stats">
@@ -221,7 +228,7 @@ export function SpeechReview({
                 recording={answer.recording}
                 attemptId={attemptId}
                 ready={model.status === "ready" && !progress}
-                onClose={() => setSelected(undefined)}
+                onClose={() => setSelectedIndex(undefined)}
               />
             </Suspense>
           )}

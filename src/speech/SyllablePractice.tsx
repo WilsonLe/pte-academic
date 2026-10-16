@@ -53,7 +53,8 @@ export function SyllablePractice({
     ? word.syllables
     : refWord.map((s) => ({ ...s, similarity: null }));
   const [index, setIndex] = useState(0);
-  const current = syllables[index];
+  const activeIndex = Math.min(index, Math.max(0, syllables.length - 1));
+  const current = syllables[activeIndex];
   const standard = refWord.find(
     (s) => s.syllableIndex === current?.syllableIndex,
   );
@@ -265,9 +266,9 @@ export function SyllablePractice({
           {syllables.map((s, i) => (
             <Button
               key={s.syllableIndex}
-              variant={index === i ? "secondary" : "outline"}
+              variant={activeIndex === i ? "secondary" : "outline"}
               disabled={busy || reward.isPending}
-              aria-pressed={index === i}
+              aria-pressed={activeIndex === i}
               onClick={() => {
                 setIndex(i);
                 setGrade(undefined);
@@ -291,7 +292,7 @@ export function SyllablePractice({
         </div>
         {current && (
           <div className="syllable-detail">
-            <h3>Practise syllable {index + 1}</h3>
+            <h3>Practise syllable {activeIndex + 1}</h3>
             <fieldset
               disabled={busy}
               className="paired-audio"
@@ -299,7 +300,7 @@ export function SyllablePractice({
             >
               {recording && original && (
                 <AudioPlayer
-                  key={`your-${index}`}
+                  key={`your-${activeIndex}`}
                   src={recording}
                   start={original.start}
                   end={original.end}
@@ -308,7 +309,7 @@ export function SyllablePractice({
               )}
               {standard && (
                 <AudioPlayer
-                  key={`reference-${index}`}
+                  key={`reference-${activeIndex}`}
                   src={asset(reference.audio)}
                   start={standard.start}
                   end={standard.end}
