@@ -861,8 +861,12 @@ test("section mode has full scope; shared timer finishes without a backward acti
     page.getByRole("heading", { name: "Review", exact: true }),
   ).toBeVisible();
   await expect(
+    page.getByText("No responses were saved in this session.", { exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("navigation", { name: "review questions" }),
-  ).toContainText("1 / 15");
+  ).toHaveCount(0);
+  await expect(page.locator(".exam")).toHaveCount(0);
 });
 test("full mock has all 65 questions and advances into Reading after section timeout", async ({
   page,
@@ -890,8 +894,12 @@ test("full mock has all 65 questions and advances into Reading after section tim
   await expect(page.getByRole("combobox", { name: "Blank 1" })).toBeVisible();
   await end(page);
   await expect(
+    page.getByText("No responses were saved in this session.", { exact: true }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("navigation", { name: "review questions" }),
-  ).toContainText("1 / 65");
+  ).toHaveCount(0);
+  await expect(page.locator(".exam")).toHaveCount(0);
 });
 test("manifest, cached media and navigation work offline", async ({
   page,
