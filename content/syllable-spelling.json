@@ -1,0 +1,593 @@
+{
+  "version": 1,
+  "groups": {
+    "access": {
+      "2": ["ac", "cess"]
+    },
+    "adapting": {
+      "3": ["a", "dap", "ting"]
+    },
+    "after": {
+      "2": ["af", "ter"]
+    },
+    "afternoon": {
+      "3": ["af", "ter", "noon"]
+    },
+    "alone": {
+      "2": ["a", "lone"]
+    },
+    "alongside": {
+      "3": ["a", "long", "side"]
+    },
+    "already": {
+      "3": ["al", "rea", "dy"]
+    },
+    "amounts": {
+      "2": ["a", "mounts"]
+    },
+    "any": {
+      "2": ["a", "ny"]
+    },
+    "areas": {
+      "2": ["a", "reas"]
+    },
+    "argument": {
+      "3": ["ar", "gu", "ment"]
+    },
+    "assignment": {
+      "3": ["a", "ssign", "ment"]
+    },
+    "attending": {
+      "3": ["a", "tten", "ding"]
+    },
+    "before": {
+      "2": ["be", "fore"]
+    },
+    "being": {
+      "2": ["be", "ing"]
+    },
+    "benefits": {
+      "3": ["be", "ne", "fits"]
+    },
+    "booking": {
+      "2": ["boo", "king"]
+    },
+    "calling": {
+      "2": ["ca", "lling"]
+    },
+    "campus": {
+      "2": ["cam", "pus"]
+    },
+    "changes": {
+      "2": ["chan", "ges"]
+    },
+    "changing": {
+      "2": ["chan", "ging"]
+    },
+    "choosing": {
+      "2": ["choo", "sing"]
+    },
+    "city": {
+      "2": ["ci", "ty"]
+    },
+    "classes": {
+      "2": ["cla", "sses"]
+    },
+    "classmate's": {
+      "2": ["cla", "ssmate's"]
+    },
+    "closes": {
+      "2": ["clo", "ses"]
+    },
+    "collect": {
+      "2": ["co", "llect"]
+    },
+    "collected": {
+      "3": ["co", "llec", "ted"],
+      "2": ["co", "llected"]
+    },
+    "combining": {
+      "3": ["com", "bi", "ning"]
+    },
+    "community": {
+      "4": ["co", "mmu", "ni", "ty"],
+      "3": ["co", "mmuni", "ty"]
+    },
+    "complete": {
+      "2": ["com", "plete"]
+    },
+    "conditions": {
+      "3": ["con", "di", "tions"]
+    },
+    "conference": {
+      "2": ["con", "ference"]
+    },
+    "consent": {
+      "2": ["con", "sent"]
+    },
+    "consistent": {
+      "3": ["con", "si", "stent"]
+    },
+    "continues": {
+      "3": ["con", "ti", "nues"]
+    },
+    "cover": {
+      "2": ["co", "ver"]
+    },
+    "create": {
+      "2": ["cre", "ate"]
+    },
+    "deadline": {
+      "2": ["dead", "line"]
+    },
+    "depend": {
+      "2": ["de", "pend"]
+    },
+    "depends": {
+      "2": ["de", "pends"]
+    },
+    "describes": {
+      "2": ["de", "scribes"]
+    },
+    "detail": {
+      "2": ["de", "tail"]
+    },
+    "difficult": {
+      "3": ["di", "ffi", "cult"]
+    },
+    "digital": {
+      "3": ["di", "gi", "tal"]
+    },
+    "directly": {
+      "3": ["di", "rect", "ly"],
+      "2": ["direct", "ly"]
+    },
+    "discussed": {
+      "2": ["di", "scussed"]
+    },
+    "distance": {
+      "2": ["di", "stance"]
+    },
+    "during": {
+      "2": ["du", "ring"]
+    },
+    "effect": {
+      "2": ["e", "ffect"]
+    },
+    "encountered": {
+      "3": ["en", "coun", "tered"]
+    },
+    "especially": {
+      "4": ["e", "spe", "cial", "ly"]
+    },
+    "even": {
+      "2": ["e", "ven"]
+    },
+    "every": {
+      "2": ["ev", "ery"]
+    },
+    "examination": {
+      "5": ["ex", "a", "mi", "na", "tion"],
+      "4": ["ex", "ami", "na", "tion"]
+    },
+    "explains": {
+      "2": ["ex", "plains"]
+    },
+    "explanations": {
+      "4": ["ex", "pla", "na", "tions"]
+    },
+    "extended": {
+      "3": ["ex", "ten", "ded"],
+      "2": ["ex", "tended"]
+    },
+    "features": {
+      "2": ["fea", "tures"]
+    },
+    "feedback": {
+      "2": ["feed", "back"]
+    },
+    "final": {
+      "2": ["fi", "nal"]
+    },
+    "findings": {
+      "2": ["fin", "dings"]
+    },
+    "floating": {
+      "2": ["floa", "ting"]
+    },
+    "friday": {
+      "2": ["fri", "day"]
+    },
+    "giving": {
+      "2": ["gi", "ving"]
+    },
+    "greater": {
+      "2": ["grea", "ter"]
+    },
+    "helping": {
+      "2": ["hel", "ping"]
+    },
+    "however": {
+      "3": ["how", "e", "ver"]
+    },
+    "identify": {
+      "4": ["i", "den", "ti", "fy"],
+      "3": ["i", "denti", "fy"]
+    },
+    "important": {
+      "3": ["im", "por", "tant"]
+    },
+    "includes": {
+      "2": ["in", "cludes"]
+    },
+    "information": {
+      "4": ["in", "for", "ma", "tion"]
+    },
+    "instead": {
+      "2": ["in", "stead"]
+    },
+    "instruments": {
+      "3": ["in", "stru", "ments"]
+    },
+    "intensive": {
+      "3": ["in", "ten", "sive"]
+    },
+    "internet": {
+      "3": ["in", "ter", "net"]
+    },
+    "interview": {
+      "3": ["in", "ter", "view"]
+    },
+    "investigated": {
+      "5": ["in", "ve", "sti", "ga", "ted"],
+      "3": ["in", "vesti", "gated"]
+    },
+    "judgement": {
+      "2": ["judge", "ment"]
+    },
+    "laboratory": {
+      "4": ["la", "bo", "ra", "tory"]
+    },
+    "language": {
+      "2": ["lan", "guage"]
+    },
+    "learning": {
+      "2": ["lear", "ning"]
+    },
+    "libraries": {
+      "3": ["li", "bra", "ries"]
+    },
+    "library": {
+      "3": ["li", "bra", "ry"]
+    },
+    "limitations": {
+      "4": ["li", "mi", "ta", "tions"]
+    },
+    "local": {
+      "2": ["lo", "cal"]
+    },
+    "locations": {
+      "3": ["lo", "ca", "tions"]
+    },
+    "lower": {
+      "2": ["low", "er"]
+    },
+    "mainly": {
+      "2": ["main", "ly"]
+    },
+    "making": {
+      "2": ["ma", "king"]
+    },
+    "many": {
+      "2": ["ma", "ny"]
+    },
+    "measure": {
+      "2": ["mea", "sure"]
+    },
+    "memories": {
+      "3": ["me", "mo", "ries"]
+    },
+    "method": {
+      "2": ["me", "thod"]
+    },
+    "midnight": {
+      "2": ["mid", "night"]
+    },
+    "model": {
+      "2": ["mo", "del"]
+    },
+    "models": {
+      "2": ["mo", "dels"]
+    },
+    "moisture": {
+      "2": ["mois", "ture"]
+    },
+    "museum": {
+      "2": ["mu", "seum"]
+    },
+    "needed": {
+      "2": ["nee", "ded"]
+    },
+    "observations": {
+      "4": ["ob", "ser", "va", "tions"]
+    },
+    "observe": {
+      "2": ["ob", "serve"]
+    },
+    "occasional": {
+      "4": ["o", "cca", "sio", "nal"]
+    },
+    "ocean": {
+      "2": ["o", "cean"]
+    },
+    "offer": {
+      "2": ["o", "ffer"]
+    },
+    "online": {
+      "2": ["on", "line"]
+    },
+    "open": {
+      "2": ["o", "pen"]
+    },
+    "outcomes": {
+      "2": ["out", "comes"]
+    },
+    "participants": {
+      "4": ["par", "ti", "ci", "pants"]
+    },
+    "people": {
+      "2": ["peo", "ple"]
+    },
+    "period": {
+      "3": ["pe", "ri", "od"]
+    },
+    "picture": {
+      "2": ["pic", "ture"]
+    },
+    "practise": {
+      "2": ["prac", "tise"]
+    },
+    "predict": {
+      "2": ["pre", "dict"]
+    },
+    "preserve": {
+      "2": ["pre", "serve"]
+    },
+    "printed": {
+      "2": ["prin", "ted"]
+    },
+    "problem": {
+      "2": ["pro", "blem"]
+    },
+    "problems": {
+      "2": ["pro", "blems"]
+    },
+    "professor": {
+      "3": ["pro", "fe", "ssor"]
+    },
+    "provide": {
+      "2": ["pro", "vide"]
+    },
+    "public": {
+      "2": ["pu", "blic"]
+    },
+    "question": {
+      "2": ["ques", "tion"]
+    },
+    "quickly": {
+      "2": ["qui", "ckly"]
+    },
+    "railway": {
+      "2": ["rail", "way"]
+    },
+    "rather": {
+      "2": ["ra", "ther"]
+    },
+    "real": {
+      "2": ["re", "al"]
+    },
+    "regular": {
+      "3": ["re", "gu", "lar"]
+    },
+    "release": {
+      "2": ["re", "lease"]
+    },
+    "relevant": {
+      "3": ["re", "le", "vant"],
+      "2": ["rele", "vant"]
+    },
+    "reliable": {
+      "4": ["re", "li", "a", "ble"],
+      "3": ["reli", "a", "ble"]
+    },
+    "remain": {
+      "2": ["re", "main"]
+    },
+    "remains": {
+      "2": ["re", "mains"]
+    },
+    "renovation": {
+      "4": ["re", "no", "va", "tion"]
+    },
+    "reorganizes": {
+      "5": ["re", "or", "ga", "ni", "zes"],
+      "4": ["re", "or", "ga", "nizes"]
+    },
+    "replace": {
+      "2": ["re", "place"]
+    },
+    "report": {
+      "2": ["re", "port"]
+    },
+    "representation": {
+      "5": ["re", "pre", "sen", "ta", "tion"],
+      "4": ["repre", "sen", "ta", "tion"]
+    },
+    "research": {
+      "2": ["re", "search"]
+    },
+    "researchers": {
+      "3": ["re", "sear", "chers"],
+      "2": ["resear", "chers"]
+    },
+    "reserve": {
+      "2": ["re", "serve"]
+    },
+    "resources": {
+      "3": ["re", "sour", "ces"]
+    },
+    "revise": {
+      "2": ["re", "vise"]
+    },
+    "revision": {
+      "3": ["re", "vi", "sion"],
+      "2": ["revi", "sion"]
+    },
+    "routine": {
+      "2": ["rou", "tine"]
+    },
+    "samples": {
+      "2": ["sam", "ples"]
+    },
+    "satellites": {
+      "3": ["sa", "te", "llites"]
+    },
+    "scientific": {
+      "3": ["scien", "ti", "fic"]
+    },
+    "scientists": {
+      "2": ["scien", "tists"]
+    },
+    "seminar": {
+      "3": ["se", "mi", "nar"]
+    },
+    "separate": {
+      "2": ["se", "parate"]
+    },
+    "services": {
+      "3": ["ser", "vi", "ces"],
+      "2": ["ser", "vices"]
+    },
+    "several": {
+      "2": ["sev", "eral"]
+    },
+    "simplifications": {
+      "5": ["sim", "pli", "fi", "ca", "tions"]
+    },
+    "simplified": {
+      "3": ["sim", "pli", "fied"],
+      "2": ["simpli", "fied"]
+    },
+    "simply": {
+      "2": ["sim", "ply"]
+    },
+    "single": {
+      "2": ["sin", "gle"]
+    },
+    "species": {
+      "2": ["spe", "cies"]
+    },
+    "specific": {
+      "3": ["spe", "ci", "fic"]
+    },
+    "station": {
+      "2": ["sta", "tion"]
+    },
+    "strengthens": {
+      "2": ["streng", "thens"]
+    },
+    "student": {
+      "2": ["stu", "dent"]
+    },
+    "students": {
+      "2": ["stu", "dents"]
+    },
+    "study": {
+      "2": ["stu", "dy"]
+    },
+    "submit": {
+      "2": ["sub", "mit"]
+    },
+    "suited": {
+      "2": ["sui", "ted"]
+    },
+    "supports": {
+      "2": ["su", "pports"]
+    },
+    "surface": {
+      "2": ["sur", "face"]
+    },
+    "surrounding": {
+      "3": ["su", "rroun", "ding"]
+    },
+    "system": {
+      "2": ["sy", "stem"]
+    },
+    "temperature": {
+      "3": ["tem", "pera", "ture"]
+    },
+    "temperatures": {
+      "3": ["tem", "pera", "tures"]
+    },
+    "therefore": {
+      "2": ["there", "fore"]
+    },
+    "throughout": {
+      "2": ["through", "out"]
+    },
+    "timetable": {
+      "3": ["time", "ta", "ble"]
+    },
+    "unclear": {
+      "2": ["un", "clear"]
+    },
+    "understand": {
+      "3": ["un", "der", "stand"]
+    },
+    "university": {
+      "5": ["u", "ni", "ver", "si", "ty"],
+      "4": ["u", "ni", "versi", "ty"]
+    },
+    "until": {
+      "2": ["un", "til"]
+    },
+    "urban": {
+      "2": ["ur", "ban"]
+    },
+    "useful": {
+      "2": ["use", "ful"]
+    },
+    "using": {
+      "2": ["u", "sing"]
+    },
+    "valuable": {
+      "4": ["val", "u", "a", "ble"]
+    },
+    "value": {
+      "2": ["val", "ue"]
+    },
+    "walking": {
+      "2": ["wal", "king"]
+    },
+    "water": {
+      "2": ["wa", "ter"]
+    },
+    "whether": {
+      "2": ["whe", "ther"]
+    },
+    "within": {
+      "2": ["wi", "thin"]
+    },
+    "writing": {
+      "2": ["wri", "ting"]
+    },
+    "yesterday's": {
+      "3": ["ye", "ster", "day's"]
+    }
+  },
+  "variants": {
+    "laboratory": {
+      "l æ1|b ɹ ə0|t ɔː2|ɹ i0": ["la", "bora", "to", "ry"]
+    }
+  }
+}

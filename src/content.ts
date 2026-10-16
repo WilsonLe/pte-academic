@@ -7,7 +7,21 @@ import guideData from "../content/guides.json";
 import questionData from "../content/questions.json";
 import mockData from "../content/mock-tests.json";
 import sectionData from "../content/sections.json";
+import syllableSpellingData from "../content/syllable-spelling.json";
 import type { Transcription } from "./speech/legacy-transcription";
+export const syllableSpellingSchema = z.object({
+  version: z.literal(1),
+  groups: z.record(
+    z.string(),
+    z.record(z.string(), z.array(z.string().min(1)).min(1)),
+  ),
+  variants: z.record(
+    z.string(),
+    z.record(z.string(), z.array(z.string().min(1)).min(1)),
+  ),
+});
+export const syllableSpelling =
+  syllableSpellingSchema.parse(syllableSpellingData);
 export const sectionId = z.enum(["speaking", "reading", "listening"]);
 export const guideSchema = z.object({
   id: z.string(),

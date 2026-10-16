@@ -1919,14 +1919,16 @@ body {
   pointer-events: none;
 }
 .feedback-word {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--card);
-  font-size: 20px;
+  min-width: 44px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 3px 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 24px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -1935,31 +1937,26 @@ body {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-.word-syllables {
-  display: flex;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
+.word-characters {
+  white-space: nowrap;
 }
-.word-syllables > span {
-  border-radius: 6px;
-  min-width: 26px;
-  padding: 3px 5px;
-  text-align: center;
+.syllable-letters {
+  padding: 2px 1px;
+  border-radius: 4px;
 }
-[data-tone="close"] {
-  color: #28530e;
-  background: #e4f8cc;
+.practice-ui [data-tone="close"] {
+  color: #166534;
+  background: #dcfce7;
 }
-[data-tone="developing"] {
-  color: #663ca4;
-  background: #eee4ff;
+.practice-ui [data-tone="developing"] {
+  color: #854d0e;
+  background: #fef3c7;
 }
-[data-tone="focus"] {
-  color: #9b3415;
-  background: #ffeadb;
+.practice-ui [data-tone="focus"] {
+  color: #991b1b;
+  background: #fee2e2;
 }
-[data-tone="uncertain"] {
+.practice-ui [data-tone="uncertain"] {
   color: #615b6a;
   background: #eeeaf3;
 }
@@ -2014,8 +2011,8 @@ body {
 }
 @media (max-width: 767px) {
   .feedback-word {
-    font-size: 17px;
-    padding: 8px 10px;
+    font-size: 21px;
+    padding: 3px 2px;
   }
   .review-audio-pair {
     gap: 6px;

@@ -1,21 +1,18 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Pager, observePageLayout } from "../Pages";
 import type { Pronunciation } from "./comparison-schema";
 import { scriptKey } from "./comparison-core";
+import {
+  syllableLetters,
+  syllableDescription,
+  similarityTone,
+} from "./syllable-display";
 export type Syllable = Pronunciation["syllables"][number];
 export type FeedbackWord = {
   word: string;
   index: number;
   syllables: Syllable[];
 };
-export const similarityTone = (value: number | null) =>
-  value === null
-    ? "uncertain"
-    : value >= 75
-      ? "close"
-      : value >= 50
-        ? "developing"
-        : "focus";
 export function feedbackWords(
   text: string,
   result?: Pronunciation,
@@ -37,6 +34,7 @@ export function SpeechDiff({
   words: FeedbackWord[];
   onSelect: (word: FeedbackWord) => void;
 }) {
+  const descriptionId = useId();
   const panel = useRef<HTMLDivElement>(null),
     measure = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<FeedbackWord[][]>([words]);
@@ -84,25 +82,37 @@ export function SpeechDiff({
       aria-label={
         measuring ? undefined : `Practise word ${word.index + 1}: ${word.word}`
       }
+      aria-describedby={
+        measuring ? undefined : `${descriptionId}-${word.index}`
+      }
       tabIndex={measuring ? -1 : undefined}
       onClick={() => onSelect(word)}
     >
-      <span>{word.word}</span>
-      <span className="word-syllables">
-        {word.syllables.length ? (
-          word.syllables.map((s) => (
-            <span
-              key={s.syllableIndex}
-              data-tone={similarityTone(s.similarity)}
-              aria-label={`Syllable ${s.syllableIndex + 1}: ${s.similarity === null ? "uncertain" : `${Math.round(s.similarity)} out of 100`}`}
-            >
-              {s.similarity === null ? "?" : Math.round(s.similarity)}
-            </span>
-          ))
-        ) : (
-          <span data-tone="uncertain">Unscored</span>
-        )}
+      <span className="word-characters" aria-hidden="true">
+        {syllableLetters(word.word, word.syllables).map((part, index) => (
+          <span
+            key={index}
+            className={part.syllable ? "syllable-letters" : undefined}
+            data-tone={
+              part.syllable
+                ? similarityTone(part.syllable.similarity)
+                : undefined
+            }
+            title={
+              part.syllable ? syllableDescription(part.syllable) : undefined
+            }
+          >
+            {part.text}
+          </span>
+        ))}
       </span>
+      {!measuring && (
+        <span id={`${descriptionId}-${word.index}`} className="sr-only">
+          {word.syllables.length
+            ? word.syllables.map(syllableDescription).join(". ")
+            : "Unscored"}
+        </span>
+      )}
     </button>
   );
   return (

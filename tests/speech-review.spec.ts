@@ -15,9 +15,9 @@ async function seed(
     .find((v) => v.language === variant)!
     .syllables.map((s, i) => ({
       ...s,
-      similarity: i % 3 ? 78 : null,
-      confidence: i % 3 ? 0.8 : 0,
-      status: i % 3 ? "scored" : "uncertain",
+      similarity: [null, 88, 60, 25][i % 4],
+      confidence: i % 4 ? 0.8 : 0,
+      status: i % 4 ? "scored" : "uncertain",
     }));
   await page.evaluate(
     async ({ syllables, state, sha, exportId }) => {
@@ -303,5 +303,68 @@ test("expanded long legacy transcripts remain complete on desktop and short phon
         () => document.documentElement.scrollWidth <= innerWidth + 1,
       ),
     ).toBe(true);
+  }
+});
+
+test("green, yellow and red colour the syllable letters, with uncertainty neutral and no score chips", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const urban = page.getByRole("button", {
+      name: "Practise word 1: Urban",
+      exact: true,
+    });
+    await expect(urban.locator(".syllable-letters")).toHaveText(["Ur", "ban"]);
+    await expect(urban).toHaveAccessibleDescription(
+      "Syllable 1: uncertain, no score. Syllable 2: 88 out of 100",
+    );
+    const green = urban.locator('[data-tone="close"]');
+    const yellow = page
+      .getByRole("button", { name: "Practise word 2: trees", exact: true })
+      .locator('[data-tone="developing"]');
+    const red = page
+      .getByRole("button", { name: "Practise word 3: provide", exact: true })
+      .locator('[data-tone="focus"]');
+    await expect(green).toHaveText("ban");
+    await expect(yellow).toHaveText("trees");
+    await expect(red).toHaveText("pro");
+    await expect(green).toHaveCSS("color", "rgb(22, 101, 52)");
+    await expect(yellow).toHaveCSS("color", "rgb(133, 77, 14)");
+    await expect(red).toHaveCSS("color", "rgb(153, 27, 27)");
+    await expect(page.locator(".word-syllables")).toHaveCount(0);
+    const letters = (
+      await page.locator(".diff-page .word-characters").allTextContents()
+    ).join(" ");
+    expect(letters).not.toMatch(/[?\d]/);
+    expect(letters).toContain("Urban trees provide");
+    const bounds = await urban.boundingBox();
+    expect(bounds!.height).toBeGreaterThanOrEqual(44);
+    expect(bounds!.width).toBeGreaterThanOrEqual(44);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+    await page.screenshot({
+      path: info.outputPath(`coloured-syllables-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    await urban.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page
+        .getByRole("dialog")
+        .getByRole("group", { name: "Your word", exact: true }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(urban).toBeFocused();
   }
 });

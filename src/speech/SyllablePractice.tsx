@@ -15,7 +15,8 @@ import { reviewRewardMutation } from "../queries";
 import references from "./reference-clips.json";
 import { scoreRecording } from "./comparison-client";
 import { type Pronunciation } from "./comparison-schema";
-import { type FeedbackWord, similarityTone } from "./SpeechDiff";
+import type { FeedbackWord } from "./SpeechDiff";
+import { similarityTone } from "./syllable-display";
 
 export function SyllablePractice({
   word,

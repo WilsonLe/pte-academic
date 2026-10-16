@@ -151,3 +151,50 @@ test("every fixed speech question has integral review audio and estimated syllab
       );
   }
 });
+
+test("authored spelling groups preserve every fixed-question model syllable variant", async () => {
+  const spelling = JSON.parse(
+    await readFile("content/syllable-spelling.json", "utf8"),
+  );
+  const metadata = JSON.parse(
+    await readFile("public/models/blended-english-v3/comparison.json", "utf8"),
+  );
+  const questions = JSON.parse(
+    await readFile("content/questions.json", "utf8"),
+  );
+  assert.equal(spelling.version, 1);
+  for (const [word, forms] of Object.entries(spelling.groups))
+    for (const [count, letters] of Object.entries(forms)) {
+      assert.equal(letters.length, Number(count), word);
+      assert.equal(letters.join(""), word);
+      assert.ok(
+        letters.every((part) => part.length > 0),
+        word,
+      );
+    }
+  for (const q of questions.filter((q) =>
+    ["read-aloud", "repeat-sentence"].includes(q.type),
+  )) {
+    const key = (q.text || q.audioText)
+      .toLowerCase()
+      .replace(/[’‘]/g, "'")
+      .match(/[a-z]+(?:'[a-z]+)?/g)
+      .join(" ");
+    for (const variant of metadata.scripts[key]) {
+      const words = new Map();
+      for (const s of variant.syllables)
+        words.set(s.wordIndex, [...(words.get(s.wordIndex) || []), s]);
+      for (const syllables of words.values()) {
+        if (syllables.length === 1) continue;
+        const word = syllables[0].word,
+          signature = syllables.map((s) => s.phonemes.join(" ")).join("|");
+        const letters =
+          spelling.variants[word]?.[signature] ||
+          spelling.groups[word]?.[syllables.length];
+        assert.ok(letters, `${q.id}/${variant.language}/${word}`);
+        assert.equal(letters.length, syllables.length);
+        assert.equal(letters.join(""), word);
+      }
+    }
+  }
+});
