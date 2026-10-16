@@ -1598,6 +1598,23 @@
     font-size: 24px;
   }
 }
+/* The daily panel needs more room than a catalogue at these short heights. */
+@media (min-height: 451px) and (max-height: 560px) {
+  .app-shell:has(.hub-play) {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .workspace:has(.hub-play) {
+    min-height: 100dvh;
+  }
+  .main-content:has(.hub-play) {
+    min-height: 550px;
+  }
+  .home-screen:has(.hub-play) {
+    min-height: 520px;
+  }
+}
 .history-row {
   height: auto;
   min-height: 112px;

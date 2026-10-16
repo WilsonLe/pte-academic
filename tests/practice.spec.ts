@@ -1375,17 +1375,32 @@ test("daily home groups progress and actions across fresh, partial and completed
     .getByRole("button", { name: "Keep practising", exact: true })
     .click();
   await expect(page).toHaveURL(/\/types$/);
-  await page.setViewportSize({ width: 320, height: 400 });
-  await page.goto("/");
-  const keepPractising = page.getByRole("button", {
-    name: "Keep practising",
-    exact: true,
-  });
-  await keepPractising.scrollIntoViewIfNeeded();
-  await expect(keepPractising).toBeInViewport();
-  for (const link of await page.locator(".practice-modes a").all()) {
-    await link.scrollIntoViewIfNeeded();
-    await expect(link).toBeInViewport();
+  for (const height of [400, 451, 500, 540, 560, 561]) {
+    await page.setViewportSize({ width: 320, height });
+    await page.goto("/");
+    const keepPractising = page.getByRole("button", {
+      name: "Keep practising",
+      exact: true,
+    });
+    await keepPractising.scrollIntoViewIfNeeded();
+    await expect(keepPractising).toBeInViewport();
+    const card = page.getByRole("region", {
+      name: "Daily practice",
+      exact: true,
+    });
+    expect(
+      await card.evaluate((node) => {
+        const panel = node.getBoundingClientRect();
+        const action = node
+          .querySelector(".quest-start")!
+          .getBoundingClientRect();
+        return action.bottom <= panel.bottom;
+      }),
+    ).toBe(true);
+    for (const link of await page.locator(".practice-modes a").all()) {
+      await link.scrollIntoViewIfNeeded();
+      await expect(link).toBeInViewport();
+    }
   }
 });
 
