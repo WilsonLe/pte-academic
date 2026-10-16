@@ -7,7 +7,7 @@ import guideData from "../content/guides.json";
 import questionData from "../content/questions.json";
 import mockData from "../content/mock-tests.json";
 import sectionData from "../content/sections.json";
-import type { Transcription } from "./speech/scoring";
+import type { Transcription } from "./speech/legacy-transcription";
 export const sectionId = z.enum(["speaking", "reading", "listening"]);
 export const guideSchema = z.object({
   id: z.string(),
@@ -127,7 +127,7 @@ export function feedback(q: Question, a: Answer) {
     return {
       label: a.recording ? "Listen & self-review" : "No recording",
       detail:
-        "Replay your recording or transcribe it on this device for word-match feedback. Transcription does not assess pronunciation or predict a PTE score.",
+        "Replay your recording and compare your response with the example for self-review. This task has no automatic speech grade.",
     };
   if (g.kind === "write") {
     const n = wordCount(a.text || "");

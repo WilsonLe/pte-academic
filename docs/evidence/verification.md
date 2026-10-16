@@ -41,6 +41,8 @@ Visual evidence: [desktop](overview-desktop.png), [mobile](overview-mobile.png),
 
 ## On-device transcription follow-up (issue #3)
 
+Historical evidence: Whisper transcription was subsequently removed in [PR #31](https://github.com/WilsonLe/pte-academic/pull/31). The commands and runtime details in this section describe the earlier implementation; current speech grading uses the in-house v3 comparison model, with legacy transcripts retained for reading.
+
 The operator replaced cloud scoring exploration with browser-local transcription. Transformers.js 4.3.1 runs pinned q8 Whisper Tiny English on single-thread WASM in a dedicated worker. Model requests are restricted to public pinned-revision GET/HEAD retrieval. Worker/runtime files are excluded from eager app precaching and cached after first use; weights use their own scoped Cache Storage. No OpenRouter scoring calls or new charges were made.
 
 - Five focused speech contracts cover word-error alignment/padding/normalization/empty input, task-specific feedback, persisted transcript/recording compatibility and clear/prune late-write races.

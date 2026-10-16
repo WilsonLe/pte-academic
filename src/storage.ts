@@ -2,7 +2,7 @@ import { openDB, type DBSchema } from "idb";
 import { z } from "zod";
 import type { Result } from "./Runner";
 import { questions } from "./content";
-import { transcriptionSchema, type Transcription } from "./speech/scoring";
+import { transcriptionSchema, type Transcription } from "./speech/legacy-transcription";
 import {
   pronunciationSchema,
   type Pronunciation,

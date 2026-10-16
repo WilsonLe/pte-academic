@@ -2,7 +2,7 @@ import {
   comparisonWorkerUrl,
   comparisonRuntimeFiles,
 } from "./comparison-runtime";
-import { decodeRecording } from "./client";
+import { decodeRecording } from "./audio";
 import {
   prepareComparisonModel,
   modelBase,
