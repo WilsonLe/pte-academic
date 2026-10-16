@@ -21,6 +21,7 @@ import {
   withGenerationLock,
   readLedger,
   writeLedger,
+  authorizedBudget,
 } from "./openrouter.mjs";
 const exec = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -232,11 +233,15 @@ async function main() {
       await readFile(join(ROOT, "content/authoring.json"), "utf8"),
     );
     if (
-      policy.spendingLimitUsd !== 10 ||
+      !Number.isFinite(policy.spendingLimitUsd) ||
+      policy.spendingLimitUsd <= 0 ||
       !policy.requiresOperatorApprovalToIncrease
     )
-      throw Error("Original spending policy required.");
+      throw Error(
+        "An authorized finite cumulative spending policy is required.",
+      );
     const ledger = await readLedger();
+    const limit = authorizedBudget(policy, ledger);
     if (ledger.reservations.some((r) => r.status !== "completed"))
       throw Error(
         "An uncertain paid request requires reconciliation before generation.",
@@ -343,7 +348,7 @@ async function main() {
     const remainingCost = pending.reduce((s, t) => s + costOf(t), 0);
     checkKeyBudget(
       (await (await api("/key")).json()).data,
-      10,
+      limit,
       remainingCost,
       ledger.reservations.reduce((s, r) => s + r.costUsd, 0),
     );
@@ -366,7 +371,7 @@ async function main() {
         const costUsd = costOf(take);
         checkKeyBudget(
           key,
-          10,
+          limit,
           costUsd,
           ledger.reservations.reduce((s, r) => s + r.costUsd, 0),
         );

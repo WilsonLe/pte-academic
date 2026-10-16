@@ -2,9 +2,23 @@
   "audioProvider": "OpenRouter",
   "defaultModel": "mistralai/voxtral-mini-tts-2603",
   "defaultVoice": "en_paul_neutral",
-  "spendingLimitUsd": 10,
+  "spendingLimitUsd": 17.0113639,
   "budgetScope": "total-project-key-usage",
   "requiresOperatorApprovalToIncrease": true,
   "credentialsPath": ".cli/openrouter/token",
-  "ledgerPath": ".cli/openrouter/spending.json"
+  "ledgerPath": ".cli/openrouter/spending.json",
+  "budgetAuthorizations": [
+    {
+      "id": "fresh-allowance-2026-10-16",
+      "date": "2026-10-16",
+      "operatorDecision": "Fresh $10 from now",
+      "priorCumulativeReservedUsd": 7.0113639,
+      "priorReservationCount": 5736,
+      "additionalAllowanceUsd": 10,
+      "cumulativeCapUsd": 17.0113639,
+      "priorLedgerSha256": "d52137b0442c4a7099453cc426ebf1ac2de480ad42c96c558b4e8e4709457e36",
+      "historyPreserved": true,
+      "priorReservationsSha256": "756ca0c08a681538c54d0f64304d9459b1643cb7a04c4bdb21ea9ef79888fc92"
+    }
+  ]
 }

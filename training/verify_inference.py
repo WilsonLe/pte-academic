@@ -72,6 +72,7 @@ def main():
         )
         repeat = run("checkpoint-reload", corpus / ref["file"], ref["text"])
         accent_samples = {}
+        accent_vowel_controls = {}
         if experiment.config["schemaVersion"] == 2:
             for accent in ["en-GB", "en-AU", "en-IN"]:
                 take = next(
@@ -93,6 +94,38 @@ def main():
                     "medianSimilarity": float(
                         np.median([s["similarity"] for s in scored_sample])
                     ),
+                }
+                control = next(
+                    t
+                    for t in manifest["takes"]
+                    if t["id"] == "passage-054"
+                    and t["accent"] == accent
+                    and t["heldOut"]
+                )
+                right = run(
+                    accent + "-correct-vowel", corpus / control["file"], control["text"]
+                )
+                wrong_accent = run(
+                    accent + "-wrong-vowel",
+                    corpus / control["file"],
+                    control["text"].replace("red ship", "red sheep"),
+                )
+                right_syllable = next(
+                    s for s in right["syllables"] if s["word"] == "ship"
+                )
+                wrong_syllable = next(
+                    s for s in wrong_accent["syllables"] if s["word"] == "sheep"
+                )
+                assert right_syllable["similarity"] is not None
+                assert (
+                    wrong_syllable["similarity"] is None
+                    or right_syllable["similarity"] > wrong_syllable["similarity"]
+                ), (accent, right_syllable, wrong_syllable)
+                accent_vowel_controls[accent] = {
+                    "takeId": control["takeId"],
+                    "correct": right_syllable["similarity"],
+                    "wrong": wrong_syllable["similarity"],
+                    "wrongStatus": wrong_syllable["status"],
                 }
         network_calls = network.call_count
     scored = [s for s in ordinary["syllables"] if s["similarity"] is not None]
@@ -141,6 +174,7 @@ def main():
         "wrongVowelStatus": wrong_target["status"],
         "outputFolder": str(folder),
         "heldOutAccentSamples": accent_samples,
+        "heldOutAccentVowelControls": accent_vowel_controls,
         "timings": timings,
         "scope": "Synthetic local audio controls; not human-speaker or browser validation.",
     }

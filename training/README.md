@@ -2,7 +2,7 @@
 
 This development-only pipeline generates synthetic English reference speech through OpenRouter, trains a local comparison model, and returns a reference similarity index for every supported syllable in a local recording. It is separate from PTE Studio's learner-facing Whisper review. Nothing in this directory is imported by the PWA.
 
-The operator authorized generated-output training. The existing US$10 **total project** authoring budget still applies. The corpus generator reads the existing private credential internally and shares the authoring lock and conservative spending ledger. Never reset the ledger, automatically retry a failed paid request, or put a credential in a command argument.
+The operator authorized generated-output training. The current authorized cumulative cap is **US$17.0113639**: on 2026-10-16 the operator explicitly granted a fresh US$10 allowance after US$7.0113639 in reservations. The original spending history remains intact; there is no automatic reset. `content/authoring.json` records the authorization. The corpus generator reads the existing private credential internally and shares the authoring lock and conservative spending ledger. Never reset the ledger, automatically retry a failed paid request, or put a credential in a command argument.
 
 ## Reference recordings
 
@@ -16,7 +16,7 @@ node scripts/reference-corpus.mjs plan --config training/reference-corpus-v2.jso
 node scripts/reference-corpus.mjs generate --config training/reference-corpus-v2.json --concurrency 16 --requests-per-second 4 --confirm-spend --max-usd 7
 ```
 
-Review the live estimate first. The batch ceiling never overrides the cumulative US$10 cap. Concurrency accepts 1–32 workers. Request starts are paced at four per second by default (`--requests-per-second`, greater than zero and at most 32); an unpaced 32-worker burst reached a provider preflight rate limit, so higher concurrency alone is not a throughput guarantee. One serialized coordinator reserves budget and checkpoints each manifest/ledger mutation, while independent requests overlap. A failed request stops new scheduling and drains in-flight work. There are no automatic paid retries. Failed/uncertain reservations block resumption until reconciled.
+Review the live estimate first. The batch ceiling never overrides the currently authorized cumulative cap. Concurrency accepts 1–32 workers. Request starts are paced at four per second by default (`--requests-per-second`, greater than zero and at most 32); an unpaced 32-worker burst reached a provider preflight rate limit, so higher concurrency alone is not a throughput guarantee. One serialized coordinator reserves budget and checkpoints each manifest/ledger mutation, while independent requests overlap. A failed request stops new scheduling and drains in-flight work. There are no automatic paid retries. Failed/uncertain reservations block resumption until reconciled.
 
 Matching completed takes are hash checked and retained; 300 matching baseline recordings are reused in v2. Files include synthetic flags, model/voice/accent, split/family, generation-header ID, script/audio hashes, duration and truthful listening status. Decoder or recognizer checks do not establish human listening review. Public model availability and prices are verified when planning/generating.
 
@@ -64,7 +64,7 @@ Use `--follow` on preparation/audit to process incoming generator checkpoints. E
 
 ```sh
 uv run --project training python training/comparison.py predict \
-  --model training/checkpoints/blended-english-v2/model.pt \
+  --model training/checkpoints/blended-english-v3/model.pt \
   --audio /absolute/path/to/recording.wav \
   --text 'The sentence the learner intended to read.' \
   --output artifacts/pronunciation/prediction.json
@@ -92,7 +92,7 @@ The trained model is a Python research artifact. No browser export, mobile perfo
 
 `reference-corpus-v3.json` preserves the existing ten profiles and all 5,000 audio files. It adds 60 fresh, independent final-test passages (600 recordings), reuses the existing 350 training passages and treats all 150 previously exposed validation/test passages as development validation. The original held-out profiles remain excluded from fitted data and the reference bank. Do not use the fresh final test to select a model. Live provider discovery did not expose additional distinct Australian/Indian identities; the pipeline does not relabel the same voice on another synthesis model as an independent speaker.
 
-The versioned `hidden-ctc-v1` feature concatenates the original layer-7 representation with the **full observed phonetic log-probability vector**, pooled over the same aligned frames. No expected sound ID, accent ID, target one-hot vector or accent-specific score offset is appended. Preparation and prediction share `sound_feature`; checkpoints and caches record the representation, and mismatches fail closed. Legacy checkpoints default to `hidden7`, retaining their original prediction behavior. Balanced training/banks remain; v3 epoch selection uses macro-average validation sound accuracy with equal weight for each accent group.
+The versioned `hidden-ctc-v1` feature concatenates the original layer-7 representation with the **full observed phonetic log-probability vector**, pooled over the same aligned frames. No expected sound ID, accent ID, target one-hot vector or accent-specific score offset is appended. Preparation and prediction share `sound_feature`; checkpoints and caches record the representation, and mismatches fail closed. Legacy checkpoints default to `hidden7`, retaining their original prediction behavior. Balanced training/banks remain; v3 also balances stress-training sampling and each sound’s shared calibration/duration distributions across represented accents. Calibration uses the inverse weighted empirical distribution (one equal total mass per accent), producing one common scale for all speakers. V3 epoch selection uses macro-average validation sound accuracy with equal weight for each accent group.
 
 ```sh
 node scripts/reference-corpus.mjs plan --config training/reference-corpus-v3.json
