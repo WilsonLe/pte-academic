@@ -1,5 +1,12 @@
-import { Link, useLocation, useNavigate } from "react-router";
-import { screenPath, useScreen } from "./routing";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  historyQuery,
+  progressQuery,
+  saveAttemptMutation,
+  clearHistoryMutation,
+} from "./queries";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { screenPath, useScreen, isScreenId, type ScreenId } from "./routing";
 import { AudioPlayer } from "./components/AudioPlayer";
 import {
   Children,
@@ -50,13 +57,7 @@ import {
 import { Pager, ReadingPages } from "./Pages";
 import { type PracticePlan, type Result } from "./Runner";
 import { PracticeSession } from "./PracticeSession";
-import {
-  readHistory,
-  saveAttempt,
-  loadAttempt,
-  clearHistory,
-  loadProgress,
-} from "./storage";
+import { loadAttempt } from "./storage";
 import { usePwa } from "./pwa";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
@@ -74,16 +75,16 @@ import {
 } from "./components/ui/dialog";
 import { Toaster } from "./components/ui/sonner";
 import { GameHub, GameStatus, RewardMoment } from "./GameHub";
-import {
-  emptyProgress,
-  localDay,
-  questQuestions,
-  type Progress,
-} from "./progress";
+import { emptyProgress, localDay, questQuestions } from "./progress";
 import { Chart } from "./QuestionInput";
 import { SpeechReview } from "./speech/SpeechReview";
 import type { Transcription } from "./speech/scoring";
-const navigation = [
+const navigation: readonly {
+  id: ScreenId;
+  label: string;
+  mobileLabel?: string;
+  icon: typeof House;
+}[] = [
   { id: "home", label: "Practice", mobileLabel: "Practice", icon: House },
   { id: "types", label: "Question types", icon: Target },
   { id: "sections", label: "Section practice", icon: ListChecks },
@@ -100,7 +101,7 @@ const navigation = [
     mobileLabel: "History",
     icon: History,
   },
-];
+] as const;
 const icons = { speaking: Mic, reading: BookOpen, listening: Headphones };
 const titles: Record<string, string> = {
   home: "Practice",
@@ -224,7 +225,13 @@ function Nav({ active, mobile = false }: { active: string; mobile?: boolean }) {
   );
 }
 export default function App() {
-  const [progress, setProgress] = useState<Progress>(emptyProgress);
+  const client = useQueryClient();
+  const progressState = useQuery(progressQuery());
+  const progress = progressState.data ?? emptyProgress();
+  const historyState = useQuery(historyQuery());
+  const history = historyState.data ?? [];
+  const save = useMutation(saveAttemptMutation(client));
+  const clear = useMutation(clearHistoryMutation(client));
   const route = useScreen();
   const location = useLocation();
   const go = useNavigate();
@@ -232,14 +239,15 @@ export default function App() {
   const guideId = route.guideId || "";
   const hubView = route.view || "play";
   const setHubView = (view: string) =>
-    go(
-      view === "play"
-        ? "/"
-        : view === "progress"
-          ? "/progress"
-          : "/achievements",
-    );
-  const [progressReady, setProgressReady] = useState(false);
+    go({
+      to:
+        view === "play"
+          ? "/"
+          : view === "progress"
+            ? "/progress"
+            : "/achievements",
+    });
+  const progressReady = !progressState.isPending;
   const [today, setToday] = useState(localDay);
   const [celebration, setCelebration] = useState<string | null>(null);
   const [selectedSections, setSelectedSections] = useState<Section[]>(() =>
@@ -251,35 +259,16 @@ export default function App() {
   const resultRef = useRef(result);
   resultRef.current = result;
   const [attemptError, setAttemptError] = useState("");
-  const [history, setHistory] = useState<Result[]>(readHistory);
   const [storageError, setStorageError] = useState("");
   const [saving, setSaving] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
   const main = useRef<HTMLElement>(null);
   const pwa = usePwa();
   useEffect(() => {
-    let live = true;
-    const refresh = () => {
-      setToday(localDay());
-      void loadProgress()
-        .then((value) => {
-          if (live) setProgress(value);
-        })
-        .catch(() => {
-          if (live)
-            setStorageError(
-              "Practice progress could not load. Your practice controls are still available.",
-            );
-        })
-        .finally(() => {
-          if (live) setProgressReady(true);
-        });
-    };
-    refresh();
-    const timer = setInterval(() => setToday(localDay()), 30000);
+    const refresh = () => setToday(localDay());
+    const timer = setInterval(refresh, 30000);
     window.addEventListener("focus", refresh);
     return () => {
-      live = false;
       clearInterval(timer);
       window.removeEventListener("focus", refresh);
     };
@@ -288,8 +277,8 @@ export default function App() {
   useEffect(() => {
     const migrateHash = () => {
       const legacy = window.location.hash.slice(1);
-      if (navigation.some((item) => item.id === legacy))
-        void go(screenPath(legacy), { replace: true });
+      if (isScreenId(legacy))
+        void go({ to: screenPath(legacy), replace: true });
     };
     window.addEventListener("hashchange", migrateHash);
     return () => window.removeEventListener("hashchange", migrateHash);
@@ -329,8 +318,8 @@ export default function App() {
     window.scrollTo(0, 0);
     setCelebration(null);
   }, [location.pathname]);
-  function navigate(to: string) {
-    void go(screenPath(to));
+  function navigate(to: ScreenId) {
+    void go({ to: screenPath(to) });
   }
   function makePlan(mode?: string, id?: string): PracticePlan | null {
     if (id === "daily" && mode === "type")
@@ -364,7 +353,10 @@ export default function App() {
     };
   }
   function begin(mode: PracticePlan["mode"], id: string) {
-    void go(`/practice/${mode}/${encodeURIComponent(id)}`);
+    void go({
+      to: "/practice/$mode/$practiceId",
+      params: { mode, practiceId: id },
+    });
   }
   function startQuest() {
     if (!questQuestions(progress, today).length) {
@@ -375,13 +367,12 @@ export default function App() {
   }
   function finish(r: Result) {
     setResult(r);
-    void go(`/history/${encodeURIComponent(r.id)}`);
+    void go({ to: "/history/$attemptId", params: { attemptId: r.id } });
     setStorageError("");
     setSaving(true);
-    void saveAttempt(r)
+    void save
+      .mutateAsync(r)
       .then((saved) => {
-        setHistory(saved.history);
-        setProgress(saved.progress);
         setResult((current) =>
           current?.id === r.id ? { ...current, reward: saved.reward } : current,
         );
@@ -398,13 +389,14 @@ export default function App() {
         );
         toast.error("Unable to save this attempt");
       })
-      .finally(() => setSaving(false));
+      .finally(() => {
+        setSaving(false);
+        save.reset();
+      });
   }
   async function removeHistory() {
     try {
-      await clearHistory();
-      setHistory([]);
-      setProgress(emptyProgress());
+      await clear.mutateAsync();
       setCelebration(null);
       setClearConfirm(false);
       setStorageError("");
@@ -489,12 +481,14 @@ export default function App() {
               )}
             </div>
           </header>
-          {(storageError || pwa.error) && (
+          {(storageError || pwa.error || progressState.isError) && (
             <div
               className="border-b bg-destructive/5 px-5 py-3 text-xs text-destructive"
               role="alert"
             >
-              {storageError || pwa.error}
+              {storageError ||
+                pwa.error ||
+                "Practice progress could not load. Your practice controls are still available."}
             </div>
           )}
           <main
@@ -630,7 +624,12 @@ export default function App() {
                     selectedSections={selectedSections}
                     search={search}
                     progress={progress}
-                    onSelect={(id) => void go(`/types/${id}`)}
+                    onSelect={(id) =>
+                      void go({
+                        to: "/types/$guideId",
+                        params: { guideId: id },
+                      })
+                    }
                   />
                   {(search || selectedSections.length !== sections.length) && (
                     <Button
@@ -650,7 +649,12 @@ export default function App() {
               ) : active === "sections" ? (
                 <SectionSelect
                   sectionId={route.sectionId}
-                  onSelect={(id) => void go(`/sections/${id}`)}
+                  onSelect={(id) =>
+                    void go({
+                      to: "/sections/$sectionId",
+                      params: { sectionId: id },
+                    })
+                  }
                   progress={progress}
                   onStart={(id) => begin("section", id)}
                 />
@@ -710,7 +714,11 @@ export default function App() {
                 <LearnScreen
                   key={route.topicId}
                   topic={route.topicId}
-                  onTopic={(id) => void go(id ? `/guide/${id}` : "/guide")}
+                  onTopic={(id) =>
+                    void (id
+                      ? go({ to: "/guide/$topicId", params: { topicId: id } })
+                      : go({ to: "/guide" }))
+                  }
                   onPractice={() => navigate("types")}
                 />
               ) : (

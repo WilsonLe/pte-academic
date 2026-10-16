@@ -1,19 +1,6 @@
-import { useMatches } from "react-router";
+import { useMatches } from "@tanstack/react-router";
 
-export const screenRoutes = [
-  { index: true, handle: { page: "home", view: "play" } },
-  { path: "progress", handle: { page: "home", view: "progress" } },
-  { path: "achievements", handle: { page: "home", view: "badges" } },
-  { path: "types/:guideId?", handle: { page: "types" } },
-  { path: "sections/:sectionId?", handle: { page: "sections" } },
-  { path: "mocks", handle: { page: "mocks" } },
-  { path: "guide/:topicId?", handle: { page: "guide" } },
-  { path: "history/:attemptId?", handle: { page: "history" } },
-  { path: "practice/:mode/:practiceId", handle: { page: "practice" } },
-  { path: "practice/:mode/:practiceId/run", handle: { page: "practice" } },
-  { path: "*", handle: { page: "missing" } },
-];
-export function useScreen(): {
+type Screen = {
   page: string;
   view?: string;
   guideId?: string;
@@ -22,12 +9,26 @@ export function useScreen(): {
   practiceId?: string;
   sectionId?: string;
   topicId?: string;
-} {
-  const matches = useMatches();
-  const match = matches[matches.length - 1];
-  return {
-    ...(match.handle as { page: string; view?: string }),
-    ...match.params,
-  };
+};
+declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    screen?: Pick<Screen, "page" | "view">;
+  }
 }
-export const screenPath = (id: string) => (id === "home" ? "/" : "/" + id);
+export function useScreen(): Screen {
+  const matches = useMatches();
+  const match = matches.at(-1)!;
+  return { page: "missing", ...match.staticData.screen, ...match.params };
+}
+const screenPaths = {
+  home: "/",
+  types: "/types",
+  sections: "/sections",
+  mocks: "/mocks",
+  guide: "/guide",
+  history: "/history",
+} as const;
+export type ScreenId = keyof typeof screenPaths;
+export const isScreenId = (id: string): id is ScreenId =>
+  Object.hasOwn(screenPaths, id);
+export const screenPath = (id: ScreenId) => screenPaths[id];

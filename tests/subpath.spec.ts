@@ -1,9 +1,20 @@
-import { test, expect } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
+const test = base.extend<{ noPageErrors: void }>({
+  noPageErrors: [
+    async ({ page }, use) => {
+      const errors: string[] = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      await use();
+      expect(errors).toEqual([]);
+    },
+    { auto: true },
+  ],
+});
 test("subdirectory static build retains manifest, audio and offline navigation", async ({
   page,
   context,
 }) => {
-  await page.goto("http://127.0.0.1:4180/pte-academic/");
+  await page.goto("/pte-academic/");
   await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
   await page.reload();
   await context.setOffline(true);
