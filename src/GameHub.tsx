@@ -35,6 +35,11 @@ import { questions, guideFor } from "./content";
 import { Button } from "./components/ui/button";
 import { CardsList } from "./components/CardsList";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./components/ui/popover";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -105,7 +110,6 @@ export function GameStatus({
 }
 export function GameHub({
   view,
-  onViewChange,
   progress: p,
   today,
   ready,
@@ -113,14 +117,12 @@ export function GameHub({
   navigate,
 }: {
   view: string;
-  onViewChange: (view: string) => void;
   progress: Progress;
   today: string;
   ready: boolean;
   onQuest: () => void;
   navigate: (page: ScreenId) => void;
 }) {
-  const setView = onViewChange;
   const [selected, setSelected] = useState<string | null>(null);
   const done = Math.min(3, dayCount(p, today)),
     complete = done >= 3,
@@ -131,35 +133,14 @@ export function GameHub({
     monday = shiftDay(today, -((date.getDay() + 6) % 7));
   return (
     <div className={"game-hub hub-" + view}>
-      <div className="hub-heading">
-        <h2 className={view === "play" ? "sr-only" : undefined}>
-          {view === "play"
-            ? "Practice"
-            : view === "progress"
-              ? "Your progress"
-              : "Your achievements"}
-          <span className="accent-dot">.</span>
-        </h2>
-        <div className="hub-tools">
-          {view !== "badges" && (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    size="icon"
-                    variant={view === "badges" ? "secondary" : "outline"}
-                    aria-label="View achievements"
-                    onClick={() => setView("badges")}
-                  />
-                }
-              >
-                <Trophy />
-              </TooltipTrigger>
-              <TooltipContent>Achievements</TooltipContent>
-            </Tooltip>
-          )}
+      {view !== "play" && (
+        <div className="hub-heading">
+          <h2>
+            {view === "progress" ? "Your progress" : "Your achievements"}
+            <span className="accent-dot">.</span>
+          </h2>
         </div>
-      </div>
+      )}
       <div className="quest-grid">
         {view === "play" && (
           <section
@@ -171,15 +152,16 @@ export function GameHub({
                 <Sparkles className="size-3.5" />
                 DAILY PRACTICE
               </span>
-              <span className="quest-prize">
-                <Zap className="size-3.5" fill="currentColor" />
-                {complete
-                  ? "GOAL COMPLETE"
-                  : "+" + ((3 - done) * 10 + 30) + " XP"}
-              </span>
             </div>
             <div className="quest-body">
-              <div className="quest-orbit">
+              <div
+                className="quest-orbit"
+                role="progressbar"
+                aria-label="Daily questions answered"
+                aria-valuenow={done}
+                aria-valuemin={0}
+                aria-valuemax={3}
+              >
                 <svg viewBox="0 0 120 120" aria-hidden="true">
                   <circle cx="60" cy="60" r="49" className="orbit-track" />
                   <circle
@@ -204,6 +186,21 @@ export function GameHub({
                 <span className="orbit-spark spark-one" />
                 <span className="orbit-spark spark-two" />
               </div>
+              <div className="quest-summary">
+                {!complete && (
+                  <span className="quest-prize">
+                    <Zap className="size-3.5" fill="currentColor" />+
+                    {(3 - done) * 10 + 30} XP
+                  </span>
+                )}
+                <h3>
+                  {complete
+                    ? "Daily goal complete"
+                    : done
+                      ? `${3 - done} more to go`
+                      : "Your next 3 questions"}
+                </h3>
+              </div>
             </div>
             <div className="quest-bottom">
               <Button
@@ -218,8 +215,8 @@ export function GameHub({
                     : "Start daily quest"}
                 <ArrowRight className="size-4" />
               </Button>
-              <Tooltip>
-                <TooltipTrigger
+              <Popover>
+                <PopoverTrigger
                   render={
                     <button
                       className="quest-help"
@@ -228,12 +225,12 @@ export function GameHub({
                   }
                 >
                   <Info className="size-4" />
-                </TooltipTrigger>
-                <TooltipContent>
+                </PopoverTrigger>
+                <PopoverContent className="practice-ui" side="top" align="end">
                   10 XP for each different question answered today, plus 30 XP
                   at three. Any practice mode counts. XP rewards effort.
-                </TooltipContent>
-              </Tooltip>
+                </PopoverContent>
+              </Popover>
             </div>
           </section>
         )}

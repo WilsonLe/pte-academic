@@ -9,9 +9,10 @@ import {
   Target,
   Check,
   History,
+  Trophy,
   Info,
 } from "lucide-react";
-import { Button } from "./components/ui/button";
+import { Button, buttonVariants } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
 import { ReadingPages } from "./Pages";
 import { CardsList } from "./components/CardsList";
@@ -299,7 +300,21 @@ export function HistoryScreen({
 }) {
   return (
     <div className="screen-stack">
-      <h2 className="screen-title">Sessions.</h2>
+      <div className="screen-toolbar flex-wrap">
+        <h2 className="screen-title">Sessions.</h2>
+        <Link
+          to="/achievements"
+          className={buttonVariants({
+            variant: "outline",
+            className: "ml-auto",
+          })}
+          data-slot="button"
+          data-size="default"
+          data-variant="outline"
+        >
+          <Trophy /> Achievements
+        </Link>
+      </div>
       <CardsList
         items={history}
         minCardHeight={112}
