@@ -7,7 +7,21 @@ import guideData from "../content/guides.json";
 import questionData from "../content/questions.json";
 import mockData from "../content/mock-tests.json";
 import sectionData from "../content/sections.json";
+import syllableSpellingData from "../content/syllable-spelling.json";
 import type { Transcription } from "./speech/legacy-transcription";
+export const syllableSpellingSchema = z.object({
+  version: z.literal(1),
+  groups: z.record(
+    z.string(),
+    z.record(z.string(), z.array(z.string().min(1)).min(1)),
+  ),
+  variants: z.record(
+    z.string(),
+    z.record(z.string(), z.array(z.string().min(1)).min(1)),
+  ),
+});
+export const syllableSpelling =
+  syllableSpellingSchema.parse(syllableSpellingData);
 export const sectionId = z.enum(["speaking", "reading", "listening"]);
 export const guideSchema = z.object({
   id: z.string(),
@@ -102,6 +116,7 @@ export type Answer = {
   recording?: string;
   transcription?: Transcription;
   pronunciation?: Pronunciation;
+  speechAssessment?: Pronunciation;
 };
 export function answerMatches(q: Question, a: Answer) {
   const kind = guideFor(q).kind;
@@ -130,19 +145,16 @@ export function answerMatches(q: Question, a: Answer) {
 export function feedback(q: Question, a: Answer) {
   const g = guideFor(q);
   if (g.kind === "speak") {
-    const score = a.pronunciation
-      ? pronunciationSummary(a.pronunciation)
-      : null;
+    const assessment = a.speechAssessment || a.pronunciation;
+    const score = assessment ? pronunciationSummary(assessment) : null;
     return {
       label:
         score !== null
           ? `${score}/100 reference similarity`
-          : a.pronunciation
+          : assessment
             ? "No reliable score"
             : a.recording
-              ? q.type === "read-aloud" || q.type === "repeat-sentence"
-                ? "Ready to compare"
-                : "Self-review"
+              ? "Ready for speech feedback"
               : "No recording",
       detail: q.explanation,
     };

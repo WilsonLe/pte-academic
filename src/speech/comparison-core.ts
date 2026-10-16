@@ -278,6 +278,10 @@ export function reliableSignal(audio: Float32Array) {
   if (Math.sqrt(energy / audio.length) < 1e-5) return false;
   const flatness: number[] = [];
   for (let offset = 0; offset + 400 <= audio.length; offset += 400) {
+    let windowEnergy = 0;
+    for (let j = 0; j < 400; j++) windowEnergy += audio[offset + j] ** 2;
+    // Silence must not dominate the spectral median in a response with pauses.
+    if (windowEnergy / 400 < 1e-10) continue;
     const re = new Float64Array(512),
       im = new Float64Array(512);
     for (let j = 0; j < 400; j++)
@@ -315,6 +319,7 @@ export function reliableSignal(audio: Float32Array) {
     }
     flatness.push(Math.exp(log / 257) / (sum / 257));
   }
+  if (!flatness.length) return false;
   flatness.sort((a, b) => a - b);
   const mid = Math.floor(flatness.length / 2),
     median =
@@ -322,4 +327,49 @@ export function reliableSignal(audio: Float32Array) {
         ? flatness[mid]
         : (flatness[mid - 1] + flatness[mid]) / 2;
   return median < 0.35;
+}
+
+export type SyllableTarget = {
+  word?: string;
+  wordIndex: number;
+  syllableIndex: number;
+  syllableCount?: number;
+};
+/** Reuse every supported whole-passage variant, selecting only its target sounds. */
+export function targetVariants(variants: Variant[], target: SyllableTarget) {
+  if (
+    !Number.isInteger(target.wordIndex) ||
+    target.wordIndex < 0 ||
+    !Number.isInteger(target.syllableIndex) ||
+    target.syllableIndex < 0 ||
+    (target.syllableCount !== undefined &&
+      (!Number.isInteger(target.syllableCount) || target.syllableCount < 1))
+  )
+    throw new Error("Invalid syllable target.");
+  const selected = variants.flatMap((variant) => {
+    if (
+      target.syllableCount !== undefined &&
+      variant.syllables.filter((s) => s.wordIndex === target.wordIndex)
+        .length !== target.syllableCount
+    )
+      return [];
+    const syllable = variant.syllables.find(
+      (s) =>
+        s.wordIndex === target.wordIndex &&
+        s.syllableIndex === target.syllableIndex,
+    );
+    if (!syllable) return [];
+    return [
+      {
+        language: variant.language,
+        phones: syllable.phoneIndexes.map((i) => variant.phones[i]),
+        syllables: [
+          { ...syllable, phoneIndexes: syllable.phoneIndexes.map((_, i) => i) },
+        ],
+      },
+    ];
+  });
+  if (!selected.length)
+    throw new Error("This syllable is not supported by the local model.");
+  return selected;
 }

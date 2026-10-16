@@ -1,541 +1,371 @@
-import { test, expect } from "@playwright/test";
-
+import { test, expect, type Page } from "@playwright/test";
+import references from "../src/speech/reference-clips.json" with { type: "json" };
+import {
+  COMPARISON_MODEL_SHA,
+  COMPARISON_EXPORT,
+} from "../src/speech/comparison-schema";
 const base = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
-test("speech review keeps legacy transcripts and playback without transcription or word-match actions", async ({
+async function seed(
+  page: Page,
+  state: "scored" | "no-reliable-speech" = "scored",
+  variant: "en-us" | "en-gb" = "en-us",
+) {
+  await page.goto(base);
+  const syllables = references["read-aloud-01"].variants
+    .find((v) => v.language === variant)!
+    .syllables.map((s, i) => ({
+      ...s,
+      similarity: [null, 88, 60, 25][i % 4],
+      confidence: i % 4 ? 0.8 : 0,
+      status: i % 4 ? "scored" : "uncertain",
+    }));
+  await page.evaluate(
+    async ({ syllables, state, sha, exportId }) => {
+      const blob = await (
+        await fetch(
+          new URL("audio/read-aloud-01-reference.mp3", document.baseURI),
+        )
+      ).blob();
+      const result = {
+        id: "feedback",
+        label: "Saved speaking practice",
+        date: new Date().toISOString(),
+        finished: true,
+        questionIds: [
+          "read-aloud-01",
+          "read-aloud-02",
+          "describe-image-01",
+          "repeat-sentence-01",
+        ],
+        answers: {
+          "read-aloud-01": {
+            pronunciation: {
+              schemaVersion: 1,
+              modelSha256: sha,
+              exportId,
+              referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+              seconds: 20,
+              status: state,
+              syllables: state === "scored" ? syllables : [],
+            },
+          },
+          "repeat-sentence-01": {
+            transcription: {
+              text: "The saved transcript stays readable.",
+              seconds: 3,
+              engine: "legacy-local",
+              model: "whisper",
+              revision: "old",
+            },
+          },
+        },
+      };
+      await new Promise<void>((resolve, reject) => {
+        const r = indexedDB.open("pte-studio", 2);
+        r.onupgradeneeded = () => {
+          for (const name of ["attempts", "progress"])
+            if (!r.result.objectStoreNames.contains(name))
+              r.result.createObjectStore(name);
+        };
+        r.onerror = () => reject(r.error);
+        r.onsuccess = () => {
+          const db = r.result,
+            tx = db.transaction("attempts", "readwrite");
+          tx.objectStore("attempts").put(
+            {
+              result,
+              recordings: { "read-aloud-01": blob, "describe-image-01": blob },
+            },
+            result.id,
+          );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+      localStorage.setItem(
+        "pte-studio-history-v1",
+        JSON.stringify([{ ...result, answers: {} }]),
+      );
+    },
+    {
+      syllables,
+      state,
+      sha: COMPARISON_MODEL_SHA,
+      exportId: COMPARISON_EXPORT,
+    },
+  );
+  await page.goto(base + "history/feedback");
+}
+test("feedback is a paged prompt diff, word and syllable playback stop at their bounds, and skipped questions are absent", async ({
   page,
   context,
 }, info) => {
-  const external: string[] = [];
-  context.on("request", (r) => {
-    if (new URL(r.url()).origin !== new URL(info.project.use.baseURL!).origin)
-      external.push(r.url());
-  });
-  // Keep this compatibility check small; inference is covered by comparison.spec.ts.
-  await context.route("**/models/**", (route) => route.abort());
-  await page.goto(base);
-  await page.evaluate(async () => {
-    const recording = await (
-      await fetch(new URL("audio/repeat-sentence-01.mp3", document.baseURI))
-    ).blob();
-    const result = {
-      id: "legacy-speech-review",
-      label: "Saved speaking practice",
-      date: new Date().toISOString(),
-      questionIds: ["repeat-sentence-01", "describe-image-01"],
-      answers: {
-        "repeat-sentence-01": {
-          transcription: {
-            text: "The saved transcript stays readable.",
-            seconds: 3,
-            engine: "transformers.js-4.3.1/whisper-q8-wasm",
-            model: "onnx-community/whisper-tiny.en",
-            revision: "2575352d61be1bf7225cf8f8b268a4678025fc58",
-          },
-        },
-        "describe-image-01": {},
-      },
-      finished: true,
-    };
-    await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open("pte-studio", 2);
-      request.onupgradeneeded = () => {
-        for (const name of ["attempts", "progress"])
-          if (!request.result.objectStoreNames.contains(name))
-            request.result.createObjectStore(name);
-      };
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const db = request.result;
-        const tx = db.transaction("attempts", "readwrite");
-        tx.objectStore("attempts").put(
-          {
-            result,
-            recordings: {
-              "repeat-sentence-01": recording,
-              "describe-image-01": recording,
-            },
-          },
-          result.id,
-        );
-        tx.oncomplete = () => {
-          db.close();
-          resolve();
-        };
-        tx.onerror = () => {
-          db.close();
-          reject(tx.error);
-        };
-      };
-    });
-    localStorage.setItem(
-      "pte-studio-history-v1",
-      JSON.stringify([{ ...result, answers: {} }]),
-    );
-  });
-  await page.goto(base + "history/legacy-speech-review");
-  const speech = page.getByRole("button", {
-    name: "Feedback",
-    exact: true,
-  });
-  await speech.click();
-  const panel = page.getByRole("region", { name: "On-device speech feedback" });
-  await expect(panel.getByLabel("Local transcript result")).toContainText(
-    "The saved transcript stays readable.",
-  );
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page);
   await expect(
-    panel.getByRole("button", { name: /Transcribe|Word comparison/i }),
-  ).toHaveCount(0);
-  await expect(panel.getByText(/word match|words\/min|60 MB/i)).toHaveCount(0);
-  await expect(
-    panel.getByRole("button", { name: "Compare syllables" }),
-  ).toBeDisabled();
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
-  const recording = page.getByRole("group", {
-    name: "Your recording for question 1",
-    exact: true,
-  });
-  await recording.getByRole("button", { name: /Play/ }).click();
-  await expect(recording.getByRole("button", { name: /Pause/ })).toBeVisible();
-  await page.reload();
-  await speech.click();
-  await expect(panel.getByLabel("Local transcript result")).toContainText(
-    "The saved transcript stays readable.",
-  );
-  await page.screenshot({ path: info.outputPath("saved-transcript.png") });
-  await page
-    .getByRole("button", { name: "Next review questions", exact: true })
-    .click();
-  await expect(
-    panel.getByRole("button", {
-      name: /Transcribe|Score speech|Word comparison/i,
-    }),
-  ).toHaveCount(0);
-  await expect(panel.locator(".reading-copy")).toContainText(
-    "Give the values as percentages.",
-  );
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
-  await expect(
-    page.getByRole("group", {
-      name: "Your recording for question 2",
-      exact: true,
-    }),
+    page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
-  await page.screenshot({ path: info.outputPath("self-review-mobile.png") });
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
-  const nextNotes = page.getByRole("button", {
-    name: "Next speech review pages",
+  await expect(page.getByRole("group", { name: "Review panels" })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("button", {
+      name: /Compare|Self-review|How local feedback|Your response|^Prompt$/,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("navigation", { name: "review questions" }),
+  ).toContainText("1 / 3");
+  await page.getByRole("button", { name: "Practise word 1: Urban" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("Syllable 1");
+  await expect(
+    dialog.getByRole("group", { name: "Your word", exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("group", { name: "Reference pronunciation", exact: true }),
+  ).toBeVisible();
+  const syllable = dialog.getByRole("group", {
+    name: "Reference syllable",
     exact: true,
   });
-  let notes = await page.locator(".reading-copy").innerText();
-  while ((await nextNotes.count()) && (await nextNotes.isEnabled())) {
-    await nextNotes.click();
-    notes += " " + (await page.locator(".reading-copy").innerText());
-  }
-  expect(notes).toContain("Example response");
-  expect(external).toEqual([]);
-});
-
-test("syllable rows remain readable below media controls on a short phone", async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.context().route("**/models/**", (route) => route.abort());
-  await page.goto(base);
-  await page.evaluate(async () => {
-    const recording = await (
-      await fetch(new URL("audio/repeat-sentence-01.mp3", document.baseURI))
-    ).blob();
-    const pronunciation = {
-      schemaVersion: 1,
-      modelSha256:
-        "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
-      exportId: "blended-english-v3-fp16-storage-f32-v1",
-      referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
-      seconds: 3,
-      status: "scored",
-      syllables: Array.from({ length: 24 }, (_, i) => ({
-        word: "practice",
-        wordIndex: i,
-        syllableIndex: 0,
-        label: "practice",
-        start: i / 10,
-        end: i / 10 + 0.1,
-        similarity: i % 3 ? 75 : null,
-        confidence: i % 3 ? 0.8 : 0,
-        status: i % 3 ? "scored" : "uncertain",
-      })),
-    };
-    const result = {
-      id: "syllable-layout",
-      label: "Saved speaking practice",
-      date: new Date().toISOString(),
-      questionIds: ["repeat-sentence-01", "describe-image-01"],
-      answers: { "repeat-sentence-01": { pronunciation } },
-      finished: true,
-    };
-    await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open("pte-studio", 2);
-      request.onupgradeneeded = () => {
-        for (const name of ["attempts", "progress"])
-          if (!request.result.objectStoreNames.contains(name))
-            request.result.createObjectStore(name);
-      };
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const db = request.result,
-          tx = db.transaction("attempts", "readwrite");
-        tx.objectStore("attempts").put(
-          { result, recordings: { "repeat-sentence-01": recording } },
-          result.id,
-        );
-        tx.oncomplete = () => {
-          db.close();
-          resolve();
-        };
-        tx.onerror = () => {
-          db.close();
-          reject(tx.error);
-        };
-      };
-    });
-    localStorage.setItem(
-      "pte-studio-history-v1",
-      JSON.stringify([{ ...result, answers: {} }]),
-    );
-  });
-  await page.setViewportSize({ width: 360, height: 640 });
-  await page.goto(base + "history/syllable-layout");
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
-  const table = page.getByRole("table", { name: "Syllable similarities" });
-  const firstRow = table.locator("tbody tr").first();
-  await firstRow.scrollIntoViewIfNeeded();
+  await syllable.getByRole("button", { name: /^Play / }).click();
   await expect
     .poll(() =>
-      table.evaluate((node) => {
-        const view = node
-          .closest(".syllable-table-view")!
-          .getBoundingClientRect();
-        const header = node.querySelector("thead")!.getBoundingClientRect();
-        const row = node.querySelector("tbody tr")!.getBoundingClientRect();
-        return view.height >= header.height + row.height;
-      }),
+      syllable.locator("audio").evaluate((a: HTMLAudioElement) => a.paused),
     )
     .toBe(true);
-  await expect(firstRow).toContainText("Uncertain");
-  const next = page.getByRole("button", { name: "Next syllable score pages" });
-  await next.click();
+  await dialog.getByRole("button", { name: /Syllable 2/ }).click();
+  await expect(dialog).toContainText("Practise syllable 2");
   await expect(
-    page.getByRole("navigation", { name: "syllable score pages" }),
-  ).toContainText("2 /");
-  await page.getByRole("button", { name: "How local feedback works" }).click();
-  await expect(
-    page.getByRole("dialog", { name: "How local feedback works" }),
-  ).toBeVisible();
+    dialog.getByRole("button", { name: "Record syllable", exact: true }),
+  ).toBeDisabled();
+  await page.screenshot({ path: info.outputPath("word-practice-desktop.png") });
   await page.keyboard.press("Escape");
-  await expect(table).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "How local feedback works" }),
+    page.getByRole("button", { name: "Practise word 1: Urban" }),
   ).toBeFocused();
-});
-
-test("speaking Feedback opens syllables directly and remains available without recordings", async ({
-  page,
-}, info) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.context().route("**/models/**", (route) => route.abort());
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(base);
-  await page.evaluate(async () => {
-    const recording = await (
-      await fetch(new URL("audio/repeat-sentence-01.mp3", document.baseURI))
-    ).blob();
-    const pronunciation = {
-      schemaVersion: 1,
-      modelSha256:
-        "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
-      exportId: "blended-english-v3-fp16-storage-f32-v1",
-      referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
-      seconds: 3,
-      status: "scored",
-      syllables: [
-        {
-          word: "Urban",
-          wordIndex: 0,
-          syllableIndex: 0,
-          label: "ur",
-          start: 0,
-          end: 0.2,
-          similarity: 82,
-          confidence: 0.9,
-          status: "scored",
-        },
-      ],
-    };
-    const result = {
-      id: "feedback-discovery",
-      label: "Speaking feedback",
-      date: new Date().toISOString(),
-      finished: true,
-      questionIds: [
-        "read-aloud-01",
-        "repeat-sentence-01",
-        "read-aloud-02",
-        "read-aloud-03",
-        "describe-image-01",
-        "reading-single-01",
-      ],
-      answers: {
-        "read-aloud-01": { pronunciation },
-        "repeat-sentence-01": { pronunciation },
-        "read-aloud-03": { pronunciation },
-      },
-    };
-    await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open("pte-studio", 2);
-      request.onupgradeneeded = () => {
-        for (const name of ["attempts", "progress"])
-          if (!request.result.objectStoreNames.contains(name))
-            request.result.createObjectStore(name);
-      };
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const db = request.result,
-          tx = db.transaction("attempts", "readwrite");
-        tx.objectStore("attempts").put(
-          {
-            result,
-            recordings: {
-              "read-aloud-01": recording,
-              "repeat-sentence-01": recording,
-            },
-          },
-          result.id,
-        );
-        tx.oncomplete = () => {
-          db.close();
-          resolve();
-        };
-        tx.onerror = () => {
-          db.close();
-          reject(tx.error);
-        };
-      };
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(size);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth + 1,
+        ),
+      )
+      .toBe(true);
+    await page.screenshot({
+      path: info.outputPath(`feedback-first-${size.width}.png`),
+      animations: "disabled",
     });
-    localStorage.setItem(
-      "pte-studio-history-v1",
-      JSON.stringify([{ ...result, answers: {} }]),
-    );
-  });
-  await page.goto(base + "history/feedback-discovery");
-  const panels = page.getByRole("group", {
-    name: "Review panels",
-    exact: true,
-  });
-  const feedback = panels.getByRole("button", {
-    name: "Feedback",
-    exact: true,
-  });
-  await expect(feedback).toHaveAttribute("aria-pressed", "true");
-  await expect(feedback.locator("span")).toBeVisible();
-  await expect(
-    panels.getByRole("button", { name: /Information|Speech/ }),
-  ).toHaveCount(0);
-  await expect(panels.locator(".lucide-info")).toHaveCount(0);
-  const table = page.getByRole("table", { name: "Syllable similarities" });
-  await expect(table).toContainText("82");
-  await page.screenshot({
-    path: info.outputPath("read-aloud-feedback-mobile.png"),
-  });
-  await panels
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
-  await expect(table).toHaveCount(0);
-  await expect(
-    page.getByRole("group", {
-      name: "Your recording for question 1",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await feedback.focus();
-  await page.keyboard.press("Enter");
-  await expect(table).toBeVisible();
-  await page.reload();
-  await expect(table).toContainText("82");
-  const next = page.getByRole("button", {
-    name: "Next review questions",
-    exact: true,
-  });
-  await next.click();
-  await expect(table).toContainText("82");
-  await next.click();
-  await expect(feedback).toHaveAttribute("aria-pressed", "true");
-  await expect(
-    page.getByRole("region", { name: "On-device speech feedback" }),
-  ).toContainText("No recording was saved");
-  await expect(
-    page.getByRole("button", { name: "Compare syllables" }),
-  ).toHaveCount(0);
-  await expect(page.locator(".local-speech-screen audio")).toHaveCount(0);
-  await page.screenshot({
-    path: info.outputPath("missing-recording-mobile.png"),
-  });
-  await next.click();
-  await expect(table).toContainText("82");
-  await expect(page.locator(".local-speech-screen audio")).toHaveCount(0);
-  await next.click();
-  await expect(
-    page.getByRole("region", { name: "On-device speech feedback" }),
-  ).toContainText("No recording was saved");
-  await next.click();
-  await expect(
-    page.getByRole("region", { name: "On-device speech feedback" }),
-  ).toHaveCount(0);
-  await expect(page.locator(".review-screen .reading-copy")).toContainText(
-    "The final clause states that arranging early meetings became harder.",
+    const words: string[] = [];
+    const next = page.getByRole("button", { name: "Next prompt word pages" });
+    do {
+      words.push(
+        ...(await page
+          .locator(".diff-page .feedback-word > span:first-child")
+          .allTextContents()),
+      );
+      if (!(await next.count()) || (await next.isDisabled())) break;
+      await next.click();
+    } while (words.length < 100);
+    expect(words.join(" ")).toContain("even if it grows quickly.");
+    await page.screenshot({
+      path: info.outputPath(`feedback-${size.width}.png`),
+    });
+    await page.reload();
+  }
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(page.locator(".review-screen")).toHaveAttribute(
+    "data-question-id",
+    "describe-image-01",
   );
-  await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto(base + "history/feedback-discovery");
-  await expect(feedback.locator("span")).toBeVisible();
+  await page.getByText("Question details", { exact: true }).click();
+  await expect(page.getByRole("figure")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Compare syllables" }).locator("span"),
+    page.getByRole("group", { name: "Your recording", exact: true }),
   ).toBeVisible();
-  await expect
-    .poll(async () => {
-      const row = await table.locator("tbody tr").first().boundingBox();
-      const footer = await page
-        .getByRole("navigation", { name: "Mobile navigation" })
-        .boundingBox();
-      return !!row && !!footer && row.y + row.height <= footer.y;
-    })
-    .toBeTruthy();
-  await page.screenshot({
-    path: info.outputPath("read-aloud-feedback-short-phone.png"),
-  });
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(base + "history/feedback-discovery");
-  await expect(table).toBeVisible();
-  await page.screenshot({
-    path: info.outputPath("read-aloud-feedback-desktop.png"),
-  });
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await page.getByText("Saved transcript", { exact: true }).click();
+  await expect(
+    page.getByText("The saved transcript stays readable."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Transcribe|Word comparison/ }),
+  ).toHaveCount(0);
 });
-
-test("unscored speech and uncertain syllables stay distinct from an empty transcript", async ({
+test("no-speech stays unscored, and legacy evidence without a recording remains reviewable", async ({
   page,
   context,
 }) => {
-  await context.route("**/models/**", (route) => route.abort());
-  await page.goto(base);
-  await page.evaluate(async () => {
-    const identity = {
-      schemaVersion: 1,
-      modelSha256:
-        "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
-      exportId: "blended-english-v3-fp16-storage-f32-v1",
-      referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
-      seconds: 3,
-    };
-    const result = {
-      id: "unscored-review",
-      label: "Unscored speech",
-      date: new Date().toISOString(),
-      finished: true,
-      questionIds: [
-        "read-aloud-01",
-        "repeat-sentence-01",
-        "repeat-sentence-02",
-      ],
-      answers: {
-        "read-aloud-01": {
-          pronunciation: {
-            ...identity,
-            status: "no-reliable-speech",
-            syllables: [],
-          },
-        },
-        "repeat-sentence-01": {
-          pronunciation: {
-            ...identity,
-            status: "unscored",
-            syllables: [
-              {
-                word: "library",
-                wordIndex: 1,
-                syllableIndex: 0,
-                label: "library",
-                start: 0,
-                end: 1,
-                similarity: null,
-                confidence: 0,
-                status: "uncertain",
-              },
-            ],
-          },
-        },
-        "repeat-sentence-02": {
-          transcription: {
-            text: "",
-            seconds: 3,
-            engine: "transformers.js-4.3.1/whisper-q8-wasm",
-            model: "onnx-community/whisper-tiny.en",
-            revision: "2575352d61be1bf7225cf8f8b268a4678025fc58",
-          },
-        },
-      },
-    };
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page, "no-reliable-speech");
+  await expect(page.getByLabel("Local syllable scores")).toContainText(
+    "No reliable speech detected",
+  );
+  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(
+    page.getByText("No recording was saved.", { exact: false }),
+  ).toBeVisible();
+  await page.getByText("Saved transcript", { exact: true }).click();
+  await expect(
+    page.getByText("The saved transcript stays readable."),
+  ).toBeVisible();
+});
+
+test("reference playback follows the saved pronunciation variant when syllable counts differ", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page, "scored", "en-gb");
+  await page
+    .getByRole("button", { name: /^Practise word \d+: release/ })
+    .click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: /Syllable 2/ }).click();
+  await expect(
+    dialog.getByRole("group", { name: "Reference syllable", exact: true }),
+  ).toBeVisible();
+  const duration = await dialog
+    .getByRole("group", { name: "Reference syllable", exact: true })
+    .locator("audio")
+    .getAttribute("src");
+  expect(duration).toContain("read-aloud-01-reference.mp3");
+});
+
+test("expanded long legacy transcripts remain complete on desktop and short phones", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page);
+  const text =
+    "A saved learner transcript remains available for reading. ".repeat(130) +
+    "FINAL SAVED TRANSCRIPT WORDS";
+  await page.evaluate(async (text) => {
     await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open("pte-studio", 2);
-      request.onupgradeneeded = () => {
-        for (const name of ["attempts", "progress"])
-          if (!request.result.objectStoreNames.contains(name))
-            request.result.createObjectStore(name);
-      };
-      request.onsuccess = () => {
-        const db = request.result,
-          tx = db.transaction("attempts", "readwrite");
-        tx.objectStore("attempts").put({ result, recordings: {} }, result.id);
+      const r = indexedDB.open("pte-studio", 2);
+      r.onerror = () => reject(r.error);
+      r.onsuccess = () => {
+        const db = r.result,
+          tx = db.transaction("attempts", "readwrite"),
+          store = tx.objectStore("attempts"),
+          get = store.get("feedback");
+        get.onsuccess = () => {
+          const saved = get.result;
+          saved.result.questionIds = ["repeat-sentence-01"];
+          saved.result.answers["repeat-sentence-01"].transcription.text = text;
+          store.put(saved, "feedback");
+        };
         tx.oncomplete = () => {
           db.close();
           resolve();
         };
         tx.onerror = () => reject(tx.error);
       };
-      request.onerror = () => reject(request.error);
     });
-    localStorage.setItem(
-      "pte-studio-history-v1",
-      JSON.stringify([{ ...result, answers: {} }]),
+  }, text);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(base + "history/feedback");
+    await page.getByText("Saved transcript", { exact: true }).click();
+    const copy = page.locator(".legacy-transcript .reading-copy"),
+      next = page.getByRole("button", { name: "Next saved transcript pages" });
+    const parts: string[] = [];
+    for (let i = 0; i < 150; i++) {
+      await expect
+        .poll(() =>
+          copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+        )
+        .toBe(true);
+      parts.push(await copy.innerText());
+      if (!(await next.count()) || (await next.isDisabled())) break;
+      await next.click();
+    }
+    expect(parts.join(" ").replace(/\s+/g, " ").trim()).toBe(text.trim());
+    await expect(copy).toContainText(/WORDS\s*$/);
+    await copy.scrollIntoViewIfNeeded();
+    await expect(copy).toBeInViewport({ ratio: 1 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+  }
+});
+
+test("green, yellow and red colour the syllable letters, with uncertainty neutral and no score chips", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const urban = page.getByRole("button", {
+      name: "Practise word 1: Urban",
+      exact: true,
+    });
+    await expect(urban.locator(".syllable-letters")).toHaveText(["Ur", "ban"]);
+    await expect(urban).toHaveAccessibleDescription(
+      "Syllable 1: uncertain, no score. Syllable 2: 88 out of 100",
     );
-  });
-  await page.goto(base + "history/unscored-review");
-  await expect(page.getByLabel("Local syllable scores")).toContainText(
-    "No reliable speech detected",
-  );
-  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
-  await page.getByRole("button", { name: "Self-review notes" }).click();
-  await expect(page.locator(".reading-copy")).toContainText(
-    "No recording was saved",
-  );
-  await expect(page.locator(".reading-copy")).toContainText(
-    "cooling benefits and water needs",
-  );
-  await page
-    .getByRole("button", { name: "Syllable scores", exact: true })
-    .click();
-  await expect(page.getByLabel("Local syllable scores")).toContainText(
-    "No reliable speech detected",
-  );
-  await page.getByRole("button", { name: "Next review questions" }).click();
-  await expect(
-    page.getByRole("table", { name: "Syllable similarities" }),
-  ).toContainText("Uncertain");
-  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
-  await page.getByRole("button", { name: "Next review questions" }).click();
-  await expect(page.getByLabel("Local transcript result")).toContainText(
-    "saved transcript is empty",
-  );
+    const green = urban.locator('[data-tone="close"]');
+    const yellow = page
+      .getByRole("button", { name: "Practise word 2: trees", exact: true })
+      .locator('[data-tone="developing"]');
+    const red = page
+      .getByRole("button", { name: "Practise word 3: provide", exact: true })
+      .locator('[data-tone="focus"]');
+    await expect(green).toHaveText("ban");
+    await expect(yellow).toHaveText("trees");
+    await expect(red).toHaveText("pro");
+    await expect(green).toHaveCSS("color", "rgb(22, 101, 52)");
+    await expect(yellow).toHaveCSS("color", "rgb(133, 77, 14)");
+    await expect(red).toHaveCSS("color", "rgb(153, 27, 27)");
+    await expect(page.locator(".word-syllables")).toHaveCount(0);
+    const letters = (
+      await page.locator(".diff-page .word-characters").allTextContents()
+    ).join(" ");
+    expect(letters).not.toMatch(/[?\d]/);
+    expect(letters).toContain("Urban trees provide");
+    const bounds = await urban.boundingBox();
+    expect(bounds!.height).toBeGreaterThanOrEqual(44);
+    expect(bounds!.width).toBeGreaterThanOrEqual(44);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+    await page.screenshot({
+      path: info.outputPath(`coloured-syllables-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    await urban.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page
+        .getByRole("dialog")
+        .getByRole("group", { name: "Your word", exact: true }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(urban).toBeFocused();
+  }
 });

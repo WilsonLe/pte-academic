@@ -1866,3 +1866,189 @@ body {
 .practice-ui .arena-node > small {
   background: #90622a;
 }
+
+.feedback-heading {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--muted-foreground);
+}
+.review-audio-pair,
+.paired-audio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.review-audio-pair > *,
+.paired-audio > * {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.speech-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  font-size: 14px;
+}
+.speech-diff {
+  position: relative;
+  flex: 1;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.feedback-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-start;
+  gap: 10px 8px;
+  padding: 3px;
+}
+.diff-page {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.diff-measure-box {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.feedback-word {
+  min-width: 44px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 3px 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.feedback-word:hover,
+.feedback-word:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.word-characters {
+  white-space: nowrap;
+}
+.syllable-letters {
+  padding: 2px 1px;
+  border-radius: 4px;
+}
+.practice-ui [data-tone="close"] {
+  color: #166534;
+  background: #dcfce7;
+}
+.practice-ui [data-tone="developing"] {
+  color: #854d0e;
+  background: #fef3c7;
+}
+.practice-ui [data-tone="focus"] {
+  color: #991b1b;
+  background: #fee2e2;
+}
+.practice-ui [data-tone="uncertain"] {
+  color: #615b6a;
+  background: #eeeaf3;
+}
+.syllable-practice {
+  width: min(900px, calc(100vw - 32px));
+  max-width: 900px;
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+}
+.syllable-practice h3 {
+  font-weight: 650;
+}
+.syllable-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.syllable-choices button {
+  height: auto;
+  min-height: 48px;
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.syllable-choices [data-tone] {
+  border-radius: 6px;
+  padding: 2px 5px;
+}
+.syllable-phonemes {
+  overflow-wrap: anywhere;
+  font-family: system-ui, sans-serif;
+}
+.syllable-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.retry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.retry-actions [role="status"] {
+  font-size: 14px;
+}
+.retry-result {
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+@media (max-width: 767px) {
+  .feedback-word {
+    font-size: 21px;
+    padding: 3px 2px;
+  }
+  .review-audio-pair {
+    gap: 6px;
+  }
+  .review-audio-pair > * {
+    flex-basis: 160px;
+  }
+  .local-speech-screen {
+    overflow-y: auto;
+  }
+  .speech-diff {
+    flex-shrink: 0;
+    min-height: 160px;
+  }
+  .syllable-practice {
+    gap: 12px;
+  }
+}
+.review-question h2 {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Legacy text shares measured pages; short panels retain contained scrolling. */
+.legacy-transcript {
+  flex-shrink: 0;
+}
+.legacy-transcript > .reading-pages {
+  height: clamp(160px, 30dvh, 260px);
+  flex: none;
+  margin-top: 8px;
+}
+.local-speech-screen:has(.legacy-transcript[open]) {
+  overflow-y: auto;
+}
+
+.feedback-word:has(.word-replacement) { flex-direction: column; }
+.word-replacement { font-size: 11px; font-weight: 400; color: var(--muted-foreground); }
+.omitted-word .word-characters { text-decoration: line-through; color: var(--muted-foreground); }

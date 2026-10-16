@@ -279,7 +279,14 @@ async function selection(args) {
   const qs = JSON.parse(
     await readFile(join(ROOT, "content/questions.json"), "utf8"),
   );
-  const selected = qs.filter((q) => q.audioText && (!only || q.id === only));
+  const reviewReference = args.includes("--review-reference");
+  const selected = qs
+    .filter(
+      (q) =>
+        (reviewReference ? q.type === "read-aloud" : q.audioText) &&
+        (!only || q.id === only),
+    )
+    .map((q) => (reviewReference ? { ...q, audioText: q.text } : q));
   if (!selected.length) fail("No matching audio questions.");
   const model = (await listModels()).find((m) => m.id === modelId);
   if (!model) fail("Speech model is unavailable.");
@@ -289,7 +296,7 @@ async function selection(args) {
     selected.map((q) => q.audioText),
     model,
   );
-  return { qs, selected, model, voice, cost };
+  return { qs, selected, model, voice, cost, reviewReference };
 }
 export function enforceBudget(cost, limit, used) {
   if (
@@ -414,7 +421,8 @@ async function generate(args) {
   return withGenerationLock(() => generateLocked(args));
 }
 async function generateLocked(args) {
-  const { qs, selected, model, voice, cost } = await selection(args);
+  const { qs, selected, model, voice, cost, reviewReference } =
+    await selection(args);
   const capAt = args.indexOf("--max-usd");
   const cap = capAt >= 0 ? Number(args[capAt + 1]) : NaN;
   if (!args.includes("--confirm-spend") || !Number.isFinite(cap) || cap <= 0)
@@ -448,7 +456,7 @@ async function generateLocked(args) {
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   let committedEstimate = 0;
   for (const q of selected) {
-    const audio = `audio/${q.id}.mp3`;
+    const audio = `audio/${q.id}${reviewReference ? "-reference" : ""}.mp3`;
     const output = join(ROOT, "public", audio);
     try {
       await lstat(output);
@@ -538,11 +546,11 @@ async function generateLocked(args) {
     q.audio = audio;
     reservation.status = "completed";
     await writeLedger(ledger);
-    manifest.takes = manifest.takes.filter((t) => t.questionId !== q.id);
+    manifest.takes = manifest.takes.filter((t) => t.audio !== audio);
     manifest.takes.push({
       questionId: q.id,
       audio,
-      scriptField: `content/questions.json#${q.id}.audioText`,
+      scriptField: `content/questions.json#${q.id}.${reviewReference ? "text" : "audioText"}`,
       scriptSha256: createHash("sha256").update(q.audioText).digest("hex"),
       audioSha256: createHash("sha256").update(bytes).digest("hex"),
       durationSeconds: duration,
@@ -558,10 +566,11 @@ async function generateLocked(args) {
         "No substitutions. Group discussion currently uses one narrator.",
     });
     // Checkpoint each successful item so an interrupted run never repeats completed paid calls.
-    await writeFile(
-      join(ROOT, "content/questions.json"),
-      JSON.stringify(qs, null, 2) + "\n",
-    );
+    if (!reviewReference)
+      await writeFile(
+        join(ROOT, "content/questions.json"),
+        JSON.stringify(qs, null, 2) + "\n",
+      );
     await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
     committedEstimate += estimateCost([q.audioText], model);
     console.log(
@@ -609,7 +618,7 @@ async function main() {
   } else if (command === "tts") await generate(args);
   else
     console.log(
-      "Usage: npm run openrouter -- login | status | models | plan | tts\nTTS options: --model ID --voice ID --question ID --confirm-spend --max-usd NUMBER",
+      "Usage: npm run openrouter -- login | status | models | plan | tts\nTTS options: --model ID --voice ID --question ID --review-reference --confirm-spend --max-usd NUMBER",
     );
 }
 if (

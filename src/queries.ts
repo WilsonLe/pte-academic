@@ -8,6 +8,7 @@ import {
   loadProgress,
   saveAttempt,
   clearHistory,
+  saveReviewReward,
 } from "./storage";
 import { emptyProgress } from "./progress";
 
@@ -55,5 +56,14 @@ export const clearHistoryMutation = (client: QueryClient) =>
       ]);
       client.setQueryData(localKeys.history, []);
       client.setQueryData(localKeys.progress, emptyProgress());
+    },
+  });
+
+export const reviewRewardMutation = (client: QueryClient) =>
+  mutationOptions({
+    mutationFn: saveReviewReward,
+    onSuccess: async (saved: Awaited<ReturnType<typeof saveReviewReward>>) => {
+      await client.cancelQueries({ queryKey: localKeys.progress });
+      client.setQueryData(localKeys.progress, saved.progress);
     },
   });

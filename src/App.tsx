@@ -522,7 +522,9 @@ export default function App() {
                               ...current.answers,
                               [questionId]: {
                                 ...current.answers[questionId],
-                                pronunciation: value,
+                                ...(value.recognition
+                                  ? { speechAssessment: value }
+                                  : { pronunciation: value }),
                               },
                             },
                           }
@@ -619,20 +621,6 @@ export default function App() {
                       })
                     }
                   />
-                  {(search || selectedSections.length !== sections.length) && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setSearch("");
-                        setSelectedSections(
-                          sections.map((section) => section.id),
-                        );
-                        setCatalogueIndex(0);
-                      }}
-                    >
-                      Clear filters
-                    </Button>
-                  )}
                 </div>
               ) : active === "sections" ? (
                 <SectionSelect

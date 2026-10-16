@@ -10,7 +10,6 @@ import {
   Check,
   History,
   Trophy,
-  Info,
 } from "lucide-react";
 import { Button, buttonVariants } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
@@ -98,7 +97,6 @@ export function SectionSelect({
     0,
     sections.findIndex((s) => s.id === sectionId),
   );
-  const [details, setDetails] = useState(false);
   const section = sections[selected],
     Icon = icons[section.id];
   return (
@@ -114,7 +112,6 @@ export function SectionSelect({
               aria-pressed={i === selected}
               onClick={() => {
                 onSelect(s.id);
-                setDetails(false);
               }}
             >
               <I />
@@ -124,39 +121,14 @@ export function SectionSelect({
         })}
       </div>
       <section className="section-stage" data-track={section.id}>
-        <div className="section-details-action">
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Section details"
-            aria-pressed={details}
-            onClick={() => setDetails(!details)}
-          >
-            <Info />
-          </Button>
-        </div>
-        {!details && <Icon className="stage-icon" />}
+        <Icon className="stage-icon" />
         <h2>{section.title}</h2>
         <p>
           {section.duration} ·{" "}
           {questions.filter((q) => guideFor(q).section === section.id).length}{" "}
           questions
         </p>
-        {details ? (
-          <ReadingPages
-            key={section.id}
-            texts={[
-              section.description,
-              guides
-                .filter((g) => g.section === section.id)
-                .map((g) => g.title)
-                .join(" · "),
-            ]}
-            label="section information pages"
-          />
-        ) : (
-          <TrackProgress progress={progress} section={section.id} />
-        )}
+        <TrackProgress progress={progress} section={section.id} />
         <Button
           className="big-play"
           aria-label={`Start ${section.title} practice`}

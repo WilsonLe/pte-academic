@@ -7,6 +7,7 @@ import {
   loadAttempt,
   clearHistory,
   loadProgress,
+  saveReviewReward,
 } from "../src/storage";
 import {
   COMPARISON_EXPORT,
@@ -72,4 +73,66 @@ test("late grades cannot recreate cleared or pruned attempts or attach to anothe
   await clearHistory();
   assert.equal(await savePronunciation("new-9", "read-aloud-01", score), false);
   await assert.rejects(() => loadAttempt("new-9"));
+});
+test("audio-only feedback preserves the original prompt grade and open speaking retry rewards remain bounded", async () => {
+  await clearHistory();
+  await saveAttempt(attempt("upgrade"));
+  await savePronunciation("upgrade", "read-aloud-01", score);
+  const recognized: Pronunciation = {
+    ...score,
+    seconds: 90,
+    recognition: {
+      modelId: "audio-only-words-v1",
+      words: [
+        {
+          word: "test",
+          index: 0,
+          start: 0,
+          end: 1,
+          confidence: 0.9,
+          status: "recognized",
+        },
+      ],
+    },
+  };
+  await savePronunciation("upgrade", "read-aloud-01", recognized);
+  const loaded = await loadAttempt("upgrade");
+  assert.deepEqual(
+    loaded.answers["read-aloud-01"].speechAssessment,
+    recognized,
+  );
+  assert.deepEqual(loaded.answers["read-aloud-01"].pronunciation, score);
+  assert.ok(loaded.answers["read-aloud-01"].pronunciation!.seconds <= 45);
+  const open = {
+    ...attempt("open"),
+    questionIds: ["describe-image-01"],
+    answers: { "describe-image-01": { recording } },
+  };
+  await saveAttempt(open);
+  assert.equal(
+    (
+      await saveReviewReward({
+        attemptId: "open",
+        questionId: "describe-image-01",
+        wordIndex: 0,
+        syllableIndex: 0,
+        result: score,
+      })
+    ).xp,
+    5,
+  );
+  assert.equal(
+    (
+      await saveReviewReward({
+        attemptId: "open",
+        questionId: "describe-image-01",
+        wordIndex: 0,
+        syllableIndex: 0,
+        result: score,
+      })
+    ).xp,
+    0,
+  );
+  assert.equal([...local.values()].join("").includes("recognition"), false);
+  URL.revokeObjectURL(loaded.answers["read-aloud-01"].recording!);
 });

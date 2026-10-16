@@ -113,6 +113,90 @@ test("app feedback uses the saved v3 grade rather than a transcript word match",
   );
   assert.equal(
     feedback(q, { recording: "blob:local" }).label,
-    "Ready to compare",
+    "Ready for speech feedback",
+  );
+});
+
+test("isolated syllable targets retain occurrence identity and all supported variants", async () => {
+  const { targetVariants } = await import("../src/speech/comparison-core");
+  const variants = ["en-us", "en-gb"].map((language) => ({
+    language,
+    phones: ["a", "b", "c", "d"],
+    syllables: [
+      {
+        word: "repeat",
+        wordIndex: 0,
+        syllableIndex: 0,
+        phonemes: ["a"],
+        phoneIndexes: [0],
+      },
+      {
+        word: "repeat",
+        wordIndex: 1,
+        syllableIndex: 0,
+        phonemes: ["b", "c"],
+        phoneIndexes: [1, 2],
+      },
+      {
+        word: "repeat",
+        wordIndex: 1,
+        syllableIndex: 1,
+        phonemes: ["d"],
+        phoneIndexes: [3],
+      },
+    ],
+  }));
+  const target = targetVariants(variants, { wordIndex: 1, syllableIndex: 0 });
+  assert.equal(target.length, 2);
+  assert.deepEqual(target[0].phones, ["b", "c"]);
+  assert.deepEqual(target[0].syllables[0].phoneIndexes, [0, 1]);
+  assert.equal(target[0].syllables[0].wordIndex, 1);
+  assert.equal(variants[0].phones.length, 4);
+  assert.throws(() =>
+    targetVariants(variants, { wordIndex: 9, syllableIndex: 0 }),
+  );
+  assert.throws(() =>
+    targetVariants(variants, { wordIndex: 1.1, syllableIndex: 0 }),
+  );
+});
+
+test("a retry never substitutes a whole-word variant for one selected syllable", async () => {
+  const { targetVariants } = await import("../src/speech/comparison-core");
+  const base = { word: "release", wordIndex: 4, syllableIndex: 0 };
+  const variants = [
+    {
+      language: "en-us",
+      phones: ["r", "i", "l", "s"],
+      syllables: [
+        { ...base, phonemes: ["r", "i", "l", "s"], phoneIndexes: [0, 1, 2, 3] },
+      ],
+    },
+    {
+      language: "en-gb",
+      phones: ["r", "i", "l", "s"],
+      syllables: [
+        { ...base, phonemes: ["r", "i"], phoneIndexes: [0, 1] },
+        {
+          ...base,
+          syllableIndex: 1,
+          phonemes: ["l", "s"],
+          phoneIndexes: [2, 3],
+        },
+      ],
+    },
+  ];
+  const selected = targetVariants(variants, {
+    wordIndex: 4,
+    syllableIndex: 0,
+    syllableCount: 2,
+  });
+  assert.equal(selected.length, 1);
+  assert.deepEqual(selected[0].phones, ["r", "i"]);
+  assert.throws(() =>
+    targetVariants(variants, {
+      wordIndex: 4,
+      syllableIndex: 0,
+      syllableCount: 0,
+    }),
   );
 });

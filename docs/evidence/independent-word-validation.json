@@ -1,0 +1,36 @@
+{
+  "mode": "Audio-only word recognition followed by word-local synthetic-reference phonetic comparison",
+  "recognizer": {
+    "repository": "facebook/wav2vec2-base-960h",
+    "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+    "encoderSha256": "b81a5907a87709ff9a83ac87a74473128c76ab3cefa8416bdebd4dbbc1eea931",
+    "sourceWeightSha256": "8aa76ab2243c81747a1f832954586bc566090c83a0ac167df6f31f0fa917d74a",
+    "addedPackBytes": 211357419,
+    "lexiconWords": 124082,
+    "referenceWords": 998
+  },
+  "comparisonModelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+  "evidence": [
+    "Pinned Python/export transcript equality on four retained development accent controls; no human learner recognition accuracy claim.",
+    "Actual Chrome/WASM four-accent audio-only decoding with unrelated prompt and identical no-prompt result.",
+    "125-second paused response: three utterances preserve independent words and global word/syllable timestamps.",
+    "Describe Image without reference text: persisted recognised feedback, paired word playback, question details, keyboard dialog and desktop/phone captures.",
+    "Fresh-document offline word playback and controlled unsupported-word missing-reference feedback under /pte-academic/.",
+    "Actual pinned-model isolated retry, once-per-target/day XP, denied permission and stopped tracks; cancellation and unavailable-worker retention.",
+    "Missing/corrupt v3 and recognition metadata recover through header notification retry.",
+    "22 comparison/recognition/storage/display checks, 7 progress/storage checks, 4 local Query checks, 12 content/review checks passed.",
+    "Legacy speech-review coverage and all 65 questions in complete/incorrect states across desktop/phone; responded-only navigation retained.",
+    "Root and subpath content/model integrity, TypeScript, SPA shell/static artifact and 500 kB JavaScript checks passed."
+  ],
+  "limitations": [
+    "Synthetic reference audio and boundaries await human listening review.",
+    "Greedy word recognition can be wrong and is not a pronunciation grade.",
+    "Phonetic dictionary coverage is broader than bundled word audio; missing clips are explicit.",
+    "Letter groups without authored spelling boundaries remain neutral.",
+    "No semantic, fluency, correctness or exam score validation.",
+    "Independent review on earlier PR candidate predates this model integration; no further automatic review cycle.",
+    "Full suite deferred to a merge request. No merge or deployment."
+  ],
+  "newPaidCalls": 0,
+  "storageContract": "Independent speechAssessment is additive; original legacy pronunciation remains unchanged and older readers can ignore long independent results."
+}

@@ -17,7 +17,7 @@
     "test:speech": "tsx --test tests/speech-storage.test.ts",
     "test:progress": "tsx --test tests/progress.test.ts tests/progress-storage.test.ts",
     "test:local-state": "tsx --test tests/local-queries.test.ts",
-    "test:comparison": "tsx --test tests/comparison.test.ts tests/comparison-storage.test.ts",
+    "test:comparison": "tsx --test tests/comparison.test.ts tests/comparison-storage.test.ts tests/syllable-display.test.ts tests/recognition.test.ts",
     "test:comparison:browser": "PTE_TEST_COMPARISON=1 playwright test tests/comparison.spec.ts",
     "validate:comparison": "node --test tests/comparison-assets.test.mjs"
   },

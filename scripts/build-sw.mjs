@@ -16,6 +16,12 @@ const modelManifest = JSON.parse(
     "utf8",
   ),
 );
+const recognitionManifest = JSON.parse(
+  await readFile(
+    new URL("../src/speech/recognition-manifest.json", import.meta.url),
+    "utf8",
+  ),
+);
 // GitHub Pages serves this shell for direct browser-route entries. Asset URLs
 // already include the configured absolute deployment base.
 await copyFile(`${outDir}/index.html`, `${outDir}/404.html`);
@@ -35,7 +41,7 @@ await writeFile(
   `${outDir}/sw.js`,
   `const PREFIX="pte-studio:"+self.registration.scope+":";
 const CACHE=PREFIX+${JSON.stringify(version)};
-const MODEL_CACHE="pte-comparison:"+self.registration.scope+":"+${JSON.stringify(modelManifest.id)};
+const MODEL_CACHE="pte-comparison:"+self.registration.scope+":"+${JSON.stringify(modelManifest.id + ":" + recognitionManifest.id)};
 const ASSETS=${JSON.stringify(eager.map((p) => "./" + p.slice(outDir.length + 1)))};
 const ON_DEMAND=${JSON.stringify(onDemand.map((p) => "./" + p.slice(outDir.length + 1)))}.map(path=>new URL(path,self.registration.scope).href);
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));

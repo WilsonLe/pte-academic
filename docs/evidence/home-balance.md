@@ -1,5 +1,7 @@
 # Practice home balance — issue #39
 
+Later UI requirements in [issue #50](https://github.com/WilsonLe/pte-academic/issues/50) supersede this snapshot's XP help, section information, preflight details and review-panel controls. See the [current review contract](../review-audit.md) for the single Feedback surface, syllable practice and review rewards.
+
 The daily panel now keeps its progress, state heading and primary action together. Achievements opens from a labelled control in History; Practice and Progress have no trophy shortcut. The collection retains its direct route and keeps History selected. The bounded panel and larger ring preserve the violet/lime practice design without stretching blank space through the entire workspace. Short windows arrange the ring and heading side by side. All three practice modes still use CardsList; progress remains in the header. The XP explanation opens by click/tap or keyboard in a dismissible popover.
 
 The workspace header remains sticky while the short-window escape scrolls. Local Chrome evidence uses synthetic progress, not learner records:

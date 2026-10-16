@@ -9,6 +9,7 @@ Read the root AGENTS.md, then `agents/content-author.md` and `agents/question-re
 - `mock-tests.json`: ordered, explicit question IDs, at least 65 distinct items and all 22 types. Match the published practice blueprint; do not silently pad a form with duplicates. Each new complete mock needs its own set of original items if it is advertised as unseen.
 - `sections.json`: learner descriptions and section time limits.
 - `learn.json`: beginner explanations, preparation, privacy and simulation limitations. No assumed PTE knowledge.
+- `syllable-spelling.json`: authored display-letter groups for each fixed-speech word and model syllable count, plus same-count pronunciation overrides. Groups must rejoin to the original lowercase word; unknown boundaries stay neutral. This does not change scripts, audio or scoring. `validate:comparison` checks coverage for every fixed-speech model variant.
 - `narration.json`: authoring provenance per audio file: script/audio hashes, measured duration, provider/model/voice, synthetic disclosure and listening-review status. Never include credentials or account details.
 - `authoring.json`: authorized provider and total spending policy; changing the cap requires operator approval.
 

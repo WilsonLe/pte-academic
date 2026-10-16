@@ -6,11 +6,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "./components/ui/dialog";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "./components/ui/collapsible";
+
 import { Button } from "./components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -21,8 +17,6 @@ import {
   Check,
   ArrowRight,
   ArrowLeft,
-  Info,
-  ChevronDown,
 } from "lucide-react";
 import {
   type Question,
@@ -161,6 +155,10 @@ export function Preflight({
               <ArrowRight aria-hidden="true" />
               Move forward only.
             </li>
+            <li>
+              <LogOut aria-hidden="true" />
+              Once you begin, leaving or refreshing ends this attempt.
+            </li>
             {needAudio && (
               <li>
                 <Volume2 aria-hidden="true" />
@@ -248,48 +246,8 @@ export function Preflight({
               Begin {plan.mode === "mock" ? "mock test" : "practice"}
               <ArrowRight size={20} aria-hidden="true" />
             </Button>
-            <p>Once you begin, leaving or refreshing ends this attempt.</p>
           </div>
         </section>
-        <Collapsible className="setup-details more">
-          <CollapsibleTrigger className="setup-details-trigger">
-            <Info className="size-4" aria-hidden="true" />
-            Practice details
-            <ChevronDown className="setup-chevron size-4" aria-hidden="true" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="disclosure-panel">
-            <div className="setup-details-copy">
-              <p>
-                Independent practice simulation. Exact live-test parity is
-                unverified. Synthetic audio is included. Read Aloud and Repeat
-                Sentence offer local syllable comparison after practice; other
-                speaking responses use self-review.
-              </p>
-              {plan.mode === "mock" && (
-                <p>
-                  Section limits:{" "}
-                  {sections
-                    .map(
-                      (section) =>
-                        `${section.title}: ${plan.minutes[section.id]} minutes`,
-                    )
-                    .join(" · ")}
-                  . Shorter prompts can make practice faster than test day.
-                  Personal introduction and check-in are not simulated.
-                </p>
-              )}
-              <p>
-                Completed attempts are saved locally when browser storage is
-                available.
-              </p>
-              <p>
-                A desktop or laptop gives the closest test experience. Keep
-                paper nearby for notes. Responses and recordings stay on this
-                device.
-              </p>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
       </div>
     </main>
   );
