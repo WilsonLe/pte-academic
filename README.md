@@ -75,7 +75,7 @@ The accepted blended-English **v3 comparison model** grades syllable sound simil
 
 Open a saved speaking response in Review → Speech → **Score speech** to run v3 locally and inspect paged syllable scores/times. The source checkpoint SHA is `2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b`. The browser export keeps its comparison head/reference bank/calibration and uses float16-stored encoder constants with float32 operations. See [browser export and validation](training/checkpoints/blended-english-v3/BROWSER_EXPORT.md), [training process](training/RESUME.md) and the [model card](training/checkpoints/blended-english-v3/MODEL_CARD.md).
 
-**Transcribe** remains a separate optional Whisper word-review action (~60 MB public download on first use). Read Aloud/Repeat Sentence word match counts missing, substituted and extra recognized words; short answers compare the key ignoring case/punctuation/leading articles. Other speaking tasks show transcript/pace for self-review. Recognition can mishear accents/noise or hallucinate; it does not supply the v3 sound-similarity grade.
+Whisper transcription and word-match/pace feedback have been removed. The app uses the in-house v3 comparison model for the two supported fixed-word tasks; it does not generate transcripts. Other speaking tasks retain recording playback and self-review. Previously saved transcripts remain readable with their retained attempts. Old Whisper download caches are inert and can be removed through browser site-storage settings.
 
 Syllable results, transcripts and provenance persist only with retained attempts in IndexedDB; clearing history removes them and recordings, without recreating cleared/pruned attempts or granting XP. The scope-specific model cache survives ordinary app updates/history clearing, supports offline reuse and can be removed through browser site-storage settings. Browser storage can be evicted; missing/corrupt files require download again. Cancel stops local scoring; failure retains playback and never invents a score. Low-memory browsers may be unable to initialize the encoder even after download.
 
@@ -84,14 +84,13 @@ npm run test:comparison
 uv run --project training python training/browser_cases.py
 npm run test:comparison:browser
 npm run test:speech
-npm run test:speech:browser
 ```
 
-The four-accent browser validation command requires retained local training reference audio to prepare its development controls; those files are intentionally not in Git. Whisper uses `onnx-community/whisper-tiny.en` revision `2575352d61be1bf7225cf8f8b268a4678025fc58`, q8 / Transformers.js 4.3.1. Its transcript input limit remains 125 seconds / 24 MiB; both local inference jobs time out after five minutes.
+The four-accent browser validation command requires retained local training reference audio to prepare its development controls; those files are intentionally not in Git. Local v3 inference times out after five minutes.
 
 ## Practice progress
 
-The practice home has a rotating three-question reading quest, XP levels, daily streaks, weekly activity and six practice achievements. Any mode counts toward the daily goal. Answering a different question earns 10 XP once per local calendar day; reaching three earns a one-time 30 XP bonus. A level takes 150 XP. Empty attempts earn zero and replaying a review or transcribing an answer never earns XP. These are effort milestones, without a proficiency claim.
+The practice home has a rotating three-question reading quest, XP levels, daily streaks, weekly activity and six practice achievements. Any mode counts toward the daily goal. Answering a different question earns 10 XP once per local calendar day; reaching three earns a one-time 30 XP bonus. A level takes 150 XP. Empty attempts earn zero and replaying a review or scoring a recording never earns XP. These are effort milestones, without a proficiency claim.
 
 Quest progress resumes remaining questions. XP, coverage and badges stay in IndexedDB even when older attempts fall outside the ten-attempt history. Game progress starts with newly saved practice after this update; existing attempts, recordings and transcripts are preserved. Clearing history also resets game progress, as the dialog explains. Public model caches remain separate. Daily records retain up to 365 days; cumulative XP, earned badges and longest streak persist.
 
@@ -101,7 +100,7 @@ Focused game checks: npm run test:progress and the daily-quest/browser journeys 
 
 ### Practice interface
 
-Home is one large practice screen, with progress and achievements behind the flame and trophy buttons. Desktop retains its header and icon sidebar; mobile retains its header and the Practice, Learn and History footer tabs, with text below icons. Question types, sections and mock tests remain within Practice. Catalogues use adaptive card pages; saved sessions use compact cards aligned at the top. Single-page pagination is hidden. Question guidance, beginner lessons, long responses, transcripts and word comparisons use Next/Previous reading pages sized to the actual font and available space. Review shows one question and one selected response/key/feedback/prompt/speech panel at a time. Returning from a question guide retains the catalogue page and filters.
+Home is one large practice screen, with progress and achievements behind the flame and trophy buttons. Desktop retains its header and icon sidebar; mobile retains its header and the Practice, Learn and History footer tabs, with text below icons. Question types, sections and mock tests remain within Practice. Catalogues use adaptive card pages; saved sessions use compact cards aligned at the top. Single-page pagination is hidden. Question guidance, beginner lessons, long responses and saved transcripts use Next/Previous reading pages sized to the actual font and available space. Review shows one question and one selected response/key/feedback/prompt/speech panel at a time. Returning from a question guide retains the catalogue page and filters.
 
 The ordinary learning workspace fits the device viewport without document scrolling. Windows below 450 CSS pixels high (including extreme zoom) deliberately regain scrolling so enlarged controls remain reachable. The timed test surface keeps its independent exam layout and content scrolling where needed; this redesign changes the practice workspace and post-attempt review.
 

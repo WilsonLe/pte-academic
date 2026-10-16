@@ -55,7 +55,7 @@
       },
       {
         "title": "What this site can tell you",
-        "text": "This independent app compares selected answers with an original answer key, checks word counts, and lets you replay your recorded responses. After a speaking task, you can transcribe your recording on this device. Read Aloud and Repeat Sentence show word match, and short answers compare with the key. Open speaking responses show a transcript and pace for self-review; extended writing also needs self-review. Transcription may mishear speech and does not assess pronunciation or fluency. The app cannot assess your English proficiency or produce a validated PTE score. A correct-answer percentage is not a prediction of a 10–90 result."
+        "text": "This independent app compares selected answers with an original answer key, checks word counts, and lets you replay your recorded responses. After Read Aloud or Repeat Sentence, the in-house model compares syllable sounds with four equally valid reference accents on this device. Uncertain syllables have no score. This experimental similarity is not pronunciation correctness or fluency. Other speaking responses and extended writing need self-review. The app no longer generates transcripts; previously saved transcripts remain readable. The app cannot assess your English proficiency or produce a validated PTE score. A correct-answer percentage is not a prediction of a 10–90 result."
       },
       {
         "title": "Make feedback useful",

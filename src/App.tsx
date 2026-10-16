@@ -83,7 +83,6 @@ import {
 import { Chart } from "./QuestionInput";
 import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
 import { SpeechReview } from "./speech/SpeechReview";
-import type { Transcription } from "./speech/scoring";
 import type { Pronunciation } from "./speech/comparison-schema";
 const navigation = [
   { id: "home", label: "Practice", mobileLabel: "Practice", icon: House },
@@ -549,22 +548,6 @@ export default function App() {
                         : current,
                     )
                   }
-                  onTranscription={(questionId, value) =>
-                    setResult((current) =>
-                      current && current.id === result.id
-                        ? {
-                            ...current,
-                            answers: {
-                              ...current.answers,
-                              [questionId]: {
-                                ...current.answers[questionId],
-                                transcription: value,
-                              },
-                            },
-                          }
-                        : current,
-                    )
-                  }
                 />
               ) : currentGuide ? (
                 <GuideScreen
@@ -720,8 +703,9 @@ export default function App() {
                     </ul>
                     <p className="mt-4 text-xs">
                       Synthetic prompts may be shorter than live test prompts.
-                      Speaking has optional local transcription; open responses
-                      use self-review. Exact live-test UI parity is unverified.
+                      Read Aloud and Repeat Sentence have local syllable
+                      comparison; open responses use self-review. Exact
+                      live-test UI parity is unverified.
                     </p>
                   </More>
                 </section>
@@ -791,13 +775,11 @@ function modelAnswer(q: Question) {
 }
 function Review({
   result: r,
-  onTranscription,
   onPronunciation,
   celebrate,
 }: {
   celebrate: boolean;
   result: Result;
-  onTranscription: (questionId: string, value: Transcription) => void;
   onPronunciation: (questionId: string, value: Pronunciation) => void;
 }) {
   const [index, setIndex] = useState(0);
@@ -880,7 +862,6 @@ function Review({
             answer={a}
             attemptId={r.id}
             questionNumber={index + 1}
-            onChange={(value) => onTranscription(id, value)}
             onPronunciation={(value) => onPronunciation(id, value)}
           />
         </div>
