@@ -1055,10 +1055,20 @@ test("warm preparation avoids model transfers and saved word references work whi
           .evaluate((a) => (a as HTMLAudioElement).currentTime),
       )
       .toBeGreaterThan(0);
+    const referenceUrl = await dialog
+      .getByRole("group", { name: "Reference pronunciation", exact: true })
+      .locator("audio")
+      .getAttribute("src");
     await release();
     await expect(
       dialog.getByRole("button", { name: "Record syllable", exact: true }),
     ).toBeEnabled({ timeout: 30000 });
+    expect(
+      await dialog
+        .getByRole("group", { name: "Reference pronunciation", exact: true })
+        .locator("audio")
+        .getAttribute("src"),
+    ).toBe(referenceUrl);
   } finally {
     await release();
   }
@@ -1066,4 +1076,117 @@ test("warm preparation avoids model transfers and saved word references work whi
     body: JSON.stringify({ warmMilliseconds, modelTransfersOnWarmStart: 0 }),
     contentType: "application/json",
   });
+});
+
+test("an open word dialog recovers a failed reference when header preparation finishes", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  await seed(page);
+  await page.evaluate(async (base) => {
+    const key = (await caches.keys()).find((k) =>
+      k.startsWith("pte-comparison:"),
+    )!;
+    const cache = await caches.open(key);
+    for (const path of [
+      "models/blended-english-v3/encoder-00.bin",
+      "models/blended-english-v3/encoder-01.bin",
+      "models/word-recognition-v1/word-reference-en-US.mp3",
+    ])
+      await cache.delete(new URL(base + path, location.origin));
+  }, base);
+  await page.addInitScript(() => {
+    const nativeFetch = window.fetch.bind(window);
+    let phase = "fail",
+      referenceRequests = 0;
+    const pending: Array<() => void> = [];
+    (window as any).__referenceRecovery = {
+      hold: () => {
+        phase = "hold";
+      },
+      release: () => {
+        phase = "released";
+        pending.splice(0).forEach((f) => f());
+      },
+    };
+    window.fetch = (input, init) => {
+      const url = String(input);
+      if (/\/encoder-0[01]\.bin$/.test(url)) {
+        if (phase === "fail")
+          return Promise.resolve(new Response("Unavailable", { status: 503 }));
+        if (phase === "hold")
+          return new Promise<Response>((resolve) =>
+            pending.push(() => resolve(nativeFetch(input, init))),
+          );
+      }
+      if (
+        url.endsWith("/word-reference-en-US.mp3") &&
+        referenceRequests++ === 0
+      )
+        return Promise.resolve(new Response("Unavailable", { status: 503 }));
+      return nativeFetch(input, init);
+    };
+  });
+  try {
+    await page.reload();
+    const bell = page.getByRole("button", {
+      name: "Notifications",
+      exact: true,
+    });
+    await bell.click();
+    await expect(
+      page.getByRole("button", { name: "Retry model download", exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() => (window as any).__referenceRecovery.hold());
+    await page
+      .getByRole("button", { name: "Retry model download", exact: true })
+      .click();
+    await page.keyboard.press("Escape");
+    await page
+      .getByRole("button", { name: /^Practise word 2: library/ })
+      .click();
+    const dialog = page.getByRole("dialog", { name: "library", exact: true });
+    await expect(
+      dialog.getByText("The word reference could not be loaded.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await page.evaluate(() => (window as any).__referenceRecovery.release());
+    await expect(
+      dialog.getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      }),
+    ).toBeEnabled({ timeout: 30000 });
+    await expect(
+      dialog.getByRole("button", { name: "Record syllable", exact: true }),
+    ).toBeEnabled();
+    await expect(
+      dialog.getByText("The word reference could not be loaded.", {
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await dialog
+      .getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      })
+      .click();
+    await expect
+      .poll(() =>
+        dialog
+          .getByRole("group", { name: "Reference pronunciation", exact: true })
+          .locator("audio")
+          .evaluate((a) => (a as HTMLAudioElement).currentTime),
+      )
+      .toBeGreaterThan(0);
+  } finally {
+    await page.evaluate(() => (window as any).__referenceRecovery?.release());
+  }
 });

@@ -73,7 +73,9 @@ export async function verifiedAsset(
     (await sha256(bytes)) !== descriptor.sha256
   ) {
     await cache.delete(new URL(pack.assetDirectory + path, base).href);
-    throw new ModelAssetError("Speech model integrity check failed. Retry its download.");
+    throw new ModelAssetError(
+      "Speech model integrity check failed. Retry its download.",
+    );
   }
   return bytes;
 }
@@ -118,7 +120,11 @@ async function ensureAsset(
         cache: "no-store",
         signal: AbortSignal.timeout(180_000),
       },
-    );
+    ).catch(() => {
+      throw new ModelAssetError(
+        "Required speech model download failed. Check your connection and retry.",
+      );
+    });
     if (!response.ok)
       throw new ModelAssetError(
         "Required speech model download failed. Check your connection and retry.",

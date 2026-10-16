@@ -53,6 +53,13 @@ export function SyllablePractice({
     useState<Awaited<ReturnType<typeof loadWordReference>>>();
   const [referenceError, setReferenceError] = useState("");
   const referenceLabels = word.syllables.map((s) => s.label).join("|");
+  const [referenceRequest, setReferenceRequest] = useState(0);
+  const previousReady = useRef(ready);
+  useEffect(() => {
+    if (ready && !previousReady.current && referenceError)
+      setReferenceRequest((request) => request + 1);
+    previousReady.current = ready;
+  }, [ready, referenceError]);
   useEffect(() => {
     if (!word.spoken) return;
     setCorpusReference(undefined);
@@ -87,7 +94,7 @@ export function SyllablePractice({
       live = false;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [word.spoken?.word, referenceLabels]);
+  }, [word.spoken?.word, referenceLabels, referenceRequest]);
   const reference = word.spoken
     ? corpusReference
       ? {
