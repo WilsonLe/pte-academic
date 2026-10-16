@@ -1,0 +1,29 @@
+{
+  "observedAtUnix": 1792108064.551948,
+  "logicalCpus": 18,
+  "memoryBytes": 51539607552,
+  "processes": [
+    {
+      "pid": 54876,
+      "ppid": 65776,
+      "cpuPercent": 15.7,
+      "residentMB": 115.5,
+      "command": "node scripts/reference-corpus.mjs generate --config training/reference-corpus-v2.json --concurrency 16 --confirm-spend --max-usd 4"
+    },
+    {
+      "pid": 61369,
+      "ppid": 65776,
+      "cpuPercent": 22.4,
+      "residentMB": 1347.6875,
+      "command": "training/.venv/bin/python training/comparison.py prepare --config training/reference-corpus-v2.json --batch-size 32 --workers 8 --follow"
+    },
+    {
+      "pid": 61388,
+      "ppid": 65776,
+      "cpuPercent": 501.5,
+      "residentMB": 3425.71875,
+      "command": "training/.venv/bin/python training/audit_corpus.py --config training/reference-corpus-v2.json --batch-size 8 --workers 4 --device cpu --threads 8 --follow"
+    }
+  ],
+  "note": "Snapshot while following live generation; CPU percentages and RSS are not peaks or GPU allocation."
+}

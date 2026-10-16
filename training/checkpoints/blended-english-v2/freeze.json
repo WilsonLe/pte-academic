@@ -1,0 +1,12 @@
+{
+  "modelSha256": "fc68aa74c34a4c76dc172ec10df0344cfcc320588b1869a217aca88af6d35bdf",
+  "validationSha256": "ec8d75a93fd34e686f063c64c55cfaa837ec7e2e5cc957f6d158330640dbfffa",
+  "frozenAt": "2026-10-15T23:58:30.894729+00:00",
+  "selection": "Highest validation phone classification across 30 epochs; validation and actual inference controls reviewed before opening final test.",
+  "knownLimitations": [
+    "Synthetic references only; no human rating validation or listening review.",
+    "Held-out AU and IN phone classification is weaker; AU held-out profile also changes TTS provider.",
+    "A fast AU validation sample has median syllable similarity 56.235 and one uncertain syllable despite transcript coverage. AU/IN do not have locale-specific G2P dictionaries."
+  ],
+  "testTuning": false
+}

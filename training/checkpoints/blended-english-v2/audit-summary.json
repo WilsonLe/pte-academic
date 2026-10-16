@@ -1,0 +1,26 @@
+{
+  "en-US": {
+    "recordings": 1500,
+    "usable": 1495,
+    "excluded": 5,
+    "decodedSeconds": 9276.992999999997
+  },
+  "en-GB": {
+    "recordings": 1500,
+    "usable": 1481,
+    "excluded": 19,
+    "decodedSeconds": 9190.687000000009
+  },
+  "en-AU": {
+    "recordings": 1000,
+    "usable": 968,
+    "excluded": 32,
+    "decodedSeconds": 6073.320000000006
+  },
+  "en-IN": {
+    "recordings": 1000,
+    "usable": 996,
+    "excluded": 4,
+    "decodedSeconds": 6010.128
+  }
+}
