@@ -770,7 +770,23 @@ test("listening is single play, transcript hidden, highlight input available", a
   await expect(
     page.getByRole("group", { name: "Prompt recording", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/surveys the site carefully/)).toBeVisible();
+  const transcript = page.getByText(/surveys the site carefully/);
+  await expect(transcript).toHaveCount(0);
+  const source = page.getByRole("button", { name: "Open source", exact: true });
+  await source.click();
+  const dialog = page.getByRole("dialog");
+  const next = dialog.getByRole("button", {
+    name: "Next detail pages",
+    exact: true,
+  });
+  for (let i = 0; i < 20 && !(await transcript.isVisible()); i++) {
+    await expect(next).toBeEnabled();
+    await next.click();
+  }
+  await expect(dialog.getByText(/surveys the site carefully/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(source).toBeFocused();
 });
 test("microphone preflight, timed recording and persistent audio review", async ({
   page,
