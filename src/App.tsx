@@ -477,6 +477,7 @@ export default function App() {
                   setHubView("progress");
                 }}
               />
+              <RequiredSpeechModel />
               {pwa.update && (
                 <IconAction
                   label={
@@ -491,7 +492,6 @@ export default function App() {
               )}
             </div>
           </header>
-          <RequiredSpeechModel />
           {(storageError || pwa.error) && (
             <div
               className="border-b bg-destructive/5 px-5 py-3 text-xs text-destructive"

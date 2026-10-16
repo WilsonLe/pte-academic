@@ -1356,3 +1356,89 @@ test("populated compact history pages fit without overlapping pagination", async
     animations: "disabled",
   });
 });
+
+test("header notifications disclose speech preparation, errors and recovery", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  let releaseDownload!: () => void;
+  const downloadGate = new Promise<void>((resolve) => {
+    releaseDownload = resolve;
+  });
+  await page.route("**/models/blended-english-v3/**", async (route) => {
+    await downloadGate;
+    await route.fulfill({ status: 503, body: "Download unavailable" });
+  });
+  await page.goto("/");
+  const bell = page.getByRole("button", { name: "Notifications", exact: true });
+  await expect(
+    page
+      .locator("header")
+      .getByRole("button", { name: "Notifications", exact: true }),
+  ).toBeVisible();
+  await expect(bell).toHaveAccessibleDescription(
+    /Preparing required speech model/,
+  );
+  await expect(page.locator(".workspace > .required-speech-model")).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("progressbar", { name: "Speech model download" }),
+  ).toHaveCount(0);
+  await bell.focus();
+  await page.keyboard.press("Enter");
+  const popover = page.getByRole("dialog", {
+    name: "Notifications",
+    exact: true,
+  });
+  await expect(
+    popover.getByRole("list", { name: "Notifications" }).getByRole("listitem"),
+  ).toHaveCount(1);
+  await expect(
+    popover.getByRole("progressbar", { name: "Speech model download" }),
+  ).toHaveAttribute("value", "0");
+  await page.keyboard.press("Escape");
+  await expect(popover).toBeHidden();
+  await expect(bell).toBeFocused();
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 360, height: 640 },
+  ]) {
+    await page.setViewportSize(size);
+    await bell.click();
+    await expect(popover).toBeVisible();
+    const box = await popover.boundingBox();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(size.width);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(size.height);
+    await page.locator("h1").click();
+    await expect(popover).toBeHidden();
+  }
+  releaseDownload();
+  await expect(bell).toHaveAccessibleDescription(/needs attention/);
+  await bell.click();
+  await expect(popover.getByRole("alert")).toContainText(/download failed/);
+  await expect(popover.getByRole("progressbar")).toHaveCount(0);
+  // Retry against the real local assets; do not bypass integrity verification.
+  await page.unroute("**/models/blended-english-v3/**");
+  await popover.getByRole("button", { name: "Retry model download" }).click();
+  await expect(popover.getByRole("progressbar")).toBeVisible();
+  await expect(
+    popover.getByText("No notifications", { exact: true }),
+  ).toBeVisible({ timeout: 90_000 });
+  await expect(bell).toHaveAccessibleDescription("No notifications.");
+  await expect(popover.getByRole("listitem")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(bell).toBeFocused();
+  await page.reload();
+  await expect(bell).toHaveAccessibleDescription("No notifications.", {
+    timeout: 30_000,
+  });
+  await bell.click();
+  await expect(
+    page
+      .getByRole("dialog", { name: "Notifications", exact: true })
+      .getByText("No notifications", { exact: true }),
+  ).toBeVisible();
+});
