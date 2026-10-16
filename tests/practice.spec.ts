@@ -1021,6 +1021,10 @@ test("real routes restore history sessions, missing records and screen navigatio
   await expect(
     page.getByRole("navigation", { name: "feedback pages", exact: true }),
   ).toHaveCount(0);
+  // Review renders immediately; XP is published only after the save commits.
+  await expect(
+    page.getByRole("button", { name: "10 XP, level 1. View progress" }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByText("Difficulty scheduling early meetings", { exact: true }),
