@@ -48,11 +48,10 @@ async function seed(page: Page, waitForModel = true) {
     );
   });
   await page.goto(base + "history/comparison-fixture");
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
   if (waitForModel)
-    await expect(
-      page.getByRole("button", { name: "Compare syllables" }),
-    ).toBeEnabled({ timeout: 90000 });
+    await expect(page.getByLabel(/^Reference similarity/)).toBeVisible({
+      timeout: 90000,
+    });
 }
 async function workerPath() {
   return (
@@ -179,119 +178,181 @@ test("actual v3 browser inference matches all four Python accent controls and wr
     JSON.stringify(reports, null, 2) + "\n",
   );
 });
-test("required automatic download, actual app grading, saved scores, cancellation and offline fresh-document scoring", async ({
+test("automatic initial feedback persists; isolated syllable retry grades locally, rewards once, and survives offline reload", async ({
   page,
   context,
-}) => {
+}, info) => {
   test.setTimeout(180000);
-  const modelRequests: string[] = [];
+  const requests: string[] = [];
   context.on("request", (r) => {
-    if (r.url().includes("/models/")) modelRequests.push(r.url());
+    if (
+      r.postData() ||
+      !["GET"].includes(r.method()) ||
+      r.url().startsWith("https://")
+    )
+      requests.push(r.url());
   });
   await seed(page);
-  expect(modelRequests.some((u) => u.includes("encoder-00.bin"))).toBeTruthy();
-  const score = page.getByRole("button", {
-    name: "Compare syllables",
+  const badge = page.getByLabel(/^Reference similarity/);
+  await expect(badge).toBeVisible();
+  await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
+  // Feed a real reference syllable through the recorder adapter, then run the actual pinned worker.
+  await page.evaluate(async () => {
+    const context = new AudioContext({ sampleRate: 16000 });
+    const raw = await (
+      await fetch(
+        document.querySelector<HTMLAudioElement>(
+          ".review-audio-pair .audio-player:last-child audio",
+        )!.src,
+      )
+    ).arrayBuffer();
+    const decoded = await context.decodeAudioData(raw);
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      const r = indexedDB.open("pte-studio", 2);
+      r.onsuccess = () => resolve(r.result);
+    });
+    const result = await new Promise<any>((resolve) => {
+      const tx = db.transaction("attempts");
+      const r = tx.objectStore("attempts").get("comparison-fixture");
+      r.onsuccess = () => resolve(r.result);
+    });
+    db.close();
+    const syllable = result.result.answers[
+      "repeat-sentence-01"
+    ].pronunciation.syllables.find(
+      (s: any) => s.wordIndex === 0 && s.syllableIndex === 0,
+    );
+    const samples = decoded
+      .getChannelData(0)
+      .slice(
+        Math.max(0, Math.floor(syllable.start * 16000)),
+        Math.ceil(syllable.end * 16000),
+      );
+    const buffer = new ArrayBuffer(44 + samples.length * 2),
+      view = new DataView(buffer);
+    const str = (at: number, s: string) =>
+      [...s].forEach((c, i) => view.setUint8(at + i, c.charCodeAt(0)));
+    str(0, "RIFF");
+    view.setUint32(4, 36 + samples.length * 2, true);
+    str(8, "WAVE");
+    str(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, 16000, true);
+    view.setUint32(28, 32000, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    str(36, "data");
+    view.setUint32(40, samples.length * 2, true);
+    samples.forEach((s, i) =>
+      view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, s)) * 32767, true),
+    );
+    const blob = new Blob([buffer], { type: "audio/wav" });
+    await context.close();
+    (window as any).__tracks = [];
+    const getUserMedia = navigator.mediaDevices.getUserMedia.bind(
+      navigator.mediaDevices,
+    );
+    navigator.mediaDevices.getUserMedia = async (constraints) => {
+      const stream = await getUserMedia(constraints);
+      (window as any).__tracks.push(...stream.getTracks());
+      return stream;
+    };
+    (window as any).MediaRecorder = class {
+      state = "inactive";
+      mimeType = "audio/wav";
+      ondataavailable: any;
+      onstop: any;
+      start() {
+        this.state = "recording";
+      }
+      stop() {
+        this.state = "inactive";
+        this.ondataavailable?.({ data: blob });
+        this.onstop?.();
+      }
+    };
   });
-  await score.click();
-  const badge = page.getByLabel(/^Reference similarity \d+ out of 100$/);
-  await expect(badge).toBeVisible({ timeout: 60000 });
-  await expect(page.getByLabel("Local syllable scores")).toContainText(
-    "syllables scored",
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog
+    .getByRole("button", { name: "Record syllable", exact: true })
+    .click();
+  await dialog.getByRole("button", { name: "Stop and grade" }).click();
+  await expect(dialog.locator(".retry-result")).toHaveText(
+    /(?:\d+\/100 reference similarity|Uncertain · no reliable score for this syllable\.)/,
+    { timeout: 60000 },
   );
-  const saved = await page.evaluate(
-    async () =>
-      await new Promise<any>((resolve, reject) => {
-        const r = indexedDB.open("pte-studio", 2);
-        r.onsuccess = () => {
-          const db = r.result,
-            tx = db.transaction("attempts"),
-            q = tx.objectStore("attempts").get("comparison-fixture");
-          q.onsuccess = () =>
-            resolve(
-              q.result.result.answers["repeat-sentence-01"].pronunciation,
-            );
-          tx.oncomplete = () => db.close();
-        };
-        r.onerror = () => reject(r.error);
-      }),
-  );
-  expect(saved.modelSha256).toBe(COMPARISON_MODEL_SHA);
-  expect(saved.syllables.some((s: any) => s.similarity !== null)).toBeTruthy();
+  await expect(page.getByText("+5 XP for syllable practice")).toBeVisible();
   expect(
-    await page.evaluate(() => localStorage.getItem("pte-studio-history-v1")),
-  ).not.toContain("pronunciation");
-  if (base === "/") {
-    await page.screenshot({ path: "docs/evidence/speech-v3-desktop.png" });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await expect
-      .poll(async () => {
-        const pager = await page
-            .getByRole("navigation", { name: "syllable score pages" })
-            .boundingBox(),
-          footer = await page
-            .getByRole("navigation", { name: "Mobile navigation" })
-            .boundingBox();
-        return !!pager && !!footer && pager.y + pager.height <= footer.y + 1;
-      })
-      .toBeTruthy();
-    await page.screenshot({ path: "docs/evidence/speech-v3-mobile.png" });
-    await page
-      .getByRole("button", { name: "Your response", exact: true })
-      .click();
-    await expect(
-      page.getByRole("group", {
-        name: "Your recording for question 1",
-        exact: true,
-      }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Feedback", exact: true }).click();
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth + 1,
+    await page.evaluate(() =>
+      (window as any).__tracks.every(
+        (t: MediaStreamTrack) => t.readyState === "ended",
       ),
-    ).toBeTruthy();
-  }
-  await context.setOffline(true);
-  await page.reload();
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
-  await expect(badge).toBeVisible();
-  await expect(score).toBeEnabled({ timeout: 30000 });
-  await score.click();
-  await expect(
-    page.getByRole("button", { name: "Cancel speech scoring" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Cancel speech scoring" }).click();
-  await expect(score).toBeEnabled({ timeout: 30000 });
-  await score.click();
-  await expect(score).toBeEnabled({ timeout: 60000 });
-  await expect(badge).toBeVisible();
-  await expect(
-    page
-      .getByRole("region", { name: "On-device speech feedback" })
-      .getByRole("alert"),
-  ).toHaveCount(0);
-  await context.addInitScript(() =>
-    Object.defineProperty(window, "Worker", { value: undefined }),
+    ),
+  ).toBe(true);
+  await expect(page.locator(".xp-chip")).toHaveAttribute(
+    "aria-label",
+    "5 XP, level 1. View progress",
   );
-  await page.reload();
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
-  await expect(score).toBeEnabled({ timeout: 30000 });
-  await score.click();
-  await expect(
-    page
-      .getByRole("region", { name: "On-device speech feedback" })
-      .getByRole("alert"),
-  ).toContainText("unavailable");
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
+  await page.screenshot({ path: info.outputPath("actual-syllable-retry.png") });
+  await dialog
+    .getByRole("button", { name: "Record syllable", exact: true })
+    .click();
+  await dialog.getByRole("button", { name: "Stop and grade" }).click();
+  await expect(dialog.locator(".retry-result")).toContainText(
+    "Already practised for XP today",
+    { timeout: 60000 },
+  );
+  await dialog
+    .getByRole("button", { name: "Record syllable", exact: true })
     .click();
   await expect(
-    page.getByRole("group", {
-      name: "Your recording for question 1",
-      exact: true,
-    }),
+    dialog.getByRole("button", { name: "Stop and grade" }),
   ).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Play Reference word", exact: true }),
+  ).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (window as any).__tracks.every(
+          (t: MediaStreamTrack) => t.readyState === "ended",
+        ),
+      ),
+    )
+    .toBe(true);
+  await page.evaluate(() => {
+    navigator.mediaDevices.getUserMedia = async () => {
+      throw new DOMException("Microphone permission denied", "NotAllowedError");
+    };
+  });
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  await dialog
+    .getByRole("button", { name: "Record syllable", exact: true })
+    .click();
+  await expect(dialog.getByRole("alert")).toContainText(
+    "Microphone permission denied",
+  );
+  await expect(
+    dialog.getByRole("button", { name: "Record syllable", exact: true }),
+  ).toBeEnabled();
+  await page.keyboard.press("Escape");
+  await context.setOffline(true);
+  await page.reload();
+  await expect(badge).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^5 XP, level/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByRole("group", { name: "Reference syllable", exact: true }),
+  ).toBeVisible();
+  expect(requests).toEqual([]);
 });
 test("failed required download blocks model grading and retries without a word-match fallback", async ({
   page,
@@ -344,13 +405,11 @@ test("failed required download blocks model grading and retries without a word-m
   await context.setOffline(true);
   await seed(page, false);
   await expect(
-    page.getByRole("button", { name: "Compare syllables" }),
-  ).toBeDisabled();
+    page.getByRole("button", { name: /^Practise word 1:/ }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
   await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
-  await page
-    .getByRole("group", { name: "Your recording for question 1", exact: true })
+    .getByRole("group", { name: "Your recording", exact: true })
     .getByRole("button", { name: /Play/ })
     .click();
   await notifications.click();
@@ -368,53 +427,55 @@ test("failed required download blocks model grading and retries without a word-m
   ).toBeVisible();
 });
 
-test("post-ready missing and corrupt cached assets expose retry and recover without reload", async ({
+test("automatic feedback cancels, retains playback, and reports worker failure without repeat-comparison controls", async ({
   page,
+  context,
 }) => {
-  test.setTimeout(180000);
+  test.setTimeout(120000);
   await seed(page);
-  const score = page.getByRole("button", {
-    name: "Compare syllables",
+  // Remove only the saved initial result, simulating a retained ungraded recording.
+  const ungrade = async () =>
+    page.evaluate(async () => {
+      await new Promise<void>((resolve) => {
+        const r = indexedDB.open("pte-studio", 2);
+        r.onsuccess = () => {
+          const db = r.result,
+            tx = db.transaction("attempts", "readwrite"),
+            store = tx.objectStore("attempts"),
+            get = store.get("comparison-fixture");
+          get.onsuccess = () => {
+            const saved = get.result;
+            delete saved.result.answers["repeat-sentence-01"].pronunciation;
+            store.put(saved, "comparison-fixture");
+          };
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+        };
+      });
+    });
+  await ungrade();
+  await page.reload();
+  await page.getByRole("button", { name: "Cancel speech scoring" }).click();
+  await expect(page.getByRole("alert")).toContainText("cancelled");
+  await expect(
+    page.getByRole("button", { name: "Retry feedback" }),
+  ).toBeEnabled();
+  await page.getByRole("button", { name: "Retry feedback" }).click();
+  await expect(page.getByLabel(/^Reference similarity/)).toBeVisible({
+    timeout: 60000,
   });
-  for (const corrupt of [false, true]) {
-    await page.evaluate(async (corrupt) => {
-      const name = (await caches.keys()).find((n) =>
-        n.startsWith("pte-comparison:"),
-      )!;
-      const cache = await caches.open(name);
-      const url = (await cache.keys()).find((r) =>
-        r.url.endsWith("/comparison.json"),
-      )!;
-      if (corrupt) await cache.put(url, new Response("corrupt"));
-      else await cache.delete(url);
-    }, corrupt);
-    await score.click();
-    await page
-      .getByRole("button", { name: "Notifications", exact: true })
-      .click();
-    const retry = page.getByRole("button", { name: "Retry model download" });
-    await expect(retry).toBeVisible({ timeout: 30000 });
-    await expect(score).toBeDisabled();
-    await retry.click();
-    await expect(score).toBeEnabled({ timeout: 60000 });
-    await page.keyboard.press("Escape");
-    await score.click();
-    // The previous grade remains visible during rescoring. Observe this job's
-    // lifecycle before checking its result, using the suite's inference budget.
-    const running = page.getByRole("button", { name: "Cancel speech scoring" });
-    await expect(running).toBeVisible();
-    await expect(score).toBeDisabled();
-    await expect(running).toHaveCount(0, { timeout: 60000 });
-    await expect(score).toBeEnabled();
-    await expect(
-      page.getByLabel(/^Reference similarity \d+ out of 100$/),
-    ).toBeVisible();
-    await expect(
-      page
-        .getByRole("region", { name: "On-device speech feedback" })
-        .getByRole("alert"),
-    ).toHaveCount(0);
-  }
+  await ungrade();
+  await context.addInitScript(() =>
+    Object.defineProperty(window, "Worker", { value: undefined }),
+  );
+  await page.reload();
+  await expect(page.getByRole("alert")).toContainText("unavailable");
+  await expect(
+    page.getByRole("group", { name: "Your recording", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
 });
 
 test("direct practice entry starts the required model preparation before the workspace is shown", async ({

@@ -307,7 +307,10 @@ test("shared cards list hides unnecessary pagination and preserves navigation on
   await expect(
     page.getByRole("navigation", { name: "question type pages", exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(page.getByRole("button", { name: "Clear filters" })).toHaveCount(
+    0,
+  );
+  await page.getByRole("searchbox").fill("");
   await expect(
     page.getByRole("button", { name: "Previous question type pages" }),
   ).toBeDisabled();
@@ -595,7 +598,10 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
   );
   await page.getByRole("searchbox").fill("nonsense");
   await expect(page.getByText("No question types found.")).toBeVisible();
-  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(page.getByRole("button", { name: "Clear filters" })).toHaveCount(
+    0,
+  );
+  await page.getByRole("searchbox").fill("");
   await page.getByRole("button", { name: /^Read Aloud/ }).click();
   await expect(page.getByText(/Read the text silently/)).toBeVisible();
   await page.getByRole("button", { name: "Instructions", exact: true }).click();
@@ -680,7 +686,9 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
       response.getByText(`Your response: ${word}`, { exact: true }),
     ).toHaveCount(1);
   }
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Feedback", exact: true }),
+  ).toBeVisible();
   await expect(response).toContainText("2/2 gaps correct");
   await expect(response).toContainText(
     "Evidence is used to “support” a claim.",
@@ -763,7 +771,9 @@ test("listening is single play, transcript hidden, highlight input available", a
     page.getByRole("button", { name: "Next", exact: true }),
   ).toBeEnabled({ timeout: 35000 });
   await end(page);
-  await page.getByRole("button", { name: "Prompt", exact: true }).click();
+  await expect(
+    page.getByRole("group", { name: "Prompt recording", exact: true }),
+  ).toBeVisible();
   await expect(page.getByText(/surveys the site carefully/)).toBeVisible();
 });
 test("microphone preflight, timed recording and persistent audio review", async ({
@@ -786,19 +796,16 @@ test("microphone preflight, timed recording and persistent audio review", async 
   await page.clock.resume();
   await page.waitForTimeout(1200);
   await end(page);
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
   await expect(
-    page.getByLabel("Your recording for question 1", { exact: true }),
+    page.getByLabel("Your recording", { exact: true }),
   ).toBeVisible();
   const responsePlayer = page.getByRole("group", {
-    name: "Your recording for question 1",
+    name: "Your recording",
     exact: true,
   });
   await responsePlayer
     .getByRole("button", {
-      name: "Play Your recording for question 1",
+      name: "Play Your recording",
       exact: true,
     })
     .click();
@@ -809,16 +816,10 @@ test("microphone preflight, timed recording and persistent audio review", async 
         .evaluate((node: HTMLAudioElement) => node.currentTime),
     )
     .toBeGreaterThan(0);
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
   await expect(
-    page.getByRole("group", {
-      name: "Your recording for question 1",
-      exact: true,
-    }),
-  ).toHaveCount(0);
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
+    page.getByRole("heading", { name: "Feedback", exact: true }),
+  ).toBeVisible();
+  await expect(responsePlayer).toBeVisible();
   await page.clock.fastForward(5000);
   await page.screenshot({
     path: "docs/evidence/routing-review-desktop.png",
@@ -839,11 +840,8 @@ test("microphone preflight, timed recording and persistent audio review", async 
   });
   await page.reload();
   await page.locator(".history-row").first().click();
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
   await expect(
-    page.getByLabel("Your recording for question 1", { exact: true }),
+    page.getByLabel("Your recording", { exact: true }),
   ).toBeVisible();
 });
 test("section mode has full scope; shared timer finishes without a backward action", async ({
@@ -931,7 +929,9 @@ test("multiple choices expose incorrect selections and explain the result", asyn
   await start(page);
   for (const box of await page.getByRole("checkbox").all()) await box.check();
   await end(page);
-  await page.getByRole("button", { name: "Feedback", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Feedback", exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByText(/2 correct selections, 2 incorrect, 0 missed/),
   ).toBeVisible();
@@ -1304,7 +1304,7 @@ test("real routes restore history sessions, missing records and screen navigatio
   expect(sessionURL).toMatch(/\/history\/[^/]+$/);
   await expect(page.locator(".review-heading")).toHaveCount(0);
   await expect(
-    page.getByRole("navigation", { name: "feedback pages", exact: true }),
+    page.getByRole("navigation", { name: "review questions", exact: true }),
   ).toHaveCount(0);
   // Review renders immediately; XP is published only after the save commits.
   await expect(
@@ -1629,16 +1629,9 @@ test("daily home groups progress and actions across fresh, partial and completed
       });
     }
   }
-  await page.getByRole("button", { name: "How practice XP works" }).click();
-  await expect(
-    page.getByText("Any practice mode counts. XP rewards effort.", {
-      exact: false,
-    }),
-  ).toBeVisible();
-  await page.keyboard.press("Escape");
   await expect(
     page.getByRole("button", { name: "How practice XP works" }),
-  ).toBeFocused();
+  ).toHaveCount(0);
   await openAchievements(page);
   await expect(
     page.getByRole("heading", { name: "Your achievements" }),
@@ -1720,9 +1713,13 @@ test("section filters remain independent across routed question guides", async (
   await expect(page.getByRole("searchbox")).toHaveValue("Read Aloud");
   await speaking.click();
   await expect(page.getByText("No question types found.")).toBeVisible();
-  await page
-    .getByRole("button", { name: "Clear filters", exact: true })
-    .click();
+  await expect(
+    page.getByRole("button", { name: "Clear filters", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("searchbox").fill("");
+  for (const filter of [reading, listening, speaking])
+    if ((await filter.getAttribute("aria-pressed")) === "false")
+      await filter.click();
   for (const filter of [reading, listening, speaking])
     await expect(filter).toHaveAttribute("aria-pressed", "true");
 });
@@ -2052,15 +2049,12 @@ test("all practice cleanup: every guide, section and mock keeps useful text with
     }
     for (const section of sourceSections) {
       await page.goto(`/sections/${section.id}`);
-      await page
-        .getByRole("button", { name: "Section details", exact: true })
-        .click();
-      const text = await readPages("section information pages");
-      expect(text).toContain(section.description);
-      for (const guide of sourceGuides.filter(
-        (g: { section: string }) => g.section === section.id,
-      ))
-        expect(text).toContain(guide.title);
+      await expect(
+        page.getByRole("button", { name: "Section details", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("heading", { name: section.title, exact: true }),
+      ).toBeVisible();
       await screenFits(page);
       covered.push(`section:${section.id}:${viewport.width}`);
     }
@@ -2172,12 +2166,11 @@ test("all practice cleanup: every setup route retains exactly its required devic
       await expect(begin).toBeInViewport();
     }
     await page.goto("/practice/mock/" + sourceMocks[0].id);
-    await page.getByText("Practice details", { exact: true }).click();
-    await expect(page.locator(".setup-details-copy")).toContainText(
-      "Section limits:",
-    );
-    await expect(page.locator(".setup-details-copy")).not.toContainText(
-      "This form has",
+    await expect(
+      page.getByText("Practice details", { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.locator(".setup-rules li").nth(2)).toContainText(
+      "Once you begin, leaving or refreshing ends this attempt.",
     );
     if (viewport.width === 320)
       await page.screenshot({
@@ -2187,7 +2180,7 @@ test("all practice cleanup: every setup route retains exactly its required devic
   }
 });
 
-test("all practice cleanup: all original questions and full mock review use the same compact panels", async ({
+test("all practice cleanup: unanswered questions and full mocks produce no review questions", async ({
   page,
   context,
 }, info) => {
@@ -2275,39 +2268,16 @@ test("all practice cleanup: all original questions and full mock review use the 
       })),
     ]) {
       await page.goto(`/history/${attempt.id}`);
-      for (const id of attempt.questionIds) {
-        const q = sourceQuestions.find((q: { id: string }) => q.id === id);
-        const panels = page.getByRole("group", {
-          name: "Review panels",
-          exact: true,
-        });
-        await expect(
-          panels.getByRole("button", { name: "Answer key", exact: true }),
-        ).toHaveCount(0);
-        await expect(
-          panels.getByRole("button", { name: "Speech", exact: true }),
-        ).toHaveCount(0);
-        await expect(
-          page.getByRole("region", { name: "Practice rewards" }),
-        ).toHaveCount(0);
-        for (const tab of [
-          "Your response",
-          "Feedback",
-          ...(q.prompt || q.text || q.audioText ? ["Prompt"] : []),
-          ...(q.chart ? ["Image"] : []),
-        ]) {
-          await panels.getByRole("button", { name: tab, exact: true }).click();
-          await expect(
-            panels.getByRole("button", { name: tab, exact: true }),
-          ).toHaveAttribute("aria-pressed", "true");
-          await screenFits(page);
-        }
-        const next = page.getByRole("button", {
-          name: "Next review questions",
-          exact: true,
-        });
-        if (await next.isEnabled()) await next.click();
-      }
+      await expect(
+        page.getByText("No responses were saved in this session."),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: "review questions" }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("group", { name: "Review panels" }),
+      ).toHaveCount(0);
+      await screenFits(page);
     }
   }
   await info.attach("review-coverage", {

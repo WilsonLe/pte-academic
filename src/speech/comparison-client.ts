@@ -13,11 +13,13 @@ import {
   pronunciationSchema,
   type Pronunciation,
 } from "./comparison-schema";
+import type { SyllableTarget } from "./comparison-core";
 let occupied = false;
 export function scoreRecording(
   url: string,
   text: string,
   onProgress: (message: string) => void,
+  target?: SyllableTarget,
 ) {
   let aborted = false,
     worker: Worker | undefined,
@@ -95,7 +97,9 @@ export function scoreRecording(
               );
           }
         };
-        worker!.postMessage({ audio, text, base: modelBase() }, [audio.buffer]);
+        worker!.postMessage({ audio, text, target, base: modelBase() }, [
+          audio.buffer,
+        ]);
       });
     } finally {
       worker?.terminate();

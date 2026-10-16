@@ -2,7 +2,10 @@ import { openDB, type DBSchema } from "idb";
 import { z } from "zod";
 import type { Result } from "./Runner";
 import { questions } from "./content";
-import { transcriptionSchema, type Transcription } from "./speech/legacy-transcription";
+import {
+  transcriptionSchema,
+  type Transcription,
+} from "./speech/legacy-transcription";
 import {
   pronunciationSchema,
   type Pronunciation,
@@ -12,6 +15,7 @@ import {
   rewardSchema,
   emptyProgress,
   awardPractice,
+  awardReview,
   localDay,
   type Progress,
   type Reward,
@@ -229,4 +233,51 @@ export async function loadProgress(): Promise<Progress> {
   } finally {
     db.close();
   }
+}
+
+// A completed local retry may reward effort, but never rewrites a saved response.
+export function saveReviewReward(input: {
+  attemptId: string;
+  questionId: string;
+  wordIndex: number;
+  syllableIndex: number;
+  result: Pronunciation;
+}) {
+  const result = pronunciationSchema.parse(input.result);
+  const operation = queue
+    .catch(() => {})
+    .then(async () => {
+      const db = await database();
+      try {
+        const tx = db.transaction(["attempts", "progress"], "readwrite");
+        const saved = await tx.objectStore("attempts").get(input.attemptId);
+        const raw = progressSchema.safeParse(
+          await tx.objectStore("progress").get("profile"),
+        );
+        const before = raw.success ? raw.data : emptyProgress();
+        const valid =
+          saved?.result.questionIds.includes(input.questionId) &&
+          ["read-aloud", "repeat-sentence"].includes(
+            questions.find((q) => q.id === input.questionId)?.type || "",
+          ) &&
+          result.syllables.length === 1 &&
+          result.status !== "no-reliable-speech" &&
+          result.syllables[0].wordIndex === input.wordIndex &&
+          result.syllables[0].syllableIndex === input.syllableIndex;
+        const awarded = valid
+          ? awardReview(
+              before,
+              `${input.questionId}:${input.wordIndex}:${input.syllableIndex}`,
+            )
+          : { progress: before, xp: 0 };
+        if (valid)
+          await tx.objectStore("progress").put(awarded.progress, "profile");
+        await tx.done;
+        return { ...awarded, retained: !!saved };
+      } finally {
+        db.close();
+      }
+    });
+  queue = operation;
+  return operation;
 }

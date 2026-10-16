@@ -619,20 +619,6 @@ export default function App() {
                       })
                     }
                   />
-                  {(search || selectedSections.length !== sections.length) && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setSearch("");
-                        setSelectedSections(
-                          sections.map((section) => section.id),
-                        );
-                        setCatalogueIndex(0);
-                      }}
-                    >
-                      Clear filters
-                    </Button>
-                  )}
                 </div>
               ) : active === "sections" ? (
                 <SectionSelect

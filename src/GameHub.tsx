@@ -10,7 +10,6 @@ import {
   Flame,
   Gem,
   Headphones,
-  Info,
   ListChecks,
   LockKeyhole,
   Mic,
@@ -34,11 +33,7 @@ import {
 import { questions, guideFor } from "./content";
 import { Button } from "./components/ui/button";
 import { CardsList } from "./components/CardsList";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./components/ui/popover";
+
 import {
   Tooltip,
   TooltipContent,
@@ -215,22 +210,6 @@ export function GameHub({
                     : "Start daily quest"}
                 <ArrowRight className="size-4" />
               </Button>
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <button
-                      className="quest-help"
-                      aria-label="How practice XP works"
-                    />
-                  }
-                >
-                  <Info className="size-4" />
-                </PopoverTrigger>
-                <PopoverContent className="practice-ui" side="top" align="end">
-                  10 XP for each different question answered today, plus 30 XP
-                  at three. Any practice mode counts. XP rewards effort.
-                </PopoverContent>
-              </Popover>
             </div>
           </section>
         )}

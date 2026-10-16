@@ -41,6 +41,35 @@ export function Pager({
   );
 }
 
+/** Panel fit must react to font/accessibility overrides as well as geometry. */
+export function observePageLayout(node: HTMLElement, pack: () => void) {
+  const resize = new ResizeObserver(pack);
+  resize.observe(node);
+  const styles = new MutationObserver(pack);
+  styles.observe(document.head, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+  for (
+    let parent: HTMLElement | null = node;
+    parent;
+    parent = parent.parentElement
+  )
+    styles.observe(parent, {
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+  document.fonts.addEventListener("loadingdone", pack);
+  void document.fonts.ready.then(pack);
+  pack();
+  return () => {
+    resize.disconnect();
+    styles.disconnect();
+    document.fonts.removeEventListener("loadingdone", pack);
+  };
+}
+
 export type ReadingBlock = { label?: string; text: string };
 
 function ReadingBlocks({ blocks }: { blocks: ReadingBlock[] }) {
@@ -177,13 +206,10 @@ export function ReadingPages({
         JSON.stringify(current) === JSON.stringify(next) ? current : next,
       );
     };
-    paginate();
-    const observer = new ResizeObserver(paginate);
-    observer.observe(node);
-    void document.fonts.ready.then(paginate);
+    const disconnect = observePageLayout(node, paginate);
     return () => {
       live = false;
-      observer.disconnect();
+      disconnect();
     };
   }, [source, scroll]);
   const current = Math.min(index, pages.length - 1);

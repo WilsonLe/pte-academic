@@ -1,29 +1,31 @@
-import { SyllableScores } from "./SyllableScores";
-import { exampleLabel } from "../review-content";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
-  AudioLines,
-  Gauge,
-  X,
-  CircleHelp,
-  ListChecks,
-  BookOpenCheck,
-} from "lucide-react";
-import type { Answer, Question } from "../content";
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { X } from "lucide-react";
+import { toast } from "sonner";
+import { asset, type Answer, type Question } from "../content";
+import { exampleLabel, promptBlocks } from "../review-content";
+import { AudioPlayer } from "../components/AudioPlayer";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog";
 import { ReadingPages } from "../Pages";
+import { Chart } from "../QuestionInput";
 import { savePronunciation } from "../storage";
 import { scoreRecording } from "./comparison-client";
 import { modelStatus, subscribeModel } from "./comparison-assets";
 import { pronunciationSummary, type Pronunciation } from "./comparison-schema";
-import { toast } from "sonner";
+import { SpeechDiff, feedbackWords, type FeedbackWord } from "./SpeechDiff";
+const SyllablePractice = lazy(() =>
+  import("./SyllablePractice").then((module) => ({
+    default: module.SyllablePractice,
+  })),
+);
 export function SpeechReview({
   question,
   answer,
@@ -35,14 +37,10 @@ export function SpeechReview({
   attemptId: string;
   onPronunciation: (value: Pronunciation) => void;
 }) {
-  const [panel, setPanel] = useState(
-    answer.pronunciation
-      ? "syllables"
-      : answer.transcription
-        ? "transcript"
-        : "review",
-  );
   const [pronunciation, setPronunciation] = useState(answer.pronunciation);
+  const [selected, setSelected] = useState<FeedbackWord>();
+  const [progress, setProgress] = useState("");
+  const [error, setError] = useState("");
   const model = useSyncExternalStore(subscribeModel, modelStatus);
   const expected =
     question.type === "read-aloud"
@@ -50,11 +48,12 @@ export function SpeechReview({
       : question.type === "repeat-sentence"
         ? question.audioText
         : undefined;
+  const referenceAudio = expected
+    ? question.audio || `audio/${question.id}-reference.mp3`
+    : undefined;
   const scoreJob = useRef<ReturnType<typeof scoreRecording> | null>(null);
-  const transcription = answer.transcription;
-  const [progress, setProgress] = useState("");
-  const [error, setError] = useState("");
-  const alive = useRef(true);
+  const tried = useRef(false),
+    alive = useRef(true);
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -62,13 +61,10 @@ export function SpeechReview({
       scoreJob.current?.cancel();
     };
   }, []);
-  function cancel() {
-    scoreJob.current?.cancel();
-    // Keep the action disabled until audio decoding/worker cleanup has settled.
-    setProgress("Cancelling…");
-  }
   async function score() {
-    if (!answer.recording || !expected || scoreJob.current) return;
+    if (!answer.recording || !expected || scoreJob.current || pronunciation)
+      return;
+    tried.current = true;
     setError("");
     const operation = scoreRecording(answer.recording, expected, (message) => {
       if (alive.current) setProgress(message);
@@ -76,159 +72,99 @@ export function SpeechReview({
     scoreJob.current = operation;
     try {
       const value = await operation.promise;
-      if (!alive.current || scoreJob.current !== operation) return;
+      if (!alive.current) return;
       setPronunciation(value);
-      setPanel("syllables");
       try {
         const saved = await savePronunciation(attemptId, question.id, value);
-        if (!alive.current || scoreJob.current !== operation) return;
+        if (!alive.current) return;
         onPronunciation(value);
-        if (saved) toast.success("Syllable scores saved on this device");
+        if (saved) toast.success("Syllable feedback saved on this device");
         else
           setError(
-            "This attempt is no longer stored. Scores are available in this view.",
+            "This session is no longer stored. Feedback is available in this view.",
           );
       } catch {
         if (alive.current)
           setError(
-            "Scores ready, but they could not be saved. They are available in this view.",
+            "Feedback is ready, but could not be saved. It is available in this view.",
           );
       }
     } catch (e) {
-      if (
-        alive.current &&
-        !(e instanceof DOMException && e.name === "AbortError")
-      )
+      if (alive.current)
         setError(
-          e instanceof Error
-            ? e.message
-            : "Speech comparison failed. Your recording is retained.",
+          e instanceof DOMException && e.name === "AbortError"
+            ? "Feedback cancelled. Your recording is retained."
+            : e instanceof Error
+              ? e.message
+              : "Speech feedback could not finish.",
         );
     } finally {
-      if (alive.current && scoreJob.current === operation) {
-        scoreJob.current = null;
-        setProgress("");
-      }
+      scoreJob.current = null;
+      if (alive.current) setProgress("");
     }
   }
+  useEffect(() => {
+    if (
+      expected &&
+      answer.recording &&
+      !pronunciation &&
+      !tried.current &&
+      model.status === "ready"
+    )
+      void score();
+  }, [expected, answer.recording, pronunciation, model.status]);
+  const words = useMemo(
+    () => feedbackWords(expected || "", pronunciation),
+    [expected, pronunciation],
+  );
   const similarity = pronunciation ? pronunciationSummary(pronunciation) : null;
   return (
     <section
       aria-label="On-device speech feedback"
       className="local-speech-screen"
     >
-      <div className="speech-toolbar">
-        <div className="speech-actions flex flex-wrap items-center gap-2">
-          {expected && answer.recording && (
-            <Button
-              onClick={() => void score()}
-              disabled={!!progress || model.status !== "ready"}
-              title="Compare syllables with the reference recordings"
-              aria-label="Compare syllables"
-            >
-              <Gauge className="size-4" />
-              <span className="speech-action-label">
-                {pronunciation ? "Compare again" : "Compare syllables"}
-              </span>
-            </Button>
-          )}
-          {!!progress && (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Cancel speech scoring"
-              onClick={cancel}
-            >
-              <X className="size-4" />
-            </Button>
-          )}
-
-          {!!progress && (
-            <p role="status" className="text-xs text-muted-foreground">
-              {progress}
-            </p>
-          )}
-        </div>
-        <div className="speech-tabs">
-          {(pronunciation || transcription) && panel !== "review" && (
-            <Button
-              aria-label="Self-review notes"
-              title="Self-review notes"
-              aria-pressed={panel === "review"}
-              variant={panel === "review" ? "secondary" : "ghost"}
-              onClick={() => setPanel("review")}
-            >
-              <BookOpenCheck />
-              <span>Self-review</span>
-            </Button>
-          )}
-          {pronunciation && panel !== "syllables" && (
-            <Button
-              aria-label="Syllable scores"
-              aria-pressed={panel === "syllables"}
-              title="Syllable scores"
-              variant={panel === "syllables" ? "secondary" : "ghost"}
-              onClick={() => setPanel("syllables")}
-            >
-              <ListChecks />
-              <span>Syllables</span>
-            </Button>
-          )}
-          {transcription && panel !== "transcript" && (
-            <Button
-              aria-label="Transcript"
-              aria-pressed={panel === "transcript"}
-              title="Transcript"
-              variant={panel === "transcript" ? "secondary" : "ghost"}
-              onClick={() => setPanel("transcript")}
-            >
-              <AudioLines />
-              <span>Saved transcript</span>
-            </Button>
-          )}
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="How local feedback works"
-                  title="How local feedback works"
-                />
-              }
-            >
-              <CircleHelp />
-            </DialogTrigger>
-            <DialogContent className="practice-ui info-dialog">
-              <DialogTitle>How local feedback works</DialogTitle>
-              <ReadingPages
-                label="speech help pages"
-                texts={[
-                  ...(expected
-                    ? [
-                        "Read Aloud and Repeat Sentence use the trained blended-English v3 model for syllable sound similarity. American, British, Australian and Indian references are equally valid. Uncertain syllables have no score. This is experimental synthetic-reference similarity, not pronunciation correctness, fluency, proficiency or an exam score. Stress assessment remains separate from this app score.",
-                        "The required comparison model downloads automatically, is verified and cached for offline scoring. Your recording stays on this device.",
-                      ]
-                    : []),
-                  "Your response has recording playback. Prompt has the source text and any prompt audio. Saved transcripts remain readable; this app does not generate new transcripts. Your recording stays on this device.",
-                ]}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
+      <div className="review-audio-pair">
+        {answer.recording && (
+          <AudioPlayer src={answer.recording} label="Your recording" />
+        )}
+        {(referenceAudio || question.audio) && (
+          <AudioPlayer
+            src={asset(referenceAudio || question.audio!)}
+            label={referenceAudio ? "Reference recording" : "Prompt recording"}
+          />
+        )}
       </div>
+      {progress && (
+        <div className="speech-toolbar">
+          <span role="status">{progress}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Cancel speech scoring"
+            onClick={() => scoreJob.current?.cancel()}
+          >
+            <X />
+          </Button>
+        </div>
+      )}
       {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
+        <p role="alert">
+          {error}{" "}
+          {!pronunciation && !progress && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={model.status !== "ready"}
+              onClick={() => void score()}
+            >
+              Retry feedback
+            </Button>
+          )}
         </p>
       )}
-      {panel === "syllables" && pronunciation ? (
-        <div className="speech-reading" aria-label="Local syllable scores">
-          <p className="speech-stats">
-            Reference similarity, not pronunciation correctness or an exam
-            score.
-          </p>
-          <p className="speech-stats">
+      {expected ? (
+        <>
+          <div className="speech-summary" aria-label="Local syllable scores">
             {similarity !== null && (
               <Badge
                 variant="secondary"
@@ -236,57 +172,92 @@ export function SpeechReview({
               >
                 {similarity}/100 similarity
               </Badge>
-            )}{" "}
-            {
-              pronunciation.syllables.filter((s) => s.status === "scored")
-                .length
-            }{" "}
-            of {pronunciation.syllables.length} syllables scored
+            )}
+            {pronunciation && (
+              <span>
+                {
+                  pronunciation.syllables.filter((s) => s.status === "scored")
+                    .length
+                }{" "}
+                of {pronunciation.syllables.length} syllables scored
+              </span>
+            )}
+            {pronunciation?.status === "no-reliable-speech" && (
+              <span>
+                No reliable speech detected. Select a word to practise.
+              </span>
+            )}
+          </div>
+          <p className="speech-stats">
+            Select a word to listen and practise its syllables. Scores compare
+            your audio with the prompt sounds; they do not transcribe what you
+            said.
           </p>
-          {pronunciation.syllables.length ? (
-            <SyllableScores syllables={pronunciation.syllables} />
-          ) : (
-            <p>
-              {pronunciation.status === "no-reliable-speech"
-                ? "No reliable speech detected. No syllable score."
-                : "No supported syllables could be scored."}
-            </p>
+          <SpeechDiff words={words} onSelect={setSelected} />
+          {!answer.recording && (
+            <p>No recording was saved. You can still practise each syllable.</p>
           )}
-        </div>
-      ) : panel === "transcript" && transcription ? (
-        <div className="speech-reading" aria-label="Local transcript result">
+          {answer.transcription && (
+            <details>
+              <summary>Saved transcript</summary>
+              <p>
+                {answer.transcription.text || "The saved transcript is empty."}
+              </p>
+            </details>
+          )}
+          <p className="speech-stats">
+            Reference similarity, not pronunciation correctness or an exam
+            score. Uncertain syllables have no score.
+          </p>
+          {selected && referenceAudio && (
+            <Suspense
+              fallback={<p role="status">Opening syllable practice…</p>}
+            >
+              <SyllablePractice
+                key={selected.index}
+                word={selected}
+                questionId={question.id}
+                expected={expected}
+                recording={answer.recording}
+                attemptId={attemptId}
+                ready={model.status === "ready" && !progress}
+                onClose={() => setSelected(undefined)}
+              />
+            </Suspense>
+          )}
+        </>
+      ) : (
+        <div className="speech-reading">
+          {question.chart && (
+            <div className="review-chart">
+              <Chart q={question} responsive />
+            </div>
+          )}
           <ReadingPages
-            key={transcription.text}
-            label="transcript pages"
-            texts={[
-              transcription.text ||
-                "The saved transcript is empty. Replay your recording for self-review.",
+            label="feedback pages"
+            blocks={[
+              ...(!answer.recording
+                ? [{ text: "No recording was saved." }]
+                : []),
+              { label: "What to check", text: question.explanation },
+              ...(question.model
+                ? [{ label: exampleLabel(question), text: question.model }]
+                : []),
+              ...promptBlocks(question),
+              ...(answer.transcription
+                ? [
+                    {
+                      label: "Saved transcript",
+                      text:
+                        answer.transcription.text ||
+                        "The saved transcript is empty.",
+                    },
+                  ]
+                : []),
+              { text: "This response is not automatically graded." },
             ]}
           />
         </div>
-      ) : (
-        <ReadingPages
-          label="speech review pages"
-          blocks={[
-            ...(!answer.recording
-              ? [
-                  {
-                    text: "No recording was saved.",
-                  },
-                ]
-              : []),
-            {
-              label: expected ? "Listen for" : "What to check",
-              text: question.explanation,
-            },
-            ...(!expected && question.model
-              ? [{ label: exampleLabel(question), text: question.model }]
-              : []),
-            ...(!expected
-              ? [{ text: "This response is not automatically graded." }]
-              : []),
-          ]}
-        />
       )}
     </section>
   );

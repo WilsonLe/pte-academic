@@ -95,3 +95,80 @@ test("a save after midnight credits the question completion day", async () => {
   assert.equal((await loadProgress()).lastDay, "2025-12-31");
   await clearHistory();
 });
+
+test("review effort commits once per target/day, survives retention and cannot recreate cleared/pruned attempts", async () => {
+  const { saveReviewReward } = await import("../src/storage");
+  const { awardReview, emptyProgress } = await import("../src/progress");
+  const { COMPARISON_MODEL_SHA, COMPARISON_EXPORT } =
+    await import("../src/speech/comparison-schema");
+  await clearHistory();
+  await saveAttempt(attempt("review", "read-aloud-01"));
+  const result: import("../src/speech/comparison-schema").Pronunciation = {
+    schemaVersion: 1 as const,
+    modelSha256: COMPARISON_MODEL_SHA,
+    exportId: COMPARISON_EXPORT,
+    referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"] as [
+      "en-US",
+      "en-GB",
+      "en-AU",
+      "en-IN",
+    ],
+    seconds: 1,
+    status: "unscored" as const,
+    syllables: [
+      {
+        word: "urban",
+        wordIndex: 0,
+        syllableIndex: 0,
+        label: "ɜː",
+        start: 0,
+        end: 0.5,
+        similarity: null,
+        confidence: 0,
+        status: "uncertain" as const,
+      },
+    ],
+  };
+  const input = {
+    attemptId: "review",
+    questionId: "read-aloud-01",
+    wordIndex: 0,
+    syllableIndex: 0,
+    result,
+  };
+  const before = await loadProgress();
+  const completed = await Promise.all([
+    saveReviewReward(input),
+    saveReviewReward(input),
+  ]);
+  assert.deepEqual(
+    completed.map((r) => r.xp),
+    [5, 0],
+  );
+  const after = await loadProgress();
+  assert.equal(after.xp, before.xp + 5);
+  assert.deepEqual(after.days, before.days);
+  assert.equal(after.streak, before.streak);
+  assert.equal(
+    (await loadAttempt("review")).answers["read-aloud-01"].pronunciation,
+    undefined,
+  );
+  assert.ok(
+    !localStorage.getItem("pte-studio-history-v1")!.includes("reviewed"),
+  );
+  const noSpeech = await saveReviewReward({
+    ...input,
+    result: { ...result, status: "no-reliable-speech", syllables: [] },
+  });
+  assert.equal(noSpeech.xp, 0);
+  const fresh = awardReview(emptyProgress(), "target", "2026-10-16");
+  assert.equal(awardReview(fresh.progress, "target", "2026-10-16").xp, 0);
+  assert.equal(awardReview(fresh.progress, "target", "2026-10-17").xp, 5);
+  for (let i = 0; i < 11; i++) await saveAttempt(attempt(`retained-${i}`));
+  assert.equal((await saveReviewReward(input)).retained, false);
+  assert.equal((await loadProgress()).xp, after.xp + 10);
+  await clearHistory();
+  assert.equal((await saveReviewReward(input)).xp, 0);
+  assert.equal((await loadProgress()).xp, 0);
+  await assert.rejects(loadAttempt("review"));
+});

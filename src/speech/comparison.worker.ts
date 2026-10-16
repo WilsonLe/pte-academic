@@ -11,6 +11,8 @@ import {
   normalizedAudio,
   scoreOutputs,
   scriptKey,
+  targetVariants,
+  type SyllableTarget,
   reliableSignal,
   type ComparisonMetadata,
 } from "./comparison-core";
@@ -27,13 +29,18 @@ ort.env.wasm.wasmPaths = {
   mjs: new URL(factoryUrl, self.location.href).href,
 };
 self.onmessage = async (
-  event: MessageEvent<{ audio: Float32Array; text: string; base: string }>,
+  event: MessageEvent<{
+    audio: Float32Array;
+    text: string;
+    target?: SyllableTarget;
+    base: string;
+  }>,
 ) => {
   let session: ort.InferenceSession | undefined;
   const progress = (message: string) =>
     self.postMessage({ type: "progress", message });
   try {
-    const { audio, text, base } = event.data;
+    const { audio, text, target, base } = event.data;
     if (
       !(audio instanceof Float32Array) ||
       !audio.length ||
@@ -67,6 +74,11 @@ self.onmessage = async (
       !metadata.scripts[scriptKey(text)]?.length
     )
       throw new Error("This reference text is not supported by the v3 model.");
+    if (target)
+      metadata.scripts[scriptKey(text)] = targetVariants(
+        metadata.scripts[scriptKey(text)],
+        target,
+      );
     const bytes = new Uint8Array(comparisonManifest.encoderBytes);
     let offset = 0;
     for (const part of comparisonManifest.files.filter(

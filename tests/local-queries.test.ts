@@ -150,3 +150,67 @@ test("invalid saves fail once and leave published local query snapshots unchange
     client.clear();
   }
 });
+
+test("offline review reward publishes its committed profile and cancels older reads", async () => {
+  const { reviewRewardMutation } = await import("../src/queries");
+  const { COMPARISON_MODEL_SHA, COMPARISON_EXPORT } =
+    await import("../src/speech/comparison-schema");
+  await clearHistory();
+  const client = createLocalQueryClient();
+  const saved = await saveAttempt({
+    ...attempt("review-query"),
+    questionIds: ["read-aloud-01"],
+    answers: { "read-aloud-01": { text: "response evidence" } },
+  });
+  let finish!: (value: typeof saved.progress) => void;
+  const pending = client
+    .fetchQuery({
+      ...progressQuery(),
+      queryFn: () =>
+        new Promise<typeof saved.progress>((resolve) => {
+          finish = resolve;
+        }),
+    })
+    .catch(() => {});
+  onlineManager.setOnline(false);
+  const mutation = new MutationObserver(client, reviewRewardMutation(client));
+  try {
+    const result = await mutation.mutate({
+      attemptId: "review-query",
+      questionId: "read-aloud-01",
+      wordIndex: 0,
+      syllableIndex: 0,
+      result: {
+        schemaVersion: 1,
+        modelSha256: COMPARISON_MODEL_SHA,
+        exportId: COMPARISON_EXPORT,
+        referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+        seconds: 1,
+        status: "scored",
+        syllables: [
+          {
+            word: "urban",
+            wordIndex: 0,
+            syllableIndex: 0,
+            label: "ɜː",
+            start: 0,
+            end: 1,
+            similarity: 30,
+            confidence: 0.5,
+            status: "scored",
+          },
+        ],
+      },
+    });
+    finish(saved.progress);
+    await pending;
+    assert.equal(result.xp, 5);
+    assert.equal(
+      client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp,
+      saved.progress.xp + 5,
+    );
+    mutation.reset();
+  } finally {
+    client.clear();
+  }
+});

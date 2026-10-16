@@ -8,6 +8,8 @@ const daySchema = z.object({
 export const progressSchema = z.object({
   version: z.literal(1),
   xp: z.number().int().nonnegative(),
+  reviewDay: z.string().default(""),
+  reviewed: z.array(z.string()).max(1000).default([]),
   seen: z.array(z.string()),
   earned: z.array(z.string()).default([]),
   days: z.array(daySchema).max(365),
@@ -31,6 +33,8 @@ export const rewardSchema = z.object({
 export const emptyProgress = (): Progress => ({
   version: 1,
   xp: 0,
+  reviewDay: "",
+  reviewed: [],
   seen: [],
   earned: [],
   days: [],
@@ -177,4 +181,20 @@ export function questQuestions(p: Progress, day = localDay()) {
   return [...varied, ...rotated.filter((q) => !varied.includes(q))]
     .filter((q) => !done.has(q.id))
     .slice(0, remaining);
+}
+
+/** Effort reward, independent of similarity, practice quests and streaks. */
+export function awardReview(before: Progress, key: string, day = localDay()) {
+  const progress = structuredClone(before);
+  if (progress.reviewDay !== day) {
+    progress.reviewDay = day;
+    progress.reviewed = [];
+  }
+  const fresh =
+    !progress.reviewed.includes(key) && progress.reviewed.length < 1000;
+  if (fresh) {
+    progress.reviewed.push(key);
+    progress.xp += 5;
+  }
+  return { progress, xp: fresh ? 5 : 0 };
 }

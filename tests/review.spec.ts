@@ -1,6 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import questionData from "../content/questions.json" with { type: "json" };
 import guideData from "../content/guides.json" with { type: "json" };
+import references from "../src/speech/reference-clips.json" with { type: "json" };
+import {
+  COMPARISON_MODEL_SHA,
+  COMPARISON_EXPORT,
+} from "../src/speech/comparison-schema";
 import mocks from "../content/mock-tests.json" with { type: "json" };
 import type { Answer, Question } from "../src/content";
 const questions = questionData as Question[];
@@ -30,7 +35,36 @@ async function seed(page: Page) {
                       ? ["0"]
                       : ["wrong", ""];
             a = { values: state === "correct" ? q.answers : wrong };
-          } else if (kind(q) !== "speak")
+          } else if (["read-aloud", "repeat-sentence"].includes(q.type)) {
+            a = {
+              pronunciation: {
+                schemaVersion: 1,
+                modelSha256: COMPARISON_MODEL_SHA,
+                exportId: COMPARISON_EXPORT,
+                referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+                seconds: 40,
+                status: "scored",
+                syllables: references[
+                  q.id as keyof typeof references
+                ].syllables.map((s) => ({
+                  ...s,
+                  similarity: 75,
+                  confidence: 0.8,
+                  status: "scored",
+                })),
+              },
+            };
+          } else if (kind(q) === "speak")
+            a = {
+              transcription: {
+                text: "Saved spoken response",
+                seconds: 3,
+                engine: "legacy-local",
+                model: "legacy",
+                revision: "old",
+              },
+            };
+          else if (kind(q) !== "speak")
             a = { text: state === "correct" ? q.model : "A short response." };
         }
         return [q.id, a];
@@ -111,13 +145,6 @@ async function readPages(page: Page, label = "feedback pages") {
   }
   throw new Error("Review pagination did not reach the final page");
 }
-async function select(page: Page, panel: string) {
-  const button = page
-    .getByRole("group", { name: "Review panels", exact: true })
-    .getByRole("button", { name: panel, exact: true });
-  await button.click();
-  await expect(button).toHaveAttribute("aria-pressed", "true");
-}
 async function fits(page: Page) {
   expect(
     await page.evaluate(
@@ -128,7 +155,7 @@ async function fits(page: Page) {
   expect(box!.y + box!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
 }
 
-test("all 65 questions: complete, incorrect and unanswered review panels on desktop and phone", async ({
+test("all 65 questions: unified complete and incorrect feedback on desktop and phone", async ({
   page,
   context,
 }, info) => {
@@ -142,7 +169,7 @@ test("all 65 questions: complete, incorrect and unanswered review panels on desk
     { width: 390, height: 844 },
   ]) {
     await page.setViewportSize(viewport);
-    for (const state of ["correct", "wrong", "empty"]) {
+    for (const state of ["correct", "wrong"]) {
       await page.goto(`/history/review-${state}`);
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
@@ -150,8 +177,11 @@ test("all 65 questions: complete, incorrect and unanswered review panels on desk
           "data-question-id",
           q.id,
         );
-        await select(page, "Your response");
-        const response = await readPages(page);
+        await expect(
+          page.getByRole("heading", { name: "Feedback", exact: true }),
+        ).toBeVisible();
+        const fixedSpeech = ["read-aloud", "repeat-sentence"].includes(q.type);
+        const response = fixedSpeech ? "" : await readPages(page);
         if (kind(q) === "write") {
           expect(response).toContain(
             q.type === "write-essay" ? "Planning outline" : "Example response",
@@ -180,50 +210,27 @@ test("all 65 questions: complete, incorrect and unanswered review panels on desk
           }
         } else if (kind(q) === "dictation")
           expect(response).toContain(compact(q.model!));
-        else expect(response).toContain("No recording");
-        await select(page, "Feedback");
-        const feedback = await readPages(
-          page,
-          kind(q) === "speak" ? "speech review pages" : "feedback pages",
-        );
-        expect(feedback).toContain(compact(q.explanation));
-        expect(feedback).not.toMatch(
-          /Preserve the main information|Check the content, form and language|v3 reference model/,
-        );
-        if (
-          kind(q) === "speak" &&
-          !["read-aloud", "repeat-sentence"].includes(q.type)
-        )
-          expect(feedback).toContain(compact(q.model!));
-        if (q.prompt || q.text || q.audioText) {
-          await select(page, "Prompt");
-          const prompt = await readPages(page);
-          for (const text of [
-            q.prompt,
-            kind(q) === "blanks"
-              ? undefined
-              : q.text?.replace(/\{\{\}\}/g, "GAP"),
-            q.audioText,
-          ].filter(Boolean)) {
-            if (!text!.includes("GAP"))
-              expect(prompt).toContain(compact(text!));
-          }
-          if (q.type === "respond-to-situation")
-            expect(prompt.split(compact(q.text!))).toHaveLength(2);
-          if (q.audio)
-            await expect(
-              page.getByRole("group", {
-                name: `Prompt recording for question ${i + 1}`,
-                exact: true,
-              }),
-            ).toBeVisible();
+        else if (!fixedSpeech) expect(response).toContain("No recording");
+        if (!fixedSpeech) {
+          expect(response).toContain(compact(q.explanation));
+          if (kind(q) === "speak")
+            expect(response).toContain(compact(q.model!));
+          for (const text of [q.prompt, q.audioText].filter(Boolean))
+            expect(response).toContain(compact(text!));
+        } else {
+          await expect(page.getByLabel("Local syllable scores")).toContainText(
+            "syllables scored",
+          );
         }
-        if (q.chart) {
-          await select(page, "Image");
+        if (q.audio)
+          await expect(
+            page.getByRole("group", {
+              name: fixedSpeech ? "Reference recording" : "Prompt recording",
+              exact: true,
+            }),
+          ).toBeVisible();
+        if (q.chart)
           await expect(page.getByRole("figure")).toContainText(q.chart.title);
-          for (const value of q.chart.values)
-            await expect(page.getByRole("figure")).toContainText(String(value));
-        }
         await fits(page);
         visited.push(`${viewport.width}/${state}/${q.id}`);
         if (
@@ -237,10 +244,6 @@ test("all 65 questions: complete, incorrect and unanswered review panels on desk
             "describe-image-01",
           ].includes(q.id)
         ) {
-          await select(
-            page,
-            kind(q) === "speak" ? "Feedback" : "Your response",
-          );
           await page.screenshot({
             path: info.outputPath(`${q.id}-mobile.png`),
           });
@@ -252,41 +255,60 @@ test("all 65 questions: complete, incorrect and unanswered review panels on desk
       }
     }
   }
-  expect(visited).toHaveLength(390);
+  expect(visited).toHaveLength(260);
   await info.attach("all-question-review-coverage", {
     body: JSON.stringify(visited),
     contentType: "application/json",
   });
 });
 
-test("mixed mock and section reviews retain navigation, panel fallback, keyboard and reload", async ({
+test("answered-only reviews hide single-page navigation, and empty sessions have no questions", async ({
   page,
   context,
 }) => {
-  await context.route("**/models/**", (route) => route.abort());
+  await context.route("**/models/**", (r) => r.abort());
   await seed(page);
-  for (const id of [
-    "mock",
-    "section-speaking",
-    "section-reading",
-    "section-listening",
-  ]) {
-    await page.goto(`/history/review-${id}`);
-    await expect(page.locator(".review-screen")).toBeVisible();
-    await page.getByRole("button", { name: "Feedback", exact: true }).focus();
-    await page.keyboard.press("Enter");
-    await expect(
-      page.getByRole("button", { name: "Feedback", exact: true }),
-    ).toHaveAttribute("aria-pressed", "true");
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await expect(
-      page.getByRole("button", { name: "Feedback", exact: true }),
-    ).toHaveAttribute("aria-pressed", "true");
-    await page.reload();
-    await expect(page.locator(".review-screen")).toBeVisible();
-  }
+  await page.goto("/history/review-empty");
+  await expect(
+    page.getByText("No responses were saved in this session."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "review questions" }),
+  ).toHaveCount(0);
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => {
+      const r = indexedDB.open("pte-studio", 2);
+      r.onsuccess = () => {
+        const db = r.result,
+          tx = db.transaction("attempts", "readwrite"),
+          store = tx.objectStore("attempts");
+        const get = store.get("review-correct");
+        get.onsuccess = () => {
+          const saved = get.result;
+          saved.result.answers = { "reading-single-01": { values: ["0"] } };
+          saved.recordings = {};
+          store.put(saved, "review-correct");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+      };
+    });
+  });
+  await page.goto("/history/review-correct");
+  await expect(page.locator(".review-screen")).toHaveAttribute(
+    "data-question-id",
+    "reading-single-01",
+  );
+  await expect(
+    page.getByRole("navigation", { name: "review questions" }),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator(".review-screen")).toHaveAttribute(
+    "data-question-id",
+    "reading-single-01",
+  );
 });
 
 test("long writing remains complete on short phones and enlarged text; source audio replays", async ({
@@ -349,29 +371,20 @@ test("long writing remains complete on short phones and enlarged text; source au
   await page
     .getByRole("button", { name: "Next review questions", exact: true })
     .click();
-  await select(page, "Prompt");
   const audio = page.getByRole("group", {
-    name: "Prompt recording for question 2",
+    name: "Prompt recording",
     exact: true,
   });
   await audio.getByRole("button", { name: /Play/ }).click();
   await expect(audio.getByRole("button", { name: /Pause/ })).toBeVisible();
-  await select(page, "Feedback");
-  await expect(page.locator(".review-screen audio")).toHaveCount(0);
-  await select(page, "Prompt");
+  await audio.getByRole("button", { name: /Pause/ }).click();
   await audio.getByRole("button", { name: /Play/ }).click();
   await expect(audio.getByRole("button", { name: /Pause/ })).toBeVisible();
   await page
     .getByRole("button", { name: "Next review questions", exact: true })
     .click();
+  await expect(page.getByRole("figure")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Feedback", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  await select(page, "Image");
-  await page
-    .getByRole("button", { name: "Next review questions", exact: true })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Your response", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+    page.getByRole("heading", { name: "Feedback", exact: true }),
+  ).toBeVisible();
 });

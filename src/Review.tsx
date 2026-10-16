@@ -1,18 +1,12 @@
 import { useState } from "react";
-import { BookOpen, Image as ImageIcon, ListChecks, Play } from "lucide-react";
 import { asset, feedback, guideFor, questions } from "./content";
 import { responseBlocks, feedbackBlocks, promptBlocks } from "./review-content";
 import { AudioPlayer } from "./components/AudioPlayer";
-import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./components/ui/tooltip";
 import { Pager, ReadingPages } from "./Pages";
 import { Chart } from "./QuestionInput";
 import { SpeechReview } from "./speech/SpeechReview";
+import { answered } from "./progress";
 import type { Pronunciation } from "./speech/comparison-schema";
 import type { Result } from "./Runner";
 
@@ -24,27 +18,20 @@ export function Review({
   onPronunciation: (questionId: string, value: Pronunciation) => void;
 }) {
   const [index, setIndex] = useState(0);
-  const [tab, setTab] = useState(() =>
-    guideFor(questions.find((q) => q.id === r.questionIds[0])!).kind === "speak"
-      ? "Feedback"
-      : "Your response",
+  const responded = r.questionIds.filter(
+    (id) =>
+      answered(r.answers[id]) ||
+      r.answers[id]?.pronunciation ||
+      r.answers[id]?.transcription,
   );
-  const id = r.questionIds[index];
+  const id = responded[Math.min(index, responded.length - 1)];
+  if (!id)
+    return (
+      <p className="empty-state">No responses were saved in this session.</p>
+    );
   const q = questions.find((question) => question.id === id)!;
   const a = r.answers[id] || {};
   const speaking = guideFor(q).kind === "speak";
-  const prompt = promptBlocks(q);
-  const tabs = [
-    "Your response",
-    "Feedback",
-    ...(prompt.length || q.audio ? ["Prompt"] : []),
-    ...(q.chart ? ["Image"] : []),
-  ];
-  const activeTab = tabs.includes(tab)
-    ? tab
-    : speaking
-      ? "Feedback"
-      : "Your response";
   return (
     <div className="screen-stack review-screen" data-question-id={id}>
       <div className="review-question">
@@ -52,61 +39,13 @@ export function Review({
         {!speaking && <Badge variant="outline">{feedback(q, a).label}</Badge>}
         <Pager
           index={index}
-          count={r.questionIds.length}
+          count={responded.length}
           label="review questions"
-          onChange={(n) => {
-            setIndex(n);
-            const next = questions.find(
-              (question) => question.id === r.questionIds[n],
-            )!;
-            if (
-              (tab === "Image" && !next.chart) ||
-              (tab === "Prompt" && !promptBlocks(next).length && !next.audio)
-            )
-              setTab(
-                guideFor(next).kind === "speak" ? "Feedback" : "Your response",
-              );
-          }}
+          onChange={setIndex}
         />
       </div>
-      <div
-        className="screen-tabs review-tabs"
-        role="group"
-        aria-label="Review panels"
-      >
-        {tabs.map((t) => {
-          const Icon =
-            t === "Your response"
-              ? Play
-              : t === "Feedback"
-                ? ListChecks
-                : t === "Prompt"
-                  ? BookOpen
-                  : ImageIcon;
-          return (
-            <Tooltip key={t}>
-              <TooltipTrigger
-                render={
-                  <Button
-                    variant={activeTab === t ? "secondary" : "outline"}
-                    aria-label={t}
-                    className={
-                      t === "Feedback" ? "review-feedback-tab" : undefined
-                    }
-                    aria-pressed={activeTab === t}
-                    onClick={() => setTab(t)}
-                  />
-                }
-              >
-                <Icon />
-                <span>{t}</span>
-              </TooltipTrigger>
-              <TooltipContent>{t}</TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </div>
-      {activeTab === "Feedback" && speaking ? (
+      <h3 className="feedback-heading">Feedback</h3>
+      {speaking ? (
         <div className="speech-panel">
           <SpeechReview
             key={id}
@@ -116,34 +55,27 @@ export function Review({
             onPronunciation={(value) => onPronunciation(id, value)}
           />
         </div>
-      ) : activeTab === "Your response" && a.recording ? (
-        <AudioPlayer
-          key={id}
-          src={a.recording}
-          label={`Your recording for question ${index + 1}`}
-        />
-      ) : activeTab === "Image" && q.chart ? (
-        <div className="review-chart">
-          <Chart q={q} responsive />
-        </div>
       ) : (
         <div className="review-reading">
-          {activeTab === "Prompt" && q.audio && (
+          {q.audio && (
             <AudioPlayer
-              key={id}
+              key={`audio-${id}`}
               src={asset(q.audio)}
-              label={`Prompt recording for question ${index + 1}`}
+              label="Prompt recording"
             />
           )}
+          {q.chart && (
+            <div className="review-chart">
+              <Chart q={q} responsive />
+            </div>
+          )}
           <ReadingPages
-            key={id + activeTab}
-            blocks={
-              activeTab === "Your response"
-                ? responseBlocks(q, a)
-                : activeTab === "Feedback"
-                  ? feedbackBlocks(q, a)
-                  : prompt
-            }
+            key={`reading-${id}`}
+            blocks={[
+              ...responseBlocks(q, a),
+              ...feedbackBlocks(q, a),
+              ...promptBlocks(q),
+            ]}
             label="feedback pages"
           />
         </div>

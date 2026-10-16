@@ -71,3 +71,83 @@ test("browser model pack is complete, pinned to accepted v3, and covers every fi
     }
   }
 });
+
+test("every fixed speech question has integral review audio and estimated syllable bounds", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { createHash } = await import("node:crypto");
+  const questions = JSON.parse(
+    await readFile("content/questions.json", "utf8"),
+  );
+  const references = JSON.parse(
+    await readFile("src/speech/reference-clips.json", "utf8"),
+  );
+  const narration = JSON.parse(
+    await readFile("content/narration.json", "utf8"),
+  );
+  for (const q of questions.filter((q) =>
+    ["read-aloud", "repeat-sentence"].includes(q.type),
+  )) {
+    const ref = references[q.id];
+    assert.ok(ref && ref.syllables.length, q.id);
+    const take = narration.takes.find((t) => t.audio === ref.audio);
+    assert.ok(take, q.id);
+    const hash = (v) => createHash("sha256").update(v).digest("hex");
+    assert.equal(ref.audioSha256, hash(await readFile(`public/${ref.audio}`)));
+    assert.equal(ref.scriptSha256, hash(q.text || q.audioText));
+    assert.equal(ref.synthetic, true);
+    assert.equal(ref.listeningStatus, take.listeningStatus);
+    assert.ok(
+      ref.syllables.every(
+        (s) =>
+          s.start >= 0 &&
+          s.end > s.start &&
+          s.end <= take.durationSeconds + 0.05,
+      ),
+    );
+    const words = (q.text || q.audioText)
+      .toLowerCase()
+      .replace(/[’‘]/g, "'")
+      .match(/[a-z]+(?:'[a-z]+)?/g);
+    words.forEach((word, index) =>
+      assert.ok(
+        ref.syllables.some((s) => s.word === word && s.wordIndex === index),
+        `${q.id}: ${index} ${word}`,
+      ),
+    );
+    const metadata = JSON.parse(
+      await readFile(
+        "public/models/blended-english-v3/comparison.json",
+        "utf8",
+      ),
+    );
+    const key = words.join(" ");
+    for (const candidate of metadata.scripts[key]) {
+      const aligned = ref.variants.find(
+        (v) => v.language === candidate.language,
+      );
+      assert.ok(aligned, `${q.id}: missing variant ${candidate.language}`);
+      assert.deepEqual(
+        aligned.syllables.map((s) => [s.wordIndex, s.syllableIndex, s.label]),
+        candidate.syllables.map((s) => [
+          s.wordIndex,
+          s.syllableIndex,
+          s.phonemes.join(" "),
+        ]),
+      );
+      assert.ok(
+        aligned.syllables.every(
+          (s) =>
+            s.start >= 0 &&
+            s.end > s.start &&
+            s.end <= take.durationSeconds + 0.05,
+        ),
+      );
+    }
+    if (q.type === "read-aloud")
+      assert.equal(
+        q.audio,
+        undefined,
+        "review examples must not enter the timed prompt",
+      );
+  }
+});
