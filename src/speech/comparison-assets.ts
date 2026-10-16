@@ -1,7 +1,19 @@
 import manifest from "./comparison-manifest.json";
 import recognition from "./recognition-manifest.json";
-const packs = [manifest, recognition];
-const totalBytes = packs.reduce((n, pack) => n + pack.totalBytes, 0);
+import { unpackAsset, type AssetTransport } from "./asset-codec";
+type ModelFile = {
+  path: string;
+  bytes: number;
+  sha256: string;
+  transport?: Omit<AssetTransport, "encoding"> & { encoding: string };
+};
+type ModelPack = { assetDirectory: string; files: ModelFile[] };
+const packs: ModelPack[] = [manifest, recognition];
+const totalBytes = packs.reduce(
+  (n, pack) =>
+    n + pack.files.reduce((sum, f) => sum + (f.transport?.bytes ?? f.bytes), 0),
+  0,
+);
 const files = packs.flatMap((pack) =>
   pack.files.map((file) => ({ ...file, url: pack.assetDirectory + file.path })),
 );
@@ -43,7 +55,7 @@ export function invalidateComparisonModel(message: string) {
 export async function verifiedAsset(
   path: string,
   base = modelBase(),
-  pack: typeof manifest | typeof recognition = manifest,
+  pack: ModelPack = manifest,
 ) {
   const descriptor = pack.files.find((f) => f.path === path);
   if (!descriptor) throw new Error("Unknown speech model asset.");
@@ -59,10 +71,10 @@ export async function verifiedAsset(
   if (
     bytes.length !== descriptor.bytes ||
     (await sha256(bytes)) !== descriptor.sha256
-  )
-    throw new ModelAssetError(
-      "Speech model integrity check failed. Retry its download.",
-    );
+  ) {
+    await cache.delete(new URL(pack.assetDirectory + path, base).href);
+    throw new ModelAssetError("Speech model integrity check failed. Retry its download.");
+  }
   return bytes;
 }
 async function sha256(data: Uint8Array) {
@@ -73,6 +85,110 @@ async function sha256(data: Uint8Array) {
   ]
     .map((x) => x.toString(16).padStart(2, "0"))
     .join("");
+}
+// Reference playback and the full preparer share a bounded per-file download.
+// Cache entries contain decoded bytes, retaining compatibility with existing packs.
+const downloads = new Map<string, Promise<Uint8Array>>();
+async function ensureAsset(
+  file: ModelFile,
+  pack: ModelPack,
+  base: string,
+  progress: (loaded: number) => void = () => {},
+) {
+  const url = new URL(pack.assetDirectory + file.path, base).href;
+  const cache = await caches.open(modelCache(base));
+  const existing = await cache.match(url);
+  if (existing) {
+    const bytes = new Uint8Array(await existing.arrayBuffer());
+    if (bytes.length === file.bytes && (await sha256(bytes)) === file.sha256) {
+      if (existing.headers.get("x-pte-sha256") !== file.sha256)
+        await cache.put(url, stored(bytes, file));
+      return bytes;
+    }
+    await cache.delete(url);
+  }
+  const current = downloads.get(url);
+  if (current) return current;
+  const operation = (async () => {
+    const transport = file.transport;
+    const expected = transport ?? file;
+    const response = await fetch(
+      new URL(pack.assetDirectory + expected.path, base),
+      {
+        cache: "no-store",
+        signal: AbortSignal.timeout(180_000),
+      },
+    );
+    if (!response.ok)
+      throw new ModelAssetError(
+        "Required speech model download failed. Check your connection and retry.",
+      );
+    const reader = response.body?.getReader();
+    if (!reader)
+      throw new ModelAssetError("Model download streaming is unavailable.");
+    const data = new Uint8Array(expected.bytes);
+    let offset = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (offset + value.length > data.length) {
+          await reader.cancel();
+          throw new ModelAssetError("Unexpected model download size.");
+        }
+        data.set(value, offset);
+        offset += value.length;
+        progress(offset);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    if (offset !== expected.bytes || (await sha256(data)) !== expected.sha256)
+      throw new ModelAssetError(
+        "Downloaded model failed its integrity check. Retry the download.",
+      );
+    const bytes = transport
+      ? await unpackAsset(
+          data,
+          file.bytes,
+          transport.encoding as AssetTransport["encoding"],
+        )
+      : data;
+    if (bytes.length !== file.bytes || (await sha256(bytes)) !== file.sha256)
+      throw new ModelAssetError(
+        "Unpacked model failed its integrity check. Retry the download.",
+      );
+    await cache.put(url, stored(bytes, file));
+    return bytes;
+  })();
+  downloads.set(url, operation);
+  try {
+    return await operation;
+  } finally {
+    downloads.delete(url);
+  }
+}
+function stored(bytes: Uint8Array, file: ModelFile) {
+  return new Response(bytes as Uint8Array<ArrayBuffer>, {
+    headers: {
+      "Content-Type": "application/octet-stream",
+      "Content-Length": String(file.bytes),
+      "x-pte-sha256": file.sha256,
+    },
+  });
+}
+/** Only the small reference index/audio can prepare independently of inference. */
+export function verifiedReferenceAsset(path: string, base = modelBase()) {
+  const file = recognition.files.find((f) => f.path === path);
+  if (
+    !file ||
+    !(
+      path === "word-references.json" ||
+      /^word-reference-[a-zA-Z-]+\.mp3$/.test(path)
+    )
+  )
+    throw new ModelAssetError("Unknown word reference asset.");
+  return ensureAsset(file, recognition, base);
 }
 export function prepareComparisonModel(
   retry = false,
@@ -91,11 +207,18 @@ export function prepareComparisonModel(
       index = 0;
     const active = new Map<string, number>();
     const progress = () => {
-      const loaded = complete + [...active.values()].reduce((a, b) => a + b, 0);
+      const percent = Math.min(
+        99,
+        Math.floor(
+          ((complete + [...active.values()].reduce((a, b) => a + b, 0)) /
+            totalBytes) *
+            100,
+        ),
+      );
       update({
         status: "loading",
-        percent: Math.floor((loaded / totalBytes) * 100),
-        message: `Preparing required speech model · ${Math.floor((loaded / totalBytes) * 100)}% of ${Math.ceil(totalBytes / 1024 / 1024)} MB`,
+        percent,
+        message: `Preparing required speech model · ${percent}% of ${Math.ceil(totalBytes / 1024 / 1024)} MB`,
       });
     };
     update({
@@ -103,76 +226,34 @@ export function prepareComparisonModel(
       percent: 0,
       message: "Preparing required speech model…",
     });
-    // Bounded parallel downloads avoid buffering the whole encoder in the page.
     let failed: Error | undefined;
     async function next() {
       while (index < files.length && !failed) {
-        const file = files[index++],
-          url = new URL(file.url, base).href;
+        const file = files[index++];
+        const pack = packs.find(
+          (p) => file.url === p.assetDirectory + file.path,
+        )!;
         try {
-          const cached = await cache.match(url);
-          let bytes: Uint8Array | undefined;
-          if (cached) {
-            const data = new Uint8Array(await cached.arrayBuffer());
-            if (
-              data.length === file.bytes &&
-              (await sha256(data)) === file.sha256
-            )
-              bytes = data;
-            else await cache.delete(url);
-          }
-          if (!bytes) {
-            const response = await fetch(url, {
-              cache: "no-store",
-              signal: AbortSignal.timeout(180_000),
+          const cached = await cache.match(new URL(file.url, base).href);
+          // Warm availability checks only read validation receipts. Every actual
+          // inference/reference read still hashes the decoded bytes in full.
+          const warm =
+            cached?.headers.get("x-pte-sha256") === file.sha256 &&
+            cached.headers.get("content-length") === String(file.bytes);
+          if (!warm)
+            await ensureAsset(file, pack, base, (n) => {
+              active.set(file.url, n);
+              progress();
             });
-            if (!response.ok)
-              throw new Error(
-                "Required speech model download failed. Check your connection and retry.",
-              );
-            const data = new Uint8Array(file.bytes);
-            const reader = response.body?.getReader();
-            if (!reader)
-              throw new Error("Model download streaming is unavailable.");
-            let offset = 0;
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                if (offset + value.length > data.length)
-                  throw new Error("Unexpected model download size.");
-                data.set(value, offset);
-                offset += value.length;
-                active.set(file.url, offset);
-                progress();
-              }
-            } finally {
-              reader.releaseLock();
-            }
-            if (offset !== file.bytes || (await sha256(data)) !== file.sha256)
-              throw new Error(
-                "Downloaded model failed its integrity check. Retry the download.",
-              );
-            await cache.put(
-              url,
-              new Response(data, {
-                headers: {
-                  "Content-Type": "application/octet-stream",
-                  "Content-Length": String(data.length),
-                },
-              }),
-            );
-            bytes = data;
-          }
           active.delete(file.url);
-          complete += bytes.length;
+          complete += file.transport?.bytes ?? file.bytes;
           progress();
         } catch (e) {
           failed =
             e instanceof Error
               ? e
               : new Error(
-                  "Required speech model could not be stored. Free browser storage and retry.",
+                  "Speech model could not be stored. Free browser storage and retry.",
                 );
         }
       }
