@@ -94,6 +94,8 @@ test("fixed viewport blocks app zoom and document scrolling without blocking inp
     { width: 390, height: 844 },
     { width: 844, height: 390 },
     { width: 360, height: 400 },
+    { width: 320, height: 451 },
+    { width: 320, height: 560 },
   ]) {
     await page.setViewportSize(size);
     for (const route of ["/", "/types", "/guide", "/history"]) {
