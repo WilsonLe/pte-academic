@@ -668,9 +668,38 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
     .getByRole("combobox", { name: "Blank 2" })
     .selectOption("reliability");
   await end(page);
-  await expect(
-    page.getByText("support · reliability", { exact: true }),
-  ).toHaveCount(1);
+  const response = page.locator(".review-screen .reading-copy");
+  for (const [index, word] of ["support", "reliability"].entries()) {
+    await expect(
+      response.getByRole("heading", {
+        name: `Gap ${index + 1} · Correct`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      response.getByText(`Your response: ${word}`, { exact: true }),
+    ).toHaveCount(1);
+  }
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
+  await expect(response).toContainText("2/2 gaps correct");
+  await expect(response).toContainText(
+    "Evidence is used to “support” a claim.",
+  );
+  await expect(response).toContainText(
+    "A larger sample can improve an estimate’s “reliability”",
+  );
+  await page.reload();
+  for (const [index, word] of ["support", "reliability"].entries()) {
+    await expect(
+      response.getByRole("heading", {
+        name: `Gap ${index + 1} · Correct`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      response.getByText(`Your response: ${word}`, { exact: true }),
+    ).toHaveCount(1);
+  }
 });
 test("word bank and paragraph controls are keyboard operable", async ({
   page,
