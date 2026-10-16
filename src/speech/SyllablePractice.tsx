@@ -20,6 +20,7 @@ import { loadWordReference, type ReferenceSyllable } from "./word-reference";
 import {
   ModelAssetError,
   invalidateComparisonModel,
+  modelStatus,
 } from "./comparison-assets";
 import { similarityTone } from "./syllable-display";
 import { scriptKey } from "./comparison-core";
@@ -75,7 +76,10 @@ export function SyllablePractice({
         else URL.revokeObjectURL(url);
       })
       .catch((error) => {
-        if (error instanceof ModelAssetError)
+        if (
+          error instanceof ModelAssetError &&
+          modelStatus().status === "ready"
+        )
           invalidateComparisonModel(error.message);
         if (live) setReferenceError("The word reference could not be loaded.");
       });

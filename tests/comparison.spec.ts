@@ -561,13 +561,19 @@ test("failed required download blocks model grading and retries without a word-m
 }) => {
   test.setTimeout(120000);
   await page.setViewportSize({ width: 390, height: 844 });
-  let release!: () => void;
-  const held = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  await page.route("**/models/blended-english-v3/encoder-00.bin", async (r) => {
-    await held;
-    await r.abort();
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("pte-test-download-released")) return;
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) =>
+      String(input).endsWith("/models/blended-english-v3/encoder-00.bin")
+        ? new Promise<Response>((resolve) => {
+            (window as any).__failModelDownload = () => {
+              sessionStorage.setItem("pte-test-download-released", "1");
+              window.fetch = nativeFetch;
+              resolve(new Response("Download unavailable", { status: 503 }));
+            };
+          })
+        : nativeFetch(input, init);
   });
   await page.goto(base + "types");
   const notifications = page.getByRole("button", {
@@ -584,7 +590,7 @@ test("failed required download blocks model grading and retries without a word-m
     await page.screenshot({
       path: "artifacts/pronunciation/browser-export/model-loading-mobile.png",
     });
-  release();
+  await page.evaluate(() => (window as any).__failModelDownload());
   await expect(
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible({ timeout: 60000 });
@@ -618,7 +624,6 @@ test("failed required download blocks model grading and retries without a word-m
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible();
   await context.setOffline(false);
-  await page.unroute("**/models/blended-english-v3/encoder-00.bin");
   await page.getByRole("button", { name: "Retry model download" }).click();
   await expect(notifications).toHaveAccessibleDescription("No notifications.", {
     timeout: 90000,
@@ -945,7 +950,7 @@ test("isolated retries accept all four reference accents after native recording 
     { workerUrl, base },
   );
   await writeFile(
-    "artifacts/issue53-probes/native-controls.json",
+    info.outputPath("native-controls.json"),
     JSON.stringify(report, null, 2),
   );
   for (const control of report.positive) {
