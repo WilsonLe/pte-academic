@@ -791,9 +791,17 @@ def train_stress(seed, experiment=None, device="cpu", batch_size=256):
     history = []
     for epoch in range(30):
         head.train()
-        for ids in np.array_split(
-            train[np.random.permutation(len(train))], max(1, len(train) // batch_size)
-        ):
+        order = (
+            np.random.choice(
+                train,
+                size=len(train),
+                replace=True,
+                p=equal_accent_weights(records, train),
+            )
+            if experiment and experiment.representation == "hidden-ctc-v1"
+            else train[np.random.permutation(len(train))]
+        )
+        for ids in np.array_split(order, max(1, len(train) // batch_size)):
             loss = F.cross_entropy(head(x[ids]), y[ids])
             opt.zero_grad()
             loss.backward()
@@ -882,6 +890,24 @@ def distribution_distances(z, labels, bank):
             distances = 1 - z[batch] @ refs.T
             result[batch] = np.partition(distances, k - 1, axis=1)[:, :k].mean(1)
     return result
+
+
+def equal_accent_weights(records, ids):
+    from collections import Counter
+
+    counts = Counter(records[i]["accent"] for i in ids)
+    weights = np.array([1 / counts[records[i]["accent"]] for i in ids])
+    return weights / weights.sum()
+
+
+def weighted_quantiles(values, weights, quantiles):
+    order = np.argsort(values, kind="stable")
+    cumulative = np.cumsum(np.asarray(weights)[order])
+    cumulative /= cumulative[-1]
+    indexes = np.searchsorted(cumulative, quantiles, side="left").clip(
+        0, len(order) - 1
+    )
+    return np.asarray(values)[order[indexes]]
 
 
 def fit(args):
@@ -1003,16 +1029,28 @@ def fit(args):
         ids = val[labels[val] == label]
         ds = distribution_distances(z[ids], labels[ids], bank)
         if len(ds) >= 5:
+            quantiles = (
+                weighted_quantiles(ds, equal_accent_weights(records, ids), [0.5, 0.95])
+                if experiment.representation == "hidden-ctc-v1"
+                else np.quantile(ds, [0.5, 0.95])
+            )
             calibration[str(label)] = [
-                float(np.quantile(ds, 0.5)),
-                float(np.quantile(ds, 0.95)),
+                float(quantiles[0]),
+                float(quantiles[1]),
                 int(len(ds)),
             ]
     duration = {}
     for p in classes:
         ids = [i for i in train if records[i]["phone"].rstrip("012") == p]
         d = np.log([max(0.01, records[i]["end"] - records[i]["start"]) for i in ids])
-        duration[p] = [float(d.mean()), float(max(d.std(), 0.2))]
+        weights = (
+            equal_accent_weights(records, ids)
+            if experiment.representation == "hidden-ctc-v1"
+            else None
+        )
+        mu = float(np.average(d, weights=weights))
+        sigma = float(np.sqrt(np.average((d - mu) ** 2, weights=weights)))
+        duration[p] = [mu, max(sigma, 0.2)]
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     stress_model = train_stress(args.seed, experiment, device, args.batch_size)
@@ -1037,6 +1075,9 @@ def fit(args):
         "scoreTarget": experiment.config.get("scoreTarget", "american-reference"),
         "phoneticMode": experiment.phonetic_mode,
         "featureRepresentation": experiment.representation,
+        "calibrationMode": "equal-accent-mixture-v1"
+        if experiment.representation == "hidden-ctc-v1"
+        else "pooled-validation",
         "configPath": str(experiment.path.relative_to(ROOT)),
         "seed": args.seed,
     }

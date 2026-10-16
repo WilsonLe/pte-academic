@@ -12,11 +12,22 @@ from comparison import (
     reference_stream,
     sound_feature,
     evaluation_features,
+    equal_accent_weights,
+    weighted_quantiles,
 )
 import torch
 
 
 class ComparisonContracts(unittest.TestCase):
+    def test_shared_calibration_balances_accent_mass_without_group_offsets(self):
+        records = [{"accent": "en-US"}] * 40 + [{"accent": "en-IN"}]
+        weights = equal_accent_weights(records, range(41))
+        self.assertAlmostEqual(weights[:40].sum(), 0.5)
+        self.assertAlmostEqual(weights[-1], 0.5)
+        np.testing.assert_array_equal(
+            weighted_quantiles([0] * 40 + [10], weights, [0.75, 0.95]), [10, 10]
+        )
+
     def test_phonetic_features_preserve_legacy_prefix_and_full_observed_distribution(
         self,
     ):
