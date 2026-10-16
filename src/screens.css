@@ -1201,6 +1201,15 @@
   .review-tabs button > span {
     display: none;
   }
+  .review-tabs .review-feedback-tab {
+    flex: 2;
+    gap: 6px;
+    padding-inline: 10px;
+    font-size: 14px;
+  }
+  .review-tabs .review-feedback-tab > span {
+    display: inline;
+  }
   .review-tabs button > .lucide {
     display: block;
     width: 23px;
@@ -1620,7 +1629,6 @@
   flex-shrink: 0;
 }
 @media (max-width: 767px) {
-  .speech-actions .speech-action-label,
   .speech-actions .speech-word-badge,
   .speech-actions .speech-score-badge {
     display: none;
@@ -1629,6 +1637,10 @@
     width: 44px;
     min-width: 44px;
     padding: 0;
+  }
+  .speech-actions > button:has(.speech-action-label) {
+    width: auto;
+    padding-inline: 12px;
   }
   .speech-actions {
     gap: 4px;
