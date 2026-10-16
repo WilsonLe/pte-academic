@@ -803,11 +803,17 @@ function modelAnswer(q: Question) {
 }
 function answerMatches(q: Question, a: Answer) {
   const kind = guideFor(q).kind;
-  if (kind === "multi" || kind === "highlight")
+  if (q.answers) {
+    const actual = a.values || [];
     return (
-      a.values?.length === q.answers?.length &&
-      !!a.values?.every((value) => q.answers?.includes(value))
+      actual.length === q.answers.length &&
+      (kind === "multi" || kind === "highlight"
+        ? actual.every((value) => q.answers!.includes(value))
+        : q.answers.every(
+            (value, index) => normalize(value) === normalize(actual[index]),
+          ))
     );
+  }
   const actual = showAnswer(q, a);
   const expected = modelAnswer(q);
   if (!expected) return false;
@@ -830,9 +836,11 @@ function Review({
     a = r.answers[id] || {};
   const f = feedback(q, a);
   const expected = modelAnswer(q);
-  const prompt = [q.prompt, q.text, q.audioText].filter(
-    (text): text is string => !!text,
-  );
+  const prompt = [
+    ...new Set(
+      [q.prompt, q.text, q.audioText].filter((text): text is string => !!text),
+    ),
+  ];
   const example =
     a.recording && expected && !prompt.includes(expected)
       ? `Example response: ${expected}`

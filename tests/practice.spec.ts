@@ -1544,9 +1544,12 @@ test("review combines duplicate answers and packs related text without stacked p
         "reading-single-02",
         "write-essay-01",
         "describe-image-01",
+        "listening-blanks-01",
+        "respond-to-situation-01",
       ],
       answers: {
         "reading-multiple-01": { values: ["1", "0"] },
+        "listening-blanks-01": { values: ["Society!", "Discarded"] },
         "reading-single-01": { values: ["0"] },
         "write-essay-01": { text },
       },
@@ -1690,6 +1693,30 @@ test("review combines duplicate answers and packs related text without stacked p
     await expect(
       page.getByRole("button", { name: "Your response", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await expect(copy).toContainText("Society! · Discarded");
+    await expect(copy).not.toContainText("Answer key:");
+    await expect(page.locator(".review-question")).toContainText("Correct");
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Prompt", exact: true }).click();
+    let promptText = await copy.innerText();
+    const nextPrompt = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    while ((await nextPrompt.count()) && (await nextPrompt.isEnabled())) {
+      await nextPrompt.click();
+      promptText += " " + (await copy.innerText());
+    }
+    expect(promptText.match(/You have been ill/g)).toHaveLength(1);
+    expect(promptText).toContain("submit the report on Monday.");
     await page.reload();
     await expect(copy).toContainText("Students valued the ability to pause.");
   }
