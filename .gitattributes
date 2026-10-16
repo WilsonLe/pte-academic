@@ -1,0 +1,5 @@
+# Derived model weights are immutable binary assets, never text diffs/merges.
+/public/models/*/encoder-*.bin binary linguist-generated=true
+/public/models/*/comparison.json -text -diff linguist-generated=true
+/public/models/*/manifest.json linguist-generated=true
+/src/speech/comparison-manifest.json linguist-generated=true

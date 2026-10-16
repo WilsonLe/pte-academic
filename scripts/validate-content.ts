@@ -121,9 +121,24 @@ export function validateContent() {
   const policy = JSON.parse(readFileSync("content/authoring.json", "utf8"));
   assert.equal(
     policy.spendingLimitUsd,
-    10,
-    "Increasing the authorized $10 budget requires operator approval and updating this assertion",
+    17.0113639,
+    "Changing the authorized cumulative budget requires operator approval and updating this assertion",
   );
+  assert.equal(
+    policy.budgetAuthorizations?.[0]?.operatorDecision,
+    "Fresh $10 from now",
+  );
+  assert.equal(
+    policy.budgetAuthorizations?.[0]?.priorCumulativeReservedUsd,
+    7.0113639,
+  );
+  assert.equal(policy.budgetAuthorizations?.[0]?.additionalAllowanceUsd, 10);
+  assert.equal(policy.budgetAuthorizations?.[0]?.priorReservationCount, 5736);
+  assert.equal(
+    policy.budgetAuthorizations?.[0]?.cumulativeCapUsd,
+    policy.spendingLimitUsd,
+  );
+  assert.equal(policy.budgetAuthorizations?.[0]?.historyPreserved, true);
   assert.equal(policy.requiresOperatorApprovalToIncrease, true);
 
   return `${guides.length} guides, ${questions.length} original questions, ${mocks.length} full mock; assets and references valid`;

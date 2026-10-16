@@ -1,0 +1,3618 @@
+{
+  "schemaVersion": 1,
+  "recognizer": {
+    "repository": "facebook/wav2vec2-base-960h",
+    "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+  },
+  "takes": [
+    {
+      "takeId": "passage-001--af_heart",
+      "audioSha256": "069d99ab29cbeb020fe0dff360f38bf80f7c1f9831df4764ef6005e215492667",
+      "seconds": 5.775,
+      "transcript": "the morning sunlight reached the kitchen window while julia carefully prepared breakfast for her family",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-001--af_bella",
+      "audioSha256": "54be40fd37ce616d51e6f388a2f6fbcdf3720805a5eb3995f436f0e89a5cc16a",
+      "seconds": 6.275,
+      "transcript": "the morning sunlight reached the kitchen window while julia carefully prepared breakfast for her family",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-001--am_michael",
+      "audioSha256": "e0b5cb16db5a731453779729ad36c4bce0f3e5bd795964ab5f520a1578b5128c",
+      "seconds": 6.45,
+      "transcript": "the morning sunlight reached the kitchen window while julia carefully prepared breakfast for her family",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-001--am_puck",
+      "audioSha256": "9b6448243b919e2e604fc450aeabd594ac5fccc8a47ab02386d47af2490e038e",
+      "seconds": 5.95,
+      "transcript": "the morning sunlight reached the kitchen window while julia carefully prepared breakfast for her family",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-002--af_heart",
+      "audioSha256": "2d68c624e892a94f98f7d4e31eaf2f4d6c6d116089d2a950dd597db85372776f",
+      "seconds": 5.5,
+      "transcript": "a curious student asked the librarian whether the new science books would arrive before friday",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-002--af_bella",
+      "audioSha256": "5f34ffeebf818b9edd714f5084d4d34cc1a68dc6bc95df30cb8b6059f766dd12",
+      "seconds": 5.95,
+      "transcript": "a curious student asked the librarian whether the new science books would arrive before friday",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-002--am_michael",
+      "audioSha256": "8b51a5e4a1a317ee804fd8109a7a1a8e174269d556d5c8039e3b57edea0737a0",
+      "seconds": 6.2,
+      "transcript": "a curious student asked the librarian whether the new science books would arrive before friday",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-002--am_puck",
+      "audioSha256": "213424761fe72d24d459e48fc52c2e54ead2921551a1f817926e0c7728521b94",
+      "seconds": 5.65,
+      "transcript": "a curious student asked the librarian whether the new science books would arrive before friday",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-003--af_heart",
+      "audioSha256": "3a1d093b0f260533374adc6a29b169edb3607d73e56b64b39561f97a0df224d7",
+      "seconds": 5.15,
+      "transcript": "please leave the blue folder beside the computer and close the office door when you finish",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-003--af_bella",
+      "audioSha256": "c76f6c409ed4cc218510d6fa223ad98c1ed84a46f54aea37a01d4deabb37784a",
+      "seconds": 5.35,
+      "transcript": "please leave the blue folder beside the computer and close the office door when you finish",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-003--am_michael",
+      "audioSha256": "928a5f03b8708e1be0817f5eaa0d70a29349044ff962fb671e2fd4d9d8bd5f93",
+      "seconds": 6.15,
+      "transcript": "please leave the blue folder beside the computer and close the office door when you finish",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-003--am_puck",
+      "audioSha256": "334422b0551eec15d54049af07b561d878c3a06d0d69d2e41dc80d216959a647",
+      "seconds": 5.2,
+      "transcript": "please leave the blue folder beside the computer and close the office door when you finish",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-004--af_heart",
+      "audioSha256": "67acb4b1423c613f875523b68dec42227cc4b44e2fef5cae5e712b40a2caa2a7",
+      "seconds": 6.1,
+      "transcript": "our neighborhood garden produces fresh tomatoes sweet peppers and enough herbs for every one to share",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-004--af_bella",
+      "audioSha256": "4e9b5492fd6ba31b370dffe906629f89f5243566357789bf2b227c9b2729ae99",
+      "seconds": 6.6,
+      "transcript": "our neighborhood garden produces fresh tomatoes sweet peppers and enough herbs for every one to share",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-004--am_michael",
+      "audioSha256": "3546d36e9c0ea705f6a30c81ced13fa73bd6023fc67e7ff0aff17886efd8c447",
+      "seconds": 7.075,
+      "transcript": "our neighborhood garden produces fresh tomatoes sweet peppers and enough herbs for every one to share",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-004--am_puck",
+      "audioSha256": "1339f9a8bafa2607cfccc15ea851c7a05642c266dc5c3d41f9e7758119763962",
+      "seconds": 5.925,
+      "transcript": "our neighborhood garden produces fresh tomatoes sweet peppers and enough herbs for every one to share",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-005--af_heart",
+      "audioSha256": "7ff4fe9528173aaf3a434ca600ff3dddd34dd60da51afb3baa877687b1b9354a",
+      "seconds": 5.7,
+      "transcript": "michael checked the weather forecast before choosing a comfortable jacket for the walk across town",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-005--af_bella",
+      "audioSha256": "479645548be82621b37765b311bc0f768ec4aca4bfdf9ace175193c33fcdb854",
+      "seconds": 6.05,
+      "transcript": "michael checked the weather forecast before choosing a comfortable jacket for the walk across town",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-005--am_michael",
+      "audioSha256": "f47ae38ce29907b17fcaa5c143c2078fbb35629bce49196af130255b2847e41b",
+      "seconds": 6.325,
+      "transcript": "michael checked the weather forecast before choosing a comfortable jacket for the walk across town",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-005--am_puck",
+      "audioSha256": "b28aea6b880f3dc24da2526be071e610422b84099563bbbc8d588fbdaeedacde",
+      "seconds": 5.75,
+      "transcript": "michael checked the weather forecast before choosing a comfortable jacket for the walk across town",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-006--af_heart",
+      "audioSha256": "23897cba9d53ef0f2fc93c778e60ffd3688370ab75d2ff445ee9b75c2c83dc2e",
+      "seconds": 5.925,
+      "transcript": "the young musician practised a difficult rhythm until every note sounded clear and confident",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-006--af_bella",
+      "audioSha256": "8de50de515887f62b8a4f0a4a9139e627544b53ffa17311d89a4fffdbab50613",
+      "seconds": 6.25,
+      "transcript": "the young musician practised a difficult rhythm until every note sounded clear and confident",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-006--am_michael",
+      "audioSha256": "75034592a0c776c868854d059bf80441d54a57375c6801224e6af545c576cd58",
+      "seconds": 6.45,
+      "transcript": "the young musician practised a difficult rhythm until every note sounded clear and confident",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-006--am_puck",
+      "audioSha256": "fccf32793ba45c3d8a23223f52ddfc9768fe64fbb7f0ebe28e459a1996b1cbdc",
+      "seconds": 5.85,
+      "transcript": "the young musician practised a difficult rhythm until every note sounded clear and confident",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-007--af_heart",
+      "audioSha256": "b0988cba3421abcb0d4deb78d11b47d93c08fb11712766128021ab4f669387f1",
+      "seconds": 6.2,
+      "transcript": "several volunteers gathered near the station to discuss a practical solution to the traffic problem",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-007--af_bella",
+      "audioSha256": "072e7126e1a8fb104f085dded9a0a9d52e6626125ea0ac459a50ec2433478266",
+      "seconds": 6.5,
+      "transcript": "several volunteers gathered near the station to discuss a practical solution to the traffic problem",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-007--am_michael",
+      "audioSha256": "ba22baf1660659011c192838d2902c330c76a80db4b45e21c54857ddb3d9891e",
+      "seconds": 7.05,
+      "transcript": "several volunteers gathered near the station to discuss a practical solution to the traffic problem",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-007--am_puck",
+      "audioSha256": "c6e508afdb58b0b76852fc16a31f8ab761b0d19e8f8049722030ed37bd60c6ea",
+      "seconds": 6.025,
+      "transcript": "several volunteers gathered near the station to discuss a practical solution to the traffic problem",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-008--af_heart",
+      "audioSha256": "3f4d4092421e5dec7ef0cec073a74aee67acb7b5234398daea52d821acc839d4",
+      "seconds": 5.875,
+      "transcript": "after a quiet dinner rachel described the beautiful mountains she had visited during her vacation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-008--af_bella",
+      "audioSha256": "eb4e0f4def73dfa916146602cb8a9d281f0558ff1bebac363bf75358bce93937",
+      "seconds": 6.25,
+      "transcript": "after a quiet dinner rachel described the beautiful mountains she had visited during her vacation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-008--am_michael",
+      "audioSha256": "ffc8c5f973fc630c485d77f10bd3932c02a33cde95a0ffbe088c736d379c52e5",
+      "seconds": 6.6,
+      "transcript": "after a quiet dinner rachel described the beautiful mountains she had visited during her vacation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-008--am_puck",
+      "audioSha256": "9f7059cb874d74b8de088efb37108184ac62648c376615a09aa56e75c8156559",
+      "seconds": 5.592,
+      "transcript": "after a quiet dinner rachel described the beautiful mountains she had visited during her vacation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-009--af_heart",
+      "audioSha256": "321046463a9227ed2567b74b5f463db493736a8d3cec21a15fa517e16fb41e03",
+      "seconds": 5.85,
+      "transcript": "the friendly mechanic explained why the engine needed a small adjustment before the journey",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-009--af_bella",
+      "audioSha256": "82c66bca635995532264d01abaf9bfd15499f04826d576067cd9385fd24ec0ea",
+      "seconds": 6.125,
+      "transcript": "the friendly mechanic explained why the engine needed a small adjustment before the journey",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-009--am_michael",
+      "audioSha256": "654e6a5dd704792c3d0ef60ffded74459444f0fe2f52317c25a344dc6dcd11dd",
+      "seconds": 6.225,
+      "transcript": "the friendly mechanic explained why the engine needed a small adjustment before the journey",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-009--am_puck",
+      "audioSha256": "c45574e6bced1fce1aa76c57fa2137fe9987e628ddefb107760eae8bea9f8c90",
+      "seconds": 5.725,
+      "transcript": "the friendly mechanic explained why the engine needed a small adjustment before the journey",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-010--af_heart",
+      "audioSha256": "b8bffa4820404e2f55d800b96f67776a425d5ca3549addf113c33cff701b04aa",
+      "seconds": 5.775,
+      "transcript": "we should compare the available information before making a decision about the research project",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-010--af_bella",
+      "audioSha256": "ca0ac87fbc68d289264d3a26eac8c156a01c819e1a90f1126580902639691487",
+      "seconds": 5.85,
+      "transcript": "we should compare the available information before making a decision about the research project",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-010--am_michael",
+      "audioSha256": "85e9c92e6434d1398c7f3d0080b5dfe33c3c5f37a65f5d04909f75947b214914",
+      "seconds": 6.048,
+      "transcript": "we should compare the available information before making a decision about the research project",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-010--am_puck",
+      "audioSha256": "7f203fe4b09a7218decf9ba17d632abdf66e23781b5351b2dc6d818a1816a5fa",
+      "seconds": 5.6,
+      "transcript": "we should compare the available information before making a decision about the research project",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-011--af_heart",
+      "audioSha256": "ae9d25c3dc961703245cfd136cc98ae8d14d5a7e98fb5a8c50d89861907049a3",
+      "seconds": 5.75,
+      "transcript": "a silver airplane crossed the cloudy sky as children watched from the crowded observation deck",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-011--af_bella",
+      "audioSha256": "b3c502646e3b57c38c7ae7201df1da9ae3bd1facb56794a1e424a4fcea6fa1fc",
+      "seconds": 6.15,
+      "transcript": "a silver airplane crossed the cloudy sky as children watched from the crowded observation deck",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-011--am_michael",
+      "audioSha256": "6c5fbe69d631df0369d0ce63e98390979e38394db304e13d21a76370eb17da10",
+      "seconds": 6.45,
+      "transcript": "a silver airplane crossed the cloudy sky as children watched from the crowded observation deck",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-011--am_puck",
+      "audioSha256": "06084dea0ae2805ff1e6d8dbe330ef87ff8b4b2c5fba7383867b8549d929bba9",
+      "seconds": 5.85,
+      "transcript": "a silver airplane crossed the cloudy sky as children watched from the crowded observation deck",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-012--af_heart",
+      "audioSha256": "580ce9831e449146cf61f20cdca35f74bb76863fb2482b20c182efef0b428d1e",
+      "seconds": 6.35,
+      "transcript": "the teacher encouraged her students to explain their answers using simple words and complete sentences",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-012--af_bella",
+      "audioSha256": "8eae71396e89eacde051c0997c4ac9922ee60737991984a927916cf8e43334e6",
+      "seconds": 6.775,
+      "transcript": "the teacher encouraged her students to explain their answers using simple words and complete sentences",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-012--am_michael",
+      "audioSha256": "0c27c0189aa80467af045a8952e48262b6973fae6783e383ee123d70a33cd543",
+      "seconds": 6.925,
+      "transcript": "the teacher encouraged her students to explain their answers using simple words and complete sentences",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-012--am_puck",
+      "audioSha256": "3a38832f13a425b7b97ceea2524d1382e8eaf05658f957713411d131a2ea7add",
+      "seconds": 6.25,
+      "transcript": "the teacher encouraged her students to explain their answers using simple words and complete sentences",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-013--af_heart",
+      "audioSha256": "f82fa82a8307e6ef0c94e84581ba67584c2b8e21e9c147e0f8e7ea29b8bd7b9e",
+      "seconds": 4.875,
+      "transcript": "some one left a pair of yellow gloves on the wooden bench outside the community centre",
+      "wordErrorRate": 0.2,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-013--af_bella",
+      "audioSha256": "3c6a921bdac34271d8f042685ebf3cdc1328c3a43db4787ed4a597f8344ec1d1",
+      "seconds": 5.325,
+      "transcript": "some one left a pair of yellow gloves on the wooden bench outside the community centre",
+      "wordErrorRate": 0.2,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-013--am_michael",
+      "audioSha256": "91963e88f5c7eb5a65859201af6ea0d86d36d0b516ef45daf92e2e77fc09d821",
+      "seconds": 5.625,
+      "transcript": "some one left a pair of yellow gloves on the wooden bench outside the community centre",
+      "wordErrorRate": 0.2,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-013--am_puck",
+      "audioSha256": "3659383d639cd49f75b40e326efe7372143a7fccd3904a0e6f358fb97bc9ec83",
+      "seconds": 5.05,
+      "transcript": "someone left a pair of yellow gloves on the wooden bench outside the community centre",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-014--af_heart",
+      "audioSha256": "359bab9794984d9052d5a402755e8abe2eed3b6c52bcfa470973ebded4a036b4",
+      "seconds": 5.05,
+      "transcript": "david usually drinks a glass of water before taking a short walk through the park",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-014--af_bella",
+      "audioSha256": "bd7407b0e367e45650d7a952975bbaba95edeb610ce9909a1e0d24ac8b8d6dfa",
+      "seconds": 5.4,
+      "transcript": "david usually drinks a glass of water before taking a short walk through the park",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-014--am_michael",
+      "audioSha256": "4961ae46175dd8e6c3f18b273df5f47d1e8b986b2866d89596825eca0b38eb77",
+      "seconds": 5.85,
+      "transcript": "david usually drinks a glass of water before taking a short walk through the park",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-014--am_puck",
+      "audioSha256": "83d2c9b4f0f931084e52d1f998f39104739c5498a7a0cf2abea1e836efa2e131",
+      "seconds": 4.875,
+      "transcript": "david usually drinks a glass of water before taking a short walk through the park",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-015--af_heart",
+      "audioSha256": "11a174136133a6fadc955732a86ba469dc6c97419e54b4c46c0b608a360d0230",
+      "seconds": 5.7,
+      "transcript": "the little bakery on the corner cells warm bread fresh cookies and delicious apple pies",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-015--af_bella",
+      "audioSha256": "f4229c48bed5c7d8a1e95b642ec9de3ff5fdacb69e09b75814bf2ce856401a9b",
+      "seconds": 6.175,
+      "transcript": "the little bakery on the corner cells warm bread fresh cookies and delicious apple pies",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-015--am_michael",
+      "audioSha256": "e6ff0a88a2e8e855ef7a56f677e743e1bba5d2951d4d302b4ee6bd7b918f7087",
+      "seconds": 6.5,
+      "transcript": "the little bakery on the corner cells warm bread fresh cookies and delicious apple pies",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-015--am_puck",
+      "audioSha256": "f5d10070683f1a87b53b41d2ac6c80b4c4e531d9c61f3d01b0430f9205397d28",
+      "seconds": 5.6,
+      "transcript": "the little bakery on the corner cells warm bread fresh cookies and delicious apple pies",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-016--af_heart",
+      "audioSha256": "7edd14cfa798b6490006712c9a6a6208ab611935b4a22f12d813ccbd787a565d",
+      "seconds": 6.35,
+      "transcript": "an experienced engineer inspected the bridge carefully and recorded each measurement in a small note book",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-016--af_bella",
+      "audioSha256": "44a395501fad845c50f07ec5aa483d2ba139ca006d601feaceca821c6c7e1e73",
+      "seconds": 6.825,
+      "transcript": "an experienced engineer inspected the bridge carefully and recorded each measurement in a small note book",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-016--am_michael",
+      "audioSha256": "9dcf096efa1b83633d221c172ad8f17a36b95c7c3743c57c94af2217a130fa26",
+      "seconds": 7.075,
+      "transcript": "an experienced engineer inspected the bridge carefully and recorded each measurement in a small note book",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-016--am_puck",
+      "audioSha256": "7346ed7091246c643251b871981dfdd1e9f7f5a046effebbea4479c398d164c7",
+      "seconds": 6.475,
+      "transcript": "an experienced engineer inspected the bridge carefully and recorded each measurement in a small note book",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-017--af_heart",
+      "audioSha256": "aef419f12cc964107d879d859239f3ed79ec5d0d82bbe1a13c60cea29119ad8d",
+      "seconds": 6.35,
+      "transcript": "during the afternoon meeting amanda suggested a different approach to organizing the annual festival",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-017--af_bella",
+      "audioSha256": "cd6bf57cb18c43b0a9600db74a23940a99aad7d9361e8901e588254165a47b4c",
+      "seconds": 6.475,
+      "transcript": "during the afternoon meeting a manda suggested a different approach to organizing the annual festival",
+      "wordErrorRate": 0.14285714285714285,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-017--am_michael",
+      "audioSha256": "aaa8d096bf88ca144911f221eb137fecbf1aad6cb2900ed0610c6e4aeeed03ea",
+      "seconds": 6.9,
+      "transcript": "during the afternoon meeting amande suggested a different approach to organizing the annual festival",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-017--am_puck",
+      "audioSha256": "91354bb82460f7f8f7b481eff860b96d04775bf0820ccb806663f83b1a9e45f8",
+      "seconds": 6.325,
+      "transcript": "during the afternoon meeting amanda suggested a different approach to organizing the annual festival",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-018--af_heart",
+      "audioSha256": "4c0502614bb286f079da32c91d0ad317c6b47d71d8132c9ce21fa255ee17eef7",
+      "seconds": 6.175,
+      "transcript": "the museum guide pointed toward an unusual painting and explained the story behind its creation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-018--af_bella",
+      "audioSha256": "5a582fa30ae1a01a654dc0050de662117ad060335344d6a036501f691a284a8f",
+      "seconds": 6.8,
+      "transcript": "the museum guide pointed toward an unusual painting and explained the story behind its creation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-018--am_michael",
+      "audioSha256": "11825fcf713a7e4875bc17c6cfe11340a03ac66452c7707d846ded4ebe16aa78",
+      "seconds": 6.95,
+      "transcript": "the museum guide pointed toward an unusual painting and explained the story behind its creation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-018--am_puck",
+      "audioSha256": "4cbad3a3dc517401915dfa830864c012cf2d576b52c4ef26a082f44f4c60d31e",
+      "seconds": 6.175,
+      "transcript": "the museum guide pointed toward an unusual painting and explained the story behind its creation",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-019--af_heart",
+      "audioSha256": "29d4dce2e843654581d821124a4170818d6e2f1bb604043bfc6e25a12dfcd033",
+      "seconds": 5.7,
+      "transcript": "every participant received a printed schedule with clear directions to the main conference room",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-019--af_bella",
+      "audioSha256": "330469045f2594f2e338fa0c89c4c9dc046bff410da0cf4afa97d1e3978f144f",
+      "seconds": 6.1,
+      "transcript": "every participant received a printed schedule with clear directions to the main conference room",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-019--am_michael",
+      "audioSha256": "79d4828ee8d057f94958862908af1f0fe56c5cb4aa785a2a7cf8fe63df0bafb0",
+      "seconds": 6.425,
+      "transcript": "every participant received a printed schedule with clear directions to the main conference room",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-019--am_puck",
+      "audioSha256": "0a96d06d5a3e7a569be8d512d0b5fc756a4ffe596ec08983406869eb19a3aa13",
+      "seconds": 5.65,
+      "transcript": "every participant received a printed schedule with clear directions to the main conference room",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-020--af_heart",
+      "audioSha256": "240c6d23991bc49b6434e073be17e0712462cc32fd814a2d475449b295355c61",
+      "seconds": 5.075,
+      "transcript": "a gentle breeze moved through the branches while the neighbors enjoyed their lunch outside",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-020--af_bella",
+      "audioSha256": "a429b60188b463dfe67756a882f9bd11e01baeb537c16bd51345d2dfb0540fc8",
+      "seconds": 5.425,
+      "transcript": "a gentle breeze moved through the branches while the neighbors enjoyed their lunch outside",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-020--am_michael",
+      "audioSha256": "ae86cecb8da0c947cb627b33fc5834882de08ac76c2477f9acaa889c194073e7",
+      "seconds": 5.8,
+      "transcript": "a gentle breeze moved through the branches while the neighbors enjoyed their lunch outside",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-020--am_puck",
+      "audioSha256": "f13b5ab5724271e7db7acb9ae0045906e6b8014a8db2ecd72975df37edbdaa54",
+      "seconds": 5.025,
+      "transcript": "a gentle breeze moved through the branches while the neighbors enjoyed their lunch outside",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-021--af_heart",
+      "audioSha256": "41330b48e41ae8a9a8c60b15fd1586e2cec09bd91839a2fb3a53b46f808ed6cd",
+      "seconds": 5.875,
+      "transcript": "the photographer waited patiently for the perfect moment to capture the colorful birds in flight",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-021--af_bella",
+      "audioSha256": "499c15a27d18e97f998b162655f354f6bad6d8719c2ae80b3565c436260928e5",
+      "seconds": 6.325,
+      "transcript": "the photographer waited patiently for the perfect moment to capture the colorful birds in flight",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-021--am_michael",
+      "audioSha256": "90c5b6718221aef89411e226d80457825b3254c82708e9da063e6156a6d6a8d0",
+      "seconds": 6.6,
+      "transcript": "the photographer waited patiently for the perfect moment to capture the colorful birds in flight",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-021--am_puck",
+      "audioSha256": "425fe593a6e03d27b92589dbf743d29bb7863550d3d07f85c584cb0f3c4ca4f0",
+      "seconds": 5.625,
+      "transcript": "the photographer waited patiently for the perfect moment to capture the colorful birds in flight",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-022--af_heart",
+      "audioSha256": "dbf45441597c4fda8c9ccdae42ab79fe9f62af94c3d96939ed51c68e6fa9f42c",
+      "seconds": 5.4,
+      "transcript": "my brother borrowed a bicycle yesterday because his car was being repaired at the garage",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-022--af_bella",
+      "audioSha256": "9aac3b7bcaff3c153028f2b31fa40f39aacb5eaa2d8b9450c4ca388b662e9e04",
+      "seconds": 5.65,
+      "transcript": "my brother borrowed a bicycle yesterday because his car was being repaired at the garage",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-022--am_michael",
+      "audioSha256": "0f5212ed8bc80485ee41ba373b6133fa09178150987111e7ef9027025a4fc8fd",
+      "seconds": 6.025,
+      "transcript": "my brother borrowed a bicycle yesterday because his car was being repaired at the garage",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-022--am_puck",
+      "audioSha256": "96a8d6727427ac9166946f7866886c84e3e4199965241c591636d9d2aa15a12c",
+      "seconds": 5.4,
+      "transcript": "my brother borrowed a bicycle yesterday because his car was being repaired at the garaghe",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-023--af_heart",
+      "audioSha256": "3976d217dea24eca1932f515072385e732056dac8d680a228a0c2101e96d0e2e",
+      "seconds": 6.75,
+      "transcript": "the doctor recommended regular exercise balanced meals and enough sleep to support a healthy routine",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-023--af_bella",
+      "audioSha256": "ec67a4f78f7839f8bc344e9baaaa73bd369ddd9b0d8505192bb1a94ce09c4854",
+      "seconds": 7.125,
+      "transcript": "the doctor recommended regular exercise balanced meals and enough sleep to support a healthy routine",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-023--am_michael",
+      "audioSha256": "a99d81902020ba8c0a1836be5c0364407df889c3c1c944e0f4628c8c39fa96ec",
+      "seconds": 7.425,
+      "transcript": "the doctor recommended regular exercise balanced meals and enough sleep to support a healthy routine",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-023--am_puck",
+      "audioSha256": "0c593d49e3105fd55d9faa912bc2887d81ecc0925ee6b64628502a1dabe55578",
+      "seconds": 6.5,
+      "transcript": "the doctor recommended regular exercise balanced meals and enough sleep to support a healthy routine",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-024--af_heart",
+      "audioSha256": "c7176b1547cec0de3ff0e54e974a3bd1e0d03ccf896dc09cec6f9f916ff5f13a",
+      "seconds": 5.925,
+      "transcript": "across the river a narrow path leads visitors toward a peaceful village surrounded by trees",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-024--af_bella",
+      "audioSha256": "5e2c5d8f39f3632aabbaa693f7a70d5a74b3651c8e247368c161c40428fac1d8",
+      "seconds": 6.175,
+      "transcript": "across the river a narrow path leads visitors toward a peaceful village surrounded by trees",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-024--am_michael",
+      "audioSha256": "7650ad4530a2740aa51ad00d40c49aeab0c1562bff9dbdbeb9c81116693a8d82",
+      "seconds": 6.325,
+      "transcript": "across the river a narrow path leads visitors toward a peaceful village surrounded by trees",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-024--am_puck",
+      "audioSha256": "a8fe4e109af2612ed72133cf86767aade98cdef97264f3f6e9b5a610d1d46966",
+      "seconds": 5.775,
+      "transcript": "across the river a narrow path leads visitors toward a peaceful village surrounded by trees",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-025--af_heart",
+      "audioSha256": "d99138e47cffd91cc13f8deadfe14b5ead5e306455aa36d07c5db1448a56df0f",
+      "seconds": 5.975,
+      "transcript": "before submitting the application check that your address and telephone number are written correctly",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-025--af_bella",
+      "audioSha256": "db47443dd6f293adf1234bb085c20e9edba11c848962b5fd87a96ac3350fe38a",
+      "seconds": 6.3,
+      "transcript": "before submitting the application check that your address and telephone number are written correctly",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-025--am_michael",
+      "audioSha256": "a1a942902d8a228d5f2ee53b42ee70eada6a93768c143bb1d7ae8d1aea9f529b",
+      "seconds": 6.312,
+      "transcript": "before submitting the application check that your address and telephone number are written correctly",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-025--am_puck",
+      "audioSha256": "012ee9fa4d7897a2e1b67b74927f631f41c2b5689b2f75f63446bf936d50af91",
+      "seconds": 5.9,
+      "transcript": "before submitting the application check that your address an telephone number are written correctly",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-026--af_heart",
+      "audioSha256": "89d03099a84e071b356b61a4215d6e7b331550b9bd4406cb3063ad012c85d6f5",
+      "seconds": 5.825,
+      "transcript": "the manager thanked the entire team for completing such a challenging assignment ahead of schedule",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-026--af_bella",
+      "audioSha256": "162624b79ac1a12c69061d330d98ab3bbd7a94b0bf3ccebda0b919adaeb9b028",
+      "seconds": 6.0,
+      "transcript": "the manager thanked the entire team for completing such a challenging assignment ahead of schedule",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-026--am_michael",
+      "audioSha256": "2796a089f39a96cec6ffe8425391d1e8ce32fd4b46b42fc90f8d42c67d46f1d2",
+      "seconds": 6.375,
+      "transcript": "the manager thanked the entire team for completing such a challenging assignment ahead of schedule",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-026--am_puck",
+      "audioSha256": "162c1ffe94a1ec7b8ee041a1871631f72c757534ea5684dbe6618cc64651d126",
+      "seconds": 5.7,
+      "transcript": "the manager thanked the entire team for completing such a challenging assignment ahead of schedule",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-027--af_heart",
+      "audioSha256": "5df42217291504ecff93491377d129caf2e9cd0c17d0a5a60fc199b8d080acf4",
+      "seconds": 3.95,
+      "transcript": "we heard a sudden knock at the door just as the evening news began",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-027--af_bella",
+      "audioSha256": "62f31415e869886434b35027da1f8914aafe050f21a07d1245f92a9d0010aaf7",
+      "seconds": 4.4,
+      "transcript": "we heard a sudden knock at the door just as the evening news began",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-027--am_michael",
+      "audioSha256": "cfc3aeb615d7c7bfdd0458a18b20435ecb97b94bfff5843d2746bb0486efecc5",
+      "seconds": 4.7,
+      "transcript": "we heard a sudden knock at the door just as the evening news began",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-027--am_puck",
+      "audioSha256": "0b2a740e7f90574e6e9fbb14f782f98cc301045063456c75aec998f15ced3f50",
+      "seconds": 3.975,
+      "transcript": "we heard a sudden knock at the door just as the evening news began",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-028--af_heart",
+      "audioSha256": "cfdc9e94f9511e070157c1707dcfea50b18c8a8b4c70bbd5681a17b1ee3acae6",
+      "seconds": 6.2,
+      "transcript": "a thoughtful question can encourage a conversation and help people understand another point of view",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-028--af_bella",
+      "audioSha256": "16ac352f45f9633d3733aa563d0da0cd610a8c706ad6ac8f560a20a0befe0616",
+      "seconds": 6.575,
+      "transcript": "a thoughtful question can encourage a conversation and help people understand another point of view",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-028--am_michael",
+      "audioSha256": "9e778f9bf3260f4f0889fb22630ddf2a61092dba8d8e939228ae5397ad87b514",
+      "seconds": 6.75,
+      "transcript": "a thoughtful question can encourage a conversation and help people understand another point of view",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-028--am_puck",
+      "audioSha256": "96dc1f3f8aaf1b6f68a46f2386ec5307e012ca131577a7ce3e547ea9bc2a021a",
+      "seconds": 6.025,
+      "transcript": "a thoughtful question can encourage a conversation and help people understand another point of view",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-029--af_heart",
+      "audioSha256": "03cb17571d0cf25c44e739ca51a179b4dcdc042bc1944397801e7d63cf382b68",
+      "seconds": 5.9,
+      "transcript": "the restaurant serves grilled vegetables with brown rice and a refreshing glass of lemon water",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-029--af_bella",
+      "audioSha256": "b06197976f3631d826f7ffa922f569e77e7c87917aa0958274e2bcbe31471c94",
+      "seconds": 6.2,
+      "transcript": "the restaurant serves grilled vegetables with brown rice and a refreshing glass of lemon water",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-029--am_michael",
+      "audioSha256": "cfb8892d104eebe798bd8b4de305ad2a39d7a2e2780314b9a7973a9a24b6d729",
+      "seconds": 6.425,
+      "transcript": "the restaurant serves grilled vegetables with brown rice and a refreshing glass of lemon water",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-029--am_puck",
+      "audioSha256": "ceb0e585663a80ab57f9385b14b805dd0910a0b3e36b7bf5fab7707f1aeb269b",
+      "seconds": 5.95,
+      "transcript": "the restaurant serves grilled vegetables with brown rice and a refreshing glass of lemon water",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-030--af_heart",
+      "audioSha256": "31b91dca77400eceef439c483dcc4c6156fb070037a7925311ace670cff2cfb7",
+      "seconds": 4.475,
+      "transcript": "our train arrived early so we had plenty of time to explore the station",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-030--af_bella",
+      "audioSha256": "270c923cdfcf1c9a673342295352378932bdf30fb9caf7eb1893cd9c1a5db2df",
+      "seconds": 4.825,
+      "transcript": "our train arrived early so we had plenty of time to explore the station",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-030--am_michael",
+      "audioSha256": "295e10d18c601c6b04dfdbf0e9cb42165bd4295e560d1971c22f3ce42e2111a7",
+      "seconds": 5.25,
+      "transcript": "our train arrived early so we had plenty of time to explore the station",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-030--am_puck",
+      "audioSha256": "383f2dafa0bf753ccf6a7ed3cca9287d661b58a72a804b5d61b89c71dcfd7a3d",
+      "seconds": 4.4,
+      "transcript": "our train arrived early so we had plenty of time to explore the station",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-031--af_heart",
+      "audioSha256": "6b557877061fecb520b406c7a13790a9d8cad4846edcc5d58a55f148c7f4edfc",
+      "seconds": 5.75,
+      "transcript": "the scientist placed the sample inside a transparent container and observed the gradual change",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-031--af_bella",
+      "audioSha256": "0ed4cced205cbedbca2de35922e6b0270000b3906a31c99125f382b4998d43b0",
+      "seconds": 6.225,
+      "transcript": "the scientist placed the sample inside a transparent container and observed the gradual change",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-031--am_michael",
+      "audioSha256": "10fa573b59924f5f44757650215188dbbf1ae80e67b635355161066ba307e42b",
+      "seconds": 6.5,
+      "transcript": "the scientist placed the sample inside a transparent container and observe the gradual change",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-031--am_puck",
+      "audioSha256": "1db48f72d1519f1fa7bf9bc2f554f11c7be4a6a6e470eff9bace9fd83ecb04c9",
+      "seconds": 5.825,
+      "transcript": "the scientist placed the sample inside a transparent container and observe the gradual change",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-032--af_heart",
+      "audioSha256": "fed052f1496205dce7590c573355347e3659c8c62180de8b25c68dd52253b0e2",
+      "seconds": 5.675,
+      "transcript": "she chose a bright purple note book to keep track of important ideas and useful expressions",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-032--af_bella",
+      "audioSha256": "6da3f6cc6c99d128d2393122b79aba0cce379dd61f6a3ad5dea3b8a54fc1f0e4",
+      "seconds": 6.225,
+      "transcript": "she chose a bright purple note book to keep track of important ideas and useful expressions",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-032--am_michael",
+      "audioSha256": "5786a20044c000d09fc9134edb4076ae82e7c699cca6cc5e6160e2d2151ba23d",
+      "seconds": 6.3,
+      "transcript": "she chose a bright purple note book to keep track of important ideas and useful expressions",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-032--am_puck",
+      "audioSha256": "49fe1c0eea589f00bbb7aecbbf4b212f674ddc34214d1cbbe347674e3587e991",
+      "seconds": 5.65,
+      "transcript": "she chose a bright purple note book to keep track of important ideas and useful expressions",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-033--af_heart",
+      "audioSha256": "5eabf4e87945ae2a65e21c0bee25151d4716911bb7fd9f86620dcbff94c4c068",
+      "seconds": 5.95,
+      "transcript": "the audience remained silent as the actor delivered the final sentence of the dramatic speech",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-033--af_bella",
+      "audioSha256": "9b8fd374e8b02b300e6918b482ab62289fdb83dcb00d9147ce1eb3c97c4e5454",
+      "seconds": 6.2,
+      "transcript": "the audience remained silent as the actor delivered the final sentence of the dramatic speech",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-033--am_michael",
+      "audioSha256": "0b064f6953bb31d8aaab341840f27869cb698c037cc2ae08bbcc1ff135392b4b",
+      "seconds": 6.525,
+      "transcript": "the audience remained silent as the actor delivered the final sentence of the dramatic speech",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-033--am_puck",
+      "audioSha256": "f35b6b615809f4cf80fe7cf8cbb278fb2449f8b0505d7c5e9382a989398fc991",
+      "seconds": 5.85,
+      "transcript": "the audience remained silent as the actor delivered the final sentence of the dramatic speech",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-034--af_heart",
+      "audioSha256": "352ace05b32f9eb67a82b2769b413dcea975fdfb3f6f3ef322a49face442a3f6",
+      "seconds": 5.7,
+      "transcript": "a small wooden boat floated beside the shore while fishermen prepared their equipment for to morrow",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-034--af_bella",
+      "audioSha256": "454ff55e8ae2481ddfe2876af72bcbd140167248b396effd5b4dc24fec272080",
+      "seconds": 6.125,
+      "transcript": "a small wooden boat floated beside the shore while fishermen prepared their equipment for to morrow",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-034--am_michael",
+      "audioSha256": "2c6f7ad091a6f744310b86da45343ac49feff85317e49f89bf7bf4700fb3f263",
+      "seconds": 6.475,
+      "transcript": "a small wooden boat floated beside the shore while fishermen prepared their equipment for to morrow",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-034--am_puck",
+      "audioSha256": "b0b0badafa35e95109ff5bfd70e88b4257b37974f6685676cdf424b674c63d70",
+      "seconds": 5.85,
+      "transcript": "a small wooden boat floated beside the shore while fishermen prepared their equipment for to morrow",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-035--af_heart",
+      "audioSha256": "f8998f673980fcb3a856551b7b721caa7dd8f46048d511a2b1a27c24f5c0ba41",
+      "seconds": 6.475,
+      "transcript": "you can improve your pronunciation by listening carefully and repeating short phrases at a natural pace",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-035--af_bella",
+      "audioSha256": "04a890a59c5d75b9910aeff1c58b27cb57abca7d2d00ff65c2cb80675f23aa29",
+      "seconds": 6.775,
+      "transcript": "you can improve your pronunciation by listening carefully and repeating short phrases at a natural pace",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-035--am_michael",
+      "audioSha256": "270c5d28726b9621f7e51c9395ac0501e31dac0ae05a06ca49cb101d9f02e3ea",
+      "seconds": 7.55,
+      "transcript": "you can improve your pronunciation by listening carefully and repeating short phrases at a natural pace",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-035--am_puck",
+      "audioSha256": "da7a5c42121407e8c31d6e505f21d20eadf00114a7b8d24c989e09588903021f",
+      "seconds": 6.225,
+      "transcript": "you can improve your pronunciation by listening carefully and repeating short phrases at a natural pace",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-036--af_heart",
+      "audioSha256": "e7d134b5d3693ef88befd58a36d263a591f16578f676ed238f04d31161d777a7",
+      "seconds": 6.225,
+      "transcript": "the software update includes several useful features that make everyday tasks easier to complete",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-036--af_bella",
+      "audioSha256": "46caffeeb98d2053b5e7fcf1ea5d6b6cdc63254a44911193344ba069962c556b",
+      "seconds": 6.875,
+      "transcript": "the soft ware update includes several useful features that make everyday tasks easier to complete",
+      "wordErrorRate": 0.14285714285714285,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-036--am_michael",
+      "audioSha256": "6efd21927ff62efdd94f22dd254365abf5976b4afa769fb69d7b36fd837e9fa0",
+      "seconds": 6.975,
+      "transcript": "the soft ware update includes several useful features that make everyday tasks easier to complete",
+      "wordErrorRate": 0.14285714285714285,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-036--am_puck",
+      "audioSha256": "480c5f933b293bdeeac73b321d9d62aa74450c79fe8251f0fbcc2435d80f7be8",
+      "seconds": 6.225,
+      "transcript": "the software update includes several useful features that make every day tasks easier to complete",
+      "wordErrorRate": 0.14285714285714285,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-037--af_heart",
+      "audioSha256": "194d72b378be127b0791da888706ce9ab2db9bc40d71cd02a9bcc250bc09a648",
+      "seconds": 6.05,
+      "transcript": "at the farmers market customers discussed the difference between local peaches and imported fruit",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-037--af_bella",
+      "audioSha256": "131f91c160769fd346e396c8c4e6029587d5b96941578ffc7ce68225e85acefe",
+      "seconds": 6.4,
+      "transcript": "at the farmers market customers discussd the difference between local peaches and imported fruit",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-037--am_michael",
+      "audioSha256": "67956b18c89abba4a5eef43a09a48c31377ba721ade245e74ccbaade52be4abf",
+      "seconds": 6.475,
+      "transcript": "at the farmer's market customers discussed the difference between local peaches and imported fruit",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-037--am_puck",
+      "audioSha256": "0410a81aeb1b08c313cd446e3b72b84413f113a02357857abbebe79c1b8cfe95",
+      "seconds": 6.0,
+      "transcript": "at the farmers market customers discussed the difference between local peaches and imported fruit",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-038--af_heart",
+      "audioSha256": "1851799b4599e9bcd0568224962e1c63e4675c8058341b3c45571fb8acd19f1c",
+      "seconds": 6.725,
+      "transcript": "the children built an impressive castle using cardboard boxes colored paper and a little imagination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-038--af_bella",
+      "audioSha256": "021c224cf02b045e7eb10adc07c8ceac3413765e61dbf82bdd2200a872ac58cd",
+      "seconds": 7.15,
+      "transcript": "the children built an impressive castle using cardboard boxes colored paper and a little imagination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-038--am_michael",
+      "audioSha256": "18a5a3ec0dcaea35f71f52168ff89eff4c13f8517e1248ddf86b663eb6c3e101",
+      "seconds": 7.45,
+      "transcript": "the children built an impressive castle using cardboard boxes colored paper and a little imagination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-038--am_puck",
+      "audioSha256": "54c294073e75d7f95b39c69c62546678c9de764615e6d436f7600b0e05c97c62",
+      "seconds": 6.7,
+      "transcript": "the children built an impressive castle using cardboard boxes colored paper and a little imagination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-039--af_heart",
+      "audioSha256": "8bae5eb280ada5ad9033b0dbd28313c75cf1a0df7ede11790bfb7483d5ec090e",
+      "seconds": 4.825,
+      "transcript": "please remember to switch off the lights before leaving the building at the end of the day",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-039--af_bella",
+      "audioSha256": "8e49bfd494e44fb76401ba4db9997649d04f4475fe43aac7a10be23807e0902e",
+      "seconds": 5.0,
+      "transcript": "please remember to switch off the lights before leaving the building at the end of the day",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-039--am_michael",
+      "audioSha256": "dbfdc6dca3b36c43e29a42e639fa45f7b7a3c80721a0f90ead7fd07ca04f7173",
+      "seconds": 5.55,
+      "transcript": "please remember to switch off the lights before leaving the building at the end of the day",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-039--am_puck",
+      "audioSha256": "c9ac8297aa1e83662c612a4ee057076d0be1ebe66f680b1e754026de14664197",
+      "seconds": 4.488,
+      "transcript": "please remember to switch off the lights before leaving the building at the end of the day",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-040--af_heart",
+      "audioSha256": "f0b553bac67df0452acdff621567ab71ee6a6d552ab4d2fd12fd44f63c020301",
+      "seconds": 5.175,
+      "transcript": "the mountain trail becomes steeper after the first mile but the view is worth the effort",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-040--af_bella",
+      "audioSha256": "a9feff67b821fa63dae74eaf6beb34d30054e2bb6f7640d7176af5533d9bede4",
+      "seconds": 5.65,
+      "transcript": "the mountain trail becomes steeper after the first mile but the view is worth the effort",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-040--am_michael",
+      "audioSha256": "6ae41a2c5304b8622ba81bea149038601bb43a65e940f88a751335eb0f5a03f8",
+      "seconds": 6.05,
+      "transcript": "the mountain trail becomes steeper after the first mile but the view is worth the effort",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-040--am_puck",
+      "audioSha256": "8ebf1155a6d78141a3fa6dc87e3e591d4adc65a1113a82342576051fcc4a5639",
+      "seconds": 5.1,
+      "transcript": "the mountain trail becomes steeper after the first mile but the view is worth the effort",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-041--af_heart",
+      "audioSha256": "56f8a1c2585bc745f9c3f454df28bdb4b79d8f987ee8d41be76fb9a2e29b44d7",
+      "seconds": 7.825,
+      "transcript": "a reliable public transportation system helps residence travel safely and reduces unnecessary traffic downtown",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-041--af_bella",
+      "audioSha256": "b2ed61edff20e89063307280c2bf991cc850088b833adb1b7672575dc5186635",
+      "seconds": 8.375,
+      "transcript": "a reliable public transportation system helps residence travel safely and reduces unnecessary traffic downtown",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-041--am_michael",
+      "audioSha256": "7add4554454096ddc628d767b623709c5caf92327f03fe08cd9a10f00305fae5",
+      "seconds": 8.8,
+      "transcript": "a reliable public transportation system helps residence travel safely and reduces unnecessary traffic down town",
+      "wordErrorRate": 0.21428571428571427,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-041--am_puck",
+      "audioSha256": "d96ca7eeeb29f33770bf3c4ec3c96a512140a20b2eda7535d7321bb33c4f52be",
+      "seconds": 7.9,
+      "transcript": "a reliable public transportation system helps residence travel safely and reduces unnecessary traffic downtown",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-042--af_heart",
+      "audioSha256": "6849d4d4dcf72bb3ac9ed44dfe89d280cd00a688944fc8a57a5923af1cf074a8",
+      "seconds": 4.875,
+      "transcript": "the chef added a little butter to the pan before gently stirring the chopped onions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-042--af_bella",
+      "audioSha256": "c5a5cca0813c768e269fea4a4c59095efe7dea889cdeab1c03a1aabe0fd7409a",
+      "seconds": 5.15,
+      "transcript": "the chef added a little butter to the pan before gently stirring the chopped onions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-042--am_michael",
+      "audioSha256": "d7e2dca073b2a78f598e606f5d3013caa4187477ed36aba8c9356870d6bd9ecf",
+      "seconds": 5.575,
+      "transcript": "the chef added a little butter to the pan before gently stirring the chopped onions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-042--am_puck",
+      "audioSha256": "f54bbfedf92135426717e6b699cf9e88a135ec1749af7d98242dd78dbe819642",
+      "seconds": 4.75,
+      "transcript": "the chef added a little butter to the pan before gently stirring the chopped onions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-043--af_heart",
+      "audioSha256": "e62204e2541bd7029d839f9da1a737951a292b6ae98503c016716324911bc285",
+      "seconds": 7.6,
+      "transcript": "her presentation included a clear introduction several practical examples and a brief explanation of the results",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-043--af_bella",
+      "audioSha256": "ad27d558fcca5a49bcd06b3c58c0f9e14c112df06142581a8ca7873152d42744",
+      "seconds": 7.775,
+      "transcript": "her presentation included a clear introduction several practical examples and a brief explanation of the results",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-043--am_michael",
+      "audioSha256": "53cb3060e7da62ce68b7f249f134f3bc61a2ade2e748a0bb6ce3d2f7baf3f129",
+      "seconds": 8.184,
+      "transcript": "her presentation included a clear introduction several practical examples and a brief explanation of the results",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-043--am_puck",
+      "audioSha256": "c2e2f2e014df65b12a31469e94b90e5df86a1df8de46574ac486d585955a8ebe",
+      "seconds": 7.35,
+      "transcript": "her presentation included a clear introduction several practical examples and a brief explanation of the results",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-044--af_heart",
+      "audioSha256": "96ab636c99f2a6a5e39e837747c566255dbeb82e2fa989d6ea0d0fb92799d0f6",
+      "seconds": 6.525,
+      "transcript": "the winter storm forced the airport to delay several flights until conditions improved the following morning",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-044--af_bella",
+      "audioSha256": "f425e51b063e9ca5c2afdcea5c33c321c1fd46b970a87a9957125b73e96f91ab",
+      "seconds": 6.85,
+      "transcript": "the winter storm forced the airport to delay several flights until conditions improved the following morning",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-044--am_michael",
+      "audioSha256": "6d5aed3be37759adbd8b74fd2f98de914d5fbbd5b5db34ff678ff872594e3b37",
+      "seconds": 7.05,
+      "transcript": "the winter storm forced the airport to delay several flights until conditions improve the following morning",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-044--am_puck",
+      "audioSha256": "d2b15aa57b394960f7ff1f5216c4fb1a721f710ecd55f70834d00a81b6c0bacd",
+      "seconds": 6.5,
+      "transcript": "the winter storm forced the airport to delay several flights until conditions improved the following morning",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-045--af_heart",
+      "audioSha256": "115f83a728054935d9712bb3377d80526ffcde948568c78522ba79dee4c8983c",
+      "seconds": 5.7,
+      "transcript": "a curious puppy followed the family into the garden and discovered a tiny frog near the fountain",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-045--af_bella",
+      "audioSha256": "119c398f814146f33b4259b23e4497e9e2364e1c25008d87ca69224e239ce2c7",
+      "seconds": 6.0,
+      "transcript": "a curious puppy followed the family into the garden and discovered a tiny frog near the fountain",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-045--am_michael",
+      "audioSha256": "4dda1fc7cb7ced20d5ef23f873a7aa1f404bc7d4d904579367d76cf9aec449a3",
+      "seconds": 6.55,
+      "transcript": "a curious puppy followed the family into the garden and discovered a tiny frog near the fountain",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-045--am_puck",
+      "audioSha256": "3cd9050b119b7813b60f1eeb9d923d0789eae2c7fc03af3bb134bae3ee388a8b",
+      "seconds": 5.8,
+      "transcript": "a curious puppy followed the family into the garden and discovered a tiny frog near the fountain",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-046--af_heart",
+      "audioSha256": "465f806c3d3e92e5d2037bec68efc14bf4371dc42fd09fdeab3d46ac642efde7",
+      "seconds": 6.45,
+      "transcript": "the school orchestra rehearsed together every thursday afternoon in preparation for the spring concert",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-046--af_bella",
+      "audioSha256": "d003ddf990b042d71e4fe619cddd83a26dfa700ad15bdeadb445e0b5909de54b",
+      "seconds": 6.725,
+      "transcript": "the school orchestra rehearsed together every thursday afternoon in preparation for the spring concert",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-046--am_michael",
+      "audioSha256": "4657c3becb61b2d8370f502fd481f50b47895cc218627335d043d2746ab0319e",
+      "seconds": 7.35,
+      "transcript": "the school orchestra rehearsed together every thursday afternoon in preparation for the spring concert",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-046--am_puck",
+      "audioSha256": "507f4ac5b3e7643c4cfbdffe8433983842b2cc86ce9c26b91f5e8c1a4e4543f9",
+      "seconds": 6.3,
+      "transcript": "the school orchestra rehearsed together every thursday afternoon in preparation for the spring concert",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-047--af_heart",
+      "audioSha256": "1af0a81d00b851fcf61c94fd6b39e8bc5ec47593189b28dcaf475b58f6e37662",
+      "seconds": 5.675,
+      "transcript": "when the package arrives please check the contents carefully and keep the receipt in a safe place",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-047--af_bella",
+      "audioSha256": "17f66c3a9706d387f65eab307c9c22ebdf3dbaef146171267830d152436efb87",
+      "seconds": 5.925,
+      "transcript": "when the package arrives please check the contents carefully and keep the receipt in a safe place",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-047--am_michael",
+      "audioSha256": "0669fdb9df47d18d1eb1082a8bdb80531595f14ba4044f0039081e2fb01629f4",
+      "seconds": 6.275,
+      "transcript": "when the package arrives please check the contents carefully and keep the receipt in a safe place",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-047--am_puck",
+      "audioSha256": "57560fbe573f41b9877b00a4935ff15261e4d3a717281566b81e274c169ae2e4",
+      "seconds": 5.575,
+      "transcript": "when the package arrives please check the contents carefully and keep the receipt in a safe place",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-048--af_heart",
+      "audioSha256": "f558265231f0887c6412a2b3684633915ce1ac59bfa75dba98e0568a2b4ae5b0",
+      "seconds": 6.775,
+      "transcript": "the city council proposed a new library with quiet study areas and accessible entrances for everyone",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-048--af_bella",
+      "audioSha256": "cde4771b7310a7149b34be39eb45ce721078b11e10cadf3d91da290432908fc2",
+      "seconds": 7.025,
+      "transcript": "the city council proposed a new library with quiet study areas and accessible entrances for everyone",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-048--am_michael",
+      "audioSha256": "849c4727ab52393555c94caace5306ddce14c4a5f35683d4d1c113b7bfbceedb",
+      "seconds": 7.275,
+      "transcript": "the city council proposed a new library with quiet study areas and accessible entrances for every one",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-048--am_puck",
+      "audioSha256": "6b5e92347e99a2c05757eb5136ffb465f3dad154fd58f7556d8dc94a487c286f",
+      "seconds": 6.45,
+      "transcript": "the city council proposed in new library with quiet study areas and accessible entrances for everyone",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-049--af_heart",
+      "audioSha256": "163c8aa37d36397a90f2496aee0e2e35a424b7d13eeec88ea25541dde32fb5c6",
+      "seconds": 6.075,
+      "transcript": "a generous neighbor offered to water our plants while we travel to visit relatives in another state",
+      "wordErrorRate": 0.058823529411764705,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-049--af_bella",
+      "audioSha256": "fd74108f9d21ce32f2a71baf77fae9d195bc430bacfce63aef9aca91b4278646",
+      "seconds": 6.35,
+      "transcript": "a generous neighbor offered to water our plants while we traveled to visit relatives in another state",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-049--am_michael",
+      "audioSha256": "af25c85bd878e61202370de42b02e9e23bb911de483cd711a756fdbc20f430cc",
+      "seconds": 6.825,
+      "transcript": "a generous neighbor offered to water our plants while we traveld to visit relatives in another state",
+      "wordErrorRate": 0.058823529411764705,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-049--am_puck",
+      "audioSha256": "74d538342c3e4b5b54ba2525e6210e3887c0fb19744a673913d7e61cb15a277f",
+      "seconds": 6.1,
+      "transcript": "a generous neighbor offered to water our plants while we travel to visit relatives in another state",
+      "wordErrorRate": 0.058823529411764705,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-050--af_heart",
+      "audioSha256": "729ba632b67b21c8c8931bf97542dd4f989424861f98cd6315a0351e1c514f11",
+      "seconds": 6.9,
+      "transcript": "the documentary explained how changes in ocean temperature can influence weather patterns around the world",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-050--af_bella",
+      "audioSha256": "7e504e821ec15a484171c908aa026e9fb6999ede06574a8251cb41cb0c25461c",
+      "seconds": 7.05,
+      "transcript": "the documentary explained how changes in ocean temperature can influence weather patterns around the world",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-050--am_michael",
+      "audioSha256": "ccb2f059aab5894265ecefbacc848a083bd655fee1bd55e2a3d37fc0f6e428eb",
+      "seconds": 7.5,
+      "transcript": "the documentary explain how changes in ocean temperature can influence weather patterns around the world",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-050--am_puck",
+      "audioSha256": "d96f79075558ae5f377bbda548123052de2622fa795403d98b8d5b69421eb7c0",
+      "seconds": 6.875,
+      "transcript": "the documentary explained how changes in ocean temperature can influence weather patterns around the world",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-051--af_heart",
+      "audioSha256": "766ca99894bf6f1081cb9f102a6a80f26d3c35df5493c11579857f8682e4ec81",
+      "seconds": 6.85,
+      "transcript": "three thirsty travelers stopped at a roadside cafe to order sandwiches and freshly squeezed orange juice",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-051--af_bella",
+      "audioSha256": "a4d9475a28201f44f6107305fc8e8d7e9d634437fffaac23018a9437805aa543",
+      "seconds": 7.45,
+      "transcript": "three thirsty travellers stopped at a roadside cafe to order sandwiches and freshly squeezed orange juice",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-051--am_michael",
+      "audioSha256": "00011f8e51ade4adbc9dbe2c1dca6bb670b3875915428f7cdc38b774eae6e305",
+      "seconds": 7.625,
+      "transcript": "three thirsty travellers stopped at a roadside cafe to order sandwiches and freshly squeezed orange juice",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-051--am_puck",
+      "audioSha256": "823c826340dec1ee297691d60adde79f34ac4a7ba7a156796604e1e4c0629026",
+      "seconds": 6.725,
+      "transcript": "three thirsty travellers stopped at a roadside cafe to order sandwiches and freshly squeezed orange juice",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-052--af_heart",
+      "audioSha256": "7fa918439d8992123c236438ae16e1c2626f6c989784d4026ff49bb47b38c649",
+      "seconds": 6.075,
+      "transcript": "the first chapter introduces a mysterious character who lives alone in a house beside the railway",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-052--af_bella",
+      "audioSha256": "1f14179093747c2541ca9866dcc37e572124ceb91adc549901a06af1c5bdfcf4",
+      "seconds": 6.35,
+      "transcript": "the first chapter introduces a mysterious character who lives alone in a house beside the railway",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-052--am_michael",
+      "audioSha256": "c0e6f19437a7f73cd5b0e65edd76d66779e2c31ef89e041fc354d8928e70c2f7",
+      "seconds": 6.8,
+      "transcript": "the first chapter introduces a mysterious character who lives alone in a house beside the railway",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-052--am_puck",
+      "audioSha256": "127df2dd84e6ec1a7bc87e3f6b7b6ba4df1d73800b3afc70cb34fe81f4d0718e",
+      "seconds": 6.075,
+      "transcript": "the first chapter introduces a mysterious character who lives alone in a house beside the railway",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-053--af_heart",
+      "audioSha256": "dff7e771bd3df364a3ff72ad9cd92158e75bf321bc9fad810da5630f1ddfc095",
+      "seconds": 6.85,
+      "transcript": "students should review their notes regularly instead of waiting until the night before an important examination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-053--af_bella",
+      "audioSha256": "3179589bdda9429bd1ed0165b4bba3f67bc2cee312a387f42b4852fc3f7217bc",
+      "seconds": 7.3,
+      "transcript": "students should review their notes regularly instead of waiting until the night before an important examination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-053--am_michael",
+      "audioSha256": "6f868f5e5ad7c8617349f2969cf9dc9db54181d429413f5cb5f51d61125275ee",
+      "seconds": 7.775,
+      "transcript": "students should review their notes regularly instead of waiting until the night before an important examination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-053--am_puck",
+      "audioSha256": "1e1fa45b1c339ef032f6cd6932b4c8bc977a447a7ce80afcd856f27ccbe44d44",
+      "seconds": 6.65,
+      "transcript": "students should review their notes regularly instead of waiting until the night before an important examination",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-054--af_heart",
+      "audioSha256": "453bd53cec46c7aeb52769c4fa2eec63e9687452fd07bce1f2871b68c4b42be9",
+      "seconds": 5.275,
+      "transcript": "the red ship moved slowly past the green fishing boat as waves rolled toward the beach",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-054--af_bella",
+      "audioSha256": "dedc0937a1444a92142a5054c1b670105f78a26c7d8891d0b3a42fee11ae1586",
+      "seconds": 5.75,
+      "transcript": "the red ship moved slowly past the green fishing boat as waves rolled toward the beach",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-054--am_michael",
+      "audioSha256": "157859d0ebf5bdd9e770ddab0f302982629e905b66333a58c8cce3966a322d0c",
+      "seconds": 5.875,
+      "transcript": "the red ship moved slowly past the green fishing boat as waves rolled toward the beach",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-054--am_puck",
+      "audioSha256": "7650b3812208baca297fc1d786e73edf133e66eaca2484009fad56a8ed671718",
+      "seconds": 4.92,
+      "transcript": "the red ship moved slowly past the green fishing boat as waves rolled toward the beach",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-055--af_heart",
+      "audioSha256": "1b461ac582e302bf7d0ccd0a2099dcaa028e35daab3eafd22cb0e9279dc6c3b4",
+      "seconds": 5.8,
+      "transcript": "a bowl of fresh fruit stood beside the refrigerator beneath a photograph of the family picnic",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-055--af_bella",
+      "audioSha256": "43b7d756fc070f71a5b8cc1853bd9eb4b5c3a8c520a2e6811d5feb85b860bf2f",
+      "seconds": 6.15,
+      "transcript": "a bowl of fresh fruit stood beside the refrigerator beneath a photograph of the family picnic",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-055--am_michael",
+      "audioSha256": "7170ecfa6ee55cd42ada9ef94fdce3e01fb9fa876b97a78dd25124d3ce3c0c49",
+      "seconds": 6.475,
+      "transcript": "a bowl of fresh fruit stood beside the refrigerator beneath a photograph of the family picnic",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-055--am_puck",
+      "audioSha256": "795e91eb25f186e9a58e218d8914e991b53216f9e58e644f7b11647da207c63c",
+      "seconds": 5.9,
+      "transcript": "a bowl of fresh fruit stood beside the refrigerator beneath a photograph of the family picnic",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-056--af_heart",
+      "audioSha256": "d64c5bc0606cf7bea8510698ca541760392d7bac16c9150a5106df31a506204e",
+      "seconds": 5.6,
+      "transcript": "the speaker emphasized the second syllable of the word and asked the class to repeat it together",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-056--af_bella",
+      "audioSha256": "f466c4d4b44042e7f1025e0e95795ad30c2e1de3f46e587bbc8a8c199d6aedfe",
+      "seconds": 5.975,
+      "transcript": "the speaker emphasized the second syllable of the word and asked the class to repeat it together",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-056--am_michael",
+      "audioSha256": "32f81f15061abc4f12aca6acf3e59fde94ecc92493b014bde640439f8649a94a",
+      "seconds": 6.325,
+      "transcript": "the speaker emphasized the second syllable of the word and asked the class to repeat it together",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-056--am_puck",
+      "audioSha256": "d4950d61a25da01341a51bc6218a93b217e8844818ab6e7c0d6fc0e78ccef545",
+      "seconds": 5.7,
+      "transcript": "the speaker emphasized the second syllable of the word and asked the class to repeat it together",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-057--af_heart",
+      "audioSha256": "3aa97f3d709e5877f23afd05d55286e9493f2b21c77af4ddddafa8b749e00300",
+      "seconds": 6.85,
+      "transcript": "our company supports flexible working hours because employes have different responsibilities outside the office",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-057--af_bella",
+      "audioSha256": "c610b12ff60cd24dc890a2837c2096cd2570a7491c446a7ee28833b6aa8bd481",
+      "seconds": 7.325,
+      "transcript": "our company supports flexible working hours because employes have different responsibilities outside the office",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-057--am_michael",
+      "audioSha256": "3bd7958d08bf6135f7814e84d23c164e0efc7bcef40185bc0624252320fa551d",
+      "seconds": 8.175,
+      "transcript": "our company supports flexible working hours because employes have different responsibilities outside the office",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-057--am_puck",
+      "audioSha256": "5e363f028336838f3b679d73a9358640743cd25df060f900cb44eaff9f3306ca",
+      "seconds": 6.875,
+      "transcript": "our company supports flexible working hours because employes have different responsibilities outside the office",
+      "wordErrorRate": 0.07142857142857142,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-058--af_heart",
+      "audioSha256": "f65f4aed3b2c619f34b4d7c4b724fa64cfe346174f135def4e2a35443482b5d6",
+      "seconds": 6.275,
+      "transcript": "the careful driver reduced her speed when she noticed several cyclists approaching the narrow intersection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-058--af_bella",
+      "audioSha256": "8d39278cfea8aee9ace511436abcf9eff7d22c3c129c51f958dc95b421eaeb15",
+      "seconds": 6.675,
+      "transcript": "the careful driver reduced her speed when she noticed several cyclists approaching the narrow intersection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-058--am_michael",
+      "audioSha256": "b076a4efa431856ec61352f00621e6295026ab95e464a16915f0d4950caddf32",
+      "seconds": 6.925,
+      "transcript": "the careful driver reduced her speed when she noticed several cyclists approaching the narrow intersection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-058--am_puck",
+      "audioSha256": "703aaeb7ec7abd05ee54f6cd49191309eb353e519c7ea5b859228c0f697e2e92",
+      "seconds": 6.25,
+      "transcript": "the careful driver reduced her speed when she noticed several cyclists approaching the narrow intersection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-059--af_heart",
+      "audioSha256": "b07a36068c7eb403cbbad6e5f6719646d5f98698f8bb66f573e8c7163b1c3912",
+      "seconds": 6.15,
+      "transcript": "a successful experiment often begins with a specific question and a method that others can repeat",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-059--af_bella",
+      "audioSha256": "664fd1b2b10f9a4dacccfbd4481fda22df30dd02dbf45022278f20aa6c593d85",
+      "seconds": 6.5,
+      "transcript": "a successful experiment often begins with a specific question and a method that others can repeat",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-059--am_michael",
+      "audioSha256": "c8232e4a062e9f38bd70a4e4ca11eb1d0dc0e3b935c1496a8a63d0faad6f56c2",
+      "seconds": 6.75,
+      "transcript": "a successful experiment often begins with a specific question and a method that others can repeat",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-059--am_puck",
+      "audioSha256": "db04c2cb5fb2c2b6670a737d7267b48385b1245e08983cc30db60c16e1f5359f",
+      "seconds": 6.275,
+      "transcript": "a successful experiment often begins with a specific question and a method that others can repeat",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-060--af_heart",
+      "audioSha256": "ffa585bc2009fd083476608d05a421df13edd2ecad5c3464720f8c98f89b359a",
+      "seconds": 6.375,
+      "transcript": "the hotel receptionist provided a map and suggested a pleasant walking root through the historic district",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-060--af_bella",
+      "audioSha256": "1780353115aa7162ea0eb2f6a67e366e43bef8d7f7716d2f4a0148eb3fb381ce",
+      "seconds": 6.75,
+      "transcript": "the hotel receptionist provided a map and suggested a pleasant walking route through the historic district",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-060--am_michael",
+      "audioSha256": "d31a228f16b4c5d0280e5ce27d63dab3e33687ac63b054b20d65443491f496e0",
+      "seconds": 6.975,
+      "transcript": "the hotel receptionist provided a map and suggested a pleasant walking route through the historic district",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-060--am_puck",
+      "audioSha256": "1afcbc5379ac1e167df17cb6647b09e34026e66be2695a79ce11b48cf69696f0",
+      "seconds": 6.375,
+      "transcript": "the hotel receptionist provided a map and suggested a pleasant walking route through the historic district",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-061--af_heart",
+      "audioSha256": "1a3ca139ce9bc94e1c77980fd6639608ad868f95ae971ebc61d22b949ba4220b",
+      "seconds": 5.425,
+      "transcript": "the bright street lamps reflected in the puddles after a brief shower passed through the neighborhood",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-061--af_bella",
+      "audioSha256": "3c47aaf555d22d6caac5f694ff06eda0eb8608d6825ed52624e7affed5bdada4",
+      "seconds": 5.775,
+      "transcript": "the bright street lamps reflected in the puddles after a brief shower passed through the neighborhood",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-061--am_michael",
+      "audioSha256": "23ddcddb26baedefcb483ffc847af16e5f088844b729e2e327588a8a07f0de0a",
+      "seconds": 5.925,
+      "transcript": "the bright street lamps reflected in the puddles after a brief shower passed through the neighborhood",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-061--am_puck",
+      "audioSha256": "e0f2f13b57fb9d0c24d1ec1fd5dc83e4e713521000344eb76eb8129466c30f67",
+      "seconds": 5.325,
+      "transcript": "the bright street lamps reflected in the puddles after a brief shower passed through the neighborhood",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-062--af_heart",
+      "audioSha256": "232cf1e82a72d0c5b5b917c7e33a6dae49219bd80dacca5326d692ffc8da899a",
+      "seconds": 6.3,
+      "transcript": "before the race the coach reminded each athlete to breathe steadily and maintain a comfortable rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-062--af_bella",
+      "audioSha256": "d52f86d5b0e6a81ad3adabbf9c9e5a9065f026e2745228a7d615e5aa051ead95",
+      "seconds": 6.625,
+      "transcript": "before the race the coach reminded each athlete to breathe steadily and maintain a comfortable rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-062--am_michael",
+      "audioSha256": "46a529874f1206935b672509f02c1a261d8053f3b24771690edd3e92fad66cfa",
+      "seconds": 7.1,
+      "transcript": "before the race the coach reminded each athlete to breathe steadily and maintain a comfortable rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-062--am_puck",
+      "audioSha256": "a39c2db791cbdf5e93dee3a53a2376acf30c15b4e513fd1098a2eed375c687f5",
+      "seconds": 6.325,
+      "transcript": "before the race the coach reminded each athlete to breathe steadily and maintain a comfortable rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-063--af_heart",
+      "audioSha256": "604144d60283df6e730239abc488ad83c2e4bc0f39fcfab47579c438d52d284c",
+      "seconds": 5.325,
+      "transcript": "the artist mixed shades of green and yellow to paint the leaves around the old stone house",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-063--af_bella",
+      "audioSha256": "6a37ff3e0b03c9f05ace4ea9f0b5d1acff9c0b1f5c9671ea1841c53c7eb9748b",
+      "seconds": 5.775,
+      "transcript": "the artist mixed shades of green and yellow to paint the leaves around the old stone house",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-063--am_michael",
+      "audioSha256": "7fec4b96925bd5225e4cc4b756dd01421d286a6a3e66035fa2b88b24547504bb",
+      "seconds": 6.1,
+      "transcript": "the artist mixed shades of green and yellow to paint the leaves around the old stone house",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-063--am_puck",
+      "audioSha256": "00afed6d6688a7bc4fa7ddf4cb1593c920075536c8cb1e41322fc93c2c9f476b",
+      "seconds": 5.3,
+      "transcript": "the artist mixed shades of green and yellow to paint the leaves around the old stone house",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-064--af_heart",
+      "audioSha256": "6eea38ee609b7775353f359a0532437dcf2083cc29ea0dc5cac0837ebdd34231",
+      "seconds": 6.65,
+      "transcript": "a detailed budget helps families prepare for unexpected expenses and make steady progress toward their goals",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-064--af_bella",
+      "audioSha256": "762b8eb03ba0fd3411c21a2ac8241ac08f6685ea5adc6df1e23c337adbc013fc",
+      "seconds": 7.15,
+      "transcript": "a detailed budget helps families prepare for unexpected expenses and make steady progress toward their goals",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-064--am_michael",
+      "audioSha256": "2082ca9bbfbbdc793f20b931db929eac8607cef6bdd54413c4184ba383dbd817",
+      "seconds": 7.425,
+      "transcript": "a detailed budget helps families prepare for unexpected expenses and make steady progress towards their goals",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-064--am_puck",
+      "audioSha256": "03f875158ddf24bf19283a5db1f86deb5d534579ebc8c58a1e1bc8d84fcdb43a",
+      "seconds": 6.725,
+      "transcript": "a detailed budget helps families prepare for unexpected expenses and make steady progress toward their goals",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-065--af_heart",
+      "audioSha256": "318b5035e8ffb2b23deec57ec9af57a5fca65684d8d1e515278a354763dc8b4c",
+      "seconds": 5.425,
+      "transcript": "the passenger searched his pockets for the ticket while the conductor waited beside the open door",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-065--af_bella",
+      "audioSha256": "c59223fcffdc601f1b869be31bd90c28cbe0408ef5958c54723ac9aab69d70fe",
+      "seconds": 5.9,
+      "transcript": "the passenger searched his pockets for the ticket while the conductor waited beside the open door",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-065--am_michael",
+      "audioSha256": "412777abd2dff3e45ce531352250847c652b11517204e235919fb08a0249a406",
+      "seconds": 6.325,
+      "transcript": "the passenger searched his pockets for the ticket while the conductor waited beside the open door",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-065--am_puck",
+      "audioSha256": "4f9b736513ba16980ac5e7afad39d173217b2bd45bcc0c1ff2840fc91bc3264b",
+      "seconds": 5.75,
+      "transcript": "the passenger searched his pockets for the ticket while the conductor waited beside the open door",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-066--af_heart",
+      "audioSha256": "8131e0833f1643d5c7c23c43cf74972e32d3e567147978ab15f8cd54ee37c8a4",
+      "seconds": 6.5,
+      "transcript": "the university offers evening classes for adults who want to develop new skills while continuing to work",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-066--af_bella",
+      "audioSha256": "5dda9899348365beb14bea3e8bf2dbff042ce04473a1975418b6bf7bff892c51",
+      "seconds": 6.8,
+      "transcript": "the university offers evening classes for adults who want to develop new skills while continuing to work",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-066--am_michael",
+      "audioSha256": "c2c18e15e82aa60f5b8a0e16521e3e9de6bbb2b550dfb75aeec1cc33a2f54ee7",
+      "seconds": 7.225,
+      "transcript": "the university offers evening classes for adults who want to develop new skills while continuing to work",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-066--am_puck",
+      "audioSha256": "c89d728b06c6e2e10d50f4cb46c708d7f1d47f4c9c3ced9bc080370b9f4b01a3",
+      "seconds": 6.475,
+      "transcript": "the university offers evening classes for adults who want to develop new skills while continuing to work",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-067--af_heart",
+      "audioSha256": "099acc77ba6337b779f2be94c5d147bd726f1d7b66914eec9a38a3b2c4fd50c6",
+      "seconds": 5.616,
+      "transcript": "a group of friends shared stories around the kitchen table as a pot of vegetable soup simmered",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-067--af_bella",
+      "audioSha256": "afe4a8d2d5c6a61eb3f1bf3408a1dae8cba22a9f19da8f49f592f0c12a6429f8",
+      "seconds": 6.275,
+      "transcript": "a group of friends shared stories around the kitchen table as a pot of vegetable soup simmered",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-067--am_michael",
+      "audioSha256": "17ddb9f3ef4d17d3f0497af3a81e863850fcfc140cfab3529e27929b444e6e93",
+      "seconds": 6.275,
+      "transcript": "a group of friends shared stories around the kitchen table as a pot of vegetable soup simmered",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-067--am_puck",
+      "audioSha256": "3896cd945effdac66eb110b966cd8e61845d702ff5896e141d911a7fb3c36dcb",
+      "seconds": 5.725,
+      "transcript": "a group of friends shared stories around the kitchen table as a pot of vegetable soup simmered",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-068--af_heart",
+      "audioSha256": "4666ac41899afeb74620bad11c3d776e24d71010ece171dac452e7a546cdea1b",
+      "seconds": 6.3,
+      "transcript": "the shop assistant carefully wrapped the fragile glass vase and placed it inside a sturdy cardboard box",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-068--af_bella",
+      "audioSha256": "f5ed82f96c96598498c563470925fc7b69febac2608a183e3fbf45068a272102",
+      "seconds": 6.775,
+      "transcript": "the shop assistant carefully wrapped the fragile glass vase and placed it inside a sturdy cardboard box",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-068--am_michael",
+      "audioSha256": "904e40eddf52254c162ef01f03cfe4c607d65b09f2565ab13e0e00303e52a8f2",
+      "seconds": 7.15,
+      "transcript": "the shop assistant carefully wrapped the fragile glass vase and placed it inside a sturdy card board box",
+      "wordErrorRate": 0.11764705882352941,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-068--am_puck",
+      "audioSha256": "da38a7be36145a41c003c2d5f99cf26338d2d85a84e328416607ab47b27782d9",
+      "seconds": 6.275,
+      "transcript": "the shop assistant carefully wrapped the fragile glass vase and placed it inside a sturdy cardboard box",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-069--af_heart",
+      "audioSha256": "1d9ae9ecb9655e76ccd6c8db2249d47cf57e6639b8ed75b90cf5e39ebfb38a6b",
+      "seconds": 6.5,
+      "transcript": "every summer the town celebrates its history with music dancing and a parade along the main street",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-069--af_bella",
+      "audioSha256": "98e8e5bd45903ce00071f4da38d77b1ee222501045c18d670d8ab57521418079",
+      "seconds": 7.075,
+      "transcript": "every summer the town celebrates its history with music dancing and a parade along the main street",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-069--am_michael",
+      "audioSha256": "7d5858b398ed6b1616184e9c1ef761898ab81179f2539757b73aa04671a13818",
+      "seconds": 7.275,
+      "transcript": "every summer the town celebrates its history with music dancing and a parade along the main street",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-069--am_puck",
+      "audioSha256": "5cb09d9c05f761b1521f5e758174b47a54569d85086a981b479a6dad94e2267e",
+      "seconds": 6.2,
+      "transcript": "every summer the town celebrates its history with music dancing and a parade along the main street",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-070--af_heart",
+      "audioSha256": "5e64931d9d22c60917df4fff8bbc623ce80ccfb91c229a8ff9789f3149295d7b",
+      "seconds": 6.55,
+      "transcript": "the researcher noticed a significant difference between the original sample and the material collected later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-070--af_bella",
+      "audioSha256": "07d13dfe797041fa79ba5cbda4233aa59f90da1a52bfaa70c59e9a3e692d5726",
+      "seconds": 6.725,
+      "transcript": "the researcher noticed a significant difference between the original sample and the material collected later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-070--am_michael",
+      "audioSha256": "b61dec57325b55e080ea4d4aaf2dca7786ae9cf54a1f9c4f82786652bdbfd7f0",
+      "seconds": 7.125,
+      "transcript": "the researcher noticed a significant difference between the original sample and the material collected later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-070--am_puck",
+      "audioSha256": "5d88dd25e05bf816ef4065b6f7d7225a0cd2e8d52465363563c7ee2a35d79225",
+      "seconds": 6.475,
+      "transcript": "the researcher noticed a significant difference between the original sample and the material collected later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-071--af_heart",
+      "audioSha256": "4b82216b44c5a9fae67c4f7b22c0aa1ca6c949fd3d6f264ed83bdc45123bec17",
+      "seconds": 5.45,
+      "transcript": "the dog slept beneath the dining room table while a gentle rain tapped against the windows",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-071--af_bella",
+      "audioSha256": "a1657d2f67df83b9fb95cd46c98a71c504648f44de0ce192ef3685615b99e545",
+      "seconds": 5.9,
+      "transcript": "the dog slept beneath the dining room table while a gentle rain tapped against the windows",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-071--am_michael",
+      "audioSha256": "7b38a61011b220caea115092cbe765948c9e9682d1e3bef0e2c829761aebcd47",
+      "seconds": 6.125,
+      "transcript": "the dog slept beneath the dining room table while a gentle rain tapped against the windows",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-071--am_puck",
+      "audioSha256": "a88aca61d597dbd154ac1e834ab72ec1e1b3638fb77fa43e404558c78b0bab04",
+      "seconds": 5.4,
+      "transcript": "the dog slept beneath the dining room table while a gentle rain tapped against the windows",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-072--af_heart",
+      "audioSha256": "c321f2f6f1f44ed4fc52f44f9a12a329bfb57bc61225f9bafa4a221711181bdb",
+      "seconds": 5.425,
+      "transcript": "a clear explanation of the rules helps new players feel comfortable before the game begins",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-072--af_bella",
+      "audioSha256": "cbfa2575644fec9763f139966796af13e7719e8cf1152531699c0c35eb6117cf",
+      "seconds": 5.875,
+      "transcript": "a clear explanation of the rules helps new players feel comfortable before the game begins",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-072--am_michael",
+      "audioSha256": "30b225d784eb0645667b9dabcc2d5545f2e345345c31c6e08493d9f479a400e1",
+      "seconds": 6.35,
+      "transcript": "a clear explanation of the rules helps new players feel comfortable before the game begins",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-072--am_puck",
+      "audioSha256": "2d86739d6263eec56a371d3a9234913fba88b3553419f8f4b2b881416d3d6ae2",
+      "seconds": 5.675,
+      "transcript": "a clear explanation of the rules helps new players feel comfortable before the game begins",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-073--af_heart",
+      "audioSha256": "1cb664e9ed32b976a74fda4248b378fc7eea86af34ea2478d9d12a7ab58e3fd4",
+      "seconds": 6.25,
+      "transcript": "the park ranger advised visitors to carry drinking water and remain on the marked walking paths",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-073--af_bella",
+      "audioSha256": "a5b6085e4f4939111f78dc69b43ec222a19b867a6b65e3fe18059ffed237c276",
+      "seconds": 6.55,
+      "transcript": "the park ranger advised visitors to carry drinking water and remain on the marked walking paths",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-073--am_michael",
+      "audioSha256": "a3602540cde40915908a76e08796462f0207c33d168454e50f55e9a8e73ada37",
+      "seconds": 7.025,
+      "transcript": "the park ranger advised visitors to carry drinking water and remain on the marked walking paths",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-073--am_puck",
+      "audioSha256": "ca3a6f681f8cc7a3c5c98dc54d75c0e8671576bc5826510037ff10a3d1ca286c",
+      "seconds": 5.9,
+      "transcript": "the park ranger advised visitors to carry drinking water and remain on the marked walking paths",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-074--af_heart",
+      "audioSha256": "a87f377f1ac925dcf4a78ac2371e7806a2d3a4e7da788200e4ff6e1276874fae",
+      "seconds": 6.975,
+      "transcript": "the newspaper published an interesting article about a young inventor who designed an affordable water filter",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-074--af_bella",
+      "audioSha256": "4a4a641996d0d0d1d88083a55a32214fe3a2b8b20f4b2c944a84424c22861c6f",
+      "seconds": 7.4,
+      "transcript": "the newspaper published an interesting article about a young inventor who designed an affordable water filter",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-074--am_michael",
+      "audioSha256": "91c8b7dfab11a5b27973cea722a4187d9fe1d32a2df52bd9a7d6f4fcee2b9dff",
+      "seconds": 7.725,
+      "transcript": "the newspaper published an interesting article about a young inventor who designed an affordable water filter",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-074--am_puck",
+      "audioSha256": "144df3159cb0056efe67fca75ced58ce256c9f8a47c27b88e9c3cd2f5b4c6c4a",
+      "seconds": 6.95,
+      "transcript": "the newspaper published an interesting article about a young inventor who designed an affordable water filter",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-075--af_heart",
+      "audioSha256": "155fb6e50a9f22f2ca0ee7a18fc75c0b575cb7329c34a1e12d358a2dd69afdcd",
+      "seconds": 5.325,
+      "transcript": "after replacing the batteries he tested the flashlight to make sure it would work during the trip",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-075--af_bella",
+      "audioSha256": "509b3cec049650dfb131f1db6769fefc2e6d3350d64c8530ddab9784f8856a77",
+      "seconds": 5.5,
+      "transcript": "after replacing the batteries he tested the flashlight to make sure it would work during the trip",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-075--am_michael",
+      "audioSha256": "598722374a524bf15cb3c108f7043e2dbf6d7aa91720886a2030c4b696df7580",
+      "seconds": 5.8,
+      "transcript": "after replacing the batteries he tested the flashlight to make sure it would work during the trip",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-075--am_puck",
+      "audioSha256": "ded1011079694c4edd820622dadc2e8faf8eef62051a1514bd10fa54e13ad009",
+      "seconds": 5.25,
+      "transcript": "after replacing the batteries he tested the flashlight to make sure it would work during the trip",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-076--af_heart",
+      "audioSha256": "533363029e3930a0d8e99a0f8bf8c1c0f225ba340162dd310c61ebeaf866173b",
+      "seconds": 5.375,
+      "transcript": "the music gradually became softer as the dancers moved toward the centre of the stage",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-076--af_bella",
+      "audioSha256": "248035f8ac411aabd0cc4d66604abe85acc8115a66b51b7c0d9c7008ae72e4c7",
+      "seconds": 5.8,
+      "transcript": "the music gradually became softer as the dancers moved toward the centre of the stage",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-076--am_michael",
+      "audioSha256": "e42fad7e9760320f11c51d6d453c307a6b813cc689768867a060a0d356cf4c13",
+      "seconds": 6.0,
+      "transcript": "the music gradually became softer as the dancers moved toward the centre of the stage",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-076--am_puck",
+      "audioSha256": "04e36f1f7b2e82bf29fc3f8d3944f9ad2cae33cb2e6f31144c0ede16d2e1f97a",
+      "seconds": 5.4,
+      "transcript": "the music gradually became softer as the dancers moved toward the centre of the stage",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-077--af_heart",
+      "audioSha256": "0d9d2f7e0ec44667ab7c72dd3a5729ae3ce8ff0a29043e32034a66cda10cd5d9",
+      "seconds": 5.575,
+      "transcript": "a warm scarf and a thick pair of socks can make a cold morning feel much more comfortable",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-077--af_bella",
+      "audioSha256": "efdd3b13c7adf42fe96da98c0ababf0a21b373802cf6aa181a4080f469a5627a",
+      "seconds": 6.25,
+      "transcript": "a warm scarf and a thick pair of socks can make a cold morning feel much more comfortable",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-077--am_michael",
+      "audioSha256": "c98aff5762d1f582a6fd0f9caea516d31b8d8843011fcb774bb8d2e1ad414886",
+      "seconds": 6.5,
+      "transcript": "a warm scarf and a thick pair of socks can make a cold morning feel much more comfortable",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-077--am_puck",
+      "audioSha256": "355b6020277f76da76a8250635e4234cfb89d31a5c768855ec105c64c051b895",
+      "seconds": 5.65,
+      "transcript": "a warm scarf and a thick pair of socks can make a cold morning feel much more comfortable",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-078--af_heart",
+      "audioSha256": "e1971b257358c3e3f396dfaa6ae7a003a012dd81e54fa3be24ec33157a7e15bc",
+      "seconds": 5.75,
+      "transcript": "the customer requested a receipt and asked whether the store accepted returns within thirty days",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-078--af_bella",
+      "audioSha256": "a6c0fd07508665d73cffb211f32abe5648b18b4e10926210ad0c013d526f5fc4",
+      "seconds": 6.35,
+      "transcript": "the customer requested a receipt and asked whether the store accepted returns within thirty days",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-078--am_michael",
+      "audioSha256": "b7034c2b23f13c5742042ebfa7c5c4b68c1d9656f2030e765a85939ac74309a2",
+      "seconds": 6.7,
+      "transcript": "the customer requested a receipt and asked whether the store accepted returns within thirty days",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-078--am_puck",
+      "audioSha256": "2779e6566d8809ebb86a9e40a6bd6bcb8af0a5980b4325fb3e9eac8c8d518371",
+      "seconds": 5.975,
+      "transcript": "the customer requested a receipt and asked whether the store accepted returns within thirty days",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-079--af_heart",
+      "audioSha256": "56b8de239d28596d53c10685342666c7069e581978c1cfcd1162c7a737dd5106",
+      "seconds": 6.55,
+      "transcript": "the lecturer paused briefly before explaining how the evidence supported a different interpretation of the event",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-079--af_bella",
+      "audioSha256": "04408b24b10960c15f0e2b141deb19f0789277550a71b64061bf43507a7e35e8",
+      "seconds": 7.0,
+      "transcript": "the lecturer paused briefly before explaining how the evidence supported a different interpretation of the event",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-079--am_michael",
+      "audioSha256": "4dd44109735c5eda6583c49856579b41701f275ba9155c08f87db31d4e8227b4",
+      "seconds": 7.225,
+      "transcript": "the lecturer paused briefly before explaining how the evidence supported a different interpretation of the event",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-079--am_puck",
+      "audioSha256": "6969f9db1c5147774495eb254eb4758951e55172b8f3185fa491e731dfbec3e3",
+      "seconds": 6.7,
+      "transcript": "the lecturer paused briefly before explaining how the evidence supported a different interpretation of the event",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-080--af_heart",
+      "audioSha256": "1a2fd0ebe4ec7dc7bff8366b4ab550cf0bdb86beaf88deac48484e67dcd33bb4",
+      "seconds": 5.3,
+      "transcript": "the empty class room was quiet except for the soft sound of a clock above the white board",
+      "wordErrorRate": 0.25,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-080--af_bella",
+      "audioSha256": "2c8fd7e348f6d829181139bbf54ea8352056ed56565c856e4a275735514a1a78",
+      "seconds": 5.625,
+      "transcript": "the empty class room was quiet except for the soft sound of a clock above the white board",
+      "wordErrorRate": 0.25,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-080--am_michael",
+      "audioSha256": "7d3041b8d6a20a0f5fe84e680ec9759f23ae768bc3ef0070940e8596b7cec8c4",
+      "seconds": 5.8,
+      "transcript": "the empty class room was quiet except for the soft sound of a clock above the white board",
+      "wordErrorRate": 0.25,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-080--am_puck",
+      "audioSha256": "36222bf269e6c1deb5dc6cfc5163fc675fb75887f6a327f1ca7476cacf56e424",
+      "seconds": 5.325,
+      "transcript": "the empty class room was quiet except for the soft sound of a clock above the white board",
+      "wordErrorRate": 0.25,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-081--af_heart",
+      "audioSha256": "04632c274cc97eb075564d7c99d5c5444029de94ca20e7dec59c031c940b754b",
+      "seconds": 5.675,
+      "transcript": "a fresh coat of paint transformed the small bedroom into a bright and welcoming place to study",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-081--af_bella",
+      "audioSha256": "8922ded551230e2c82b4934af527bd682fca9c5709c37baa04a5708e95db555d",
+      "seconds": 6.075,
+      "transcript": "a fresh coat of paint transformed the small bedroom into a bright and welcoming place to study",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-081--am_michael",
+      "audioSha256": "b55b1d5ebeefbe9b79bfd7dd0c1e091db02ae73483cd6f47abd675889bee5e78",
+      "seconds": 6.2,
+      "transcript": "a fresh coat of paint transformed the small bedroom into a bright and welcoming place to study",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-081--am_puck",
+      "audioSha256": "e665d89caf9e7f50ccf1302171f48a5e10cc21fb42c321b8c868c41ed70e837d",
+      "seconds": 5.7,
+      "transcript": "a fresh coat of paint transformed the small bedroom into a bright and welcoming place to study",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-082--af_heart",
+      "audioSha256": "72adef5981899627769fcd7682b725a8246822af60f15b7d954879c2fe6879e5",
+      "seconds": 6.725,
+      "transcript": "the team selected a simple design that could be repaired easily with materials available in most towns",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-082--af_bella",
+      "audioSha256": "0cb9a326e45348bd809b5e08a7c4350b5e49b1ebd5ab231a20e62c1ea14bebc2",
+      "seconds": 6.975,
+      "transcript": "the team selected a simple design that could be repaired easily with materials available in most towns",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-082--am_michael",
+      "audioSha256": "f185ea622d475de719ab48ee6ee67e2216706a4bf672ceef2f1d4b4f684c6664",
+      "seconds": 7.35,
+      "transcript": "the team selected a simple design that could be repaired easily with materials available in most towns",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-082--am_puck",
+      "audioSha256": "f74f8ca07a2bf839909cdca3151ba724943372e9cb3f6dd8d01ba51ee258a525",
+      "seconds": 6.5,
+      "transcript": "the team selected a simple design that could be repaired easily with materials available in most towns",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-083--af_heart",
+      "audioSha256": "8ee60d28b03d373727524d5f08824473c9500ed0bad9da234e166b0e5c376ee5",
+      "seconds": 5.225,
+      "transcript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-083--af_bella",
+      "audioSha256": "dcaeda51d560f155b6423363af36636c87f3dd6b3365a35f9de4b771945ad520",
+      "seconds": 5.475,
+      "transcript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-083--am_michael",
+      "audioSha256": "46c17aa4797abd8381c5b23a3602cb292b9bb1a58cfa3857e4ce95a865117db2",
+      "seconds": 5.825,
+      "transcript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-083--am_puck",
+      "audioSha256": "c960d8ebf26aef8604f66e932caa7363908f32d134e6acf19426c73b4788daa4",
+      "seconds": 5.125,
+      "transcript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-084--af_heart",
+      "audioSha256": "f382ae99999b3927dbfe48979a03334fd232f2591ab9e3fc251467bb19e02cbe",
+      "seconds": 5.65,
+      "transcript": "the river bends sharply near the village where a narrow foot bridge connects the two grassy banks",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-084--af_bella",
+      "audioSha256": "07fc32356fa69bc2e4053665ada761534e23b16c183467dfb00b2873296e4bbc",
+      "seconds": 6.05,
+      "transcript": "the river bends sharply near the village where a narrow foot bridge connects the two grassy banks",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-084--am_michael",
+      "audioSha256": "9347f9fa2bad7450475831b0585722d6eb0ab7cf2ff4ee33685b049693044df3",
+      "seconds": 6.225,
+      "transcript": "the river bends sharply near the village where a narrow foot bridge connects the two grassy banks",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-084--am_puck",
+      "audioSha256": "1846f3ba0c2077aae541a22872ee690d3e9f36b4db5210ebbbddf40f245465ac",
+      "seconds": 5.65,
+      "transcript": "the river bends sharply near the village where a narrow foot bridge connects the two grassy banks",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-085--af_heart",
+      "audioSha256": "fb207280a2b7135f0c4c2da8f7a9b48d0865e770c609c4857f9664572bc66a43",
+      "seconds": 6.9,
+      "transcript": "during the workshop participants practised giving short instructions and checking whether their partners understood them",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-085--af_bella",
+      "audioSha256": "11bce31e7cf43ab1e3c2558d7dc3e44bdda690c3831db28cc3d11a1ab490419d",
+      "seconds": 7.3,
+      "transcript": "during the workshop participants practised giving short instructions and checking whether their partners understood them",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-085--am_michael",
+      "audioSha256": "ef112255e0449392b4d758905b5cdc52a4fd554db571f49d56c5abb84890811c",
+      "seconds": 7.375,
+      "transcript": "during the work shop participants practiced giving short instructions and checking whether their partners understood them",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-085--am_puck",
+      "audioSha256": "a24c85effa0337f836ed2fb3c0a26ab88450bb1345ba7544e828bf1891e19587",
+      "seconds": 6.875,
+      "transcript": "during the workshop participants practised giving short instructions an checking whether their partners understood them",
+      "wordErrorRate": 0.13333333333333333,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-086--af_heart",
+      "audioSha256": "cb196da52b7246fd6099d6ed96c332d1df6312949d485501c212753c92e6e787",
+      "seconds": 6.0,
+      "transcript": "a busy schedule can still include a few minutes each day for reading stretching or quiet reflection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-086--af_bella",
+      "audioSha256": "fda5bc4ca2be2909fee1db65e1983cfccb1b7053019c77b54c4748b4960538ea",
+      "seconds": 6.4,
+      "transcript": "a busy schedule can still include a few minutes each day for reading stretching or quiet reflection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-086--am_michael",
+      "audioSha256": "7ee39edac7a1322f2e135789c21a33ed8f0ecec8a205c2bee55d2a508bc21ded",
+      "seconds": 6.75,
+      "transcript": "a busy schedule can still include a few minutes each day for reading stretching or quiet reflection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-086--am_puck",
+      "audioSha256": "5bceaf36bf292451df25d132d685e3985eac979aa67b4b7e3e215c72abd7ebaf",
+      "seconds": 5.856,
+      "transcript": "a busy schedule can still include a few minutes each day for reading stretching or quiet reflection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-087--af_heart",
+      "audioSha256": "7345a99281bfc4cbf1e428a8137d0f244e07a1c43b5e2dddf36cb3e9f1ed2699",
+      "seconds": 5.175,
+      "transcript": "the curious child wondered why the moon appeared larger when it was close to the horizon",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-087--af_bella",
+      "audioSha256": "a52591f3f2fb3aed8d6af312d8dcea12ade0d1b1e77de464bd0cd87d2ad5d592",
+      "seconds": 5.475,
+      "transcript": "the curious child wondered why the moon appeared larger when it was close to the horizon",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-087--am_michael",
+      "audioSha256": "25780d29dc65c0f878da881a41813bbec3899f6677ae0094786e19092e177991",
+      "seconds": 5.85,
+      "transcript": "the curious child wondered why the moon appeared larger when it was close to the horizon",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-087--am_puck",
+      "audioSha256": "4b8075f637fff3d8b8a7617fce2dbe37d66ec2000e3dcf65c88d6c8071f5fa92",
+      "seconds": 5.125,
+      "transcript": "the curious child wondered why the moon appeared larger when it was close to the horizon",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-088--af_heart",
+      "audioSha256": "9333d52f3c109df6e7dbb50c1b647ccf153c91403027a26090d9fca658caacbb",
+      "seconds": 6.625,
+      "transcript": "the repair technician discovered a loose wire behind the control panel and replaced the damaged connection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-088--af_bella",
+      "audioSha256": "f69521c51883adf894f99e88f07410e3bc7b1ccb211334a3a8768bb487007a81",
+      "seconds": 6.95,
+      "transcript": "the repair technician discovered a loose wire behind the control panel and replaced the damaged connection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-088--am_michael",
+      "audioSha256": "6b3f9c555f5e565bdd8dd4bbefda0c54d31a4dcbc7d018d1717c4fbfcd53d84b",
+      "seconds": 7.15,
+      "transcript": "the repair technician discovered a loose wire behind the control panel and replaced the damaged connection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-088--am_puck",
+      "audioSha256": "4b7b5cdfdba7cbfd941ab9f16c523de6a8e35eac6461c3c608e06255a03dbd95",
+      "seconds": 6.4,
+      "transcript": "the repair technician discovered a loose wire behind the control panel and replaced the damaged connection",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-089--af_heart",
+      "audioSha256": "d778c3bd2e1100994fc6c7bf3af6559ae6d31ead0d218837370659de3a1263c4",
+      "seconds": 6.325,
+      "transcript": "a soft blanket lay across the sofa beside a collection of travel magazines and old photographs",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-089--af_bella",
+      "audioSha256": "08bea3dbb9aed15855ffba03cea2e64a589cf6cd4e2e928cd8da732e93e4f37d",
+      "seconds": 6.725,
+      "transcript": "a soft blanket lay across the sofa beside a collection of travel magazines and old photographs",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-089--am_michael",
+      "audioSha256": "a50ed3ae29b7a034cc8bb9c07aa867ab0a22ea30add99fc6e95c6273f8380913",
+      "seconds": 7.05,
+      "transcript": "a soft blanket lay across the sofa beside a collection of travel magazines and old photographs",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-089--am_puck",
+      "audioSha256": "37936a1599e2d3186ef51934e7263035c5470b2121a35dd2ff686eb131d32060",
+      "seconds": 6.3,
+      "transcript": "a soft blanket lay across the sofa beside a collection of travel magazines and old photographs",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-090--af_heart",
+      "audioSha256": "2daebc0cbdf94f15f0034bd0ca0e75cbfe475c9b627130fadf5b1693372b975a",
+      "seconds": 6.2,
+      "transcript": "the market opened early to give local farmers enough time to arrange their vegetables and flowers",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-090--af_bella",
+      "audioSha256": "c7c5e3fba819820f5d3618494b808a4946f12ff70118714c0b147aeea67992c2",
+      "seconds": 6.5,
+      "transcript": "the market opened early to give local farmers enough time to arrange their vegetables and flowers",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-090--am_michael",
+      "audioSha256": "8cc208558c84f3f1b59a490c4a6059a24eb99728bb34fb5cc471668fe5fe26a3",
+      "seconds": 6.7,
+      "transcript": "the market opened early to give local farmers enough time to arrange their vegetables in flowers",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-090--am_puck",
+      "audioSha256": "f96b400d51b6a90d50e1e96989ea8beac1e121e8bd83ba9744805577afc94128",
+      "seconds": 5.975,
+      "transcript": "the market opened early to give local farmers enough time to arrange their vegetables and flowers",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-091--af_heart",
+      "audioSha256": "0e7d5e0233844079a0e54b6fe7c092f08d69213f840621cec1e782c978f00d75",
+      "seconds": 5.9,
+      "transcript": "the volunteer co ordinator explained the schedule twice so that everyone knew when and where to meet",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-091--af_bella",
+      "audioSha256": "878ec6d4f5b9a3ff1352422537fed72d9fdef4ef894315455cc6588abaabc44b",
+      "seconds": 6.425,
+      "transcript": "the volunteer co ordinator explained the schedule twice so that everyone knew when and where to meet",
+      "wordErrorRate": 0.125,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-091--am_michael",
+      "audioSha256": "76f1dc603fb7186228848b7a52caf9144c8d953cc3242486aca6ebb8973e2521",
+      "seconds": 6.85,
+      "transcript": "the volunteer co ordinator explained the schedule twice so that every one knew when and where to meet",
+      "wordErrorRate": 0.25,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-091--am_puck",
+      "audioSha256": "4b65a0969ebcc54562abd42307bdcafe216e5d3c76a7c86aa3e970f7779c9cfb",
+      "seconds": 6.0,
+      "transcript": "the volunteer co ordinator explained the schedule twice so that every one knew when and where to meet",
+      "wordErrorRate": 0.25,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-092--af_heart",
+      "audioSha256": "5d10fb4da33b6cefcf9cae4deb09cda1b1bdffafcd61f66dce74435f243fc361",
+      "seconds": 6.675,
+      "transcript": "a carefully chosen example can make an unfamiliar concept easier to understand and remember later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-092--af_bella",
+      "audioSha256": "dfac7215d8d971f0f2e9dd83d172a727820e1b0fc220404a08a881923bd8af45",
+      "seconds": 7.15,
+      "transcript": "a carefully chosen example can make an unfamiliar concept easier to understand and remember later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-092--am_michael",
+      "audioSha256": "c613fb22ef97b44d575a6ff4291038da7ed24b31a5b18765a350a6ea5fee5df1",
+      "seconds": 7.45,
+      "transcript": "a carefully chosen example can make an unfamiliar concept easier to understand and remember later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-092--am_puck",
+      "audioSha256": "b0411deb2c6cbd63e7ddbe7e02f69bc153c2c5225ae922b157ec5a34c679a9b6",
+      "seconds": 6.7,
+      "transcript": "a carefully chosen example can make an unfamiliar concept easier to understand and remember later",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-093--af_heart",
+      "audioSha256": "3a1fd07d822c8c6c19d8c1073942026db40203998c5b7c9a2b99bf8d39b7e7d4",
+      "seconds": 5.275,
+      "transcript": "the fairy crossed the bay beneath a clear sky while passengers enjoyed the cool morning air",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-093--af_bella",
+      "audioSha256": "5975fe292105f55e218c1341bef558bba3439e32a55881290c95e83fb75ffb46",
+      "seconds": 5.825,
+      "transcript": "the ferry crossed the bay beneath a clear sky while passengers enjoyed the cool morning air",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-093--am_michael",
+      "audioSha256": "a55b45ff8d94410ad90dd1772b8bd87082dc16474ab36f4087af188bdee609b7",
+      "seconds": 6.075,
+      "transcript": "the fairy crossed the bay beneath a clear sky while passengers enjoyed the cool morning air",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-093--am_puck",
+      "audioSha256": "16b078abee23617e2638c458a9be118f0fb2485951b87054e6df5d43f552e722",
+      "seconds": 5.375,
+      "transcript": "the fairy crossed the bay beneath a clear sky while passengers enjoyed the cool morning air",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-094--af_heart",
+      "audioSha256": "7054bd5669142164c511398525b7ac5eccb5c11100fee731e8de13eb4c3ae948",
+      "seconds": 6.175,
+      "transcript": "our new neighbor speaks quietly listens patiently and always remembers to greet people by name",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-094--af_bella",
+      "audioSha256": "6d1a663d20a2ae5ca2a17a2eaecd670cc9ccf3992723dffbb95fafb3819cbb4d",
+      "seconds": 6.575,
+      "transcript": "our new neighbor speaks quietly listens patiently and always remembers to greet people by name",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-094--am_michael",
+      "audioSha256": "9396f06bcab08adc587fb950c4f00c4dbe4f9d2add7eeb70f83e79e06cb3831d",
+      "seconds": 6.95,
+      "transcript": "our new neighbour speaks quietly listens patiently and always remembers to greet people by name",
+      "wordErrorRate": 0.06666666666666667,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-094--am_puck",
+      "audioSha256": "a3a61966c4404da6524aadd2c69579035267cabc506698faa8a4dca849316cf4",
+      "seconds": 6.15,
+      "transcript": "our new neighbor speaks quietly listens patiently and always remembers to greet people by name",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-095--af_heart",
+      "audioSha256": "09b4c4fc6b58727a86630e46bc21ef302ce5fdb0a4232537f99dfc6511ae4bd6",
+      "seconds": 5.525,
+      "transcript": "the director asked the performers to slow down slightly without losing the energy of the scene",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-095--af_bella",
+      "audioSha256": "52e104daa036f4751559d74ecab632b8d2de4e49103a137a8e14abf2f9432be6",
+      "seconds": 5.95,
+      "transcript": "the director asked the performers to slow down slightly without losing the energy of the scene",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-095--am_michael",
+      "audioSha256": "0bd287286c71d9cdfcb9abad25a7ebb5e026460dbce4028543ba8659b01002ae",
+      "seconds": 6.275,
+      "transcript": "the director asked the performers to slow down slightly without losing the energy of the scene",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-095--am_puck",
+      "audioSha256": "859e7a9de1150949d096b24273f83417ee91e11b5c0d0fa3ca575d1f441c92b6",
+      "seconds": 5.675,
+      "transcript": "the director asked the performers to slow down slightly without losing the energy of the scene",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-096--af_heart",
+      "audioSha256": "715ffca660d3e29f9e96895b6df778b62848b0434ddebdb8682207aa9c7376b9",
+      "seconds": 5.5,
+      "transcript": "a small change in the arrangement of the furniture made the room feel surprisingly spacious",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-096--af_bella",
+      "audioSha256": "79525c4597dfea48d72437688853aff178fd65f6dcaef4c5f4d0e93d4d4a55aa",
+      "seconds": 5.975,
+      "transcript": "a small change in the arrangement of the furniture made the room feel surprisingly spacious",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-096--am_michael",
+      "audioSha256": "70b57363cb5876e4ba4e8da2338664b20ca7e4b0dda50a1345bc0d2c32c6dfb0",
+      "seconds": 6.125,
+      "transcript": "a small change in the arrangement of the furniture made the room feel surprisingly spacious",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-096--am_puck",
+      "audioSha256": "89bd96caa0f0f0925c6cbf12004cc284387747fb36df224c93c09d1af36d03d8",
+      "seconds": 5.55,
+      "transcript": "a small change in the arrangement of the furniture made the room feel surprisingly spacious",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-097--af_heart",
+      "audioSha256": "62881596e6eb1186b478239c766621776914c16ce2a96340c40775694f958fc2",
+      "seconds": 6.3,
+      "transcript": "the researcher compared the recorded speech with several examples produced by speakers from different regions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-097--af_bella",
+      "audioSha256": "20dc9a28ca4e2124a4135240fe38ea3f338044a297799affa406723a7d51da27",
+      "seconds": 6.675,
+      "transcript": "the researcher compared the recorded speech with several examples produced by speakers from different regions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-097--am_michael",
+      "audioSha256": "68e95e5a74b4f97a30eed3be6b642a2d7a908f59165f0ec5ef6f8af1095a83fa",
+      "seconds": 6.925,
+      "transcript": "the researcher compared the recorded speech with several examples produced by speakers from different regions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-097--am_puck",
+      "audioSha256": "809059a80118b9d6b49a20143cdf5fb8c859ec08d22d44545345d0ee687576e5",
+      "seconds": 6.35,
+      "transcript": "the researcher compared the recorded speech with several examples produced by speakers from different regions",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-098--af_heart",
+      "audioSha256": "9af642e93c3eda8c39c587aec8590e016203ad5660fad5ec25e4257aa8237014",
+      "seconds": 6.1,
+      "transcript": "the final paragraph should connect the main ideas and explain why the findings matter to the reader",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-098--af_bella",
+      "audioSha256": "ba5e940fbb40e415afdb80ca7d6229bf8bc0ac789efaadccd2ede76b3f226672",
+      "seconds": 6.5,
+      "transcript": "the final paragraph should connect the main ideas and explain why the findings matter to the reader",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-098--am_michael",
+      "audioSha256": "e54def7b6b33728484fcc5889e8660e59fe905bad860aacb8938af8017a2944d",
+      "seconds": 6.288,
+      "transcript": "the final paragraphs should connect the main ideas and explain why the findings matter to the reader",
+      "wordErrorRate": 0.058823529411764705,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-098--am_puck",
+      "audioSha256": "13f6690cb20a7b382f8c56317ead1e04a32d0161e1d64e9aa4cad20bd482a590",
+      "seconds": 5.9,
+      "transcript": "the final paragraph should connect the main ideas and explain why the findings matter to the reader",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-099--af_heart",
+      "audioSha256": "525543e13dea6097f532e74be9210d568903d46d73b75472766929a6b35d0fa7",
+      "seconds": 6.55,
+      "transcript": "the buss stopped outside the hospital before continuing toward the university and the central shopping district",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-099--af_bella",
+      "audioSha256": "ee024c2b7ba8e176e78fb6fa401d1feb507cd111367ebd7d431875fc47811280",
+      "seconds": 6.95,
+      "transcript": "the bus stopped outside the hospital before continuing toward the university and the central shopping district",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-099--am_michael",
+      "audioSha256": "abf22733f16453952554d1b6da24cebd0a63a9dd79257983267a658bd4ce8c79",
+      "seconds": 7.15,
+      "transcript": "the buss stopped outside the hospital before continuing toward the university and the central shopping district",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-099--am_puck",
+      "audioSha256": "70ef9266b8fdb38bdfafaceb97c400e2ce84bcb2384f012e25067bd6231f44e3",
+      "seconds": 6.5,
+      "transcript": "the buss stopped outside the hospital before continuing toward the university and the central shopping district",
+      "wordErrorRate": 0.0625,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-100--af_heart",
+      "audioSha256": "36f4ab906b0faaba7117de08c783d2cefcdd38a3eede9e6667b4ef72f1a04c5f",
+      "seconds": 5.95,
+      "transcript": "at the end of the lesson each learner recorded another attempt and listened for changes in rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-100--af_bella",
+      "audioSha256": "77d847b3a6ec65fcc6cadb643fd6a0b1a0cce11598577be20de8b11b13314973",
+      "seconds": 6.3,
+      "transcript": "at the end of the lesson each learner recorded another attempt and listened for changes in rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-100--am_michael",
+      "audioSha256": "ff0c22fc3c6252dea6df57a39894e70cdcde41e253f93e743ea058bc1f16f0e7",
+      "seconds": 6.6,
+      "transcript": "at the end of the lesson each learner recorded another attempt and listened for changes in rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    },
+    {
+      "takeId": "passage-100--am_puck",
+      "audioSha256": "d76881bc5a25975766435c26ad2b3ecb7235b3297d293a143fa1f1a1d902fb3b",
+      "seconds": 5.8,
+      "transcript": "at the end of the lesson each learner recorded another attempt and listened for changes in rhythm",
+      "wordErrorRate": 0.0,
+      "validSignal": true,
+      "usable": true
+    }
+  ],
+  "count": 400,
+  "usable": 400,
+  "medianWordErrorRate": 0.0,
+  "humanListeningReview": "pending; automated coverage is not human listening",
+  "referenceManifestSha256": "a2394fa5e3ee9d480def2063b47abdfad5b572a4497a8efe80325b97888c514d",
+  "generationIdsPresent": true,
+  "distinctTexts": 100,
+  "estimatedInputCostUsd": 0.0243536,
+  "totalSeconds": 2485.129
+}

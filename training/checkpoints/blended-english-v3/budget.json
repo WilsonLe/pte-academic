@@ -1,0 +1,37 @@
+{
+  "previousCapUsd": 10,
+  "newAllowanceUsd": 10,
+  "priorCumulativeReservedUsd": 7.0113639,
+  "currentCumulativeCapUsd": 17.0113639,
+  "currentCumulativeReservedUsd": 7.011363900000023,
+  "newAllowanceReservationsUsd": 0,
+  "newAllowanceConservativeRemainingUsd": 9.999999999999975,
+  "resetCutoffReservationCount": 5736,
+  "allHistoricalReservationsPreserved": true,
+  "authorization": {
+    "id": "fresh-allowance-2026-10-16",
+    "date": "2026-10-16",
+    "operatorDecision": "Fresh $10 from now",
+    "priorCumulativeReservedUsd": 7.0113639,
+    "priorReservationCount": 5736,
+    "additionalAllowanceUsd": 10,
+    "cumulativeCapUsd": 17.0113639,
+    "priorLedgerSha256": "d52137b0442c4a7099453cc426ebf1ac2de480ad42c96c558b4e8e4709457e36",
+    "historyPreserved": true,
+    "priorReservationsSha256": "756ca0c08a681538c54d0f64304d9459b1643cb7a04c4bdb21ea9ef79888fc92"
+  },
+  "providerReadback": {
+    "authenticated": true,
+    "usageUsd": 5.39384422,
+    "limit": 17.0113639,
+    "limitRemaining": 11.61751968,
+    "isFreeTier": false,
+    "cumulativeReservedUsd": 7.011363900000023,
+    "cumulativeAuthorizedCapUsd": 17.0113639,
+    "conservativeRemainingUsd": 9.999999999999975
+  },
+  "additionalV3GenerationEstimateUsd": 0.690960299999999,
+  "v3GenerationCompletedBeforeFreshAllowance": true,
+  "automaticPaidRetries": 0,
+  "billingLimitations": "Provider usage can settle later; reservations are not released, and max(provider usage, cumulative reservations) gates paid requests."
+}

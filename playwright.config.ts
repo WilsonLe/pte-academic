@@ -1,22 +1,29 @@
 import { defineConfig } from "@playwright/test";
+const comparison = process.env.PTE_TEST_COMPARISON === "1";
 const speech = process.env.PTE_TEST_SPEECH === "1";
 const port = Number(process.env.PTE_TEST_PORT || 4178);
 const subpathPort = Number(process.env.PTE_TEST_SUBPATH_PORT || 4180);
 const subpath = process.env.PTE_TEST_SUBPATH === "1";
 export default defineConfig({
   testDir: "tests",
-  testMatch: speech
-    ? "speech.spec.ts"
-    : subpath
-      ? "subpath.spec.ts"
-      : "practice.spec.ts",
-  outputDir: speech
+  testMatch: comparison
+    ? "comparison.spec.ts"
+    : speech
+      ? "speech.spec.ts"
+      : subpath
+        ? "subpath.spec.ts"
+        : "practice.spec.ts",
+  outputDir: comparison
     ? subpath
-      ? "test-results/speech-subpath"
-      : "test-results/speech"
-    : subpath
-      ? "test-results/subpath"
-      : "test-results/practice",
+      ? "test-results/comparison-subpath"
+      : "test-results/comparison"
+    : speech
+      ? subpath
+        ? "test-results/speech-subpath"
+        : "test-results/speech"
+      : subpath
+        ? "test-results/subpath"
+        : "test-results/practice",
   fullyParallel: false,
   workers: 1,
   timeout: 45000,

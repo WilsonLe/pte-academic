@@ -12,3 +12,7 @@ dist-subpath/
 
 .start/
 .tanstack/
+# Local reference audio, model downloads, extracted features and training runs
+/artifacts/
+/training/.venv/
+__pycache__/

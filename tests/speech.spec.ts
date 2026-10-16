@@ -113,9 +113,7 @@ test("real on-device recognition, private transport, saved feedback and offline 
   await seed(page);
   expect(
     requests.filter(
-      (r) =>
-        r.url.includes("huggingface.co") ||
-        /speech\.worker-|\.wasm/.test(r.url),
+      (r) => r.url.includes("huggingface.co") || /speech\.worker-/.test(r.url),
     ),
   ).toHaveLength(0);
   await page
@@ -300,7 +298,7 @@ test("unsupported workers keep self-review available", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("undecodable recording reports an error without downloading models", async ({
+test("undecodable recording reports a decode error without downloading ASR weights", async ({
   page,
   context,
 }) => {
@@ -335,7 +333,9 @@ test("undecodable recording reports an error without downloading models", async 
   await page
     .getByRole("button", { name: "Transcribe on this device", exact: true })
     .click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: /decode/i }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", {
       name: "Transcribe on this device",

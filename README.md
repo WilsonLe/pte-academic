@@ -69,24 +69,29 @@ npm run openrouter -- plan
 npm run openrouter -- tts --confirm-spend --max-usd 0.25
 ```
 
-The operator authorized a **US$10 total project budget**. Passing or increasing it requires asking the operator. The provider key is capped without a reset, and a local cumulative reservation ledger guards each request. A per-run allowance cannot bypass the total. Credentials and ledger stay in gitignored `.cli/openrouter/`, never the site bundle. No automatic paid retries or credit purchases occur. See [audio authoring](agents/audio-author.md) for setup, supported models, macOS audio-inspector prerequisite and review requirements.
+The operator authorized an original US$10 budget and then, on 2026-10-16, a fresh US$10 after US$7.0113639 in reservations: **current cumulative cap US$17.0113639**, with all spending history preserved. Passing or increasing it requires asking the operator. The provider key is capped without a reset, and a local cumulative reservation ledger guards each request. A per-run allowance cannot bypass the total. Credentials and ledger stay in gitignored `.cli/openrouter/`, never the site bundle. No automatic paid retries or credit purchases occur. See [audio authoring](agents/audio-author.md) for setup, supported models, macOS audio-inspector prerequisite and review requirements.
 
 Audio is synthetic; group discussions currently use a narrator identifying three speakers. Generation provenance and honest listening-review status live in `content/narration.json`. A successful API response is not evidence of pronunciation quality.
 
 ## Local speaking feedback
 
-Open a speaking response in Review and select **Transcribe**. First use downloads about 60 MB of public English speech files. Quantized Whisper Tiny English and ONNX WASM run in a dedicated worker; recordings and transcripts stay on the device. The normal offline pack does not fetch speech code/weights. Once used successfully, speech assets and weights are cached for offline reuse; browser storage can be evicted. Cancel stops the worker; failures leave playback available. A changed app runtime may require another download.
+The accepted blended-English **v3 comparison model** grades syllable sound similarity in Read Aloud and Repeat Sentence. Its required model pack (~624 MiB, plus ~14 MiB speech runtime) downloads automatically when the app opens. Preparation shows progress and retry; **Score speech** waits for readiness and never substitutes word matching for a pronunciation grade. Recordings stay on this device. All four reference accents (American, British, Australian and Indian) are equally valid; uncertain syllables retain no numeric score. The model is experimental synthetic-reference similarity, not correctness, fluency, proficiency or an exam score. Browser scoring supports recordings up to 45 seconds; separate learned stress assessment remains in the Python experiment.
 
-Read Aloud and Repeat Sentence show normalized word-match accuracy, deducting missing, substituted and extra recognized words. Short answers compare the key, ignoring punctuation/case and a leading article. Other speaking types show recognized text, word count and average words per minute including pauses; they keep content self-review. Silence gets no numeric score. Recognition can mishear accents/noise or hallucinate, so these are practice aids without pronunciation/fluency assessment or a predicted PTE score.
+Open a saved speaking response in Review → Speech → **Score speech** to run v3 locally and inspect paged syllable scores/times. The source checkpoint SHA is `2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b`. The browser export keeps its comparison head/reference bank/calibration and uses float16-stored encoder constants with float32 operations. See [browser export and validation](training/checkpoints/blended-english-v3/BROWSER_EXPORT.md), [training process](training/RESUME.md) and the [model card](training/checkpoints/blended-english-v3/MODEL_CARD.md).
 
-Transcripts and model provenance are stored with attempts in IndexedDB; clearing history removes transcripts and recordings. Cache Storage retains public model/runtime files; clear site storage through browser settings to remove those too. Model: `onnx-community/whisper-tiny.en`, revision `2575352d61be1bf7225cf8f8b268a4678025fc58`, q8; Transformers.js 4.3.1, WASM single thread. Recording input is bounded to two-minute tasks (five-second tolerance) and 24 MiB encoded. Inference times out after five minutes; slower or low-memory browsers may need replay/self-review.
+**Transcribe** remains a separate optional Whisper word-review action (~60 MB public download on first use). Read Aloud/Repeat Sentence word match counts missing, substituted and extra recognized words; short answers compare the key ignoring case/punctuation/leading articles. Other speaking tasks show transcript/pace for self-review. Recognition can mishear accents/noise or hallucinate; it does not supply the v3 sound-similarity grade.
+
+Syllable results, transcripts and provenance persist only with retained attempts in IndexedDB; clearing history removes them and recordings, without recreating cleared/pruned attempts or granting XP. The scope-specific model cache survives ordinary app updates/history clearing, supports offline reuse and can be removed through browser site-storage settings. Browser storage can be evicted; missing/corrupt files require download again. Cancel stops local scoring; failure retains playback and never invents a score. Low-memory browsers may be unable to initialize the encoder even after download.
 
 ```sh
+npm run test:comparison
+uv run --project training python training/browser_cases.py
+npm run test:comparison:browser
 npm run test:speech
 npm run test:speech:browser
 ```
 
-Implementation references: [Transformers.js](https://huggingface.co/docs/transformers.js/index), [model](https://huggingface.co/onnx-community/whisper-tiny.en).
+The four-accent browser validation command requires retained local training reference audio to prepare its development controls; those files are intentionally not in Git. Whisper uses `onnx-community/whisper-tiny.en` revision `2575352d61be1bf7225cf8f8b268a4678025fc58`, q8 / Transformers.js 4.3.1. Its transcript input limit remains 125 seconds / 24 MiB; both local inference jobs time out after five minutes.
 
 ## Practice progress
 

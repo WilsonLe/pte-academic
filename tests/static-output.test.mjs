@@ -45,7 +45,15 @@ test("published artifact contains a base-aware SPA shell, public assets and scop
   assert.ok(worker.includes("self.registration.scope"));
   const assets = JSON.parse(worker.match(/const ASSETS=(\[.*?\]);/)[1]);
   assert.ok(assets.includes("./index.html"));
-  assert.ok(!assets.some((path) => /speech\.worker-|ort-wasm-/.test(path)));
+  assert.ok(
+    !assets.some((path) =>
+      /speech\.worker-|comparison\.worker-|ort-wasm-/.test(path),
+    ),
+  );
+  assert.ok(
+    !assets.some((path) => path.includes("/models/")),
+    "required model pack must use its separate verified cache",
+  );
   assert.ok(
     assets.some((path) => path.includes("_workspace-")),
     "lazy workspace must be available offline before its first use",

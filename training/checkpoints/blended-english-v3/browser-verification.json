@@ -1,0 +1,109 @@
+{
+  "sourceModelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+  "encoderSha256": "769b21ed2f10db1e25e695c4b380258ba77f91dc860dc3b1d53591588e2c7dfb",
+  "manifestSha256": "31dbf565a1fd9bbdcb13803c3112ce7e1c38f9ffb5ac4e4e1d71cdadc123d4f5",
+  "scope": "Existing development controls, actual Chrome/WASM; no fresh final-test selection or human validity claim.",
+  "maximumAllowedDifference": 0.1,
+  "cases": [
+    {
+      "name": "passage-083--am_puck",
+      "maximumScoreDifference": 0.010000000000005116,
+      "scored": 21,
+      "syllables": 21,
+      "target": []
+    },
+    {
+      "name": "passage-054--am_puck",
+      "maximumScoreDifference": 0.010000000000005116,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        68.35
+      ]
+    },
+    {
+      "name": "passage-054--am_puck-wrong",
+      "maximumScoreDifference": 0.010000000000005116,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        40.28
+      ]
+    },
+    {
+      "name": "passage-083--bm_george",
+      "maximumScoreDifference": 0.010000000000005116,
+      "scored": 21,
+      "syllables": 21,
+      "target": []
+    },
+    {
+      "name": "passage-054--bm_george",
+      "maximumScoreDifference": 0.009999999999990905,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        82.18
+      ]
+    },
+    {
+      "name": "passage-054--bm_george-wrong",
+      "maximumScoreDifference": 0.009999999999990905,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        53.73
+      ]
+    },
+    {
+      "name": "passage-083--au_bloke",
+      "maximumScoreDifference": 0.020000000000003126,
+      "scored": 20,
+      "syllables": 21,
+      "target": []
+    },
+    {
+      "name": "passage-054--au_bloke",
+      "maximumScoreDifference": 0.00999999999999801,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        63.84
+      ]
+    },
+    {
+      "name": "passage-054--au_bloke-wrong",
+      "maximumScoreDifference": 0.00999999999999801,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        37.91
+      ]
+    },
+    {
+      "name": "passage-083--in_dhruv",
+      "maximumScoreDifference": 0.009999999999990905,
+      "scored": 21,
+      "syllables": 21,
+      "target": []
+    },
+    {
+      "name": "passage-054--in_dhruv",
+      "maximumScoreDifference": 0.010000000000005116,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        78.5
+      ]
+    },
+    {
+      "name": "passage-054--in_dhruv-wrong",
+      "maximumScoreDifference": 0.010000000000005116,
+      "scored": 19,
+      "syllables": 19,
+      "target": [
+        49.97
+      ]
+    }
+  ]
+}

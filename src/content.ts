@@ -1,3 +1,7 @@
+import {
+  pronunciationSummary,
+  type Pronunciation,
+} from "./speech/comparison-schema";
 import { z } from "zod";
 import guideData from "../content/guides.json";
 import questionData from "../content/questions.json";
@@ -97,9 +101,28 @@ export type Answer = {
   values?: string[];
   recording?: string;
   transcription?: Transcription;
+  pronunciation?: Pronunciation;
 };
 export function feedback(q: Question, a: Answer) {
   const g = guideFor(q);
+  if (
+    g.kind === "speak" &&
+    (q.type === "read-aloud" || q.type === "repeat-sentence")
+  ) {
+    const score = a.pronunciation
+      ? pronunciationSummary(a.pronunciation)
+      : null;
+    return {
+      label:
+        score === null
+          ? a.recording
+            ? "Score your speech"
+            : "No recording"
+          : `${score}/100 reference similarity`,
+      detail:
+        "Open Speech to compare each syllable with the v3 reference model. All four included accents are accepted equally. Experimental similarity is not correctness or an exam score.",
+    };
+  }
   if (g.kind === "speak")
     return {
       label: a.recording ? "Listen & self-review" : "No recording",
