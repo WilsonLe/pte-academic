@@ -44,9 +44,11 @@ export function Pager({
 export function ReadingPages({
   texts,
   label = "reading pages",
+  scroll = false,
 }: {
   texts: string[];
   label?: string;
+  scroll?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   const [pages, setPages] = useState<string[]>([""]);
@@ -58,7 +60,7 @@ export function ReadingPages({
   ].join(" ");
   useLayoutEffect(() => {
     const node = panel.current;
-    if (!node) return;
+    if (!node || scroll) return;
     let live = true;
     const paginate = () => {
       if (!live) return;
@@ -142,21 +144,29 @@ export function ReadingPages({
       live = false;
       observer.disconnect();
     };
-  }, [source]);
+  }, [source, scroll]);
   const current = Math.min(index, pages.length - 1);
   return (
-    <div className="reading-pages">
-      <div className="reading-copy" ref={panel}>
+    <div className={`reading-pages ${scroll ? "reading-pages-scroll" : ""}`}>
+      <div
+        className="reading-copy"
+        ref={panel}
+        role={scroll ? "region" : undefined}
+        aria-label={scroll ? label : undefined}
+        tabIndex={scroll ? 0 : undefined}
+      >
         <p key={current} className="page-enter">
-          {pages[current]}
+          {scroll ? source : pages[current]}
         </p>
       </div>
-      <Pager
-        index={current}
-        count={pages.length}
-        onChange={setIndex}
-        label={label}
-      />
+      {!scroll && (
+        <Pager
+          index={current}
+          count={pages.length}
+          onChange={setIndex}
+          label={label}
+        />
+      )}
     </div>
   );
 }

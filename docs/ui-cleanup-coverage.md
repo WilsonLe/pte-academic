@@ -4,7 +4,7 @@ Tracks the operator's request in issue #35 to remove duplicated UI across every 
 
 ## Shared owners
 
-- `ReadingPages`: normalize and deduplicate equal blocks, then measure related text together. Preserve every distinct word and long-content paging; hide single-page controls. Guides, section details, learning articles, information dialogs, review, and speech help/transcripts all consume this owner.
+- `ReadingPages`: normalize and deduplicate equal blocks, then measure related text together. Preserve every distinct word and long-content paging where applicable; Learn opts into complete scrolling text; hide single-page controls. Guides, section details, learning articles, information dialogs, review, and speech help/transcripts all consume this owner.
 - `GuideScreen`: show Instructions initially; retain Strategy & tips and task-specific scoring guidance, without the generic ready screen or repeated review copy.
 - `Preflight`: one plan title/count, required device checks and begin action; keep timing/forward-only consequences and disclosed simulation/storage limitations. No generic ready ornament; no repeated player captions, privacy copy or form count in details. Playback groups and controls retain their accessible names.
 - `Runner` / `QuestionInput`: one media status, progress and required countdown. Audio-only status stops occupying the workspace after playback. Preserve source text, task instructions, clocks, input affordances, one-play rules and recoverable media errors; omit chart provenance filler.

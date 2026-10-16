@@ -1624,6 +1624,16 @@ body {
   /* Reserve measurement space even when Pager is absent: avoid fit oscillation. */
   grid-template-rows: minmax(0, 1fr) 48px;
 }
+.cards-list-scroll .cards-list-grid {
+  grid-auto-rows: minmax(var(--cards-height), auto);
+}
+.reading-pages-scroll {
+  display: flex;
+}
+.reading-pages-scroll .reading-copy {
+  flex: 1;
+  overflow-y: auto;
+}
 .audio-player {
   display: flex;
   align-items: center;

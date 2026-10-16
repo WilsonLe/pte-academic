@@ -21,9 +21,10 @@ type CardsListProps<T> = {
   maxCardHeight?: number;
   maxColumns?: number;
   maxRows?: number;
+  scroll?: boolean;
 };
 
-// The measured panel owns both pagination capacity and the rendered grid.
+// The measured panel owns the responsive grid and optional pagination.
 // A short final page keeps the same card dimensions as the preceding page.
 export function CardsList<T>({
   items,
@@ -39,6 +40,7 @@ export function CardsList<T>({
   maxCardHeight = 176,
   maxColumns = 2,
   maxRows = 3,
+  scroll = false,
 }: CardsListProps<T>) {
   const panel = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
@@ -48,7 +50,9 @@ export function CardsList<T>({
     height: minCardHeight,
   });
   const count = Math.ceil(items.length / layout.size);
-  const current = Math.max(0, Math.min(index ?? page, Math.max(0, count - 1)));
+  const current = scroll
+    ? 0
+    : Math.max(0, Math.min(index ?? page, Math.max(0, count - 1)));
   const latest = useRef({ current, size: layout.size, onIndex });
   useLayoutEffect(() => {
     latest.current = { current, size: layout.size, onIndex };
@@ -73,6 +77,14 @@ export function CardsList<T>({
         1,
         Math.min(maxColumns, Math.floor((width + gap) / (minCardWidth + gap))),
       );
+      if (scroll) {
+        setLayout((old) =>
+          old.columns === columns && old.height === minCardHeight
+            ? old
+            : { columns, size: 1, height: minCardHeight },
+        );
+        return;
+      }
       const rowsAt = (height: number) =>
         Math.max(
           1,
@@ -120,10 +132,17 @@ export function CardsList<T>({
     maxCardHeight,
     maxColumns,
     maxRows,
+    scroll,
   ]);
 
   return (
-    <div ref={panel} className={`cards-list ${className}`}>
+    <div
+      ref={panel}
+      className={`cards-list ${scroll ? "cards-list-scroll" : ""} ${className}`}
+      role={scroll ? "region" : undefined}
+      aria-label={scroll ? label : undefined}
+      tabIndex={scroll ? 0 : undefined}
+    >
       {items.length ? (
         <div
           className={`cards-list-grid ${gridClassName}`}
@@ -134,14 +153,17 @@ export function CardsList<T>({
             } as CSSProperties
           }
         >
-          {items
-            .slice(current * layout.size, (current + 1) * layout.size)
-            .map((item, i) => render(item, current * layout.size + i))}
+          {(scroll
+            ? items
+            : items.slice(current * layout.size, (current + 1) * layout.size)
+          ).map((item, i) =>
+            render(item, scroll ? i : current * layout.size + i),
+          )}
         </div>
       ) : (
         empty
       )}
-      {count > 1 && (
+      {!scroll && count > 1 && (
         <Pager
           index={current}
           count={count}
