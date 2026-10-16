@@ -120,7 +120,7 @@ export function feedback(q: Question, a: Answer) {
             : "No recording"
           : `${score}/100 reference similarity`,
       detail:
-        "Use the speech tools in Your response to compare each syllable with the v3 reference model. All four included accents are accepted equally. Experimental similarity is not correctness or an exam score.",
+        "Open Feedback to compare each syllable with the v3 reference model. All four included accents are accepted equally. Experimental similarity is not correctness or an exam score.",
     };
   }
   if (g.kind === "speak")

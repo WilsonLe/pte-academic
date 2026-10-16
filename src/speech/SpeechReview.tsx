@@ -1,10 +1,16 @@
 import { SyllableScores } from "./SyllableScores";
 import { AudioPlayer } from "../components/AudioPlayer";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { AudioLines, Gauge, X, Info, ListChecks } from "lucide-react";
+import { AudioLines, Gauge, X, CircleHelp, ListChecks } from "lucide-react";
 import type { Answer, Question } from "../content";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
 import { ReadingPages } from "../Pages";
 import { savePronunciation } from "../storage";
 import { scoreRecording } from "./comparison-client";
@@ -108,7 +114,7 @@ export function SpeechReview({
     >
       <div className="speech-toolbar">
         <div className="speech-actions flex flex-wrap items-center gap-2">
-          {expected && (
+          {expected && answer.recording && (
             <Button
               onClick={() => void score()}
               disabled={!!progress || model.status !== "ready"}
@@ -163,32 +169,43 @@ export function SpeechReview({
               <span>Saved transcript</span>
             </Button>
           )}
-          <Button
-            aria-label="How local feedback works"
-            aria-pressed={panel === "help"}
-            title="How local feedback works"
-            variant={panel === "help" ? "secondary" : "ghost"}
-            onClick={() =>
-              setPanel(
-                panel === "help"
-                  ? pronunciation
-                    ? "syllables"
-                    : transcription
-                      ? "transcript"
-                      : "idle"
-                  : "help",
-              )
-            }
-          >
-            <Info />
-            <span>How local feedback works</span>
-          </Button>
+          <Dialog>
+            <DialogTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="How local feedback works"
+                  title="How local feedback works"
+                />
+              }
+            >
+              <CircleHelp />
+            </DialogTrigger>
+            <DialogContent className="practice-ui info-dialog">
+              <DialogTitle>How local feedback works</DialogTitle>
+              <ReadingPages
+                label="speech help pages"
+                texts={[
+                  ...(expected
+                    ? [
+                        "Read Aloud and Repeat Sentence use the trained blended-English v3 model for syllable sound similarity. American, British, Australian and Indian references are equally valid. Uncertain syllables have no score. This is experimental synthetic-reference similarity, not pronunciation correctness, fluency, proficiency or an exam score. Stress assessment remains separate from this app score.",
+                        "The required comparison model downloads automatically, is verified and cached for offline scoring. Your recording stays on this device.",
+                      ]
+                    : []),
+                  "Replay your recording for self-review. Other speaking tasks do not have automatic grading. Previously saved transcripts remain readable, but this app no longer generates transcripts or word-match feedback. Your recording stays on this device.",
+                ]}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
-      <AudioPlayer
-        src={answer.recording!}
-        label={`Your recording for question ${questionNumber}`}
-      />
+      {answer.recording && (
+        <AudioPlayer
+          src={answer.recording}
+          label={`Your recording for question ${questionNumber}`}
+        />
+      )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -221,19 +238,6 @@ export function SpeechReview({
             </p>
           )}
         </div>
-      ) : panel === "help" ? (
-        <ReadingPages
-          label="speech help pages"
-          texts={[
-            ...(expected
-              ? [
-                  "Read Aloud and Repeat Sentence use the trained blended-English v3 model for syllable sound similarity. American, British, Australian and Indian references are equally valid. Uncertain syllables have no score. This is experimental synthetic-reference similarity, not pronunciation correctness, fluency, proficiency or an exam score.",
-                  "The required comparison model downloads automatically and is verified and cached for offline scoring.",
-                ]
-              : []),
-            "Replay your recording for self-review. Other speaking tasks do not have automatic grading. Previously saved transcripts remain readable, but this app no longer generates transcripts or word-match feedback. Your recording stays on this device.",
-          ]}
-        />
       ) : transcription ? (
         <div className="speech-reading" aria-label="Local transcript result">
           <ReadingPages
@@ -249,9 +253,11 @@ export function SpeechReview({
         <div className="speech-idle">
           <AudioLines />
           <p>
-            {expected
-              ? "Listen back, then score your speech when the model is ready."
-              : "Listen back and compare your response with the example for self-review."}
+            {!answer.recording
+              ? "No recording was saved for this response. Record a response in a new practice to get speech feedback."
+              : expected
+                ? "Listen back, then score your speech when the model is ready."
+                : "Listen back and compare your response with the example for self-review."}
           </p>
         </div>
       )}

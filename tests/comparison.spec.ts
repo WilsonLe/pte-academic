@@ -48,9 +48,7 @@ async function seed(page: Page, waitForModel = true) {
     );
   });
   await page.goto(base + "history/comparison-fixture");
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
   if (waitForModel)
     await expect(
       page.getByRole("button", { name: "Score speech with v3 model" }),
@@ -256,9 +254,7 @@ test("required automatic download, actual app grading, saved scores, cancellatio
   }
   await context.setOffline(true);
   await page.reload();
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
   await expect(badge).toBeVisible();
   await expect(score).toBeEnabled({ timeout: 30000 });
   await score.click();
@@ -279,9 +275,7 @@ test("required automatic download, actual app grading, saved scores, cancellatio
     Object.defineProperty(window, "Worker", { value: undefined }),
   );
   await page.reload();
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
   await expect(score).toBeEnabled({ timeout: 30000 });
   await score.click();
   await expect(

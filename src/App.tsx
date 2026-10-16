@@ -820,19 +820,23 @@ function Review({
   onPronunciation: (questionId: string, value: Pronunciation) => void;
 }) {
   const [index, setIndex] = useState(0);
-  const [tab, setTab] = useState("Your response");
+  const [tab, setTab] = useState(() =>
+    guideFor(questions.find((q) => q.id === r.questionIds[0])!).kind === "speak"
+      ? "Feedback"
+      : "Your response",
+  );
   const id = r.questionIds[index],
     q = questions.find((x) => x.id === id)!,
     a = r.answers[id] || {};
   const f = feedback(q, a);
+  const speaking = guideFor(q).kind === "speak";
   const expected = modelAnswer(q);
-  const prompt = [q.prompt, q.text, q.audioText].filter(
-    (text): text is string => !!text,
-  );
-  const example =
-    a.recording && expected && !prompt.includes(expected)
-      ? `Example response: ${expected}`
-      : "";
+  const prompt = [
+    q.prompt,
+    q.text,
+    q.audioText,
+    ...(speaking && q.model ? [`Example response: ${q.model}`] : []),
+  ].filter((text): text is string => !!text);
   const tabs = [
     "Your response",
     "Feedback",
@@ -846,7 +850,7 @@ function Review({
         ? [`Your response: ${showAnswer(q, a)}`, `Answer key: ${expected}`]
         : [showAnswer(q, a)]
       : activeTab === "Feedback"
-        ? [...(a.recording ? [] : [f.detail]), q.explanation, example]
+        ? [f.detail, q.explanation]
         : prompt;
   return (
     <div className="screen-stack review-screen">
@@ -883,7 +887,7 @@ function Review({
             t === "Your response"
               ? Play
               : t === "Feedback"
-                ? Info
+                ? ListChecks
                 : t === "Prompt"
                   ? BookOpen
                   : ImageIcon;
@@ -894,6 +898,9 @@ function Review({
                   <Button
                     variant={activeTab === t ? "secondary" : "outline"}
                     aria-label={t}
+                    className={
+                      t === "Feedback" ? "review-feedback-tab" : undefined
+                    }
                     aria-pressed={activeTab === t}
                     onClick={() => setTab(t)}
                   />
@@ -907,7 +914,7 @@ function Review({
           );
         })}
       </div>
-      {activeTab === "Your response" && a.recording ? (
+      {activeTab === "Feedback" && speaking ? (
         <div className="speech-panel">
           <SpeechReview
             key={id}
@@ -918,6 +925,11 @@ function Review({
             onPronunciation={(value) => onPronunciation(id, value)}
           />
         </div>
+      ) : activeTab === "Your response" && a.recording ? (
+        <AudioPlayer
+          src={a.recording}
+          label={`Your recording for question ${index + 1}`}
+        />
       ) : activeTab === "Image" && q.chart ? (
         <div className="review-chart">
           <Chart q={q} responsive />

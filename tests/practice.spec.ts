@@ -537,9 +537,7 @@ test("microphone preflight, timed recording and persistent audio review", async 
         .evaluate((node: HTMLAudioElement) => node.currentTime),
     )
     .toBeGreaterThan(0);
-  await page
-    .getByRole("button", { name: "Your response", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
   await expect(
     page.getByRole("group", {
       name: "Your recording for question 1",
