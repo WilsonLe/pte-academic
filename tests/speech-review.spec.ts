@@ -87,13 +87,17 @@ test("speech review keeps legacy transcripts and playback without transcription 
   ).toHaveCount(0);
   await expect(panel.getByText(/word match|words\/min|60 MB/i)).toHaveCount(0);
   await expect(
-    panel.getByRole("button", { name: "Score speech with v3 model" }),
+    panel.getByRole("button", { name: "Compare syllables" }),
   ).toBeDisabled();
-  await panel
-    .getByRole("group", { name: "Your recording for question 1", exact: true })
-    .getByRole("button", { name: /Play/ })
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
     .click();
-  await expect(panel.getByRole("button", { name: /Pause/ })).toBeVisible();
+  const recording = page.getByRole("group", {
+    name: "Your recording for question 1",
+    exact: true,
+  });
+  await recording.getByRole("button", { name: /Play/ }).click();
+  await expect(recording.getByRole("button", { name: /Pause/ })).toBeVisible();
   await page.reload();
   await speech.click();
   await expect(panel.getByLabel("Local transcript result")).toContainText(
@@ -108,21 +112,31 @@ test("speech review keeps legacy transcripts and playback without transcription 
       name: /Transcribe|Score speech|Word comparison/i,
     }),
   ).toHaveCount(0);
-  await expect(panel).toContainText(
-    "Listen back and compare your response with the example for self-review.",
+  await expect(panel.locator(".reading-copy")).toContainText(
+    "Give the values as percentages.",
   );
   await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   await expect(
-    panel.getByRole("group", {
+    page.getByRole("group", {
       name: "Your recording for question 2",
       exact: true,
     }),
   ).toBeVisible();
   await page.screenshot({ path: info.outputPath("self-review-mobile.png") });
-  await page.getByRole("button", { name: "Prompt", exact: true }).click();
-  await expect(page.locator(".reading-copy")).toContainText(
-    "Example response:",
-  );
+  await page.getByRole("button", { name: "Feedback", exact: true }).click();
+  const nextNotes = page.getByRole("button", {
+    name: "Next speech review pages",
+    exact: true,
+  });
+  let notes = await page.locator(".reading-copy").innerText();
+  while ((await nextNotes.count()) && (await nextNotes.isEnabled())) {
+    await nextNotes.click();
+    notes += " " + (await page.locator(".reading-copy").innerText());
+  }
+  expect(notes).toContain("Example response");
   expect(external).toEqual([]);
 });
 
@@ -364,7 +378,7 @@ test("speaking Feedback opens syllables directly and remains available without r
     page.getByRole("region", { name: "On-device speech feedback" }),
   ).toContainText("No recording was saved");
   await expect(
-    page.getByRole("button", { name: "Score speech with v3 model" }),
+    page.getByRole("button", { name: "Compare syllables" }),
   ).toHaveCount(0);
   await expect(page.locator(".local-speech-screen audio")).toHaveCount(0);
   await page.screenshot({
@@ -388,10 +402,17 @@ test("speaking Feedback opens syllables directly and remains available without r
   await page.goto(base + "history/feedback-discovery");
   await expect(feedback.locator("span")).toBeVisible();
   await expect(
-    page
-      .getByRole("button", { name: "Score speech with v3 model" })
-      .locator("span"),
+    page.getByRole("button", { name: "Compare syllables" }).locator("span"),
   ).toBeVisible();
+  await expect
+    .poll(async () => {
+      const row = await table.locator("tbody tr").first().boundingBox();
+      const footer = await page
+        .getByRole("navigation", { name: "Mobile navigation" })
+        .boundingBox();
+      return !!row && !!footer && row.y + row.height <= footer.y;
+    })
+    .toBeTruthy();
   await page.screenshot({
     path: info.outputPath("read-aloud-feedback-short-phone.png"),
   });
@@ -401,4 +422,120 @@ test("speaking Feedback opens syllables directly and remains available without r
   await page.screenshot({
     path: info.outputPath("read-aloud-feedback-desktop.png"),
   });
+});
+
+test("unscored speech and uncertain syllables stay distinct from an empty transcript", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.goto(base);
+  await page.evaluate(async () => {
+    const identity = {
+      schemaVersion: 1,
+      modelSha256:
+        "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+      exportId: "blended-english-v3-fp16-storage-f32-v1",
+      referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+      seconds: 3,
+    };
+    const result = {
+      id: "unscored-review",
+      label: "Unscored speech",
+      date: new Date().toISOString(),
+      finished: true,
+      questionIds: [
+        "read-aloud-01",
+        "repeat-sentence-01",
+        "repeat-sentence-02",
+      ],
+      answers: {
+        "read-aloud-01": {
+          pronunciation: {
+            ...identity,
+            status: "no-reliable-speech",
+            syllables: [],
+          },
+        },
+        "repeat-sentence-01": {
+          pronunciation: {
+            ...identity,
+            status: "unscored",
+            syllables: [
+              {
+                word: "library",
+                wordIndex: 1,
+                syllableIndex: 0,
+                label: "library",
+                start: 0,
+                end: 1,
+                similarity: null,
+                confidence: 0,
+                status: "uncertain",
+              },
+            ],
+          },
+        },
+        "repeat-sentence-02": {
+          transcription: {
+            text: "",
+            seconds: 3,
+            engine: "transformers.js-4.3.1/whisper-q8-wasm",
+            model: "onnx-community/whisper-tiny.en",
+            revision: "2575352d61be1bf7225cf8f8b268a4678025fc58",
+          },
+        },
+      },
+    };
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("pte-studio", 2);
+      request.onupgradeneeded = () => {
+        for (const name of ["attempts", "progress"])
+          if (!request.result.objectStoreNames.contains(name))
+            request.result.createObjectStore(name);
+      };
+      request.onsuccess = () => {
+        const db = request.result,
+          tx = db.transaction("attempts", "readwrite");
+        tx.objectStore("attempts").put({ result, recordings: {} }, result.id);
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+    localStorage.setItem(
+      "pte-studio-history-v1",
+      JSON.stringify([{ ...result, answers: {} }]),
+    );
+  });
+  await page.goto(base + "history/unscored-review");
+  await expect(page.getByLabel("Local syllable scores")).toContainText(
+    "No reliable speech detected",
+  );
+  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Self-review notes" }).click();
+  await expect(page.locator(".reading-copy")).toContainText(
+    "No recording was saved",
+  );
+  await expect(page.locator(".reading-copy")).toContainText(
+    "cooling benefits and water needs",
+  );
+  await page
+    .getByRole("button", { name: "Syllable scores", exact: true })
+    .click();
+  await expect(page.getByLabel("Local syllable scores")).toContainText(
+    "No reliable speech detected",
+  );
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(
+    page.getByRole("table", { name: "Syllable similarities" }),
+  ).toContainText("Uncertain");
+  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(page.getByLabel("Local transcript result")).toContainText(
+    "saved transcript is empty",
+  );
 });

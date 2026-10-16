@@ -3,7 +3,7 @@
     "id": "read-aloud-01",
     "type": "read-aloud",
     "title": "Urban trees",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep the contrast between cooling benefits and water needs clear. Pause at the sentence boundaries, especially before the final example about a dry city.",
     "text": "Urban trees provide more than shade. Their leaves release moisture, helping to lower the temperature of surrounding streets. However, the benefits depend on choosing species suited to local conditions. A tree that needs large amounts of water may create problems in a dry city, even if it grows quickly.",
     "model": "Urban trees provide more than shade. Their leaves release moisture, helping to lower the temperature of surrounding streets. However, the benefits depend on choosing species suited to local conditions. A tree that needs large amounts of water may create problems in a dry city, even if it grows quickly."
   },
@@ -11,7 +11,7 @@
     "id": "read-aloud-02",
     "type": "read-aloud",
     "title": "Scientific models",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep “simplified representation” together as a phrase. The final sentence explains when simplification is useful; avoid breaking between “features” and “relevant to the question”.",
     "text": "A scientific model is a simplified representation of a system. Researchers use models to test explanations and predict outcomes that may be difficult to observe directly. No model includes every detail of the real world. Its value depends on whether the simplifications preserve the features relevant to the question being investigated.",
     "model": "A scientific model is a simplified representation of a system. Researchers use models to test explanations and predict outcomes that may be difficult to observe directly. No model includes every detail of the real world. Its value depends on whether the simplifications preserve the features relevant to the question being investigated."
   },
@@ -19,7 +19,7 @@
     "id": "read-aloud-03",
     "type": "read-aloud",
     "title": "Sleep and learning",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "The passage says sleep supports study, not that it replaces it. Keep the short third sentence separate from the explanation beginning “Instead”.",
     "text": "Learning continues after a student closes a book. During sleep, the brain reorganizes information encountered throughout the day and strengthens some memories. This does not mean that sleep can replace study. Instead, regular rest supports the work already done, making a consistent routine more useful than an occasional night of intensive revision.",
     "model": "Learning continues after a student closes a book. During sleep, the brain reorganizes information encountered throughout the day and strengthens some memories. This does not mean that sleep can replace study. Instead, regular rest supports the work already done, making a consistent routine more useful than an occasional night of intensive revision."
   },
@@ -27,7 +27,7 @@
     "id": "read-aloud-04",
     "type": "read-aloud",
     "title": "Public libraries",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Group the library services as a list, then pause before the sentence about internet access. Finish the final contrast between the library’s purpose and changing information formats.",
     "text": "Public libraries are adapting to changing community needs. Alongside printed books, many now offer digital resources, language classes and quiet work areas. These services are especially valuable for people who lack reliable internet access at home. The library therefore remains a shared space for learning, even as the form of information changes.",
     "model": "Public libraries are adapting to changing community needs. Alongside printed books, many now offer digital resources, language classes and quiet work areas. These services are especially valuable for people who lack reliable internet access at home. The library therefore remains a shared space for learning, even as the form of information changes."
   },
@@ -35,7 +35,7 @@
     "id": "read-aloud-05",
     "type": "read-aloud",
     "title": "Ocean observations",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep the two observation methods distinct: satellites mainly see the surface, while instruments reach greater depths. Pause before the final sentence about combining methods.",
     "text": "Scientists measure ocean temperatures using satellites, floating instruments and research ships. Each method has strengths and limitations. Satellites cover large areas but mainly observe the surface, while instruments in the water can collect information at greater depths. Combining these observations gives researchers a more complete picture than any single method alone.",
     "model": "Scientists measure ocean temperatures using satellites, floating instruments and research ships. Each method has strengths and limitations. Satellites cover large areas but mainly observe the surface, while instruments in the water can collect information at greater depths. Combining these observations gives researchers a more complete picture than any single method alone."
   },
@@ -43,7 +43,7 @@
     "id": "read-aloud-06",
     "type": "read-aloud",
     "title": "Peer feedback",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep “a specific problem” and “explains its effect” connected. The final contrast is between useful detail and simply calling writing good or bad.",
     "text": "Giving feedback can help students understand their own writing. When they identify an unclear argument in a classmate’s draft, they practise the same judgement needed to revise their own work. Feedback is most useful when it describes a specific problem and explains its effect, rather than simply calling a piece of writing good or bad.",
     "model": "Giving feedback can help students understand their own writing. When they identify an unclear argument in a classmate’s draft, they practise the same judgement needed to revise their own work. Feedback is most useful when it describes a specific problem and explains its effect, rather than simply calling a piece of writing good or bad."
   },
@@ -51,7 +51,7 @@
     "id": "repeat-sentence-01",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check that you kept both the closing time, “until midnight”, and the limit, “during the examination period”.",
     "audioText": "The library will remain open until midnight during the examination period.",
     "model": "The library will remain open until midnight during the examination period.",
     "audio": "audio/repeat-sentence-01.mp3"
@@ -60,7 +60,7 @@
     "id": "repeat-sentence-02",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check the object, “your laboratory report”, and the deadline, “by Friday afternoon”.",
     "audioText": "Please submit your laboratory report by Friday afternoon.",
     "model": "Please submit your laboratory report by Friday afternoon.",
     "audio": "audio/repeat-sentence-02.mp3"
@@ -69,7 +69,7 @@
     "id": "repeat-sentence-03",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check the past-tense “collected” and the full location phrase, “from three separate locations”.",
     "audioText": "The research team collected samples from three separate locations.",
     "model": "The research team collected samples from three separate locations.",
     "audio": "audio/repeat-sentence-03.mp3"
@@ -78,7 +78,7 @@
     "id": "repeat-sentence-04",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check “should check the timetable” and the sequence: this happens before the first seminar.",
     "audioText": "Students should check the timetable before attending their first seminar.",
     "model": "Students should check the timetable before attending their first seminar.",
     "audio": "audio/repeat-sentence-04.mp3"
@@ -87,7 +87,7 @@
     "id": "repeat-sentence-05",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check the reason, “for renovation”, and the time period, “this month”.",
     "audioText": "The university museum is closed for renovation this month.",
     "model": "The university museum is closed for renovation this month.",
     "audio": "audio/repeat-sentence-05.mp3"
@@ -96,7 +96,7 @@
     "id": "repeat-sentence-06",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep “must sign” and “before the interview”; they state the requirement and when it applies.",
     "audioText": "All participants must sign the consent form before the interview.",
     "model": "All participants must sign the consent form before the interview.",
     "audio": "audio/repeat-sentence-06.mp3"
@@ -105,7 +105,7 @@
     "id": "repeat-sentence-07",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep “new railway station” and the full phrase “within walking distance of the campus”.",
     "audioText": "The new railway station is within walking distance of the campus.",
     "model": "The new railway station is within walking distance of the campus.",
     "audio": "audio/repeat-sentence-07.mp3"
@@ -114,7 +114,7 @@
     "id": "repeat-sentence-08",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check the plural “findings” and the phrase “were discussed at yesterday’s conference”.",
     "audioText": "Several important findings were discussed at yesterday’s conference.",
     "model": "Several important findings were discussed at yesterday’s conference.",
     "audio": "audio/repeat-sentence-08.mp3"
@@ -123,7 +123,7 @@
     "id": "repeat-sentence-09",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep “reserve a study room” and the method, “through the online booking system”.",
     "audioText": "You can reserve a study room through the online booking system.",
     "model": "You can reserve a study room through the online booking system.",
     "audio": "audio/repeat-sentence-09.mp3"
@@ -132,7 +132,7 @@
     "id": "repeat-sentence-10",
     "type": "repeat-sentence",
     "title": "Campus sentences",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep “has extended the deadline” and the object, “the final assignment”. The sentence says the deadline has changed, without giving a new date.",
     "audioText": "The professor has extended the deadline for the final assignment.",
     "model": "The professor has extended the deadline for the final assignment.",
     "audio": "audio/repeat-sentence-10.mp3"
@@ -141,142 +141,90 @@
     "id": "describe-image-01",
     "type": "describe-image",
     "title": "Travel to campus",
-    "explanation": "Identify the topic and units, describe the largest and smallest values, then make a supported comparison. Other accurate descriptions are valid.",
+    "explanation": "Give the values as percentages. Bus has the highest value at 35%, while Walk has the lowest at 18%. Keep comparisons tied to the displayed data; the chart does not explain the causes.",
     "chart": {
       "title": "Travel to campus",
-      "labels": [
-        "Walk",
-        "Bicycle",
-        "Bus",
-        "Car"
-      ],
-      "values": [
-        18,
-        27,
-        35,
-        20
-      ],
+      "labels": ["Walk", "Bicycle", "Bus", "Car"],
+      "values": [18, 27, 35, 20],
       "unit": "%"
     },
-    "model": "The chart compares travel to campus. Bus has the highest figure at 35, while Walk has the lowest at 18. A clear comparison of these values is more useful than listing every number."
+    "model": "The chart shows how students travel to campus. Bus travel is most common at 35%, followed by cycling at 27%. Cars account for 20% and walking for 18%. Bus travel is almost twice as common as walking."
   },
   {
     "id": "describe-image-02",
     "type": "describe-image",
     "title": "Library visits",
-    "explanation": "Identify the topic and units, describe the largest and smallest values, then make a supported comparison. Other accurate descriptions are valid.",
+    "explanation": "Give the values as numbers of visits. Wednesday has the highest value at 240 visits, while Monday has the lowest at 120 visits. Keep comparisons tied to the displayed data; the chart does not explain the causes.",
     "chart": {
       "title": "Library visits",
-      "labels": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday"
-      ],
-      "values": [
-        120,
-        180,
-        240,
-        210,
-        150
-      ],
+      "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "values": [120, 180, 240, 210, 150],
       "unit": "visits"
     },
-    "model": "The chart compares library visits. Wednesday has the highest figure at 240, while Monday has the lowest at 120. A clear comparison of these values is more useful than listing every number."
+    "model": "The chart shows library visits from Monday to Friday. Visits rise from 120 on Monday to a peak of 240 on Wednesday, then fall to 150 on Friday. Wednesday has twice as many visits as Monday."
   },
   {
     "id": "describe-image-03",
     "type": "describe-image",
     "title": "Renewable electricity",
-    "explanation": "Identify the topic and units, describe the largest and smallest values, then make a supported comparison. Other accurate descriptions are valid.",
+    "explanation": "Give the values as percentages. 2023 has the highest value at 46%, while 2020 has the lowest at 22%. Keep comparisons tied to the displayed data; the chart does not explain the causes.",
     "chart": {
       "title": "Renewable electricity",
-      "labels": [
-        "2020",
-        "2021",
-        "2022",
-        "2023"
-      ],
-      "values": [
-        22,
-        29,
-        38,
-        46
-      ],
+      "labels": ["2020", "2021", "2022", "2023"],
+      "values": [22, 29, 38, 46],
       "unit": "%"
     },
-    "model": "The chart compares renewable electricity. 2023 has the highest figure at 46, while 2020 has the lowest at 22. A clear comparison of these values is more useful than listing every number."
+    "model": "The chart shows the percentage of renewable electricity rising each year, from 22% in 2020 to 46% in 2023. The figure more than doubles over the period, with the largest annual increase between 2021 and 2022."
   },
   {
     "id": "describe-image-04",
     "type": "describe-image",
     "title": "Weekly study hours",
-    "explanation": "Identify the topic and units, describe the largest and smallest values, then make a supported comparison. Other accurate descriptions are valid.",
+    "explanation": "Give the values in hours per week. Law has the highest value at 27 hours, while Arts has the lowest at 18 hours. Keep comparisons tied to the displayed data; the chart does not explain the causes.",
     "chart": {
       "title": "Weekly study hours",
-      "labels": [
-        "Science",
-        "Arts",
-        "Business",
-        "Law"
-      ],
-      "values": [
-        24,
-        18,
-        21,
-        27
-      ],
+      "labels": ["Science", "Arts", "Business", "Law"],
+      "values": [24, 18, 21, 27],
       "unit": "hours"
     },
-    "model": "The chart compares weekly study hours. Law has the highest figure at 27, while Arts has the lowest at 18. A clear comparison of these values is more useful than listing every number."
+    "model": "The chart compares weekly study hours across four subjects. Law has the most at 27 hours, followed by science at 24 and business at 21. Arts has the fewest at 18 hours, nine hours below law."
   },
   {
     "id": "describe-image-05",
     "type": "describe-image",
     "title": "Water use",
-    "explanation": "Identify the topic and units, describe the largest and smallest values, then make a supported comparison. Other accurate descriptions are valid.",
+    "explanation": "Give the values as percentages. Gardens has the highest value at 40%, while Other has the lowest at 10%. Keep comparisons tied to the displayed data; the chart does not explain the causes.",
     "chart": {
       "title": "Water use",
-      "labels": [
-        "Gardens",
-        "Bathrooms",
-        "Kitchens",
-        "Other"
-      ],
-      "values": [
-        40,
-        30,
-        20,
-        10
-      ],
+      "labels": ["Gardens", "Bathrooms", "Kitchens", "Other"],
+      "values": [40, 30, 20, 10],
       "unit": "%"
     },
-    "model": "The chart compares water use. Gardens has the highest figure at 40, while Other has the lowest at 10. A clear comparison of these values is more useful than listing every number."
+    "model": "The chart shows the distribution of water use. Gardens account for the largest share at 40%, followed by bathrooms at 30% and kitchens at 20%. Other uses make up 10%, a quarter of the share used in gardens."
   },
   {
     "id": "retell-lecture-01",
     "type": "retell-lecture",
     "title": "Citizen science",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Include the benefit of wider research coverage and the limits: volunteers need consistent instructions, unusual sightings need checking, and some places receive fewer observations. The bird survey is an example, not the whole argument.",
     "audioText": "Citizen science allows members of the public to contribute to scientific research. A familiar example is a bird survey in which volunteers record the species they see in their gardens. Because researchers cannot visit every location themselves, these observations can reveal patterns across a much larger area. However, collecting many observations is not enough on its own. Volunteers need clear instructions so that their records can be compared. Researchers may also ask participants to submit photographs, which help specialists check unusual sightings. Another challenge is that some places attract far more volunteers than others. A city park may be surveyed every week while a remote forest receives little attention. For that reason, researchers must consider where observations came from before drawing conclusions. When these limitations are understood, citizen science can both expand the evidence available to scientists and help communities learn about their environment.",
-    "model": "Public volunteers expand research coverage, but clear instructions, verification and attention to uneven sampling are necessary.",
+    "model": "The lecture explains how citizen science lets public volunteers extend the reach of research. Bird surveys illustrate the value of observations from many locations. However, volunteers need clear instructions, specialists may need to verify unusual sightings, and researchers must account for places with fewer volunteers. With these limits understood, citizen science can expand evidence and help communities learn about their environment.",
     "audio": "audio/retell-lecture-01.mp3"
   },
   {
     "id": "retell-lecture-02",
     "type": "retell-lecture",
     "title": "Retrieval practice",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Distinguish familiarity from recall. Include trying to retrieve information, checking errors afterwards, using achievable questions and spacing attempts across days.",
     "audioText": "Many students prepare for examinations by rereading their notes. This feels productive because the information becomes familiar. Familiarity, however, is not the same as being able to recall an idea without help. Retrieval practice involves closing the book and trying to explain what you remember. A student might answer a short question, draw a diagram from memory or teach the concept to a friend. The attempt can reveal gaps that rereading hides. Importantly, checking the answer afterwards is part of the process, because practising an error repeatedly is unlikely to help. Researchers also distinguish a difficult attempt from an impossible one. Questions should require effort while remaining connected to material that the learner has studied. Spacing these attempts across several days can support longer retention than completing them all in one session. The practical lesson is to combine review with opportunities to retrieve information and correct misunderstandings.",
-    "model": "Retrieval reveals gaps hidden by rereading. Use achievable questions, corrective feedback and spaced practice.",
+    "model": "The lecture contrasts rereading notes with retrieval practice. Familiarity does not guarantee recall, so students can close their books and try to explain an idea, answer questions or draw a diagram from memory. They should check their answers to correct mistakes, use challenging but achievable questions, and space practice across days to support longer retention.",
     "audio": "audio/retell-lecture-02.mp3"
   },
   {
     "id": "answer-short-question-01",
     "type": "answer-short-question",
     "title": "Everyday knowledge",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "A thermometer measures temperature. A short answer such as “thermometer” is enough.",
     "audioText": "What instrument do we use to measure temperature?",
     "model": "A thermometer.",
     "audio": "audio/answer-short-question-01.mp3"
@@ -285,7 +233,7 @@
     "id": "answer-short-question-02",
     "type": "answer-short-question",
     "title": "Everyday knowledge",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "An astronomer studies stars and planets. “Astronomy” names the subject, not the person.",
     "audioText": "What do we call a person who studies the stars and planets?",
     "model": "An astronomer.",
     "audio": "audio/answer-short-question-02.mp3"
@@ -294,7 +242,7 @@
     "id": "answer-short-question-03",
     "type": "answer-short-question",
     "title": "Everyday knowledge",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "A triangle has three sides. The question asks for the shape’s name.",
     "audioText": "Which shape has three sides?",
     "model": "A triangle.",
     "audio": "audio/answer-short-question-03.mp3"
@@ -303,7 +251,7 @@
     "id": "answer-short-question-04",
     "type": "answer-short-question",
     "title": "Everyday knowledge",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Water frozen solid is ice. The question asks for its solid form.",
     "audioText": "What do we call water when it has frozen solid?",
     "model": "Ice.",
     "audio": "audio/answer-short-question-04.mp3"
@@ -312,7 +260,7 @@
     "id": "answer-short-question-05",
     "type": "answer-short-question",
     "title": "Everyday knowledge",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Roots usually absorb water from the soil. Leaves and flowers do not answer this question.",
     "audioText": "Which part of a plant usually absorbs water from the soil?",
     "model": "The roots.",
     "audio": "audio/answer-short-question-05.mp3"
@@ -321,7 +269,7 @@
     "id": "summarize-group-discussion-01",
     "type": "summarize-group-discussion",
     "title": "Library opening hours",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Keep the three positions separate: later access for working students, concern about staffing costs, and a limited exam-period trial with attendance checks. The speakers have not agreed to open the whole library later permanently.",
     "audioText": "Speaker one. I think the library should stay open later. Students who work during the day often have no quiet place to study in the evening. Last week I arrived after my shift and had only an hour before the building closed. Extending the hours would make a real difference to people like me. Speaker two. I understand that, but keeping the whole building open means paying for security and other staff. The university has a limited budget. I would rather protect the daytime services than reduce them to pay for a few extra hours at night. We should find out how many students would actually use the space. Speaker three. Perhaps we could try opening just the ground floor later during the exam period. That would provide a quiet area without the expense of running every floor. We could count attendance and ask students whether the service helped. Then the university could make a decision based on evidence rather than guesses.",
     "segments": [
       "I think the library should stay open later. Students who work during the day often have no quiet place to study in the evening. Last week I arrived after my shift and had only an hour before the building closed. Extending the hours would make a real difference to people like me.",
@@ -335,7 +283,7 @@
     "id": "summarize-group-discussion-02",
     "type": "summarize-group-discussion",
     "title": "Group presentations",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Include the tension between dividing work and keeping one argument. The proposed compromise is a shared outline, separate research, a progress meeting and a full rehearsal.",
     "audioText": "Speaker one. Our presentation is due next month, and I think we should divide the topics today. If each person researches one part independently, we can cover more ground. We all have different schedules, so waiting for a meeting every time we need to make progress will slow us down. Speaker two. Dividing the work is useful, but our last group project sounded like three separate talks. We used different terms for the same ideas and repeated some information. I think we should agree on the main argument before anyone starts writing slides. Otherwise we will spend the final week trying to connect everything. Speaker three. Could we start with a shared outline and then divide the research? We can put sources into one document and meet briefly next week to compare what we have found. That gives everyone flexibility but also lets us notice contradictions early. We should leave enough time for a full rehearsal at the end.",
     "segments": [
       "Our presentation is due next month, and I think we should divide the topics today. If each person researches one part independently, we can cover more ground. We all have different schedules, so waiting for a meeting every time we need to make progress will slow us down.",
@@ -349,7 +297,7 @@
     "id": "respond-to-situation-01",
     "type": "respond-to-situation",
     "title": "Request an extension",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Explain that illness prevents you from meeting Friday’s deadline and ask your tutor for Monday instead. Make a polite request; do not assume the extension has already been granted.",
     "text": "You have been ill and cannot finish your research report by Friday. Speak to your tutor, explain the situation, and ask whether you may submit the report on Monday.",
     "audioText": "You have been ill and cannot finish your research report by Friday. Speak to your tutor, explain the situation, and ask whether you may submit the report on Monday.",
     "model": "Hello, I have been unwell this week and have fallen behind on my research report. I am sorry I cannot meet Friday’s deadline. Would it be possible to submit it on Monday? I can provide any documentation you require. Thank you for considering my request.",
@@ -359,17 +307,17 @@
     "id": "respond-to-situation-02",
     "type": "respond-to-situation",
     "title": "Resolve a room booking",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Explain that your group has booked the room and politely ask the student to leave it available for your meeting. Offering to check the booking or ask the library desk can help resolve a mix-up.",
     "text": "You booked a study room for a group meeting, but another student is using it when you arrive. Speak to the student, explain your booking, and politely ask them to move.",
     "audioText": "You booked a study room for a group meeting, but another student is using it when you arrive. Speak to the student, explain your booking, and politely ask them to move.",
-    "model": "Hi, sorry to interrupt. My group has a booking for this room from two o’clock. I have the confirmation here. Would you mind checking your booking time? If there has been a mix-up, we could ask the library desk to help find another room.",
+    "model": "Hi, sorry to interrupt. My group has a booking for this room from two o’clock, and I have the confirmation here. Would you mind freeing the room for our meeting? If our bookings overlap, we could ask the library desk to check and help find another room.",
     "audio": "audio/respond-to-situation-02.mp3"
   },
   {
     "id": "summarize-written-text-01",
     "type": "summarize-written-text",
     "title": "Community gardens",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Connect the gardens’ food and social benefits with the need for fair responsibilities and clear rules. A summary about growing food alone misses the passage’s main qualification.",
     "text": "Community gardens are often promoted as a way to grow fresh food, but their social value may be just as important. Residents who previously had little contact can meet while caring for shared plots. Experienced gardeners pass on practical knowledge, and newcomers gain an informal reason to spend time outdoors. These benefits do not arise automatically. A garden that has no clear arrangements for watering, tool storage or access may become a source of disagreement. Some communities address this problem by agreeing on simple rules at the start and reviewing them each season. Others appoint a coordinator to make sure tasks are shared fairly. Successful gardens therefore depend on social organization as well as suitable soil and sunlight. Their value lies in the combination of food production, cooperation and opportunities for local residents to learn from one another.",
     "model": "Community gardens can produce food and strengthen local relationships, but they need fair responsibilities and clear rules to turn a shared growing space into a lasting community resource."
   },
@@ -377,7 +325,7 @@
     "id": "summarize-written-text-02",
     "type": "summarize-written-text",
     "title": "Digital archives",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Include wider access and protection of originals, then the work needed to maintain a reliable digital collection. Do not imply that digitization preserves everything or replaces physical archives completely.",
     "text": "Digitizing historical documents can make them available to readers who cannot travel to an archive. High-quality images also reduce the need to handle fragile originals. Yet the process involves more than photographing pages. Each item needs a description that helps readers discover it, and the files must be stored in formats that future systems can open. Handwritten words may be difficult for automated recognition software to interpret, so a searchable version often requires human checking. There are also choices about which records to digitize first. Popular collections may attract attention while less familiar material remains inaccessible. For these reasons, a digital archive should be understood as a carefully maintained selection rather than a complete replacement for a physical collection. Long-term access depends on continued investment in description, preservation and thoughtful decisions about whose histories are represented.",
     "model": "Digital archives widen access and protect fragile documents, but reliable discovery and long-term preservation require accurate descriptions, human checking and careful selection of the records included."
   },
@@ -385,140 +333,75 @@
     "id": "write-essay-01",
     "type": "write-essay",
     "title": "University and practical skills",
-    "explanation": "This is an outline for self-review, not a model essay. Check that you discuss both views, state your position, support it with examples and meet the word limit.",
+    "explanation": "Discuss academic knowledge and employment skills, state your position, and support it with examples. Explain how each approach helps students rather than just listing subjects or jobs.",
     "text": "Some people believe universities should focus on academic knowledge, while others think they should prioritize practical skills for employment. Discuss both views and give your own opinion.",
-    "model": "A strong response can argue that universities need both approaches. Explain how academic study develops transferable reasoning, show how practical work helps students apply ideas, and support your own position with specific examples. Write an introduction, developed body paragraphs and a conclusion in 200–300 words."
+    "model": "Academic knowledge: explain how theory and critical reasoning help graduates solve unfamiliar problems. Practical skills: discuss applying ideas through placements, projects or laboratory work. Your position: explain the balance you favour and give a concrete example. End by connecting that balance to the role you think universities should serve."
   },
   {
     "id": "reading-dropdown-01",
     "type": "reading-dropdown",
     "title": "Research evidence",
-    "explanation": "“support” fits the first context and “reliability” fits the second. Check both grammatical form and meaning.",
+    "explanation": "Evidence is used to “support” a claim. “Replace”, “avoid” and “delay” describe different actions. A larger sample can improve an estimate’s “reliability”; distance, variety and schedule do not describe the estimate’s dependability.",
     "text": "Researchers should distinguish between a claim and the evidence used to {{}} it. A large sample may improve the {{}} of an estimate, but it cannot correct a poorly designed question.",
-    "answers": [
-      "support",
-      "reliability"
-    ],
+    "answers": ["support", "reliability"],
     "blankOptions": [
-      [
-        "replace",
-        "support",
-        "avoid",
-        "delay"
-      ],
-      [
-        "reliability",
-        "distance",
-        "variety",
-        "schedule"
-      ]
+      ["replace", "support", "avoid", "delay"],
+      ["reliability", "distance", "variety", "schedule"]
     ]
   },
   {
     "id": "reading-dropdown-02",
     "type": "reading-dropdown",
     "title": "Coastal planning",
-    "explanation": "“balance” fits the first context and “impact” fits the second. Check both grammatical form and meaning.",
+    "explanation": "A “balance” is needed between development and protection. “Absence”, “method” and “arrival” do not express that trade-off. Buildings have an “impact on” habitats; the other nouns do not fit that meaning.",
     "text": "Coastal towns face a difficult {{}} between development and protection. New buildings can generate income, but planners must also consider their {{}} on fragile habitats.",
-    "answers": [
-      "balance",
-      "impact"
-    ],
+    "answers": ["balance", "impact"],
     "blankOptions": [
-      [
-        "balance",
-        "absence",
-        "method",
-        "arrival"
-      ],
-      [
-        "impact",
-        "advice",
-        "height",
-        "permission"
-      ]
+      ["balance", "absence", "method", "arrival"],
+      ["impact", "advice", "height", "permission"]
     ]
   },
   {
     "id": "reading-dropdown-03",
     "type": "reading-dropdown",
     "title": "Academic arguments",
-    "explanation": "“clear” fits the first context and “contributes” fits the second. Check both grammatical form and meaning.",
+    "explanation": "“Makes its central claim clear” needs the adjective “clear”, not the adverb or noun. Singular “evidence” takes “contributes”; the noun, participle and plural verb do not complete the clause.",
     "text": "An effective argument makes its central claim {{}} to the reader. Each paragraph should provide relevant evidence and explain how that evidence {{}} to the overall position.",
-    "answers": [
-      "clear",
-      "contributes"
-    ],
+    "answers": ["clear", "contributes"],
     "blankOptions": [
-      [
-        "clear",
-        "clearly",
-        "clarity",
-        "clearing"
-      ],
-      [
-        "contributes",
-        "contribution",
-        "contributing",
-        "contribute"
-      ]
+      ["clear", "clearly", "clarity", "clearing"],
+      ["contributes", "contribution", "contributing", "contribute"]
     ]
   },
   {
     "id": "reading-dropdown-04",
     "type": "reading-dropdown",
     "title": "Transport surveys",
-    "explanation": "“consulted” fits the first context and “frequency” fits the second. Check both grammatical form and meaning.",
+    "explanation": "The council “consulted” residents to ask about their journeys. The other verbs do not mean asking for views. “Frequency” means how often buses run, which the passage compares with reliable connections.",
     "text": "Before changing the bus timetable, the council {{}} residents about their journeys. The responses showed that reliable connections were more important than the {{}} of individual services.",
-    "answers": [
-      "consulted",
-      "frequency"
-    ],
+    "answers": ["consulted", "frequency"],
     "blankOptions": [
-      [
-        "consulted",
-        "consumed",
-        "consisted",
-        "constructed"
-      ],
-      [
-        "frequency",
-        "invention",
-        "surface",
-        "approval"
-      ]
+      ["consulted", "consumed", "consisted", "constructed"],
+      ["frequency", "invention", "surface", "approval"]
     ]
   },
   {
     "id": "reading-dropdown-05",
     "type": "reading-dropdown",
     "title": "Water conservation",
-    "explanation": "“consumption” fits the first context and “depends” fits the second. Check both grammatical form and meaning.",
+    "explanation": "Water-saving devices reduce “consumption”, meaning water use; the other nouns describe unrelated processes. “Depends on” expresses a condition. “Arrives”, “collects” and “refers” do not express that dependency.",
     "text": "Water-saving devices can reduce household {{}} without requiring major changes in behaviour. Their effectiveness, however, {{}} on regular maintenance and correct installation.",
-    "answers": [
-      "consumption",
-      "depends"
-    ],
+    "answers": ["consumption", "depends"],
     "blankOptions": [
-      [
-        "consumption",
-        "construction",
-        "comparison",
-        "conclusion"
-      ],
-      [
-        "depends",
-        "arrives",
-        "collects",
-        "refers"
-      ]
+      ["consumption", "construction", "comparison", "conclusion"],
+      ["depends", "arrives", "collects", "refers"]
     ]
   },
   {
     "id": "reading-multiple-01",
     "type": "reading-multiple",
     "title": "Online learning",
-    "explanation": "The passage explicitly supports revision and pausing. It also values live discussion, so the last two options are contradicted.",
+    "explanation": "The passage explicitly supports revision and pausing. It does not say recordings replaced every class, and it warns that recordings alone may not ensure understanding.",
     "text": "A university survey found that recorded lectures helped students revise difficult topics. Students also valued being able to pause a recording. However, many said that recordings worked best alongside live discussion, where they could ask questions. The survey did not find that students wanted all classroom teaching removed.",
     "prompt": "Which statements are supported by the passage?",
     "options": [
@@ -527,16 +410,13 @@
       "All students wanted to end classroom teaching.",
       "Live discussion was considered useless."
     ],
-    "answers": [
-      "0",
-      "1"
-    ]
+    "answers": ["0", "1"]
   },
   {
     "id": "reading-multiple-02",
     "type": "reading-multiple",
     "title": "Urban wetlands",
-    "explanation": "Both stormwater storage and maintenance are stated. The passage rejects complete pollutant removal and one-off spending.",
+    "explanation": "Wetlands store stormwater, and maintenance affects their performance. The passage rejects removing every pollutant and says ongoing care needs funding.",
     "text": "Urban wetlands can store stormwater and provide habitats for wildlife. They do not remove every pollutant, and their performance depends on maintenance. A neglected wetland may become blocked by sediment. Planners therefore need to budget for ongoing care as well as initial construction.",
     "prompt": "Which statements are supported by the passage?",
     "options": [
@@ -545,120 +425,75 @@
       "Wetlands remove every pollutant.",
       "No further spending is needed after construction."
     ],
-    "answers": [
-      "0",
-      "1"
-    ]
+    "answers": ["0", "1"]
   },
   {
     "id": "reorder-paragraphs-01",
     "type": "reorder-paragraphs",
     "title": "A seed library",
-    "explanation": "Introduce the subject first, then follow the sequence of actions. References such as the scheme, the results and this cycle connect to preceding information.",
+    "explanation": "Start with the library introducing the scheme. “The scheme” then explains borrowing and growing; harvesting comes next. “This cycle” refers to returning seeds and explains how the collection continues.",
     "options": [
       "After harvesting their crops, participants returned some new seeds to the library.",
       "A local library started a seed-sharing scheme last spring.",
       "This cycle helped maintain the collection for the following season.",
       "The scheme allowed residents to borrow seeds and grow vegetables at home."
     ],
-    "answers": [
-      "1",
-      "3",
-      "0",
-      "2"
-    ]
+    "answers": ["1", "3", "0", "2"]
   },
   {
     "id": "reorder-paragraphs-02",
     "type": "reorder-paragraphs",
     "title": "Testing a bridge",
-    "explanation": "Introduce the subject first, then follow the sequence of actions. References such as the scheme, the results and this cycle connect to preceding information.",
+    "explanation": "Start with engineers building the model. “They then” introduces the load test, “The results” reports the weakness it revealed, and “As a result” introduces the design revision.",
     "options": [
       "The results revealed a weakness near the central support.",
       "Engineers first built a small model of the proposed bridge.",
       "As a result, the team revised the design before construction began.",
       "They then placed weights on the model to measure how it responded to pressure."
     ],
-    "answers": [
-      "1",
-      "3",
-      "0",
-      "2"
-    ]
+    "answers": ["1", "3", "0", "2"]
   },
   {
     "id": "reading-blanks-01",
     "type": "reading-blanks",
     "title": "Museum labels",
-    "explanation": "Read each completed sentence aloud: the selected words fit the grammar and preserve the meaning of the passage.",
+    "explanation": "“Interpret an object” means understand its meaning, and “encourage closer observation” describes the question’s purpose. “Replace” changes the object, and “depart” cannot take “an object” as its direct object here.",
     "text": "A museum label should help visitors {{}} an object rather than simply list facts. Curators often include a short question to {{}} closer observation.",
-    "answers": [
-      "interpret",
-      "encourage"
-    ],
-    "options": [
-      "interpret",
-      "encourage",
-      "replace",
-      "depart"
-    ]
+    "answers": ["interpret", "encourage"],
+    "options": ["interpret", "encourage", "replace", "depart"]
   },
   {
     "id": "reading-blanks-02",
     "type": "reading-blanks",
     "title": "Field notes",
-    "explanation": "Read each completed sentence aloud: the selected words fit the grammar and preserve the meaning of the passage.",
+    "explanation": "Notes help researchers “reconstruct” events. Time and place give “context” for analysis. “Reject” opposes the purpose of recording events, and “contrast” means a difference rather than background information.",
     "text": "Detailed field notes allow researchers to {{}} what happened during an observation. Recording the time and place also provides useful {{}} for later analysis.",
-    "answers": [
-      "reconstruct",
-      "context"
-    ],
-    "options": [
-      "reconstruct",
-      "context",
-      "reject",
-      "contrast"
-    ]
+    "answers": ["reconstruct", "context"],
+    "options": ["reconstruct", "context", "reject", "contrast"]
   },
   {
     "id": "reading-blanks-03",
     "type": "reading-blanks",
     "title": "Energy storage",
-    "explanation": "Read each completed sentence aloud: the selected words fit the grammar and preserve the meaning of the passage.",
+    "explanation": "“Is high” needs an adjective; “height” is a noun. Demand “exceeds” supply when it is greater than supply. “Accepts” does not express that comparison.",
     "text": "Batteries can store electricity when production is {{}}. This stored energy can then be used when demand {{}} the available supply.",
-    "answers": [
-      "high",
-      "exceeds"
-    ],
-    "options": [
-      "high",
-      "exceeds",
-      "height",
-      "accepts"
-    ]
+    "answers": ["high", "exceeds"],
+    "options": ["high", "exceeds", "height", "accepts"]
   },
   {
     "id": "reading-blanks-04",
     "type": "reading-blanks",
     "title": "Language learning",
-    "explanation": "Read each completed sentence aloud: the selected words fit the grammar and preserve the meaning of the passage.",
+    "explanation": "“To use” needs the base verb, not “using”. “Their accuracy” needs a noun; “accurate” is an adjective.",
     "text": "Regular conversation gives learners a chance to {{}} new vocabulary. Feedback helps them notice errors and gradually improve their {{}}.",
-    "answers": [
-      "use",
-      "accuracy"
-    ],
-    "options": [
-      "use",
-      "accuracy",
-      "using",
-      "accurate"
-    ]
+    "answers": ["use", "accuracy"],
+    "options": ["use", "accuracy", "using", "accurate"]
   },
   {
     "id": "reading-single-01",
     "type": "reading-single",
     "title": "Flexible offices",
-    "explanation": "The final clause states that arranging early meetings became harder.",
+    "explanation": "The final clause states that arranging early meetings became harder. Journeys became easier, a shared meeting still took place at eleven, and the passage does not say working days became shorter.",
     "text": "A company introduced flexible working hours to reduce crowding on morning trains. Employees could arrive between seven and ten, provided they attended a shared meeting at eleven. After three months, most reported easier journeys, although managers noted that arranging early meetings had become harder.",
     "prompt": "What was one reported disadvantage?",
     "options": [
@@ -667,15 +502,13 @@
       "A ban on shared meetings",
       "Shorter working days"
     ],
-    "answers": [
-      "1"
-    ]
+    "answers": ["1"]
   },
   {
     "id": "reading-single-02",
     "type": "reading-single",
     "title": "Restoring a river",
-    "explanation": "The passage supports achievable improvements in an existing city rather than complete reversal of development.",
+    "explanation": "The passage supports improving river health within urban constraints. It neither calls for removing all buildings nor says restoration is impossible or requires the original river course.",
     "text": "Restoring a river does not always mean returning it to an imagined original condition. In a city, buildings and roads may make that impossible. Instead, planners can improve water quality and create habitats within existing constraints. The aim is a healthier system that can coexist with urban life.",
     "prompt": "What is the main point?",
     "options": [
@@ -684,15 +517,13 @@
       "River health can improve within urban constraints.",
       "Every river must return to its original course."
     ],
-    "answers": [
-      "2"
-    ]
+    "answers": ["2"]
   },
   {
     "id": "summarize-spoken-text-01",
     "type": "summarize-spoken-text",
     "title": "Cooler roofs",
-    "explanation": "This 54-word model captures the mechanism, limitation and need for local evaluation. Other accurate 50–70 word summaries are valid.",
+    "explanation": "Include how reflective roofs reduce cooling demand, why colder climates may benefit less, and why cities test materials and maintenance costs across seasons. Do not present one roof design as suitable everywhere.",
     "audioText": "Today I want to discuss why cities are experimenting with cooler roofs. A conventional dark roof absorbs much of the sunlight that reaches it, which can increase the temperature inside a building. A pale roof reflects more sunlight and may reduce the need for air conditioning during hot weather. However, it would be misleading to say that one roof design works equally well everywhere. In a cold region, reflecting winter sunlight could increase heating needs. The material also matters because dust and weathering can reduce its reflectivity over time. Some local governments are testing several surfaces before recommending a particular approach. They measure indoor temperatures, energy use and maintenance costs across different seasons. The main lesson is that a promising technology still needs to be evaluated in context. A cooler roof can be useful, but its overall benefit depends on climate, building design and how well the surface is maintained.",
     "model": "Reflective roofs can lower indoor temperatures and reduce cooling demand by reflecting sunlight. However, their benefits vary with climate, building design and maintenance, and they may increase heating needs in colder regions. Cities are therefore testing materials across seasons, comparing temperatures, energy consumption and costs before recommending solutions suitable for local conditions.",
     "audio": "audio/summarize-spoken-text-01.mp3"
@@ -701,7 +532,7 @@
     "id": "listening-multiple-01",
     "type": "listening-multiple",
     "title": "Student travel",
-    "explanation": "The first two claims are explicitly supported. The other options introduce claims rejected by the speaker.",
+    "explanation": "Students prioritized reliability, and some wanted secure bicycle parking. The survey did not recommend closing car parks, and reliability mattered more than low fares.",
     "audioText": "The student travel survey asked about journeys to campus. Most respondents said reliability mattered more than low fares. Many had missed the start of a class because a bus failed to arrive on time. A smaller group wanted more secure bicycle parking. The survey did not ask students to choose between closing car parks and extending bus routes. Instead, its purpose was to identify the problems students currently experienced. The transport office plans to repeat the survey after making changes, so it can compare the results.",
     "prompt": "Which statements are supported by the recording?",
     "options": [
@@ -710,17 +541,14 @@
       "The survey recommended closing all car parks.",
       "Students cared only about ticket prices."
     ],
-    "answers": [
-      "0",
-      "1"
-    ],
+    "answers": ["0", "1"],
     "audio": "audio/listening-multiple-01.mp3"
   },
   {
     "id": "listening-multiple-02",
     "type": "listening-multiple",
     "title": "Peer mentoring",
-    "explanation": "The first two claims are explicitly supported. The other options introduce claims rejected by the speaker.",
+    "explanation": "Mentors help students find resources and receive training about specialist support. They do not replace counsellors, and participation is voluntary.",
     "audioText": "The mentoring programme matches new students with experienced volunteers. Mentors can explain how to find learning resources and encourage students to join campus activities. They are not expected to give professional counselling or replace academic advisers. Training helps volunteers recognize when a student needs specialist support. The programme also asks mentors to meet regularly, because one introductory conversation is rarely enough to build trust. Participation is voluntary for both mentors and new students. Organizers will evaluate the programme by collecting anonymous feedback at the end of the term.",
     "prompt": "Which statements are supported by the recording?",
     "options": [
@@ -729,43 +557,34 @@
       "Mentors replace professional counsellors.",
       "Every student must participate."
     ],
-    "answers": [
-      "0",
-      "1"
-    ],
+    "answers": ["0", "1"],
     "audio": "audio/listening-multiple-02.mp3"
   },
   {
     "id": "listening-blanks-01",
     "type": "listening-blanks",
     "title": "A new exhibition",
-    "explanation": "Use the exact words in the recording, including their spelling and grammatical endings.",
+    "explanation": "The recording says “changes in society” and “before being discarded”. “Discarded” keeps the past-participle ending after “being”.",
     "audioText": "The exhibition explores how everyday objects reveal changes in society. Visitors can compare household tools from different periods and consider why their designs changed. Some objects were repaired many times before being discarded. These repairs show that people valued durability as well as appearance.",
     "text": "The exhibition explores how everyday objects reveal changes in {{}}. Visitors can compare household tools from different periods and consider why their designs changed. Some objects were repaired many times before being {{}}. These repairs show that people valued durability as well as appearance.",
-    "answers": [
-      "society",
-      "discarded"
-    ],
+    "answers": ["society", "discarded"],
     "audio": "audio/listening-blanks-01.mp3"
   },
   {
     "id": "listening-blanks-02",
     "type": "listening-blanks",
     "title": "Collecting samples",
-    "explanation": "Use the exact words in the recording, including their spelling and grammatical endings.",
+    "explanation": "“Immediately” describes when samples were labelled; “accurately” describes how conditions could be compared. Both words end in “-ly”.",
     "audioText": "The team collected soil samples from several locations around the lake. Each sample was labelled immediately to avoid confusion during analysis. The researchers also recorded the depth and moisture of the soil. These details allowed them to compare conditions accurately rather than treating all samples as identical.",
     "text": "The team collected soil samples from several locations around the lake. Each sample was labelled {{}} to avoid confusion during analysis. The researchers also recorded the depth and moisture of the soil. These details allowed them to compare conditions {{}} rather than treating all samples as identical.",
-    "answers": [
-      "immediately",
-      "accurately"
-    ],
+    "answers": ["immediately", "accurately"],
     "audio": "audio/listening-blanks-02.mp3"
   },
   {
     "id": "highlight-summary-01",
     "type": "highlight-summary",
     "title": "Public spaces",
-    "explanation": "The first summary preserves the central argument and its qualifications; the alternatives exaggerate or contradict it.",
+    "explanation": "The best summary connects practical features with users’ needs. The speaker says small spaces can work well, so size alone does not determine success. Photographs cannot replace observing how people use the space.",
     "audioText": "A successful public space does not have to be large. A small square with shade, seating and safe access can attract more people than an impressive plaza with nowhere to rest. Designers should observe how different groups use the area at different times. For example, a route that works well for commuters in the morning may need better lighting for evening visitors. The important point is to judge the space by the needs of its users rather than its appearance in an architectural photograph.",
     "prompt": "Choose the best summary.",
     "options": [
@@ -773,16 +592,14 @@
       "Large plazas are always more popular than small squares because they look impressive.",
       "Architectural photographs provide enough evidence to decide whether a public space is successful."
     ],
-    "answers": [
-      "0"
-    ],
+    "answers": ["0"],
     "audio": "audio/highlight-summary-01.mp3"
   },
   {
     "id": "highlight-summary-02",
     "type": "highlight-summary",
     "title": "Food labels",
-    "explanation": "The first summary preserves the central argument and its qualifications; the alternatives exaggerate or contradict it.",
+    "explanation": "The best summary combines accuracy, comparable measures and understandable presentation. The recording says people may need education; it does not propose removing all numbers.",
     "audioText": "A food label can contain accurate information without being easy to understand. If serving sizes differ between products, shoppers may find it difficult to compare them quickly. Displaying values per one hundred grams can help, but consumers still need to know what each measure means. Researchers therefore study both the accuracy of labels and how people interpret them. Clear design and education may need to work together. More information alone does not guarantee a better decision.",
     "prompt": "Choose the best summary.",
     "options": [
@@ -790,16 +607,14 @@
       "Every shopper understands food labels, so education is unnecessary.",
       "Removing all numerical information is the only way to improve food labels."
     ],
-    "answers": [
-      "0"
-    ],
+    "answers": ["0"],
     "audio": "audio/highlight-summary-02.mp3"
   },
   {
     "id": "listening-single-01",
     "type": "listening-single",
     "title": "A changed seminar",
-    "explanation": "Choose the detail or purpose stated in the recording, rather than a related but unsupported idea.",
+    "explanation": "The seminar moves from the science building to room twelve in the library. The time stays at three, the article is unchanged, and students do not need to register again.",
     "audioText": "This is a message for students attending Thursday’s seminar. We had planned to meet in the science building, but repair work means that room is unavailable. The seminar will now take place in room twelve in the library. The starting time remains three o’clock. Please bring the article listed on the course website. If you cannot find the new room, ask at the library reception desk. You do not need to register again, because the original booking list will be used.",
     "prompt": "What has changed?",
     "options": [
@@ -808,16 +623,14 @@
       "The meeting location",
       "The registration deadline"
     ],
-    "answers": [
-      "2"
-    ],
+    "answers": ["2"],
     "audio": "audio/listening-single-01.mp3"
   },
   {
     "id": "listening-single-02",
     "type": "listening-single",
     "title": "Research interviews",
-    "explanation": "Choose the detail or purpose stated in the recording, rather than a related but unsupported idea.",
+    "explanation": "A pilot interview checks whether questions are understood as intended. It does not teach preferred answers, avoid collecting information or replace the main interviews.",
     "audioText": "When planning interviews, researchers should allow time to test their questions. A question that seems clear to its writer may confuse someone else. In a pilot interview, the researcher can ask the participant to explain how they understood the wording. This does not mean training participants to give a preferred answer. It means checking whether the question invites the kind of information the study needs. Revising ambiguous wording before the main interviews can save considerable time later.",
     "prompt": "Why conduct a pilot interview?",
     "options": [
@@ -826,16 +639,14 @@
       "To avoid collecting information",
       "To replace all later interviews"
     ],
-    "answers": [
-      "1"
-    ],
+    "answers": ["1"],
     "audio": "audio/listening-single-02.mp3"
   },
   {
     "id": "select-missing-word-01",
     "type": "select-missing-word",
     "title": "Long-term planning",
-    "explanation": "The argument contrasts changing future demand with an assumption that it stays exactly the same.",
+    "explanation": "New homes and workplaces can change travel demand, so “exactly the same” completes the assumption planners should avoid. The other endings do not fit this contrast.",
     "audioText": "When a town designs a new transport network, it has to think beyond the number of passengers travelling today. Housing developments may change where people live, and new workplaces may change where they need to go. A route that appears unnecessary now could become important in a few years. Planners therefore compare several possible futures rather than assuming that demand will remain",
     "prompt": "Which ending completes the recording?",
     "options": [
@@ -843,40 +654,34 @@
       "completely unknown to everyone",
       "unrelated to travel"
     ],
-    "answers": [
-      "0"
-    ],
+    "answers": ["0"],
     "audio": "audio/select-missing-word-01.mp3"
   },
   {
     "id": "highlight-incorrect-01",
     "type": "highlight-incorrect",
     "title": "An archaeological survey",
-    "explanation": "The highlighted word differs from the recording. The correct transcript is provided below after submission.",
+    "explanation": "The displayed word is “quickly”, but the recording says “carefully”. The rest of the displayed passage matches the recording.",
     "audioText": "Before excavation begins, an archaeological team surveys the site carefully. The survey helps researchers decide where to dig and how to protect fragile remains. Every discovery is recorded so that its position can be understood later. Without this context, even an interesting object may reveal little about the people who used it.",
     "text": "Before excavation begins, an archaeological team surveys the site quickly. The survey helps researchers decide where to dig and how to protect fragile remains. Every discovery is recorded so that its position can be understood later. Without this context, even an interesting object may reveal little about the people who used it.",
-    "answers": [
-      "9"
-    ],
+    "answers": ["9"],
     "audio": "audio/highlight-incorrect-01.mp3"
   },
   {
     "id": "highlight-incorrect-02",
     "type": "highlight-incorrect",
     "title": "A community survey",
-    "explanation": "The highlighted word differs from the recording. The correct transcript is provided below after submission.",
+    "explanation": "The displayed word is “compulsory”, but the recording says “voluntary”. These describe opposite conditions for participation.",
     "audioText": "The council distributed a questionnaire to households across the district. Residents were asked about parks, transport and local services. Responses were anonymous, and participation was voluntary. The findings will be discussed at a public meeting before the council decides which improvements to fund.",
     "text": "The council distributed a questionnaire to households across the district. Residents were asked about parks, transport and local services. Responses were anonymous, and participation was compulsory. The findings will be discussed at a public meeting before the council decides which improvements to fund.",
-    "answers": [
-      "25"
-    ],
+    "answers": ["25"],
     "audio": "audio/highlight-incorrect-02.mp3"
   },
   {
     "id": "write-dictation-01",
     "type": "write-dictation",
     "title": "Academic dictation",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check the plural “results”, the phrase “will be published”, and “the next edition of the journal”.",
     "audioText": "The results will be published in the next edition of the journal.",
     "model": "The results will be published in the next edition of the journal.",
     "audio": "audio/write-dictation-01.mp3"
@@ -885,7 +690,7 @@
     "id": "write-dictation-02",
     "type": "write-dictation",
     "title": "Academic dictation",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check the plural “Students”, “are encouraged to attend”, and the phrase “the workshop on academic writing”.",
     "audioText": "Students are encouraged to attend the workshop on academic writing.",
     "model": "Students are encouraged to attend the workshop on academic writing.",
     "audio": "audio/write-dictation-02.mp3"
@@ -894,7 +699,7 @@
     "id": "write-dictation-03",
     "type": "write-dictation",
     "title": "Academic dictation",
-    "explanation": "Compare your response with the model. Preserve the main information and check the task requirements.",
+    "explanation": "Check singular “experiment” with “requires”, and keep both “careful observation” and “accurate measurement”.",
     "audioText": "The experiment requires careful observation and accurate measurement.",
     "model": "The experiment requires careful observation and accurate measurement.",
     "audio": "audio/write-dictation-03.mp3"

@@ -20,7 +20,6 @@ import {
   History,
   House,
   Info,
-  Image as ImageIcon,
   ListChecks,
   Mic,
   Play,
@@ -36,11 +35,8 @@ import {
   sections,
   mocks,
   guideFor,
-  feedback,
-  normalize,
   asset,
   type Question,
-  type Answer,
   type Section,
 } from "./content";
 import {
@@ -50,7 +46,7 @@ import {
   GuideScreen,
   HistoryScreen,
 } from "./LearningScreens";
-import { Pager, ReadingPages } from "./Pages";
+import { ReadingPages } from "./Pages";
 import { type PracticePlan, type Result } from "./Runner";
 import { PracticeSession } from "./PracticeSession";
 import { loadAttempt } from "./storage";
@@ -73,9 +69,8 @@ import {
 import { Toaster } from "./components/ui/sonner";
 import { GameHub, GameStatus } from "./GameHub";
 import { badges, emptyProgress, localDay, questQuestions } from "./progress";
-import { Chart } from "./QuestionInput";
+import { Review } from "./Review";
 import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
-import { SpeechReview } from "./speech/SpeechReview";
 import type { Pronunciation } from "./speech/comparison-schema";
 const navigation: readonly {
   id: ScreenId;
@@ -728,182 +723,5 @@ export default function App() {
         <Toaster theme="light" position="top-center" />
       </div>
     </TooltipProvider>
-  );
-}
-function showAnswer(q: Question, a: Answer) {
-  const g = guideFor(q);
-  if (a.text) return a.text;
-  if (a.values?.length) {
-    if (["single", "multi", "order"].includes(g.kind))
-      return a.values
-        .map((x) => q.options?.[+x])
-        .filter(Boolean)
-        .join("\n");
-    if (g.kind === "highlight")
-      return a.values.map((x) => q.text!.split(/\s+/)[+x]).join(", ");
-    return a.values.join(" · ");
-  }
-  return a.recording ? "Recording below" : "No response";
-}
-function modelAnswer(q: Question) {
-  const g = guideFor(q);
-  if (q.model) return q.model;
-  if (["single", "multi", "order"].includes(g.kind))
-    return q.answers!.map((x) => q.options![+x]).join("\n");
-  if (g.kind === "highlight")
-    return q.answers!.map((x) => q.text!.split(/\s+/)[+x]).join(", ");
-  return q.answers?.join(" · ");
-}
-function answerMatches(q: Question, a: Answer) {
-  const kind = guideFor(q).kind;
-  if (q.answers) {
-    const actual = a.values || [];
-    return (
-      actual.length === q.answers.length &&
-      (kind === "multi" || kind === "highlight"
-        ? actual.every((value) => q.answers!.includes(value))
-        : q.answers.every(
-            (value, index) => normalize(value) === normalize(actual[index]),
-          ))
-    );
-  }
-  const actual = showAnswer(q, a);
-  const expected = modelAnswer(q);
-  if (!expected) return false;
-  if (kind === "dictation") return normalize(actual) === normalize(expected);
-  return (
-    actual.trim().replace(/\s+/g, " ") === expected.trim().replace(/\s+/g, " ")
-  );
-}
-function Review({
-  result: r,
-  onPronunciation,
-}: {
-  result: Result;
-  onPronunciation: (questionId: string, value: Pronunciation) => void;
-}) {
-  const [index, setIndex] = useState(0);
-  const [tab, setTab] = useState(() =>
-    guideFor(questions.find((q) => q.id === r.questionIds[0])!).kind === "speak"
-      ? "Feedback"
-      : "Your response",
-  );
-  const id = r.questionIds[index],
-    q = questions.find((x) => x.id === id)!,
-    a = r.answers[id] || {};
-  const f = feedback(q, a);
-  const speaking = guideFor(q).kind === "speak";
-  const expected = modelAnswer(q);
-  const prompt = [
-    q.prompt,
-    q.text,
-    q.audioText,
-    ...(speaking && q.model ? [`Example response: ${q.model}`] : []),
-  ].filter((text): text is string => !!text);
-  const tabs = [
-    "Your response",
-    "Feedback",
-    ...(prompt.length ? ["Prompt"] : []),
-    ...(q.chart ? ["Image"] : []),
-  ];
-  const activeTab = tabs.includes(tab) ? tab : "Your response";
-  const texts =
-    activeTab === "Your response"
-      ? expected && !answerMatches(q, a)
-        ? [`Your response: ${showAnswer(q, a)}`, `Answer key: ${expected}`]
-        : [showAnswer(q, a)]
-      : activeTab === "Feedback"
-        ? [f.detail, q.explanation]
-        : prompt;
-  return (
-    <div className="screen-stack review-screen">
-      <div className="review-question">
-        <h2>{guideFor(q).title}</h2>
-        {!a.recording && <Badge variant="outline">{f.label}</Badge>}
-        <Pager
-          index={index}
-          count={r.questionIds.length}
-          label="review questions"
-          onChange={(n) => {
-            setIndex(n);
-            const next = questions.find(
-              (question) => question.id === r.questionIds[n],
-            )!;
-            if (
-              (tab === "Image" && !next.chart) ||
-              (tab === "Prompt" &&
-                !next.prompt &&
-                !next.text &&
-                !next.audioText)
-            )
-              setTab("Your response");
-          }}
-        />
-      </div>
-      <div
-        className="screen-tabs review-tabs"
-        role="group"
-        aria-label="Review panels"
-      >
-        {tabs.map((t) => {
-          const Icon =
-            t === "Your response"
-              ? Play
-              : t === "Feedback"
-                ? ListChecks
-                : t === "Prompt"
-                  ? BookOpen
-                  : ImageIcon;
-          return (
-            <Tooltip key={t}>
-              <TooltipTrigger
-                render={
-                  <Button
-                    variant={activeTab === t ? "secondary" : "outline"}
-                    aria-label={t}
-                    className={
-                      t === "Feedback" ? "review-feedback-tab" : undefined
-                    }
-                    aria-pressed={activeTab === t}
-                    onClick={() => setTab(t)}
-                  />
-                }
-              >
-                <Icon />
-                <span>{t}</span>
-              </TooltipTrigger>
-              <TooltipContent>{t}</TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </div>
-      {activeTab === "Feedback" && speaking ? (
-        <div className="speech-panel">
-          <SpeechReview
-            key={id}
-            question={q}
-            answer={a}
-            attemptId={r.id}
-            questionNumber={index + 1}
-            onPronunciation={(value) => onPronunciation(id, value)}
-          />
-        </div>
-      ) : activeTab === "Your response" && a.recording ? (
-        <AudioPlayer
-          src={a.recording}
-          label={`Your recording for question ${index + 1}`}
-        />
-      ) : activeTab === "Image" && q.chart ? (
-        <div className="review-chart">
-          <Chart q={q} responsive />
-        </div>
-      ) : (
-        <ReadingPages
-          key={id + activeTab}
-          texts={texts}
-          label="feedback pages"
-        />
-      )}
-    </div>
   );
 }

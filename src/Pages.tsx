@@ -41,42 +41,57 @@ export function Pager({
   );
 }
 
+export type ReadingBlock = { label?: string; text: string };
+
+function ReadingBlocks({ blocks }: { blocks: ReadingBlock[] }) {
+  return blocks.map((block, i) => (
+    <div className="reading-block" key={i}>
+      {block.label && <h3>{block.label}</h3>}
+      <p>{block.text}</p>
+    </div>
+  ));
+}
+
 export function ReadingPages({
-  texts,
+  texts = [],
+  blocks,
   label = "reading pages",
   scroll = false,
 }: {
-  texts: string[];
+  texts?: string[];
+  blocks?: ReadingBlock[];
   label?: string;
   scroll?: boolean;
 }) {
   const [index, setIndex] = useState(0);
-  const [pages, setPages] = useState<string[]>([""]);
+  const [pages, setPages] = useState<ReadingBlock[][]>([[]]);
   const panel = useRef<HTMLDivElement>(null);
-  const source = [
-    ...new Set(
-      texts.map((text) => text.trim().replace(/\s+/g, " ")).filter(Boolean),
-    ),
-  ].join(" ");
+  // Plain reading consumers keep their existing deduplicated, packed prose.
+  // Reviews can retain labels and line breaks without adding separate pagers.
+  const source = JSON.stringify(
+    blocks ?? [
+      {
+        text: [
+          ...new Set(
+            texts
+              .map((text) => text.trim().replace(/\s+/g, " "))
+              .filter(Boolean),
+          ),
+        ].join(" "),
+      },
+    ],
+  );
   useLayoutEffect(() => {
     const node = panel.current;
     if (!node || scroll) return;
     let live = true;
     const paginate = () => {
       if (!live) return;
-      const style = getComputedStyle(node);
-      const height =
-        node.clientHeight -
-        parseFloat(style.paddingTop) -
-        parseFloat(style.paddingBottom);
-      const width =
-        node.clientWidth -
-        parseFloat(style.paddingLeft) -
-        parseFloat(style.paddingRight);
+      const height = node.clientHeight;
+      const width = node.getBoundingClientRect().width;
       if (width <= 0 || height <= 0) return;
-      // Measure the actual font and available panel. This also handles long
-      // words, small screens and enlarged text without hiding the last line.
       const measure = document.createElement("div");
+      measure.className = "reading-copy";
       Object.assign(measure.style, {
         position: "fixed",
         visibility: "hidden",
@@ -84,54 +99,80 @@ export function ReadingPages({
         left: "0",
         top: "0",
         width: width + "px",
-        font: style.font,
-        lineHeight: style.lineHeight,
-        letterSpacing: style.letterSpacing,
-        overflowWrap: "anywhere",
+        height: "auto",
+        minHeight: "0",
+        boxSizing: "border-box",
       });
+      // Inherit the actual panel's font, including zoom/user overrides.
+      const style = getComputedStyle(node);
+      measure.style.font = style.font;
+      measure.style.lineHeight = style.lineHeight;
+      measure.style.letterSpacing = style.letterSpacing;
+      measure.style.padding = style.padding;
+      measure.style.borderWidth = style.borderWidth;
       document.body.append(measure);
-      const next: string[] = [];
-      if (source) {
-        const words = source.split(/\s+/);
-        for (let start = 0; start < words.length;) {
+      const fits = (items: ReadingBlock[]) => {
+        measure.replaceChildren();
+        for (const item of items) {
+          const block = document.createElement("div");
+          block.className = "reading-block";
+          if (item.label) {
+            const title = document.createElement("h3");
+            title.textContent = item.label;
+            block.append(title);
+          }
+          const paragraph = document.createElement("p");
+          paragraph.textContent = item.text;
+          block.append(paragraph);
+          measure.append(block);
+        }
+        return measure.clientHeight <= height;
+      };
+      const next: ReadingBlock[][] = [];
+      let page: ReadingBlock[] = [];
+      for (const block of JSON.parse(source) as ReadingBlock[]) {
+        if (!block.text.trim()) continue;
+        if (fits([...page, block])) {
+          page.push(block);
+          continue;
+        }
+        // Keep a block together if it can fit on a fresh page.
+        if (page.length) {
+          next.push(page);
+          page = [];
+        }
+        let rest = block.text.trim();
+        let continued = false;
+        while (rest) {
+          const title = block.label
+            ? block.label + (continued ? " (continued)" : "")
+            : undefined;
+          if (fits([{ label: title, text: rest }])) {
+            page.push({ label: title, text: rest });
+            break;
+          }
+          // Preserve all text, preferring whitespace boundaries. At extreme
+          // zoom even one word may need splitting; never clip a trailing line.
           let low = 1,
-            high = words.length - start,
+            high = rest.length,
             fit = 1;
           while (low <= high) {
             const n = Math.floor((low + high) / 2);
-            measure.textContent = words.slice(start, start + n).join(" ");
-            if (measure.getBoundingClientRect().height <= height) {
+            if (fits([{ label: title, text: rest.slice(0, n) }])) {
               fit = n;
               low = n + 1;
             } else high = n - 1;
           }
-          measure.textContent = words[start];
-          if (
-            fit === 1 &&
-            words[start].length > 1 &&
-            measure.getBoundingClientRect().height > height
-          ) {
-            let first = 1,
-              last = words[start].length,
-              chars = 1;
-            while (first <= last) {
-              const mid = Math.floor((first + last) / 2);
-              measure.textContent = words[start].slice(0, mid);
-              if (measure.getBoundingClientRect().height <= height) {
-                chars = mid;
-                first = mid + 1;
-              } else last = mid - 1;
-            }
-            next.push(words[start].slice(0, chars));
-            words[start] = words[start].slice(chars);
-          } else {
-            next.push(words.slice(start, start + fit).join(" "));
-            start += fit;
-          }
+          const boundary = rest.slice(0, fit + 1).search(/\s+\S*$/);
+          if (boundary > 0) fit = boundary;
+          next.push([{ label: title, text: rest.slice(0, fit).trimEnd() }]);
+          rest = rest.slice(fit).trimStart();
+          continued = true;
         }
       }
+      if (page.length) next.push(page);
       measure.remove();
-      if (!next.length) next.push("");
+      if (!next.length) next.push([]);
       setPages((current) =>
         JSON.stringify(current) === JSON.stringify(next) ? current : next,
       );
@@ -155,9 +196,11 @@ export function ReadingPages({
         aria-label={scroll ? label : undefined}
         tabIndex={scroll ? 0 : undefined}
       >
-        <p key={current} className="page-enter">
-          {scroll ? source : pages[current]}
-        </p>
+        <div key={current} className="page-enter">
+          <ReadingBlocks
+            blocks={scroll ? JSON.parse(source) : pages[current]}
+          />
+        </div>
       </div>
       {!scroll && (
         <Pager
