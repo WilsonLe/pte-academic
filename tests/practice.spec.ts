@@ -316,6 +316,18 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
       .toBe(true);
   }
   await page.goto("/#types");
+  // Exhaustive page counting requires a stable panel capacity: required setup
+  // releases its reserved status row when ready. Loading/error navigation is
+  // exercised independently in comparison.spec.ts.
+  await expect(page.getByLabel("Required speech model")).toHaveCount(0, {
+    timeout: 30000,
+  });
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+  });
   const titles = new Set<string>();
   do {
     for (const text of await page
