@@ -8,8 +8,8 @@
   "files": [
     {
       "path": "comparison.json",
-      "bytes": 21911102,
-      "sha256": "ee02ca9b4e87f69458227d1efe101401c0dcf53d254e9b96eec7ea09b3284a04",
+      "bytes": 21910590,
+      "sha256": "4d5058a820687ec4ea596185c34b1dc1ce43909cc2fd72ddd9bd9d4d0a1a996b",
       "kind": "metadata"
     },
     {
@@ -91,8 +91,8 @@
       "kind": "encoder"
     }
   ],
-  "totalBytes": 654069442,
-  "exporterSha256": "c4bb3710a1fef9c7c9e057c520ac05bf8abbf5d4253c4978275b0c8cd7d8221a",
+  "totalBytes": 654068930,
+  "exporterSha256": "67f5b9e4b5b27af4b4cdba3d5a9c5eefec51b53d4ffe845287f17c07a95cfc8c",
   "encoderRevision": [
     "facebook/wav2vec2-xlsr-53-espeak-cv-ft",
     "2c733782da5604684829819a5eb744c193fe9398"

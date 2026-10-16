@@ -19,6 +19,7 @@ An independent, beginner-friendly PTE Academic practice PWA. All learner-facing 
 ## Commands
 
 - `npm run dev` — local development on 127.0.0.1:4178.
+- `npm run validate:comparison` — verifies the pinned browser model pack, exporter identity and fixed-word speech-script coverage; both build paths require it.
 - `npm run validate:content` — content contracts, question references and media hashes.
 - `npm run test:content` — focused content/feedback checks.
 - `node --test tests/openrouter.test.mjs` — authoring budget checks, no network or charges.

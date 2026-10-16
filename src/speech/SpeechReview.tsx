@@ -3,6 +3,7 @@ import { AudioPlayer } from "../components/AudioPlayer";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   AudioLines,
+  Gauge,
   LoaderCircle,
   X,
   Info,
@@ -163,76 +164,120 @@ export function SpeechReview({
       aria-label="On-device speech feedback"
       className="local-speech-screen"
     >
-      <div className="flex flex-wrap items-center gap-2">
-        {expected && (
-          <Button
-            onClick={() => void score()}
-            disabled={!!progress || model.status !== "ready"}
-            aria-label="Score speech with v3 model"
-          >
-            <AudioLines className="size-4" />
-            {pronunciation ? "Score again" : "Score speech"}
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          onClick={() => void run()}
-          disabled={!!progress}
-          aria-label={
-            transcription
-              ? "Transcribe again on this device"
-              : "Transcribe on this device"
-          }
-        >
-          {progress ? (
-            <LoaderCircle className="size-4 animate-spin" />
-          ) : transcription ? (
-            <RotateCw className="size-4" />
-          ) : (
-            <AudioLines className="size-4" />
+      <div className="speech-toolbar">
+        <div className="speech-actions flex flex-wrap items-center gap-2">
+          {expected && (
+            <Button
+              onClick={() => void score()}
+              disabled={!!progress || model.status !== "ready"}
+              title="Score speech with v3 model"
+              aria-label="Score speech with v3 model"
+            >
+              <Gauge className="size-4" />
+              <span className="speech-action-label">
+                {pronunciation ? "Score again" : "Score speech"}
+              </span>
+            </Button>
           )}
-          {transcription ? "Transcribe again" : "Transcribe"}
-        </Button>
-        {!!progress && (
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            onClick={() => void run()}
+            disabled={!!progress}
+            title={transcription ? "Transcribe again" : "Transcribe"}
             aria-label={
-              scoreJob.current
-                ? "Cancel speech scoring"
-                : "Cancel transcription"
+              transcription
+                ? "Transcribe again on this device"
+                : "Transcribe on this device"
             }
-            onClick={cancel}
           >
-            <X className="size-4" />
+            {progress ? (
+              <LoaderCircle className="size-4 animate-spin" />
+            ) : transcription ? (
+              <RotateCw className="size-4" />
+            ) : (
+              <AudioLines className="size-4" />
+            )}
+            <span className="speech-action-label">
+              {transcription ? "Transcribe again" : "Transcribe"}
+            </span>
           </Button>
-        )}
-        {similarity !== null && (
-          <Badge
-            variant="secondary"
-            aria-label={`Reference similarity ${similarity} out of 100`}
+          {!!progress && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={
+                scoreJob.current
+                  ? "Cancel speech scoring"
+                  : "Cancel transcription"
+              }
+              onClick={cancel}
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+
+          {f?.comparison && (
+            <Badge
+              className="speech-word-badge"
+              variant="secondary"
+              aria-label={`Word match ${f.comparison.accuracy} percent`}
+            >
+              {f.comparison.accuracy}% word match
+            </Badge>
+          )}
+          {f?.answerMatch !== null && f?.answerMatch !== undefined && (
+            <Badge variant="secondary">
+              {f.answerMatch ? "Matches answer key" : "Compare answer key"}
+            </Badge>
+          )}
+          {!!progress && (
+            <p role="status" className="text-xs text-muted-foreground">
+              {progress}
+            </p>
+          )}
+        </div>
+        <div className="speech-tabs">
+          {pronunciation && (
+            <Button
+              aria-label="Syllable scores"
+              variant={panel === "syllables" ? "secondary" : "ghost"}
+              onClick={() => setPanel("syllables")}
+            >
+              <ListChecks />
+              <span>Syllables</span>
+            </Button>
+          )}
+          {transcription && (
+            <Button
+              aria-label="Transcript"
+              variant={panel === "transcript" ? "secondary" : "ghost"}
+              onClick={() => setPanel("transcript")}
+            >
+              <AudioLines />
+              <span>Transcript</span>
+            </Button>
+          )}
+          <Button
+            aria-label="How local feedback works"
+            variant={panel === "help" ? "secondary" : "ghost"}
+            onClick={() => setPanel(panel === "help" ? "transcript" : "help")}
           >
-            {similarity}/100 similarity
-          </Badge>
-        )}
-        {f?.comparison && (
-          <Badge
-            variant="secondary"
-            aria-label={`Word match ${f.comparison.accuracy} percent`}
-          >
-            {f.comparison.accuracy}% word match
-          </Badge>
-        )}
-        {f?.answerMatch !== null && f?.answerMatch !== undefined && (
-          <Badge variant="secondary">
-            {f.answerMatch ? "Matches answer key" : "Compare answer key"}
-          </Badge>
-        )}
-        {!!progress && (
-          <p role="status" className="text-xs text-muted-foreground">
-            {progress}
-          </p>
-        )}
+            <Info />
+            <span>How local feedback works</span>
+          </Button>
+          {f?.comparison && (
+            <Button
+              aria-label={`Word comparison · ${f.comparison.errors} word errors`}
+              variant={panel === "comparison" ? "secondary" : "ghost"}
+              onClick={() =>
+                setPanel(panel === "comparison" ? "transcript" : "comparison")
+              }
+            >
+              <ListChecks />
+              <span>Word comparison · {f.comparison.errors} word errors</span>
+            </Button>
+          )}
+        </div>
       </div>
       <AudioPlayer
         src={answer.recording!}
@@ -243,48 +288,6 @@ export function SpeechReview({
           Transcription downloads ~60 MB on first use.
         </p>
       )}
-      <div className="speech-tabs">
-        {pronunciation && (
-          <Button
-            aria-label="Syllable scores"
-            variant={panel === "syllables" ? "secondary" : "ghost"}
-            onClick={() => setPanel("syllables")}
-          >
-            <ListChecks />
-            <span>Syllables</span>
-          </Button>
-        )}
-        {transcription && (
-          <Button
-            aria-label="Transcript"
-            variant={panel === "transcript" ? "secondary" : "ghost"}
-            onClick={() => setPanel("transcript")}
-          >
-            <AudioLines />
-            <span>Transcript</span>
-          </Button>
-        )}
-        <Button
-          aria-label="How local feedback works"
-          variant={panel === "help" ? "secondary" : "ghost"}
-          onClick={() => setPanel(panel === "help" ? "transcript" : "help")}
-        >
-          <Info />
-          <span>How local feedback works</span>
-        </Button>
-        {f?.comparison && (
-          <Button
-            aria-label={`Word comparison · ${f.comparison.errors} word errors`}
-            variant={panel === "comparison" ? "secondary" : "ghost"}
-            onClick={() =>
-              setPanel(panel === "comparison" ? "transcript" : "comparison")
-            }
-          >
-            <ListChecks />
-            <span>Word comparison · {f.comparison.errors} word errors</span>
-          </Button>
-        )}
-      </div>
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -293,12 +296,19 @@ export function SpeechReview({
       {panel === "syllables" && pronunciation ? (
         <div className="speech-reading" aria-label="Local syllable scores">
           <p className="speech-stats">
+            {similarity !== null && (
+              <Badge
+                variant="secondary"
+                aria-label={`Reference similarity ${similarity} out of 100`}
+              >
+                {similarity}/100 similarity
+              </Badge>
+            )}{" "}
             {
               pronunciation.syllables.filter((s) => s.status === "scored")
                 .length
             }{" "}
-            of {pronunciation.syllables.length} syllables scored ·
-            blended-English v3
+            of {pronunciation.syllables.length} syllables scored
           </p>
           {pronunciation.syllables.length ? (
             <SyllableScores syllables={pronunciation.syllables} />
@@ -348,8 +358,9 @@ export function SpeechReview({
         <div className="speech-reading" aria-label="Local transcript result">
           {f && f.words > 0 && (
             <p className="speech-stats">
-              {f.words} recognized words · {Math.round(transcription.seconds)}s
-              recording · {f.wordsPerMinute} words/min
+              {expected && f.comparison
+                ? `${f.comparison.accuracy}% word match · ${Math.round(transcription.seconds)}s recording`
+                : `${f.words} recognized words · ${Math.round(transcription.seconds)}s recording · ${f.wordsPerMinute} words/min`}
             </p>
           )}
           <ReadingPages

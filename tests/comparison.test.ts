@@ -102,3 +102,17 @@ test("silence and broadband noise receive no speech grade", () => {
   const tone = new Float32Array(16000).map((_, i) => Math.sin(i * 0.1) * 0.1);
   assert.equal(reliableSignal(tone), true);
 });
+
+test("app feedback uses the saved v3 grade rather than a transcript word match", async () => {
+  const { questions, feedback } = await import("../src/content");
+  const q = questions.find((q) => q.type === "read-aloud")!;
+  const result = pronunciationSchema.parse(value);
+  assert.equal(
+    feedback(q, { recording: "blob:local", pronunciation: result }).label,
+    "70/100 reference similarity",
+  );
+  assert.equal(
+    feedback(q, { recording: "blob:local" }).label,
+    "Score your speech",
+  );
+});

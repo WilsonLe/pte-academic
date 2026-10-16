@@ -196,7 +196,7 @@ test("required automatic download, actual app grading, saved scores, cancellatio
   const badge = page.getByLabel(/^Reference similarity \d+ out of 100$/);
   await expect(badge).toBeVisible({ timeout: 60000 });
   await expect(page.getByLabel("Local syllable scores")).toContainText(
-    "blended-English v3",
+    "syllables scored",
   );
   const saved = await page.evaluate(
     async () =>

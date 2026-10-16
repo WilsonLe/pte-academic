@@ -46,6 +46,7 @@ def main():
     packed = cache / 'export-fp16-storage.onnx'; onnx.save(graph, str(packed))
     scripts={}
     def script(text):
+        text=text.replace("’", "'").replace("‘", "'")
         key=' '.join(tokenize(text))
         if not key or key in scripts: return
         variants=[]

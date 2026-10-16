@@ -1,7 +1,7 @@
 {
   "sourceModelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
   "encoderSha256": "769b21ed2f10db1e25e695c4b380258ba77f91dc860dc3b1d53591588e2c7dfb",
-  "manifestSha256": "d33a80eb9da090b1087ad0922bfc9922bbbf07731901ea809e969abd1c6d6d03",
+  "manifestSha256": "31dbf565a1fd9bbdcb13803c3112ce7e1c38f9ffb5ac4e4e1d71cdadc123d4f5",
   "scope": "Existing development controls, actual Chrome/WASM; no fresh final-test selection or human validity claim.",
   "maximumAllowedDifference": 0.1,
   "cases": [

@@ -1453,3 +1453,30 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+.speech-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+@media (max-width: 767px) {
+  .speech-actions .speech-action-label,
+  .speech-actions .speech-word-badge,
+  .speech-actions .speech-score-badge {
+    display: none;
+  }
+  .speech-actions > button {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+  }
+  .speech-actions {
+    gap: 4px;
+  }
+  .speech-toolbar {
+    gap: 4px;
+  }
+}
