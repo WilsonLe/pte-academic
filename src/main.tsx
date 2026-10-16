@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { screenRoutes, screenPath } from "./routing";
 import App from "./App";
+import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
 import "./style.css";
 import "./screens.css";
 // Absolute asset/base paths keep nested history links and refreshes reliable.
@@ -21,5 +22,8 @@ const router = createBrowserRouter(
   { basename },
 );
 createRoot(document.getElementById("root")!).render(
-  <RouterProvider router={router} />,
+  <>
+    <RequiredSpeechModel />
+    <RouterProvider router={router} />
+  </>,
 );

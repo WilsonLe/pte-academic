@@ -1,5 +1,6 @@
+import { SyllableScores } from "./SyllableScores";
 import { AudioPlayer } from "../components/AudioPlayer";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   AudioLines,
   LoaderCircle,
@@ -14,7 +15,10 @@ import { Badge } from "../components/ui/badge";
 import { ReadingPages } from "../Pages";
 import { transcribeRecording } from "./client";
 import { speechFeedback, type Transcription } from "./scoring";
-import { saveTranscription } from "../storage";
+import { saveTranscription, savePronunciation } from "../storage";
+import { scoreRecording } from "./comparison-client";
+import { modelStatus, subscribeModel } from "./comparison-assets";
+import { pronunciationSummary, type Pronunciation } from "./comparison-schema";
 import { toast } from "sonner";
 export function SpeechReview({
   question,
@@ -22,14 +26,27 @@ export function SpeechReview({
   attemptId,
   questionNumber,
   onChange,
+  onPronunciation,
 }: {
   question: Question;
   answer: Answer;
   attemptId: string;
   questionNumber: number;
   onChange: (value: Transcription) => void;
+  onPronunciation: (value: Pronunciation) => void;
 }) {
-  const [panel, setPanel] = useState("transcript");
+  const [panel, setPanel] = useState(
+    answer.pronunciation ? "syllables" : "transcript",
+  );
+  const [pronunciation, setPronunciation] = useState(answer.pronunciation);
+  const model = useSyncExternalStore(subscribeModel, modelStatus);
+  const expected =
+    question.type === "read-aloud"
+      ? question.text
+      : question.type === "repeat-sentence"
+        ? question.audioText
+        : undefined;
+  const scoreJob = useRef<ReturnType<typeof scoreRecording> | null>(null);
   const [transcription, setTranscription] = useState(answer.transcription);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
@@ -40,15 +57,62 @@ export function SpeechReview({
     return () => {
       alive.current = false;
       job.current?.cancel();
+      scoreJob.current?.cancel();
     };
   }, []);
   function cancel() {
     job.current?.cancel();
+    scoreJob.current?.cancel();
     // Keep the action disabled until audio decoding/worker cleanup has settled.
     setProgress("Cancelling…");
   }
+  async function score() {
+    if (!answer.recording || !expected || job.current || scoreJob.current)
+      return;
+    setError("");
+    const operation = scoreRecording(answer.recording, expected, (message) => {
+      if (alive.current) setProgress(message);
+    });
+    scoreJob.current = operation;
+    try {
+      const value = await operation.promise;
+      if (!alive.current || scoreJob.current !== operation) return;
+      setPronunciation(value);
+      setPanel("syllables");
+      try {
+        const saved = await savePronunciation(attemptId, question.id, value);
+        if (!alive.current || scoreJob.current !== operation) return;
+        onPronunciation(value);
+        if (saved) toast.success("Syllable scores saved on this device");
+        else
+          setError(
+            "This attempt is no longer stored. Scores are available in this view.",
+          );
+      } catch {
+        if (alive.current)
+          setError(
+            "Scores ready, but they could not be saved. They are available in this view.",
+          );
+      }
+    } catch (e) {
+      if (
+        alive.current &&
+        !(e instanceof DOMException && e.name === "AbortError")
+      )
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Speech comparison failed. Your recording is retained.",
+        );
+    } finally {
+      if (alive.current && scoreJob.current === operation) {
+        scoreJob.current = null;
+        setProgress("");
+      }
+    }
+  }
   async function run() {
-    if (!answer.recording || job.current) return;
+    if (!answer.recording || job.current || scoreJob.current) return;
     setError("");
     const operation = transcribeRecording(answer.recording, (message) => {
       if (alive.current) setProgress(message);
@@ -93,12 +157,23 @@ export function SpeechReview({
     }
   }
   const f = transcription ? speechFeedback(question, transcription) : null;
+  const similarity = pronunciation ? pronunciationSummary(pronunciation) : null;
   return (
     <section
       aria-label="On-device speech feedback"
       className="local-speech-screen"
     >
       <div className="flex flex-wrap items-center gap-2">
+        {expected && (
+          <Button
+            onClick={() => void score()}
+            disabled={!!progress || model.status !== "ready"}
+            aria-label="Score speech with v3 model"
+          >
+            <AudioLines className="size-4" />
+            {pronunciation ? "Score again" : "Score speech"}
+          </Button>
+        )}
         <Button
           variant="outline"
           onClick={() => void run()}
@@ -122,11 +197,23 @@ export function SpeechReview({
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Cancel transcription"
+            aria-label={
+              scoreJob.current
+                ? "Cancel speech scoring"
+                : "Cancel transcription"
+            }
             onClick={cancel}
           >
             <X className="size-4" />
           </Button>
+        )}
+        {similarity !== null && (
+          <Badge
+            variant="secondary"
+            aria-label={`Reference similarity ${similarity} out of 100`}
+          >
+            {similarity}/100 similarity
+          </Badge>
         )}
         {f?.comparison && (
           <Badge
@@ -151,12 +238,32 @@ export function SpeechReview({
         src={answer.recording!}
         label={`Your recording for question ${questionNumber}`}
       />
-      {!transcription && !progress && (
+      {!transcription && !pronunciation && !progress && (
         <p className="mt-2 text-xs text-muted-foreground">
-          First use downloads ~60 MB. Audio stays on this device.
+          Transcription downloads ~60 MB on first use.
         </p>
       )}
       <div className="speech-tabs">
+        {pronunciation && (
+          <Button
+            aria-label="Syllable scores"
+            variant={panel === "syllables" ? "secondary" : "ghost"}
+            onClick={() => setPanel("syllables")}
+          >
+            <ListChecks />
+            <span>Syllables</span>
+          </Button>
+        )}
+        {transcription && (
+          <Button
+            aria-label="Transcript"
+            variant={panel === "transcript" ? "secondary" : "ghost"}
+            onClick={() => setPanel("transcript")}
+          >
+            <AudioLines />
+            <span>Transcript</span>
+          </Button>
+        )}
         <Button
           aria-label="How local feedback works"
           variant={panel === "help" ? "secondary" : "ghost"}
@@ -183,10 +290,36 @@ export function SpeechReview({
           {error}
         </p>
       )}
-      {panel === "help" ? (
+      {panel === "syllables" && pronunciation ? (
+        <div className="speech-reading" aria-label="Local syllable scores">
+          <p className="speech-stats">
+            {
+              pronunciation.syllables.filter((s) => s.status === "scored")
+                .length
+            }{" "}
+            of {pronunciation.syllables.length} syllables scored ·
+            blended-English v3
+          </p>
+          {pronunciation.syllables.length ? (
+            <SyllableScores syllables={pronunciation.syllables} />
+          ) : (
+            <p>
+              {pronunciation.status === "no-reliable-speech"
+                ? "No reliable speech detected. No syllable score."
+                : "No supported syllables could be scored."}
+            </p>
+          )}
+        </div>
+      ) : panel === "help" ? (
         <ReadingPages
           label="speech help pages"
           texts={[
+            ...(expected
+              ? [
+                  "Read Aloud and Repeat Sentence use the trained blended-English v3 model for syllable sound similarity. American, British, Australian and Indian references are equally valid. Uncertain syllables have no score. This is experimental synthetic-reference similarity, not pronunciation correctness, fluency, proficiency or an exam score. Stress assessment remains separate from this app score.",
+                  "The required comparison model downloads automatically, is verified and cached for offline scoring. Your recording stays on this device. The browser export uses float16-stored encoder weights with float32 operations and the unchanged v3 comparison head, bank and calibration. Accepted checkpoint SHA-256: 2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b.",
+                ]
+              : []),
             "First use downloads about 60 MB of speech files, then caches them for offline use. Your recording stays on this device. Transcribe only when you are ready to download; slower devices may take longer.",
             "Word match compares recognized words with the reference, counting missing, changed and extra words. Short answers ignore case, punctuation and a leading article. Other speaking tasks show a transcript and pace for self-review.",
             "The recognizer can mishear words or invent speech from noise. Empty or silent responses get no score. This does not assess pronunciation, accent, fluency or English proficiency, and is not a PTE score. Pace includes pauses and has no pass/fail target.",

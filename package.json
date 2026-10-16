@@ -16,7 +16,9 @@
     "test:subpath": "PTE_TEST_SUBPATH=1 playwright test tests/subpath.spec.ts",
     "test:speech": "tsx --test tests/speech-scoring.test.ts tests/speech-storage.test.ts",
     "test:speech:browser": "PTE_TEST_SPEECH=1 playwright test tests/speech.spec.ts",
-    "test:progress": "tsx --test tests/progress.test.ts tests/progress-storage.test.ts"
+    "test:progress": "tsx --test tests/progress.test.ts tests/progress-storage.test.ts",
+    "test:comparison": "tsx --test tests/comparison.test.ts tests/comparison-storage.test.ts",
+    "test:comparison:browser": "PTE_TEST_COMPARISON=1 playwright test tests/comparison.spec.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -27,6 +29,7 @@
     "idb": "^8.0.4",
     "lucide-react": "^1.57.0",
     "next-themes": "^0.4.6",
+    "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router": "^7.18.4",

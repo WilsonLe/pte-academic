@@ -26,6 +26,7 @@ An independent, beginner-friendly PTE Academic practice PWA. All learner-facing 
 - `npm run preview` — built app on 127.0.0.1:4178; use this for offline checks.
 - `npx playwright test tests/practice.spec.ts` — focused Chromium journeys; isolated browser, synthetic microphone. Requires installed Chrome. Full suite is reserved for a merge request under the development workflow.
 - `npm run openrouter -- help` — development-only speech authoring; see `agents/audio-author.md`.
+- `npm run test:comparison` — local v3 grading/storage contracts. `npm run test:comparison:browser` — actual browser/Python parity, offline and failure controls; prepare retained-data fixtures with `training/browser_cases.py`.
 - `npm run test:speech` — local speech scoring/storage contracts. `npm run test:speech:browser` — focused Chrome inference/offline/failure checks; first use downloads public weights, with no paid calls.
 
 ## Authority and privacy
@@ -41,7 +42,8 @@ Credentials belong only in gitignored `.cli/openrouter/token`, directories mode 
 - Do not refer to or link official Pearson material; this is an explicit operator request. Do not copy official questions, instructions, screenshots or branding. Preserve brief independent-practice and scoring limitations.
 - Do not claim exact live-test pixel parity or validated 10–90 scores. The current runner's fidelity limits are listed in `docs/test-fidelity.md`.
 - OpenRouter models/keys are authoring-time only; never add client-side provider calls. The operator subsequently authorized local runtime speech recognition. `src/speech/` owns review-only Whisper inference in a worker, opt-in downloads, local Cache Storage and word-match feedback. No recording/transcript leaves the device. Keep the pinned model revision, lazy loading, cancellation/limits and no-pronunciation/no-PTE-score disclosure.
-- Persist transcripts only through `saveTranscription` in the existing IndexedDB queue. Never put them in the localStorage index or recreate cleared/pruned attempts. Speech worker/WASM assets cache on demand; model cache is separate from the ordinary offline pack.
+- The operator subsequently authorized using accepted blended-English v3 for local Read Aloud/Repeat Sentence syllable grading and explicitly requires its automatic download (not opt-in). `src/speech/comparison-*` owns its pinned, hash-verified model/runtime cache and worker. Keep all four reference accents equally valid, null uncertain scores, 45-second comparison bound, cancellation and reference-similarity/not-correctness disclosures. Word matching/Whisper remains separate, never a grade fallback. Derived browser model weights are committed; raw training audio/features/credentials remain ignored. No learner recording is uploaded.
+- Persist transcripts only through `saveTranscription` and syllable grades through `savePronunciation` in the existing IndexedDB queue. Never put them in the localStorage index or recreate cleared/pruned attempts. Speech worker/WASM assets cache on demand; model cache is separate from the ordinary offline pack.
 - Use original black/white line-art branding inspired by the operator's rounded-square app icon references. `public/icon.svg` is the vector master; run `python3 scripts/generate-icons.py` after an icon change.
 
 For repository changes: issue before implementation, isolated feature branch, focused current-candidate checks, linked draft PR, one independent review. No merge or deployment authority is implied.

@@ -1,6 +1,6 @@
 # Blended English v3: Australian and Indian generalization improvement
 
-An actual fitted local Python comparison checkpoint, preserving American, British, Australian and Indian English as equally valid references. It improves synthetic sound discrimination and reference generalization over v2 without new paid training examples. It is a research artifact, with no human pronunciation-rating validation or app integration.
+An actual fitted local Python comparison checkpoint, preserving American, British, Australian and Indian English as equally valid references. It improves synthetic sound discrimination and reference generalization over v2 without new paid training examples. Human pronunciation-rating validation remains pending. A subsequent [browser export](BROWSER_EXPORT.md) integrates its core sound-similarity model into app review; the training results below are unchanged.
 
 ## Paired fresh test result
 
@@ -57,4 +57,4 @@ AU/IN generalization remains weaker than US/GB. The fast AU validation sample's 
 
 Scores remain 0–100 reference similarity indexes, not percentages correct. Stress and timing remain separate evidence; alignment confidence is not calibrated correctness probability. Unknown/unreliable segments retain null scores. Audio-only inference scores recognized content and cannot prove an intended word was read. Use `training/README.md` for local setup/CLI commands and select this directory's `model.pt` for v3 prediction.
 
-No app/UI/storage changes or runtime cloud calls are included. Training audio, environments, encoders, credentials and checkpoint files remain outside the PWA build. PR handoff is a research deliverable; merge and deployment are not authorized.
+At training handoff no app/UI/storage integration was included. The operator subsequently authorized merging #17/#19/#21 and using this model in app grading, with a required automatic download. Its derived browser encoder/head/bank/calibration now ship separately; see BROWSER_EXPORT.md. Raw training audio, Python environments, credentials and model.pt remain outside the PWA build; recordings are never uploaded. No human scoring validation is implied.

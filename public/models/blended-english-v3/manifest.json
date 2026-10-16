@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "blended-english-v3-fp16-storage-f32-v1",
+  "modelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+  "encoderSha256": "769b21ed2f10db1e25e695c4b380258ba77f91dc860dc3b1d53591588e2c7dfb",
+  "encoderBytes": 632158340,
+  "assetDirectory": "models/blended-english-v3/",
+  "files": [
+    {
+      "path": "comparison.json",
+      "bytes": 21911102,
+      "sha256": "ee02ca9b4e87f69458227d1efe101401c0dcf53d254e9b96eec7ea09b3284a04",
+      "kind": "metadata"
+    },
+    {
+      "path": "encoder-00.bin",
+      "bytes": 50331648,
+      "sha256": "572cd3deaee91eb5c193481e6b41f838a6adca353d65af93dff75a391e6363d0",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-01.bin",
+      "bytes": 50331648,
+      "sha256": "5e0e641171f577ffbe49a486d8647158fd665ce0cef4df5e229497becf2b012f",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-02.bin",
+      "bytes": 50331648,
+      "sha256": "deedd1d7705b2a3c8f75576c7ec182113789f7e17e2974d41496ea1b25938198",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-03.bin",
+      "bytes": 50331648,
+      "sha256": "f2afe9b2dca70700155158f85aee8dcd4d441d93c79d788db57d5bc43312106c",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-04.bin",
+      "bytes": 50331648,
+      "sha256": "eb55e6c4fd0712a0fba3764f9fb85fe59d705a3a00c26500158bbc542c4e6b04",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-05.bin",
+      "bytes": 50331648,
+      "sha256": "cfa4251921389cbedbb39ab24fd155579fc1c59a892953a9724d08778a7b214f",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-06.bin",
+      "bytes": 50331648,
+      "sha256": "1c9f4d6a6948628df392eb9779c5e944302ef8f6f49af5014b3a7e6ba523ef0b",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-07.bin",
+      "bytes": 50331648,
+      "sha256": "0074ac2b4f5ff306c12ec3844e5d16d4cc4143003347fd198ec176c96e55986c",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-08.bin",
+      "bytes": 50331648,
+      "sha256": "c2ddd1910ef2d66b516275350a38cbea41284547b8dcd9b5b2ea75806af7e3e5",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-09.bin",
+      "bytes": 50331648,
+      "sha256": "79bb0ac748be0609e6ad861e4a66f599d2568cbd64b7ee12a6aaea6b4ade6b3e",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-10.bin",
+      "bytes": 50331648,
+      "sha256": "1974c832286d69838d29c960978e9c8f517201c696f9b33ca011d87cdff92705",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-11.bin",
+      "bytes": 50331648,
+      "sha256": "f99fc2298c6eeb06d3071deb9cb65d89151c4091d49443d37e76aaf96bdf8f2a",
+      "kind": "encoder"
+    },
+    {
+      "path": "encoder-12.bin",
+      "bytes": 28178564,
+      "sha256": "eda20a866e3c23ea71f674e7ea0a87d9222e942469b0aaebac9dc893f5b0a15f",
+      "kind": "encoder"
+    }
+  ],
+  "totalBytes": 654069442,
+  "exporterSha256": "c4bb3710a1fef9c7c9e057c520ac05bf8abbf5d4253c4978275b0c8cd7d8221a",
+  "encoderRevision": [
+    "facebook/wav2vec2-xlsr-53-espeak-cv-ft",
+    "2c733782da5604684829819a5eb744c193fe9398"
+  ],
+  "source": "training/checkpoints/blended-english-v3/model.pt",
+  "quantization": "float16 constant storage with explicit float32 casts/operations; comparison head/bank/calibration unchanged",
+  "limits": "Sound similarity only; expected-text scripts; <=45s. Required automatic download; local cached inference."
+}
