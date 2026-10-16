@@ -3,3 +3,9 @@
 /public/models/*/comparison.json -text -diff linguist-generated=true
 /public/models/*/manifest.json linguist-generated=true
 /src/speech/comparison-manifest.json linguist-generated=true
+/public/models/*/recognizer-*.bin binary linguist-generated=true
+/public/models/word-recognition-v1/lexicon.json -text -diff linguist-generated=true
+/public/models/word-recognition-v1/word-references.json -text -diff linguist-generated=true
+/public/models/word-recognition-v1/vocab.json linguist-generated=true
+/public/models/word-recognition-v1/word-reference-*.mp3 binary linguist-generated=true
+/src/speech/recognition-manifest.json linguist-generated=true
