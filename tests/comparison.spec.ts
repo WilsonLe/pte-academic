@@ -51,7 +51,7 @@ async function seed(page: Page, waitForModel = true) {
   await page.getByRole("button", { name: "Feedback", exact: true }).click();
   if (waitForModel)
     await expect(
-      page.getByRole("button", { name: "Score speech with v3 model" }),
+      page.getByRole("button", { name: "Compare syllables" }),
     ).toBeEnabled({ timeout: 90000 });
 }
 async function workerPath() {
@@ -191,7 +191,7 @@ test("required automatic download, actual app grading, saved scores, cancellatio
   await seed(page);
   expect(modelRequests.some((u) => u.includes("encoder-00.bin"))).toBeTruthy();
   const score = page.getByRole("button", {
-    name: "Score speech with v3 model",
+    name: "Compare syllables",
   });
   await score.click();
   const badge = page.getByLabel(/^Reference similarity \d+ out of 100$/);
@@ -236,16 +236,16 @@ test("required automatic download, actual app grading, saved scores, cancellatio
       })
       .toBeTruthy();
     await page.screenshot({ path: "docs/evidence/speech-v3-mobile.png" });
-    const action = await page
-        .getByRole("button", { name: "Score speech with v3 model" })
-        .boundingBox(),
-      audio = await page
-        .getByRole("group", {
-          name: "Your recording for question 1",
-          exact: true,
-        })
-        .boundingBox();
-    expect(action!.y + action!.height).toBeLessThanOrEqual(audio!.y);
+    await page
+      .getByRole("button", { name: "Your response", exact: true })
+      .click();
+    await expect(
+      page.getByRole("group", {
+        name: "Your recording for question 1",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Feedback", exact: true }).click();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -283,6 +283,9 @@ test("required automatic download, actual app grading, saved scores, cancellatio
       .getByRole("region", { name: "On-device speech feedback" })
       .getByRole("alert"),
   ).toContainText("unavailable");
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   await expect(
     page.getByRole("group", {
       name: "Your recording for question 1",
@@ -341,8 +344,11 @@ test("failed required download blocks model grading and retries without a word-m
   await context.setOffline(true);
   await seed(page, false);
   await expect(
-    page.getByRole("button", { name: "Score speech with v3 model" }),
+    page.getByRole("button", { name: "Compare syllables" }),
   ).toBeDisabled();
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   await page
     .getByRole("group", { name: "Your recording for question 1", exact: true })
     .getByRole("button", { name: /Play/ })
@@ -368,7 +374,7 @@ test("post-ready missing and corrupt cached assets expose retry and recover with
   test.setTimeout(180000);
   await seed(page);
   const score = page.getByRole("button", {
-    name: "Score speech with v3 model",
+    name: "Compare syllables",
   });
   for (const corrupt of [false, true]) {
     await page.evaluate(async (corrupt) => {

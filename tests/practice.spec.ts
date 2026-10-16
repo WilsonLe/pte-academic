@@ -757,6 +757,9 @@ test("microphone preflight, timed recording and persistent audio review", async 
   await page.clock.resume();
   await page.waitForTimeout(1200);
   await end(page);
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   await expect(
     page.getByLabel("Your recording for question 1", { exact: true }),
   ).toBeVisible();
@@ -783,7 +786,7 @@ test("microphone preflight, timed recording and persistent audio review", async 
       name: "Your recording for question 1",
       exact: true,
     }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page
     .getByRole("button", { name: "Your response", exact: true })
     .click();
@@ -807,6 +810,9 @@ test("microphone preflight, timed recording and persistent audio review", async 
   });
   await page.reload();
   await page.locator(".history-row").first().click();
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   await expect(
     page.getByLabel("Your recording for question 1", { exact: true }),
   ).toBeVisible();
@@ -889,7 +895,7 @@ test("manifest, cached media and navigation work offline", async ({
   ).toBeVisible();
 });
 
-test("multiple choices deduct incorrect selections and explain the result", async ({
+test("multiple choices expose incorrect selections and explain the result", async ({
   page,
 }) => {
   await drill(page, "Multiple Choice, Multiple Answers");
@@ -897,7 +903,9 @@ test("multiple choices deduct incorrect selections and explain the result", asyn
   for (const box of await page.getByRole("checkbox").all()) await box.check();
   await end(page);
   await page.getByRole("button", { name: "Feedback", exact: true }).click();
-  await expect(page.getByText(/Local item credit: 0\/2/)).toBeVisible();
+  await expect(
+    page.getByText(/2 correct selections, 2 incorrect, 0 missed/),
+  ).toBeVisible();
 });
 test("listening typed gaps and dictation accept exact text after audio", async ({
   page,
@@ -911,7 +919,7 @@ test("listening typed gaps and dictation accept exact text after audio", async (
   await page.getByRole("textbox", { name: "Blank 2" }).fill("discarded");
   await end(page);
   await expect(
-    page.getByText("society · discarded", { exact: true }),
+    page.getByText("Your response: society", { exact: true }),
   ).toHaveCount(1);
   await page.getByRole("button", { name: "My practice" }).click();
   await drill(page, "Write from Dictation");
@@ -1945,205 +1953,6 @@ test.describe("short mock recovery layout", () => {
       ).toBeVisible();
     }
   });
-});
-
-test("review combines duplicate answers and packs related text without stacked pagers", async ({
-  page,
-  context,
-}, info) => {
-  await context.route("**/models/**", (route) => route.abort());
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const longResponse =
-    "A distinct example sentence explains the argument clearly. ".repeat(80) +
-    "FINAL RESPONSE WORDS";
-  await page.evaluate(async (text) => {
-    const result = {
-      id: "review-simplification",
-      label: "Review examples",
-      date: new Date().toISOString(),
-      questionIds: [
-        "reading-multiple-01",
-        "reading-single-01",
-        "reading-single-02",
-        "write-essay-01",
-        "describe-image-01",
-        "listening-blanks-01",
-        "respond-to-situation-01",
-      ],
-      answers: {
-        "reading-multiple-01": { values: ["1", "0"] },
-        "listening-blanks-01": { values: ["Society!", "Discarded"] },
-        "reading-single-01": { values: ["0"] },
-        "write-essay-01": { text },
-      },
-      finished: true,
-      reward: {
-        xp: 60,
-        badges: ["first", "daily"],
-        dailyComplete: true,
-        levelUp: false,
-      },
-    };
-    await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open("pte-studio", 2);
-      request.onupgradeneeded = () => {
-        for (const name of ["attempts", "progress"])
-          if (!request.result.objectStoreNames.contains(name))
-            request.result.createObjectStore(name);
-      };
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const db = request.result;
-        const tx = db.transaction("attempts", "readwrite");
-        tx.objectStore("attempts").put({ result, recordings: {} }, result.id);
-        tx.oncomplete = () => {
-          db.close();
-          resolve();
-        };
-        tx.onerror = () => {
-          db.close();
-          reject(tx.error);
-        };
-      };
-    });
-    localStorage.setItem(
-      "pte-studio-history-v1",
-      JSON.stringify([{ ...result, answers: {} }]),
-    );
-  }, longResponse);
-  for (const viewport of [
-    { width: 390, height: 844 },
-    { width: 320, height: 568 },
-    { width: 1440, height: 900 },
-  ]) {
-    await page.setViewportSize(viewport);
-    await page.goto("/history/review-simplification");
-    const copy = page.locator(".review-screen .reading-copy");
-    await expect(copy).toContainText("Students valued the ability to pause.");
-    await expect(copy).toContainText("Recordings can support revision.");
-    await expect(copy).not.toContainText("Answer key:");
-    await expect(
-      page.getByRole("button", { name: "Answer key", exact: true }),
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("region", { name: "Practice rewards" }),
-    ).toHaveCount(0);
-    await expect(page.locator(".review-question nav")).toHaveAttribute(
-      "aria-label",
-      "review questions",
-    );
-    await screenFits(page);
-    await page.getByRole("button", { name: "Feedback", exact: true }).click();
-    await expect(copy).toContainText("2 correct selections, 0 incorrect");
-    let feedbackText = await copy.innerText();
-    const nextFeedback = page.getByRole("button", {
-      name: "Next feedback pages",
-      exact: true,
-    });
-    while ((await nextFeedback.count()) && (await nextFeedback.isEnabled())) {
-      await nextFeedback.click();
-      feedbackText += " " + (await copy.innerText());
-    }
-    expect(feedbackText).toContain(
-      "The passage explicitly supports revision and pausing.",
-    );
-    if (viewport.width !== 320)
-      await expect(
-        page.getByRole("navigation", { name: "feedback pages", exact: true }),
-      ).toHaveCount(0);
-    await screenFits(page);
-    if (viewport.width === 390)
-      await page.screenshot({
-        path: info.outputPath("review-feedback-mobile.png"),
-      });
-    await page.getByRole("button", { name: "Prompt", exact: true }).click();
-    await expect(copy).toContainText(
-      "Which statements are supported by the passage?",
-    );
-    await expect(copy).toContainText("A university survey found");
-    if (viewport.width !== 320)
-      await expect(
-        page.getByRole("navigation", { name: "feedback pages", exact: true }),
-      ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "Your response", exact: true })
-      .click();
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await expect(copy).toContainText("Your response: Longer train journeys");
-    await expect(copy).toContainText(
-      "Answer key: Difficulty scheduling early meetings",
-    );
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await expect(copy).toContainText("Your response: No response");
-    await expect(copy).toContainText(
-      "Answer key: River health can improve within urban constraints.",
-    );
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    const nextText = page.getByRole("button", {
-      name: "Next feedback pages",
-      exact: true,
-    });
-    await expect(nextText).toBeVisible();
-    let complete = "";
-    for (let i = 0; i < 80; i++) {
-      await expect
-        .poll(() =>
-          copy.evaluate((node) => node.scrollHeight <= node.clientHeight + 1),
-        )
-        .toBe(true);
-      complete += " " + (await copy.innerText());
-      if (await nextText.isDisabled()) break;
-      await nextText.click();
-    }
-    expect(complete).toContain("FINAL RESPONSE WORDS");
-    expect(complete).toContain("Answer key:");
-    expect(complete).toContain("200–300 words.");
-    await screenFits(page);
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await page.getByRole("button", { name: "Image", exact: true }).click();
-    await expect(page.locator(".review-chart")).toBeVisible();
-    await page
-      .getByRole("button", { name: "Previous review questions", exact: true })
-      .click();
-    await expect(
-      page.getByRole("button", { name: "Your response", exact: true }),
-    ).toHaveAttribute("aria-pressed", "true");
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await expect(copy).toContainText("Society! · Discarded");
-    await expect(copy).not.toContainText("Answer key:");
-    await expect(page.locator(".review-question")).toContainText("Correct");
-    await page
-      .getByRole("button", { name: "Next review questions", exact: true })
-      .click();
-    await page.getByRole("button", { name: "Prompt", exact: true }).click();
-    let promptText = await copy.innerText();
-    const nextPrompt = page.getByRole("button", {
-      name: "Next feedback pages",
-      exact: true,
-    });
-    while ((await nextPrompt.count()) && (await nextPrompt.isEnabled())) {
-      await nextPrompt.click();
-      promptText += " " + (await copy.innerText());
-    }
-    expect(promptText.match(/You have been ill/g)).toHaveLength(1);
-    expect(promptText).toContain("submit the report on Monday.");
-    await page.reload();
-    await expect(copy).toContainText("Students valued the ability to pause.");
-  }
 });
 
 test("all practice cleanup: every guide, section and mock keeps useful text without filler pages", async ({

@@ -9,7 +9,7 @@ export default defineConfig({
     ? "comparison.spec.ts"
     : subpath
       ? "subpath.spec.ts"
-      : /(?:practice|speech-review)\.spec\.ts$/,
+      : /(?:practice|speech-review|review)\.spec\.ts$/,
   outputDir: comparison
     ? subpath
       ? "test-results/comparison-subpath"

@@ -508,6 +508,17 @@ body {
   line-height: 32px;
   overflow-wrap: anywhere;
 }
+.reading-block + .reading-block {
+  margin-top: 18px;
+}
+.reading-block h3 {
+  font: inherit;
+  font-weight: 650;
+  margin-bottom: 4px;
+}
+.reading-block p {
+  white-space: pre-line;
+}
 .topic-select select {
   width: 100%;
   height: 52px;
@@ -609,6 +620,13 @@ body {
   color: #9971dc;
 }
 .review-screen {
+  gap: 12px;
+}
+.review-reading {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: 12px;
 }
 .review-screen audio {

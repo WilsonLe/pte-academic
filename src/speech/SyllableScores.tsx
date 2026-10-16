@@ -61,9 +61,9 @@ export function SyllableScores({ syllables }: { syllables: Syllable[] }) {
       aria-label={measurement ? undefined : "Syllable similarities"}
     >
       <colgroup>
-        <col style={{ width: "46%" }} />
-        <col style={{ width: "25%" }} />
-        <col style={{ width: "29%" }} />
+        <col style={{ width: "42%" }} />
+        <col style={{ width: "30%" }} />
+        <col style={{ width: "28%" }} />
       </colgroup>
       <thead>
         <tr>

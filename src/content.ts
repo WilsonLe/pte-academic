@@ -103,32 +103,52 @@ export type Answer = {
   transcription?: Transcription;
   pronunciation?: Pronunciation;
 };
+export function answerMatches(q: Question, a: Answer) {
+  const kind = guideFor(q).kind;
+  const expected = q.answers || [];
+  const actual = a.values || [];
+  if (q.answers) {
+    if (kind === "multi" || kind === "highlight")
+      return (
+        new Set(actual).size === expected.length &&
+        actual.every((value) => expected.includes(value))
+      );
+    return (
+      expected.length === actual.length &&
+      expected.every(
+        (value, index) => normalize(value) === normalize(actual[index] || ""),
+      )
+    );
+  }
+  return (
+    kind === "dictation" &&
+    !!a.text?.trim() &&
+    normalize(a.text) === normalize(q.model || "")
+  );
+}
+
 export function feedback(q: Question, a: Answer) {
   const g = guideFor(q);
-  if (
-    g.kind === "speak" &&
-    (q.type === "read-aloud" || q.type === "repeat-sentence")
-  ) {
+  if (g.kind === "speak") {
     const score = a.pronunciation
       ? pronunciationSummary(a.pronunciation)
       : null;
     return {
       label:
-        score === null
-          ? a.recording
-            ? "Score your speech"
-            : "No recording"
-          : `${score}/100 reference similarity`,
-      detail:
-        "Open Feedback to compare each syllable with the v3 reference model. All four included accents are accepted equally. Experimental similarity is not correctness or an exam score.",
+        score !== null
+          ? `${score}/100 reference similarity`
+          : a.pronunciation
+            ? "No reliable score"
+            : a.recording
+              ? q.type === "read-aloud" || q.type === "repeat-sentence"
+                ? "Ready to compare"
+                : "Self-review"
+              : "No recording",
+      detail: q.explanation,
     };
   }
-  if (g.kind === "speak")
-    return {
-      label: a.recording ? "Listen & self-review" : "No recording",
-      detail:
-        "Replay your recording and compare your response with the example for self-review. This task has no automatic speech grade.",
-    };
+  const hasAnswer =
+    !!a.text?.trim() || !!a.values?.some((value) => value.trim());
   if (g.kind === "write") {
     const n = wordCount(a.text || "");
     const [min, max] =
@@ -137,43 +157,60 @@ export function feedback(q: Question, a: Answer) {
         : q.type === "summarize-spoken-text"
           ? [50, 70]
           : [5, 75];
+    const range =
+      n < min
+        ? `${min - n} below the minimum of ${min}`
+        : n > max
+          ? `${n - max} above the maximum of ${max}`
+          : `within the ${min}–${max} word range`;
     return {
-      label: "Self-review",
-      detail: `${n} words. Target: ${min}–${max}${q.type === "summarize-written-text" ? ", in one sentence" : ""}. Check the content, form and language against the guidance.`,
+      label: hasAnswer ? "Self-review" : "No response",
+      detail: `${n} ${n === 1 ? "word" : "words"}; ${range}.${q.type === "summarize-written-text" ? " One sentence required; check your sentence boundaries." : ""} Content and language are not automatically graded.`,
     };
   }
+  const correct = answerMatches(q, a);
   if (g.kind === "dictation")
     return {
-      label:
-        normalize(a.text || "") === normalize(q.model || "")
+      label: !hasAnswer
+        ? "No response"
+        : correct
           ? "Exact match"
           : "Compare sentence",
-      detail:
-        "Local comparison ignores case and punctuation. It does not estimate official partial credit.",
+      detail: correct
+        ? "The words match the recorded sentence, ignoring case and punctuation."
+        : "Compare your words with the recorded sentence. Case and punctuation are ignored; spelling and word order matter.",
     };
   const expected = q.answers || [];
-  const actual = a.values || [];
-  const correct =
-    g.kind === "multi" || g.kind === "highlight"
-      ? actual.length === expected.length &&
-        actual.every((x) => expected.includes(x))
-      : expected.length === actual.length &&
-        expected.every((x, i) => normalize(x) === normalize(actual[i] || ""));
+  const actual = [...new Set(a.values || [])];
   let detail = "";
   if (g.kind === "multi" || g.kind === "highlight") {
-    const hit = actual.filter((x) => expected.includes(x)).length,
-      extra = actual.length - hit;
-    detail = `${hit} correct selection${hit === 1 ? "" : "s"}, ${extra} incorrect. Local item credit: ${Math.max(0, hit - extra)}/${expected.length}; never an official score.`;
-  }
-  if (g.kind === "order") {
+    const hit = actual.filter((value) => expected.includes(value)).length;
+    const extra = actual.length - hit;
+    const missed = expected.length - hit;
+    detail = `${hit} correct selection${hit === 1 ? "" : "s"}, ${extra} incorrect, ${missed} missed.`;
+  } else if (g.kind === "order") {
     let pairs = 0;
-    for (let i = 0; i < actual.length - 1; i++) {
-      const at = expected.indexOf(actual[i]);
-      if (at >= 0 && expected[at + 1] === actual[i + 1]) pairs++;
+    const order = a.values || [];
+    for (let i = 0; i < order.length - 1; i++) {
+      const at = expected.indexOf(order[i]);
+      if (
+        at >= 0 &&
+        at + 1 < expected.length &&
+        expected[at + 1] === order[i + 1]
+      )
+        pairs++;
     }
-    detail = `${pairs}/${Math.max(0, expected.length - 1)} correct adjacent pairs. This is item feedback, not a PTE score.`;
+    detail = `${pairs}/${Math.max(0, expected.length - 1)} correct adjacent pairs.`;
+  } else if (["dropdown", "bank", "blanks"].includes(g.kind)) {
+    const hit = expected.filter(
+      (value, i) => normalize(value) === normalize(a.values?.[i] || ""),
+    ).length;
+    detail = `${hit}/${expected.length} gaps correct.`;
   }
-  return { label: correct ? "Correct" : "Review answer", detail };
+  return {
+    label: !hasAnswer ? "No response" : correct ? "Correct" : "Review answer",
+    detail,
+  };
 }
 export const normalize = (s: string) =>
   s

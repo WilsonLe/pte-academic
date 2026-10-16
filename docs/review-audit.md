@@ -1,0 +1,51 @@
+# Saved question review audit
+
+Issue [#46](https://github.com/WilsonLe/pte-academic/issues/46) covers all 65 original questions and 22 types. Daily, question-type, section and full-mock sessions share `Review.tsx`; unfinished sessions use the same comparisons.
+
+## Behavior and content
+
+- Choices retain every option with selected, correct, incorrect and missed labels. Numbered gaps retain empty positions and show a differing key inline. Paragraph order keeps numbered boundaries; correct order is omitted when identical.
+- Incorrect-word review identifies each selected or missed word by its source position and shows the written and heard forms. Dictation compares the saved sentence without estimating exam credit.
+- Writing gives the observed word count and distance from the allowed range. Content and language remain self-review. Summary examples are alternatives; essay support is explicitly a planning outline.
+- All 65 explanations were read against their original prompt/key and rewritten to identify the relevant evidence, grammatical form, contrast or self-review target. Five chart examples now describe the data with units; two lecture examples are complete spoken responses, and the room-booking example asks for the room. Prompts, source scripts, answer keys, charts and audio are unchanged.
+- Speaking Feedback opens saved syllables, a legacy transcript or item-specific notes. Self-review notes remain available alongside saved results. Uncertain syllables stay unscored; no-speech and empty-transcript states remain distinct. Learner playback lives in Your response. Prompt owns replayable source audio, and near-duplicate listening-gap passages are reduced to the full transcript.
+- Shared `ReadingPages` measures labelled blocks, including headings, line breaks and continued text, against the actual font and available panel. It retains one content pager, preserves long responses, and keeps the short-window scrolling escape. Existing plain-text consumers retain deduplication and packed reading pages.
+
+## Complete question inventory
+
+Every ID below is covered by the browser matrix in correct, incorrect and unanswered states at 1440×900 and 390×844. These are controlled saved-response fixtures; they do not certify human speech quality.
+
+| Type                         | Included question IDs                                                                                                                                                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read-aloud`                 | `read-aloud-01`, `read-aloud-02`, `read-aloud-03`, `read-aloud-04`, `read-aloud-05`, `read-aloud-06`                                                                                                                       |
+| `repeat-sentence`            | `repeat-sentence-01`, `repeat-sentence-02`, `repeat-sentence-03`, `repeat-sentence-04`, `repeat-sentence-05`, `repeat-sentence-06`, `repeat-sentence-07`, `repeat-sentence-08`, `repeat-sentence-09`, `repeat-sentence-10` |
+| `describe-image`             | `describe-image-01`, `describe-image-02`, `describe-image-03`, `describe-image-04`, `describe-image-05`                                                                                                                    |
+| `retell-lecture`             | `retell-lecture-01`, `retell-lecture-02`                                                                                                                                                                                   |
+| `answer-short-question`      | `answer-short-question-01`, `answer-short-question-02`, `answer-short-question-03`, `answer-short-question-04`, `answer-short-question-05`                                                                                 |
+| `summarize-group-discussion` | `summarize-group-discussion-01`, `summarize-group-discussion-02`                                                                                                                                                           |
+| `respond-to-situation`       | `respond-to-situation-01`, `respond-to-situation-02`                                                                                                                                                                       |
+| `summarize-written-text`     | `summarize-written-text-01`, `summarize-written-text-02`                                                                                                                                                                   |
+| `write-essay`                | `write-essay-01`                                                                                                                                                                                                           |
+| `reading-dropdown`           | `reading-dropdown-01`, `reading-dropdown-02`, `reading-dropdown-03`, `reading-dropdown-04`, `reading-dropdown-05`                                                                                                          |
+| `reading-multiple`           | `reading-multiple-01`, `reading-multiple-02`                                                                                                                                                                               |
+| `reorder-paragraphs`         | `reorder-paragraphs-01`, `reorder-paragraphs-02`                                                                                                                                                                           |
+| `reading-blanks`             | `reading-blanks-01`, `reading-blanks-02`, `reading-blanks-03`, `reading-blanks-04`                                                                                                                                         |
+| `reading-single`             | `reading-single-01`, `reading-single-02`                                                                                                                                                                                   |
+| `summarize-spoken-text`      | `summarize-spoken-text-01`                                                                                                                                                                                                 |
+| `listening-multiple`         | `listening-multiple-01`, `listening-multiple-02`                                                                                                                                                                           |
+| `listening-blanks`           | `listening-blanks-01`, `listening-blanks-02`                                                                                                                                                                               |
+| `highlight-summary`          | `highlight-summary-01`, `highlight-summary-02`                                                                                                                                                                             |
+| `listening-single`           | `listening-single-01`, `listening-single-02`                                                                                                                                                                               |
+| `select-missing-word`        | `select-missing-word-01`                                                                                                                                                                                                   |
+| `highlight-incorrect`        | `highlight-incorrect-01`, `highlight-incorrect-02`                                                                                                                                                                         |
+| `write-dictation`            | `write-dictation-01`, `write-dictation-02`, `write-dictation-03`                                                                                                                                                           |
+
+## Verification
+
+`tests/review.spec.ts` enumerates source IDs directly. For all 390 question/state/viewport combinations, it reads every page of the response, Feedback and source panels; checks expected source/key/example content, readable panel geometry and page completion; and inspects charts and source-audio controls. It also checks mixed mock/section navigation, keyboard selection, panel fallback, reload, long responses at 320×568, enlarged text in a short window, source replay and playback cleanup.
+
+`tests/review.test.ts` checks every content ID plus partial choices, duplicate selections, unanswered gap positions, incomplete ordering, written/heard positions, writing limits, and dictation case/punctuation/order. Existing speech journeys cover saved grades, uncertain/no-speech results, missing recordings, empty/legacy transcripts, model-not-ready controls, playback and reload. Existing focused practice journeys cover actual saved attempts and all 65 mock review items. Shared reading consumers are checked through every guide, learning topic, section and mock details.
+
+Builds validate content, pinned comparison assets, TypeScript, static-only publishing and the 500 kB chunk budget. Storage/comparison unit contracts stay in the focused selection. Full-suite and hosted release evidence remain reserved for merge authority; native iOS/Safari and screen-reader behavior are not established by Chromium checks. No model-pack, storage, reward, credential, paid-call or dependency change is included. Rollback is a normal revert.
+
+Visual captures: [choices](evidence/review-choices-mobile.png), [numbered gaps](evidence/review-gaps-mobile.png), [written/heard words](evidence/review-highlights-mobile.png), [speaking self-review](evidence/review-speaking-mobile.png), [short-phone syllables](evidence/review-syllables-short-phone.png).

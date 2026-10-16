@@ -14,10 +14,13 @@ test("complete content graph, unique original mock, and local assets validate", 
   assert.equal(mocks[0].questionIds.length, 65);
   assert.equal(guides.length, 22);
 });
-test("multiple-answer penalty cannot be improved by selecting all options", () => {
+test("multiple-answer review exposes incorrect extra selections", () => {
   const q = questions.find((q) => q.type === "reading-multiple")!;
   assert.equal(feedback(q, { values: ["0", "1"] }).label, "Correct");
-  assert.match(feedback(q, { values: ["0", "1", "2", "3"] }).detail, /0\/2/);
+  assert.match(
+    feedback(q, { values: ["0", "1", "2", "3"] }).detail,
+    /2 correct selections, 2 incorrect/,
+  );
 });
 test("reordering rewards adjacent pairs rather than a correct first paragraph", () => {
   const q = questions.find((q) => q.type === "reorder-paragraphs")!;

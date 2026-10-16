@@ -1,7 +1,14 @@
 import { SyllableScores } from "./SyllableScores";
-import { AudioPlayer } from "../components/AudioPlayer";
+import { exampleLabel } from "../review-content";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { AudioLines, Gauge, X, CircleHelp, ListChecks } from "lucide-react";
+import {
+  AudioLines,
+  Gauge,
+  X,
+  CircleHelp,
+  ListChecks,
+  BookOpenCheck,
+} from "lucide-react";
 import type { Answer, Question } from "../content";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -21,13 +28,11 @@ export function SpeechReview({
   question,
   answer,
   attemptId,
-  questionNumber,
   onPronunciation,
 }: {
   question: Question;
   answer: Answer;
   attemptId: string;
-  questionNumber: number;
   onPronunciation: (value: Pronunciation) => void;
 }) {
   const [panel, setPanel] = useState(
@@ -35,7 +40,7 @@ export function SpeechReview({
       ? "syllables"
       : answer.transcription
         ? "transcript"
-        : "idle",
+        : "review",
   );
   const [pronunciation, setPronunciation] = useState(answer.pronunciation);
   const model = useSyncExternalStore(subscribeModel, modelStatus);
@@ -118,12 +123,12 @@ export function SpeechReview({
             <Button
               onClick={() => void score()}
               disabled={!!progress || model.status !== "ready"}
-              title="Score speech with v3 model"
-              aria-label="Score speech with v3 model"
+              title="Compare syllables with the reference recordings"
+              aria-label="Compare syllables"
             >
               <Gauge className="size-4" />
               <span className="speech-action-label">
-                {pronunciation ? "Score again" : "Score speech"}
+                {pronunciation ? "Compare again" : "Compare syllables"}
               </span>
             </Button>
           )}
@@ -145,7 +150,19 @@ export function SpeechReview({
           )}
         </div>
         <div className="speech-tabs">
-          {pronunciation && (
+          {(pronunciation || transcription) && panel !== "review" && (
+            <Button
+              aria-label="Self-review notes"
+              title="Self-review notes"
+              aria-pressed={panel === "review"}
+              variant={panel === "review" ? "secondary" : "ghost"}
+              onClick={() => setPanel("review")}
+            >
+              <BookOpenCheck />
+              <span>Self-review</span>
+            </Button>
+          )}
+          {pronunciation && panel !== "syllables" && (
             <Button
               aria-label="Syllable scores"
               aria-pressed={panel === "syllables"}
@@ -157,7 +174,7 @@ export function SpeechReview({
               <span>Syllables</span>
             </Button>
           )}
-          {transcription && (
+          {transcription && panel !== "transcript" && (
             <Button
               aria-label="Transcript"
               aria-pressed={panel === "transcript"}
@@ -193,19 +210,13 @@ export function SpeechReview({
                         "The required comparison model downloads automatically, is verified and cached for offline scoring. Your recording stays on this device.",
                       ]
                     : []),
-                  "Replay your recording for self-review. Other speaking tasks do not have automatic grading. Previously saved transcripts remain readable, but this app no longer generates transcripts or word-match feedback. Your recording stays on this device.",
+                  "Your response has recording playback. Prompt has the source text and any prompt audio. Saved transcripts remain readable; this app does not generate new transcripts. Your recording stays on this device.",
                 ]}
               />
             </DialogContent>
           </Dialog>
         </div>
       </div>
-      {answer.recording && (
-        <AudioPlayer
-          src={answer.recording}
-          label={`Your recording for question ${questionNumber}`}
-        />
-      )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -213,6 +224,10 @@ export function SpeechReview({
       )}
       {panel === "syllables" && pronunciation ? (
         <div className="speech-reading" aria-label="Local syllable scores">
+          <p className="speech-stats">
+            Reference similarity, not pronunciation correctness or an exam
+            score.
+          </p>
           <p className="speech-stats">
             {similarity !== null && (
               <Badge
@@ -238,7 +253,7 @@ export function SpeechReview({
             </p>
           )}
         </div>
-      ) : transcription ? (
+      ) : panel === "transcript" && transcription ? (
         <div className="speech-reading" aria-label="Local transcript result">
           <ReadingPages
             key={transcription.text}
@@ -250,16 +265,28 @@ export function SpeechReview({
           />
         </div>
       ) : (
-        <div className="speech-idle">
-          <AudioLines />
-          <p>
-            {!answer.recording
-              ? "No recording was saved for this response. Record a response in a new practice to get speech feedback."
-              : expected
-                ? "Listen back, then score your speech when the model is ready."
-                : "Listen back and compare your response with the example for self-review."}
-          </p>
-        </div>
+        <ReadingPages
+          label="speech review pages"
+          blocks={[
+            ...(!answer.recording
+              ? [
+                  {
+                    text: "No recording was saved.",
+                  },
+                ]
+              : []),
+            {
+              label: expected ? "Listen for" : "What to check",
+              text: question.explanation,
+            },
+            ...(!expected && question.model
+              ? [{ label: exampleLabel(question), text: question.model }]
+              : []),
+            ...(!expected
+              ? [{ text: "This response is not automatically graded." }]
+              : []),
+          ]}
+        />
       )}
     </section>
   );
