@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { readdir, readFile, access, stat } from "node:fs/promises";
 import { resolve, join } from "node:path";
 const directory = process.env.PTE_STATIC_DIR || "dist";
-const base = directory === "dist-subpath" ? "/pte-academic/" : "/";
+const base =
+  process.env.BASE_PATH ||
+  (directory === "dist-subpath" ? "/pte-academic/" : "/");
 async function files(dir) {
   return (
     await Promise.all(
