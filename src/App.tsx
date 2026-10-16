@@ -42,6 +42,7 @@ import {
   mocks,
   guideFor,
   feedback,
+  normalize,
   asset,
   type Question,
   type Answer,
@@ -74,8 +75,8 @@ import {
   DialogDescription,
 } from "./components/ui/dialog";
 import { Toaster } from "./components/ui/sonner";
-import { GameHub, GameStatus, RewardMoment } from "./GameHub";
-import { emptyProgress, localDay, questQuestions } from "./progress";
+import { GameHub, GameStatus } from "./GameHub";
+import { badges, emptyProgress, localDay, questQuestions } from "./progress";
 import { Chart } from "./QuestionInput";
 import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
 import { SpeechReview } from "./speech/SpeechReview";
@@ -250,7 +251,6 @@ export default function App() {
     });
   const progressReady = !progressState.isPending;
   const [today, setToday] = useState(localDay);
-  const [celebration, setCelebration] = useState<string | null>(null);
   const [selectedSections, setSelectedSections] = useState<Section[]>(() =>
     sections.map((section) => section.id),
   );
@@ -317,7 +317,6 @@ export default function App() {
   useEffect(() => {
     main.current?.focus();
     window.scrollTo(0, 0);
-    setCelebration(null);
   }, [location.pathname]);
   function navigate(to: ScreenId) {
     void go({ to: screenPath(to) });
@@ -377,11 +376,24 @@ export default function App() {
         setResult((current) =>
           current?.id === r.id ? { ...current, reward: saved.reward } : current,
         );
-        if (saved.reward.xp) setCelebration(r.id);
+        const reward = saved.reward;
         toast.success(
-          saved.reward.xp
-            ? "+" + saved.reward.xp + " XP · Practice saved"
-            : "Practice saved",
+          reward.levelUp
+            ? "New practice level"
+            : reward.dailyComplete
+              ? "Daily practice complete!"
+              : "Practice saved",
+          {
+            description:
+              [
+                reward.xp ? `+${reward.xp} XP` : "",
+                ...reward.badges.map(
+                  (id) => badges.find((badge) => badge.id === id)?.title,
+                ),
+              ]
+                .filter(Boolean)
+                .join(" · ") || undefined,
+          },
         );
       })
       .catch(() => {
@@ -398,7 +410,6 @@ export default function App() {
   async function removeHistory() {
     try {
       await clear.mutateAsync();
-      setCelebration(null);
       setClearConfirm(false);
       setStorageError("");
       toast.success("History cleared");
@@ -525,7 +536,6 @@ export default function App() {
               ) : result && result.id === route.attemptId ? (
                 <Review
                   result={result}
-                  celebrate={celebration === result.id}
                   onPronunciation={(questionId, value) =>
                     setResult((current) =>
                       current && current.id === result.id
@@ -791,12 +801,25 @@ function modelAnswer(q: Question) {
     return q.answers!.map((x) => q.text!.split(/\s+/)[+x]).join(", ");
   return q.answers?.join(" · ");
 }
+function answerMatches(q: Question, a: Answer) {
+  const kind = guideFor(q).kind;
+  if (kind === "multi" || kind === "highlight")
+    return (
+      a.values?.length === q.answers?.length &&
+      !!a.values?.every((value) => q.answers?.includes(value))
+    );
+  const actual = showAnswer(q, a);
+  const expected = modelAnswer(q);
+  if (!expected) return false;
+  if (kind === "dictation") return normalize(actual) === normalize(expected);
+  return (
+    actual.trim().replace(/\s+/g, " ") === expected.trim().replace(/\s+/g, " ")
+  );
+}
 function Review({
   result: r,
   onPronunciation,
-  celebrate,
 }: {
-  celebrate: boolean;
   result: Result;
   onPronunciation: (questionId: string, value: Pronunciation) => void;
 }) {
@@ -806,33 +829,53 @@ function Review({
     q = questions.find((x) => x.id === id)!,
     a = r.answers[id] || {};
   const f = feedback(q, a);
+  const expected = modelAnswer(q);
+  const prompt = [q.prompt, q.text, q.audioText].filter(
+    (text): text is string => !!text,
+  );
+  const example =
+    a.recording && expected && !prompt.includes(expected)
+      ? `Example response: ${expected}`
+      : "";
   const tabs = [
     "Your response",
-    "Answer key",
     "Feedback",
-    "Prompt",
+    ...(prompt.length ? ["Prompt"] : []),
     ...(q.chart ? ["Image"] : []),
-    ...(a.recording ? ["Speech"] : []),
   ];
+  const activeTab = tabs.includes(tab) ? tab : "Your response";
   const texts =
-    tab === "Your response"
-      ? [showAnswer(q, a)]
-      : tab === "Answer key"
-        ? [modelAnswer(q) || "Compare your response with the guidance."]
-        : tab === "Feedback"
-          ? [f.detail, q.explanation, ...guideFor(q).tips]
-          : [q.prompt, q.text, q.audioText].filter(
-              (text): text is string => !!text,
-            );
+    activeTab === "Your response"
+      ? expected && !answerMatches(q, a)
+        ? [`Your response: ${showAnswer(q, a)}`, `Answer key: ${expected}`]
+        : [showAnswer(q, a)]
+      : activeTab === "Feedback"
+        ? [f.detail, q.explanation, example]
+        : prompt;
   return (
     <div className="screen-stack review-screen">
-      {r.reward && <RewardMoment reward={r.reward} celebrate={celebrate} />}
       <div className="review-question">
-        <span className="question-number">
-          {String(index + 1).padStart(2, "0")}
-        </span>
         <h2>{guideFor(q).title}</h2>
         <Badge variant="outline">{f.label}</Badge>
+        <Pager
+          index={index}
+          count={r.questionIds.length}
+          label="review questions"
+          onChange={(n) => {
+            setIndex(n);
+            const next = questions.find(
+              (question) => question.id === r.questionIds[n],
+            )!;
+            if (
+              (tab === "Image" && !next.chart) ||
+              (tab === "Prompt" &&
+                !next.prompt &&
+                !next.text &&
+                !next.audioText)
+            )
+              setTab("Your response");
+          }}
+        />
       </div>
       <div
         className="screen-tabs review-tabs"
@@ -843,23 +886,19 @@ function Review({
           const Icon =
             t === "Your response"
               ? Play
-              : t === "Answer key"
-                ? Check
-                : t === "Feedback"
-                  ? Info
-                  : t === "Prompt"
-                    ? BookOpen
-                    : t === "Image"
-                      ? ImageIcon
-                      : Mic;
+              : t === "Feedback"
+                ? Info
+                : t === "Prompt"
+                  ? BookOpen
+                  : ImageIcon;
           return (
             <Tooltip key={t}>
               <TooltipTrigger
                 render={
                   <Button
-                    variant={tab === t ? "secondary" : "outline"}
+                    variant={activeTab === t ? "secondary" : "outline"}
                     aria-label={t}
-                    aria-pressed={tab === t}
+                    aria-pressed={activeTab === t}
                     onClick={() => setTab(t)}
                   />
                 }
@@ -872,7 +911,7 @@ function Review({
           );
         })}
       </div>
-      {tab === "Speech" && a.recording ? (
+      {activeTab === "Your response" && a.recording ? (
         <div className="speech-panel">
           <SpeechReview
             key={id}
@@ -883,44 +922,15 @@ function Review({
             onPronunciation={(value) => onPronunciation(id, value)}
           />
         </div>
-      ) : tab === "Image" && q.chart ? (
+      ) : activeTab === "Image" && q.chart ? (
         <div className="review-chart">
           <Chart q={q} responsive />
         </div>
       ) : (
-        <>
-          {tab === "Your response" && a.recording && (
-            <AudioPlayer
-              src={a.recording}
-              label={`Your recording for question ${index + 1}`}
-            />
-          )}
-          {!(
-            tab === "Your response" &&
-            a.recording &&
-            !a.text &&
-            !a.values?.length
-          ) && (
-            <ReadingPages key={id + tab} texts={texts} label="feedback pages" />
-          )}
-        </>
-      )}
-      {r.questionIds.length > 1 && (
-        <Pager
-          index={index}
-          count={r.questionIds.length}
-          label="review questions"
-          onChange={(n) => {
-            setIndex(n);
-            const next = questions.find(
-              (question) => question.id === r.questionIds[n],
-            )!;
-            if (
-              (tab === "Speech" && !r.answers[next.id]?.recording) ||
-              (tab === "Image" && !next.chart)
-            )
-              setTab("Your response");
-          }}
+        <ReadingPages
+          key={id + activeTab}
+          texts={[texts.join(" ")]}
+          label="feedback pages"
         />
       )}
     </div>

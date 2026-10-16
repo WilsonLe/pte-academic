@@ -977,104 +977,6 @@
   padding: 0 15px;
   border: 1px solid #e9e7f0;
 }
-.reward-moment {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 25px;
-  padding: 23px;
-  border: 1px solid #d4e7a7;
-  border-radius: 18px;
-  background: #eeffd5;
-  box-shadow: 0 4px 0 #d9e8bc;
-}
-.reward-bolt {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  color: #687b2d;
-  background: #ddf7ae;
-}
-.reward-moment h2 {
-  font-size: 17px;
-  font-weight: 750;
-  color: #374623;
-  letter-spacing: -0.03em;
-}
-.reward-moment p {
-  font-size: 10px;
-  line-height: 1.6;
-  color: #657253;
-  margin-top: 4px;
-}
-.reward-moment > strong {
-  font-size: 30px;
-  color: #496725;
-  letter-spacing: -0.06em;
-}
-.reward-moment > strong > small {
-  display: block;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-align: center;
-}
-.celebrating {
-  animation: reward-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.confetti {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  border-radius: inherit;
-}
-.confetti i {
-  position: absolute;
-  left: calc(8% + var(--i) * 6%);
-  top: 5%;
-  width: 5px;
-  height: 9px;
-  background: #9770d6;
-  border-radius: 1px;
-  opacity: 0;
-  animation: confetti-burst 1.2s ease-out both;
-  animation-delay: calc(var(--i) * 18ms);
-}
-.confetti i:nth-child(3n) {
-  background: #b8d94f;
-}
-.confetti i:nth-child(3n + 1) {
-  background: #f0b461;
-  border-radius: 50%;
-  width: 6px;
-  height: 6px;
-}
-@keyframes confetti-burst {
-  0% {
-    transform: translate(var(--x), -15px) rotate(0);
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(0, 130px) rotate(var(--turn));
-    opacity: 0;
-  }
-}
-@keyframes reward-pop {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
 @keyframes tile-in {
   from {
     opacity: 0;
@@ -1241,25 +1143,6 @@
   .achievement {
     font-size: 9px;
     gap: 10px;
-  }
-  .reward-moment {
-    padding: 18px 16px;
-    gap: 11px;
-  }
-  .reward-moment h2 {
-    font-size: 15px;
-  }
-  .reward-bolt {
-    width: 39px;
-    height: 43px;
-  }
-  .reward-moment > strong {
-    font-size: 27px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .confetti {
-    display: none;
   }
 }
 

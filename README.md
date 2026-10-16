@@ -98,7 +98,7 @@ The practice home has a rotating three-question reading quest, XP levels, daily 
 
 Quest progress resumes remaining questions. XP, coverage and badges stay in IndexedDB even when older attempts fall outside the ten-attempt history. Game progress starts with newly saved practice after this update; existing attempts, recordings and transcripts are preserved. Clearing history also resets game progress, as the dialog explains. Public model caches remain separate. Daily records retain up to 365 days; cumulative XP, earned badges and longest streak persist.
 
-The IndexedDB upgrade creates a progress store at version 2 without rewriting old attempts. To roll back the game UI, retain the version-2 database opener; browsers cannot downgrade the database to version 1. Refresh other older app tabs after the update. Rewards appear after saving, with finite celebrations and reduced-motion support; no game effects run inside a timed test.
+The IndexedDB upgrade creates a progress store at version 2 without rewriting old attempts. To roll back the game UI, retain the version-2 database opener; browsers cannot downgrade the database to version 1. Refresh other older app tabs after the update. Rewards appear once in the save confirmation toast; XP, streak and badges remain available through the header and collection screens. Review combines each response with its answer key only when they differ, keeps recording playback and speech tools together, and separates question navigation from measured text paging.
 
 Focused game checks: npm run test:progress and the daily-quest/browser journeys in tests/practice.spec.ts.
 

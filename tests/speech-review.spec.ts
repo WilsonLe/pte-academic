@@ -73,7 +73,10 @@ test("speech review keeps legacy transcripts and playback without transcription 
     );
   });
   await page.goto(base + "history/legacy-speech-review");
-  const speech = page.getByRole("button", { name: "Speech", exact: true });
+  const speech = page.getByRole("button", {
+    name: "Your response",
+    exact: true,
+  });
   await speech.click();
   const panel = page.getByRole("region", { name: "On-device speech feedback" });
   await expect(panel.getByLabel("Local transcript result")).toContainText(
@@ -189,7 +192,9 @@ test("syllable rows remain readable below media controls on a short phone", asyn
   });
   await page.setViewportSize({ width: 360, height: 640 });
   await page.goto(base + "history/syllable-layout");
-  await page.getByRole("button", { name: "Speech", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   const table = page.getByRole("table", { name: "Syllable similarities" });
   const firstRow = table.locator("tbody tr").first();
   await firstRow.scrollIntoViewIfNeeded();

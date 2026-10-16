@@ -585,10 +585,21 @@
 .review-question {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.review-question .page-controls {
+  margin-left: auto;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.review-question .page-controls button {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
 }
 .review-question h2 {
-  flex: 1;
+  flex: 1 1 200px;
   font-size: 24px;
   font-weight: 700;
 }
@@ -596,10 +607,6 @@
   font-size: 28px;
   font-weight: 750;
   color: #9971dc;
-}
-.reward-moment {
-  margin-bottom: 0;
-  padding: 18px 24px;
 }
 .review-screen {
   gap: 12px;
@@ -956,7 +963,7 @@
     font-size: 19px;
   }
   .review-question [data-slot="badge"] {
-    display: none;
+    font-size: 12px;
   }
   .review-heading {
     font-size: 14px;
@@ -972,15 +979,6 @@
   }
   .review-tabs button {
     min-height: 40px;
-  }
-  .reward-moment {
-    padding: 12px;
-  }
-  .reward-moment h2 {
-    font-size: 18px;
-  }
-  .reward-moment p {
-    font-size: 13px;
   }
 }
 @media (max-height: 740px) {
@@ -1047,9 +1045,6 @@
   }
   .arena-stages {
     padding: 6px;
-  }
-  .review-screen .reward-moment {
-    display: none;
   }
 }
 /* Accessibility fallback for extreme zoom/very short windows: preserve every control. */
