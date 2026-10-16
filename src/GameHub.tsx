@@ -132,60 +132,32 @@ export function GameHub({
   return (
     <div className={"game-hub hub-" + view}>
       <div className="hub-heading">
-        <h2>
+        <h2 className={view === "play" ? "sr-only" : undefined}>
           {view === "play"
-            ? "Ready to practise"
+            ? "Practice"
             : view === "progress"
               ? "Your progress"
               : "Your achievements"}
           <span className="accent-dot">.</span>
         </h2>
         <div className="hub-tools">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant={view === "play" ? "secondary" : "outline"}
-                  aria-label="Practice screen"
-                  onClick={() => setView("play")}
-                />
-              }
-            >
-              <Rocket />
-            </TooltipTrigger>
-            <TooltipContent>Practice</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant={view === "progress" ? "secondary" : "outline"}
-                  aria-label="View level and streak"
-                  onClick={() => setView("progress")}
-                />
-              }
-            >
-              <Flame />
-            </TooltipTrigger>
-            <TooltipContent>Progress</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant={view === "badges" ? "secondary" : "outline"}
-                  aria-label="View achievements"
-                  onClick={() => setView("badges")}
-                />
-              }
-            >
-              <Trophy />
-            </TooltipTrigger>
-            <TooltipContent>Achievements</TooltipContent>
-          </Tooltip>
+          {view !== "badges" && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    size="icon"
+                    variant={view === "badges" ? "secondary" : "outline"}
+                    aria-label="View achievements"
+                    onClick={() => setView("badges")}
+                  />
+                }
+              >
+                <Trophy />
+              </TooltipTrigger>
+              <TooltipContent>Achievements</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
       <div className="quest-grid">

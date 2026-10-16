@@ -51,7 +51,11 @@ export function ReadingPages({
   const [index, setIndex] = useState(0);
   const [pages, setPages] = useState<string[]>([""]);
   const panel = useRef<HTMLDivElement>(null);
-  const source = JSON.stringify(texts);
+  const source = [
+    ...new Set(
+      texts.map((text) => text.trim().replace(/\s+/g, " ")).filter(Boolean),
+    ),
+  ].join(" ");
   useLayoutEffect(() => {
     const node = panel.current;
     if (!node) return;
@@ -85,8 +89,8 @@ export function ReadingPages({
       });
       document.body.append(measure);
       const next: string[] = [];
-      for (const text of JSON.parse(source) as string[]) {
-        const words = text.trim().split(/\s+/);
+      if (source) {
+        const words = source.split(/\s+/);
         for (let start = 0; start < words.length;) {
           let low = 1,
             high = words.length - start,
@@ -125,8 +129,7 @@ export function ReadingPages({
         }
       }
       measure.remove();
-      if (!next.length)
-        next.push("No additional text. See the question image.");
+      if (!next.length) next.push("");
       setPages((current) =>
         JSON.stringify(current) === JSON.stringify(next) ? current : next,
       );

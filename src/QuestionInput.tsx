@@ -34,7 +34,6 @@ export function Chart({
           </div>
         ))}
       </div>
-      <div className="chart-note">Original practice data</div>
     </figure>
   );
 }

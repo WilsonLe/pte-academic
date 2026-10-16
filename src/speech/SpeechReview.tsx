@@ -227,8 +227,8 @@ export function SpeechReview({
           texts={[
             ...(expected
               ? [
-                  "Read Aloud and Repeat Sentence use the trained blended-English v3 model for syllable sound similarity. American, British, Australian and Indian references are equally valid. Uncertain syllables have no score. This is experimental synthetic-reference similarity, not pronunciation correctness, fluency, proficiency or an exam score. Stress assessment remains separate from this app score.",
-                  "The required comparison model downloads automatically, is verified and cached for offline scoring. Your recording stays on this device. The browser export uses float16-stored encoder weights with float32 operations and the unchanged v3 comparison head, bank and calibration. Accepted checkpoint SHA-256: 2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b.",
+                  "Read Aloud and Repeat Sentence use the trained blended-English v3 model for syllable sound similarity. American, British, Australian and Indian references are equally valid. Uncertain syllables have no score. This is experimental synthetic-reference similarity, not pronunciation correctness, fluency, proficiency or an exam score.",
+                  "The required comparison model downloads automatically and is verified and cached for offline scoring.",
                 ]
               : []),
             "Replay your recording for self-review. Other speaking tasks do not have automatic grading. Previously saved transcripts remain readable, but this app no longer generates transcripts or word-match feedback. Your recording stays on this device.",

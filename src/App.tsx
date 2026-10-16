@@ -168,10 +168,7 @@ function More({ label, children }: { label: string; children: ReactNode }) {
     .map(nodeText);
   return (
     <>
-      <Button variant="ghost" className="more" onClick={() => setOpen(true)}>
-        <Info />
-        {label}
-      </Button>
+      <IconAction label={label} icon={Info} onClick={() => setOpen(true)} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="info-dialog practice-ui">
           <DialogTitle>{label}</DialogTitle>
@@ -677,10 +674,13 @@ export default function App() {
                       <Trophy className="size-6" />
                     </span>
                     <div className="flex-1">
-                      <p className="game-eyebrow">FULL MOCK TEST</p>
-                      <h2 className="text-lg font-semibold">Mock 01</h2>
+                      <h2 className="text-lg font-semibold">
+                        {mocks[0].title}
+                      </h2>
                     </div>
-                    <Badge variant="secondary">65</Badge>
+                    <Badge variant="secondary">
+                      {mocks[0].questionIds.length} questions
+                    </Badge>
                   </div>
                   <ol className="arena-stages" aria-label="Mock test stages">
                     {sections.map((s, i) => {
@@ -700,27 +700,17 @@ export default function App() {
                   <div className="mock-actions">
                     <Button
                       className="big-play"
-                      onClick={() => begin("mock", "mock-01")}
+                      aria-label="Prepare for mock"
+                      onClick={() => begin("mock", mocks[0].id)}
                     >
                       <Play aria-hidden="true" />
-                      Prepare for mock
+                      Prepare
                     </Button>
                     <More label="Mock details">
                       <p className="mb-3">
-                        One original 65-question form, covering all 22 question
-                        types. Items are shared with drills and section
-                        practice.
+                        Original questions cover every question type and are
+                        shared with question-type and section practice.
                       </p>
-                      <ul className="space-y-2 text-xs">
-                        {sections.map((s) => (
-                          <li key={s.id} className="flex justify-between">
-                            <span>{s.title}</span>
-                            <span>
-                              {mocks[0].sectionMinutes[s.id]} min limit
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
                       <p className="mt-4 text-xs">
                         Synthetic prompts may be shorter than live test prompts.
                         Read Aloud and Repeat Sentence have local syllable
@@ -836,11 +826,9 @@ function Review({
     a = r.answers[id] || {};
   const f = feedback(q, a);
   const expected = modelAnswer(q);
-  const prompt = [
-    ...new Set(
-      [q.prompt, q.text, q.audioText].filter((text): text is string => !!text),
-    ),
-  ];
+  const prompt = [q.prompt, q.text, q.audioText].filter(
+    (text): text is string => !!text,
+  );
   const example =
     a.recording && expected && !prompt.includes(expected)
       ? `Example response: ${expected}`
@@ -858,13 +846,13 @@ function Review({
         ? [`Your response: ${showAnswer(q, a)}`, `Answer key: ${expected}`]
         : [showAnswer(q, a)]
       : activeTab === "Feedback"
-        ? [f.detail, q.explanation, example]
+        ? [...(a.recording ? [] : [f.detail]), q.explanation, example]
         : prompt;
   return (
     <div className="screen-stack review-screen">
       <div className="review-question">
         <h2>{guideFor(q).title}</h2>
-        <Badge variant="outline">{f.label}</Badge>
+        {!a.recording && <Badge variant="outline">{f.label}</Badge>}
         <Pager
           index={index}
           count={r.questionIds.length}
@@ -937,7 +925,7 @@ function Review({
       ) : (
         <ReadingPages
           key={id + activeTab}
-          texts={[texts.join(" ")]}
+          texts={texts}
           label="feedback pages"
         />
       )}
