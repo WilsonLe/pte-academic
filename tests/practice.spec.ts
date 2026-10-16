@@ -908,7 +908,9 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
     .getByRole("navigation", { name: "Main navigation", exact: true })
     .getByRole("link", { name: "Practice", exact: true })
     .click();
-  await expect(page.getByText("GOAL COMPLETE", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Daily goal complete", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "View achievements" }).click();
   await expect(
     page.getByRole("button", {
@@ -1239,6 +1241,151 @@ test("simplified workspace fits desktop and mobile, with compact history and sha
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(viewport.width);
+  }
+});
+
+test("daily home groups progress and actions across fresh, partial and completed states", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Start daily quest", exact: true }),
+  ).toBeEnabled();
+  for (const done of [0, 1, 3]) {
+    await page.evaluate(async (count) => {
+      const date = new Date();
+      const today = [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0"),
+      ].join("-");
+      const ids = [
+        "reading-single-01",
+        "reading-single-02",
+        "reading-multiple-01",
+      ].slice(0, count);
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onsuccess = () => {
+          const db = request.result;
+          const tx = db.transaction("progress", "readwrite");
+          tx.objectStore("progress").put(
+            {
+              version: 1,
+              xp: count === 3 ? 60 : count * 10,
+              seen: ids,
+              earned: [],
+              days: [{ date: today, questionIds: ids }],
+              lastDay: count ? today : "",
+              streak: count ? 1 : 0,
+              longest: count ? 1 : 0,
+            },
+            "profile",
+          );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+          };
+        };
+        request.onerror = () => reject(request.error);
+      });
+    }, done);
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 360, height: 640 },
+      { width: 390, height: 844 },
+      { width: 768, height: 1024 },
+      { width: 1440, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
+      await page.reload();
+      const daily = page.getByRole("region", {
+        name: "Daily practice",
+        exact: true,
+      });
+      await expect(daily.getByRole("progressbar")).toHaveAttribute(
+        "aria-valuenow",
+        String(done),
+      );
+      await expect(daily.getByRole("heading")).toHaveText(
+        done === 3
+          ? "Daily goal complete"
+          : done
+            ? "2 more to go"
+            : "Your next 3 questions",
+      );
+      const action = daily.getByRole("button", {
+        name:
+          done === 3
+            ? "Keep practising"
+            : done
+              ? "Continue daily quest"
+              : "Start daily quest",
+        exact: true,
+      });
+      await expect(action).toBeEnabled();
+      await expect(
+        daily.getByRole("button", { name: "View achievements" }),
+      ).toBeVisible();
+      await expect(page.locator(".practice-modes a")).toHaveCount(3);
+      await screenFits(page);
+      const bounds = await daily.evaluate((node) => {
+        const card = node.getBoundingClientRect();
+        return [
+          ...node.querySelectorAll("h3, [role=progressbar], button"),
+        ].every((child) => {
+          const r = child.getBoundingClientRect();
+          return (
+            r.top >= card.top &&
+            r.bottom <= card.bottom &&
+            r.left >= card.left &&
+            r.right <= card.right
+          );
+        });
+      });
+      expect(bounds).toBe(true);
+      await page.screenshot({
+        path: `test-results/home-${done}-${viewport.width}.png`,
+        animations: "disabled",
+      });
+    }
+  }
+  await page.getByRole("button", { name: "How practice XP works" }).click();
+  await expect(
+    page.getByText("Any practice mode counts. XP rewards effort.", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "How practice XP works" }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "View achievements" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Your achievements" }),
+  ).toBeVisible();
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Keep practising", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/types$/);
+  await page.setViewportSize({ width: 320, height: 400 });
+  await page.goto("/");
+  const keepPractising = page.getByRole("button", {
+    name: "Keep practising",
+    exact: true,
+  });
+  await keepPractising.scrollIntoViewIfNeeded();
+  await expect(keepPractising).toBeInViewport();
+  for (const link of await page.locator(".practice-modes a").all()) {
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeInViewport();
   }
 });
 
