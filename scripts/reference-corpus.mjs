@@ -232,14 +232,6 @@ async function main() {
     const policy = JSON.parse(
       await readFile(join(ROOT, "content/authoring.json"), "utf8"),
     );
-    if (
-      !Number.isFinite(policy.spendingLimitUsd) ||
-      policy.spendingLimitUsd <= 0 ||
-      !policy.requiresOperatorApprovalToIncrease
-    )
-      throw Error(
-        "An authorized finite cumulative spending policy is required.",
-      );
     const ledger = await readLedger();
     const limit = authorizedBudget(policy, ledger);
     if (ledger.reservations.some((r) => r.status !== "completed"))

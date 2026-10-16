@@ -1,0 +1,28 @@
+{
+  "referenceVersion": "blended-english-synthetic-v3",
+  "modelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+  "recordings": 5600,
+  "usablePreparedRecordings": 5532,
+  "distinctPassages": 560,
+  "voiceProfiles": 10,
+  "compressedEvidence": {
+    "reference-manifest.json": {
+      "sha256": "024c45b57bb1efa6927cce5cbf6d44d9ec73e5ff1c8c6b97dbffdb1df34fcdbf",
+      "gzipSha256": "4417b39d14b5be8c7e2712328185922e7888dd7a2c73624a6354d3d7bdd26d5b",
+      "uncompressedBytes": 5348520
+    },
+    "corpus-audit.json": {
+      "sha256": "1903ef9e70dfbef3bf6791d8d97a066e5cef1bab8ebeb6c210a6fbe4130536bd",
+      "gzipSha256": "95d52c9327168f8e14b08b989d0d4781d45adcf5050303c17b95e090f3753019",
+      "uncompressedBytes": 2414161
+    }
+  },
+  "rawAudioDirectory": "artifacts/pronunciation/reference-v3",
+  "sourceFiles": {
+    "training/comparison.py": "74cf06a67f7b21f4153b7a95f3320ecbe3de6f9ee69989ff74f6f5327531bfef",
+    "training/phonetics.py": "2c34c75846208d5a275dc171ba45f1d3e815ae4ca1dfc43980d9abed7f1fa27c",
+    "training/experiment.py": "57d0b2ddce7fb893329201454289e08bd14971b82f19b320caab48d9dcc9ba18",
+    "training/uv.lock": "8ac13794f2a299eec61e6483b1afea76ef61fbef77589cf4c1d401026c503e63",
+    "training/reference-corpus-v3.json": "a8a5ca050b8b8c9c73f23bfeb762873d3d17da1fbacbba4563722a807d91fc92"
+  }
+}

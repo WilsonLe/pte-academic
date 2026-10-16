@@ -1,0 +1,131 @@
+{
+  "modelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+  "referenceManifestSha256": "024c45b57bb1efa6927cce5cbf6d44d9ec73e5ff1c8c6b97dbffdb1df34fcdbf",
+  "referenceVersion": "blended-english-synthetic-v3",
+  "sampleTakeId": "passage-083--am_puck",
+  "sampleSyllables": 21,
+  "scoredSyllables": 21,
+  "medianSimilarity": 78.32,
+  "gainControlMaxSimilarityChange": 0.00999999999999801,
+  "silenceStatus": "no-reliable-speech",
+  "noiseStatus": "no-reliable-speech",
+  "audioOnlyStatus": "scored",
+  "audioOnlyTranscript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+  "checkpointReloadIdentical": true,
+  "inferenceNetworkConnections": 0,
+  "correctVowelSyllableSimilarity": 78.07,
+  "wrongVowelSyllableSimilarity": 50.13,
+  "wrongVowelStatus": "scored",
+  "outputFolder": "/Users/wilsonle/projects/pte-academic.worktrees/syllable-comparison/artifacts/pronunciation/verification-blended-english-synthetic-v3",
+  "heldOutAccentSamples": {
+    "en-GB": {
+      "takeId": "passage-083--bm_george",
+      "syllables": 21,
+      "scored": 21,
+      "medianSimilarity": 81.46
+    },
+    "en-AU": {
+      "takeId": "passage-083--au_bloke",
+      "syllables": 21,
+      "scored": 20,
+      "medianSimilarity": 58.69499999999999
+    },
+    "en-IN": {
+      "takeId": "passage-083--in_dhruv",
+      "syllables": 21,
+      "scored": 21,
+      "medianSimilarity": 78.02
+    }
+  },
+  "heldOutAccentVowelControls": {
+    "en-GB": {
+      "takeId": "passage-054--bm_george",
+      "correct": 82.18,
+      "wrong": 53.73,
+      "wrongStatus": "scored"
+    },
+    "en-AU": {
+      "takeId": "passage-054--au_bloke",
+      "correct": 63.84,
+      "wrong": 37.91,
+      "wrongStatus": "scored"
+    },
+    "en-IN": {
+      "takeId": "passage-054--in_dhruv",
+      "correct": 78.5,
+      "wrong": 49.96,
+      "wrongStatus": "scored"
+    }
+  },
+  "timings": [
+    {
+      "name": "expected-text",
+      "wallSeconds": 1.762198125012219
+    },
+    {
+      "name": "gain-control",
+      "wallSeconds": 0.3589990420732647
+    },
+    {
+      "name": "silence",
+      "wallSeconds": 0.007094583008438349
+    },
+    {
+      "name": "noise",
+      "wallSeconds": 0.0073933330131694674
+    },
+    {
+      "name": "audio-only",
+      "wallSeconds": 0.6493482500081882
+    },
+    {
+      "name": "correct-vowel",
+      "wallSeconds": 0.3363146670162678
+    },
+    {
+      "name": "wrong-vowel",
+      "wallSeconds": 0.31157224997878075
+    },
+    {
+      "name": "checkpoint-reload",
+      "wallSeconds": 0.29494266700930893
+    },
+    {
+      "name": "en-GB",
+      "wallSeconds": 0.346430667093955
+    },
+    {
+      "name": "en-GB-correct-vowel",
+      "wallSeconds": 0.33599016699008644
+    },
+    {
+      "name": "en-GB-wrong-vowel",
+      "wallSeconds": 0.2976821670308709
+    },
+    {
+      "name": "en-AU",
+      "wallSeconds": 0.32849924999754876
+    },
+    {
+      "name": "en-AU-correct-vowel",
+      "wallSeconds": 0.35843583289533854
+    },
+    {
+      "name": "en-AU-wrong-vowel",
+      "wallSeconds": 0.33167408290319145
+    },
+    {
+      "name": "en-IN",
+      "wallSeconds": 0.3418029590975493
+    },
+    {
+      "name": "en-IN-correct-vowel",
+      "wallSeconds": 0.34369491692632437
+    },
+    {
+      "name": "en-IN-wrong-vowel",
+      "wallSeconds": 0.29371170804370195
+    }
+  ],
+  "scope": "Synthetic local audio controls; not human-speaker or browser validation."
+}
