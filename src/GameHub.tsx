@@ -1,5 +1,5 @@
-import { Link } from "react-router";
-import { screenPath } from "./routing";
+import { Link } from "@tanstack/react-router";
+import { type ScreenId } from "./routing";
 import { useState, type CSSProperties } from "react";
 import {
   ArrowRight,
@@ -119,7 +119,7 @@ export function GameHub({
   today: string;
   ready: boolean;
   onQuest: () => void;
-  navigate: (page: string) => void;
+  navigate: (page: ScreenId) => void;
 }) {
   const setView = onViewChange;
   const [selected, setSelected] = useState<string | null>(null);
@@ -376,7 +376,7 @@ export function GameHub({
             maxRows={1}
             items={[
               {
-                id: "types",
+                to: "/types" as const,
                 title: "Question types",
                 detail: "Focus on one skill",
                 count: "22",
@@ -384,7 +384,7 @@ export function GameHub({
                 tone: "violet",
               },
               {
-                id: "sections",
+                to: "/sections" as const,
                 title: "Sections",
                 detail: "Connect the pieces",
                 count: "03",
@@ -392,7 +392,7 @@ export function GameHub({
                 tone: "mint",
               },
               {
-                id: "mocks",
+                to: "/mocks" as const,
                 title: "Mock tests",
                 detail: "Put it all together",
                 count: "01",
@@ -402,8 +402,8 @@ export function GameHub({
             ]}
             render={(mode, i) => (
               <Link
-                to={screenPath(mode.id)}
-                key={mode.id}
+                to={mode.to}
+                key={mode.to}
                 className={"game-mode mode-" + mode.tone}
                 style={{ "--order": i } as CSSProperties}
               >

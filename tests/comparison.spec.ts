@@ -175,7 +175,7 @@ test("actual v3 browser inference matches all four Python accent controls and wr
     contentType: "application/json",
   });
   await writeFile(
-    "artifacts/pronunciation/browser-export/verified-browser-controls.json",
+    `artifacts/pronunciation/browser-export/verified-browser-controls${base === "/" ? "" : "-subpath"}.json`,
     JSON.stringify(reports, null, 2) + "\n",
   );
 });
@@ -403,4 +403,19 @@ test("post-ready missing and corrupt cached assets expose retry and recover with
         .getByRole("alert"),
     ).toHaveCount(0);
   }
+});
+
+test("direct practice entry starts the required model preparation before the workspace is shown", async ({
+  page,
+}) => {
+  const download = page.waitForRequest((request) =>
+    request.url().includes("/models/blended-english-v3/encoder-00.bin"),
+  );
+  await page.goto(base + "practice/type/reading-single");
+  const request = await download;
+  expect(request.method()).toBe("GET");
+  expect(request.postData()).toBeNull();
+  await expect(
+    page.getByRole("button", { name: "Begin practice", exact: true }),
+  ).toBeVisible();
 });

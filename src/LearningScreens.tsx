@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   BookOpen,
@@ -342,7 +342,8 @@ export function HistoryScreen({
           <Link
             key={r.id}
             className="type-row history-row"
-            to={`/history/${encodeURIComponent(r.id)}`}
+            to="/history/$attemptId"
+            params={{ attemptId: r.id }}
           >
             <History />
             <span className="flex-1 text-left">

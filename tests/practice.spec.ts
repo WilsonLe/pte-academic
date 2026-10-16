@@ -1352,6 +1352,54 @@ test("populated compact history pages fit without overlapping pagination", async
   });
 });
 
+test("TanStack local state saves, reviews and clears an answered session fully offline", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  const external: string[] = [];
+  const errors: string[] = [];
+  page.on("request", (request) => {
+    if (
+      /^https?:/.test(request.url()) &&
+      new URL(request.url()).origin !== new URL(baseURL!).origin
+    )
+      external.push(request.url());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  await page.reload();
+  await context.setOffline(true);
+  await page.goto("/practice/type/reading-single");
+  await start(page);
+  await page
+    .getByRole("radio", { name: "Difficulty scheduling early meetings" })
+    .check();
+  await end(page);
+  await expect(
+    page.getByRole("button", { name: "10 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByText("Difficulty scheduling early meetings", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "My practice", exact: true }).click();
+  await expect(page.locator(".history-row")).toHaveCount(1);
+  await page.getByRole("button", { name: "Clear practice history" }).click();
+  await page
+    .getByRole("button", { name: "Clear history", exact: true })
+    .click();
+  await expect(page.getByText("No attempts yet.")).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "0 XP, level 1. View progress" }),
+  ).toBeVisible();
+  await expect(page.getByText("No attempts yet.")).toBeVisible();
+  expect(external).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 test("header notifications disclose speech preparation, errors and recovery", async ({
   page,
 }) => {
