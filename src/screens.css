@@ -1,4 +1,23 @@
 /* Screen-sized game shell. Secondary information is opened, never stacked below play. */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: clip;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+}
+
+/* Apply inside scroll containers too: touch gestures stop at the first scroller. */
+* {
+  /* Keep one-finger panel scrolling, without pinch or double-tap zoom. */
+  touch-action: pan-x pan-y;
+}
+
 .app-shell {
   height: 100dvh;
   min-height: 0;
@@ -1021,18 +1040,11 @@
     padding: 6px;
   }
 }
-/* Accessibility fallback for extreme zoom/very short windows: preserve every control. */
+/* Very short windows keep the document fixed and scroll only the content panel. */
 @media (max-height: 450px) {
-  .app-shell {
-    height: auto;
-    min-height: 100dvh;
-    overflow: visible;
-  }
-  .workspace {
-    min-height: 100dvh;
-  }
   .main-content {
-    min-height: 550px;
+    overflow: auto;
+    overscroll-behavior: contain;
   }
   .home-screen,
   .screen-stack {

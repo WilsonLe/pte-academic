@@ -30,6 +30,10 @@ test("published JavaScript stays within the default 500 kB chunk budget", async 
 });
 test("published artifact contains a base-aware SPA shell, public assets and scoped offline worker", async () => {
   const shell = await readFile(`${directory}/index.html`, "utf8");
+  assert.match(
+    shell,
+    /name="viewport"[^>]*content="[^"]*minimum-scale=1\.0,maximum-scale=1\.0,user-scalable=no/,
+  );
   assert.equal(await readFile(`${directory}/404.html`, "utf8"), shell);
   for (const file of ["manifest.webmanifest", "icon.svg", "icon-192.png"])
     assert.ok(shell.includes(`href="${base}${file}"`));
