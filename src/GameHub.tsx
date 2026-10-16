@@ -286,7 +286,9 @@ export function GameHub({
                         : "Going places"}
                 </h3>
               </div>
-              <span className="mini-star">✦</span>
+              <span className="mini-star" aria-hidden="true">
+                ✦
+              </span>
             </div>
             <div className="xp-meter-label">
               <span>
@@ -429,12 +431,9 @@ export function GameHub({
       )}
       {view === "badges" && (
         <>
-          <div className="mode-heading badge-heading">
-            <h3>Your achievements</h3>
-            <span>
-              {unlocked.length} / {badges.length} earned
-            </span>
-          </div>
+          <p className="badge-summary">
+            {unlocked.length} / {badges.length} earned
+          </p>
           <CardsList
             className="badge-list"
             gridClassName="badge-shelf"
@@ -496,7 +495,7 @@ export function GameHub({
           if (!open) setSelected(null);
         }}
       >
-        <DialogContent>
+        <DialogContent className="practice-ui">
           {selectedBadge && (
             <>
               <div

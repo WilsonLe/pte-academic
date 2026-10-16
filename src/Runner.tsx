@@ -131,7 +131,7 @@ export function Preflight({
     }
   }
   return (
-    <main className="setup-page">
+    <main className="setup-page practice-ui">
       <div className="setup-content">
         <header className="setup-heading">
           <Button
@@ -760,7 +760,7 @@ export function Runner({
           }
         }}
       >
-        <DialogContent showCloseButton={false}>
+        <DialogContent className="exam-dialog" showCloseButton={false}>
           <DialogTitle>
             {confirmExit ? "End this attempt?" : "Move to the next question?"}
           </DialogTitle>
@@ -769,7 +769,7 @@ export function Runner({
               ? "Your completed responses will be available for review. Remaining questions will be marked unanswered."
               : "You have not entered a response. You cannot return to this question."}
           </DialogDescription>
-          <div className="flex justify-end gap-3 pt-3">
+          <div className="dialog-actions">
             <Button
               variant="outline"
               onClick={() => {

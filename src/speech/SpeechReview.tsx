@@ -142,6 +142,8 @@ export function SpeechReview({
           {pronunciation && (
             <Button
               aria-label="Syllable scores"
+              aria-pressed={panel === "syllables"}
+              title="Syllable scores"
               variant={panel === "syllables" ? "secondary" : "ghost"}
               onClick={() => setPanel("syllables")}
             >
@@ -152,6 +154,8 @@ export function SpeechReview({
           {transcription && (
             <Button
               aria-label="Transcript"
+              aria-pressed={panel === "transcript"}
+              title="Transcript"
               variant={panel === "transcript" ? "secondary" : "ghost"}
               onClick={() => setPanel("transcript")}
             >
@@ -161,6 +165,8 @@ export function SpeechReview({
           )}
           <Button
             aria-label="How local feedback works"
+            aria-pressed={panel === "help"}
+            title="How local feedback works"
             variant={panel === "help" ? "secondary" : "ghost"}
             onClick={() =>
               setPanel(

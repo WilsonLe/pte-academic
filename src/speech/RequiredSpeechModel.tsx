@@ -33,7 +33,7 @@ export function RequiredSpeechModel() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative"
+                  className="notification-trigger relative"
                   aria-label="Notifications"
                   aria-describedby={statusId}
                 />
@@ -45,7 +45,7 @@ export function RequiredSpeechModel() {
           {pending && (
             <span
               aria-hidden="true"
-              className={`absolute right-0 top-0 flex size-3.5 items-center justify-center rounded-full text-[9px] font-semibold ${state.status === "error" ? "bg-destructive text-white" : "bg-primary text-primary-foreground"}`}
+              className={`notification-count absolute right-0 top-0 flex size-3.5 items-center justify-center rounded-full text-[9px] font-semibold ${state.status === "error" ? "bg-destructive text-white" : "bg-primary text-primary-foreground"}`}
             >
               1
             </span>
@@ -63,12 +63,12 @@ export function RequiredSpeechModel() {
       <PopoverContent
         align="end"
         sideOffset={8}
-        className="w-80 max-w-[calc(100vw-1rem)] max-h-[var(--available-height)] overflow-y-auto p-4"
+        className="practice-ui notification-panel w-80 max-w-[calc(100vw-1rem)] max-h-[var(--available-height)] overflow-y-auto p-4"
       >
         <PopoverTitle>Notifications</PopoverTitle>
         {pending ? (
           <ul aria-label="Notifications" className="m-0 list-none p-0">
-            <li className="space-y-3 border-t pt-3 text-xs">
+            <li className="space-y-3 border-t pt-3">
               <p className="font-medium">Speech model</p>
               <p
                 className="break-words text-muted-foreground"
@@ -81,7 +81,7 @@ export function RequiredSpeechModel() {
                   aria-label="Speech model download"
                   value={state.percent}
                   max={100}
-                  className="h-2 w-full"
+                  className="model-download-progress h-2 w-full"
                 />
               ) : (
                 <Button
@@ -99,7 +99,7 @@ export function RequiredSpeechModel() {
             </li>
           </ul>
         ) : (
-          <p className="py-3 text-xs text-muted-foreground" role="status">
+          <p className="py-3 text-muted-foreground" role="status">
             No notifications
           </p>
         )}
