@@ -539,12 +539,18 @@
 }
 .mock-arena {
   height: 100%;
+  min-height: 0;
   max-width: none;
   padding: 40px;
   border-radius: 32px;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
+  gap: 24px;
+  overflow-y: auto;
+}
+.mock-arena > * {
+  flex-shrink: 0;
 }
 .mock-heading h2 {
   font-size: 40px;

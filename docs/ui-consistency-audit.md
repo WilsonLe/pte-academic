@@ -8,7 +8,7 @@ The reference is the existing practice game interface: violet actions and select
 
 - Shared Buttons expose variant/size metadata. Practice styles use that metadata, since Base UI tooltip/popover render composition can replace `data-slot`. Primary actions, selected guidance/filter/review controls, secondary actions and keyboard focus now share the practice vocabulary, including portal content.
 - Preflight uses the shared violet quest card, lime Begin action, readable plan/count, media-check cards and collapsed details. Start requirements and lifecycle are unchanged.
-- Mock preparation has a large labelled action. The stage connector follows the actual node centres on desktop, mobile and short windows.
+- Mock preparation has a large labelled action. The stage connector follows the actual node centres on desktop, mobile and short windows. The panel scrolls locally when short/enlarged-text or error-banner layouts cannot contain its actions.
 - Achievement screens show the heading once, with a separate earned count. Supporting progress, achievement, mode, history and mock text has stronger contrast on its soft surfaces. Decorative stars are hidden from assistive technology.
 - Empty/search/missing/loading recovery panels share alignment and surface treatment. Existing actionable error text is retained.
 - Practice dialogs and notifications share rounded surfaces and readable controls. Close targets are at least 44 pixels; confirmation actions wrap on narrow/zoomed screens. Clear history uses the destructive variant. Exam confirmation dialogs retain neutral styling and gain the same wrapping/scroll protection.
@@ -48,7 +48,7 @@ Each row is included in the audit. “Retained” means its existing distinct tr
 
 - `npm run build`: content/media contracts, pinned model pack, Start static shell generation, TypeScript, client publish and service-worker build. The existing large-chunk warning remains.
 - Focused Chromium selection covers responsive cards/navigation/reading, all response-control families, recording/review, one-play listening, mock progression, media denial, daily rewards, reload/back, shared playback, filters/history and notifications. Full repository/model inference suites are deferred until merging is requested; this task does not authorize merge or deployment.
-- Current validation: 21 focused practice browser journeys and 2 focused speech-review journeys passed, including the new regression; the static-output contract passed. The route/content matrix passed 504 states at 320×568, 360×640, 390×844 and 1440×900, and separate captures passed all 10 response-control kinds. Sixteen confirmation/info/achievement dialog checks passed across those sizes.
+- Current validation before review: 21 focused practice browser journeys and 2 focused speech-review journeys passed, including the syllable regression; the static-output contract passed. The route/content matrix passed 504 states at 320×568, 360×640, 390×844 and 1440×900, and separate captures passed all 10 response-control kinds. This matrix checks horizontal overflow and reading-copy fit, not unobscured hit targets. Sixteen confirmation/info/achievement dialog checks passed across those sizes.
 - Additional browser matrix checks all 22 guidance screens/tabs, every learning topic/block, section details, basic routes, mock disclosure and representative runner kinds at narrow phone and desktop sizes. Saved review fixtures exercise legacy transcript/syllable/chart rendering without invoking models.
 - Screenshots and disposable browser fixtures live under ignored `artifacts/ui-audit/`; they contain synthetic practice state. Any controlled download failure proves its error presentation, not an actual provider failure. Real download/recovery is separately covered by the focused notification journey.
 - Native iOS/Safari, OS text scaling, and a screen reader were not available. Chromium mobile viewports and keyboard checks do not establish those device-specific outcomes. Generated colours/gradients and decorative icons are not claimed to have a complete automated accessibility certification.
@@ -60,3 +60,11 @@ No learning content, credentials, model, persistence schema, grading, XP logic, 
 ![Mock preparation on mobile](evidence/ui-consistency-mock-mobile.png)
 
 ![Readable syllable results on a short phone](evidence/ui-consistency-speech-mobile.png)
+
+## Independent review disposition
+
+The expanded review of `69948a7` identified one P2: at 320×568 the new mock action row could put Mock details behind the mobile footer, particularly with enlarged text or the supported offline-error alert. The reviewer confirmed the changed cause by removing only the added Prepare row in a disposable DOM. No other actionable finding was identified. The horizontal/text-fit matrix did not establish vertical hit-target reachability.
+
+The fix adds local mock-panel scrolling with non-shrinking, readable content. A click-based regression first reproduced the footer interception, then checks both Mock details and Prepare for mock at ordinary and 200% root text sizing with the error alert visible. Resulting candidate checks are recorded on the PR. The fix is validated within this final review cycle; it does not imply another independent review pass or merge authority.
+
+After the review fix, the build/static-output/format checks passed and all 24 focused journeys passed. One layout journey was rerun unchanged in isolation after a concurrent Playwright output-directory collision caused a trace-file cleanup error; the isolated rerun passed. Twenty mock hit-target/click cases passed across five viewports, ordinary/enlarged text and service-worker-enabled/error states; all sixteen dialog checks passed again.
