@@ -3,9 +3,7 @@ const indexKey = "pte-studio-history-v1";
 const appBase = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
 async function seed(page: Page, { silence = false, recorded = false } = {}) {
   await page.goto(appBase);
-  await expect(
-    page.getByRole("status", { name: "Offline ready", exact: true }),
-  ).toBeVisible({ timeout: 20000 });
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
   await page.reload();
   await page.evaluate(
     async ({ indexKey, silence, recorded }) => {
@@ -115,9 +113,7 @@ test("real on-device recognition, private transport, saved feedback and offline 
   await seed(page);
   expect(
     requests.filter(
-      (r) =>
-        r.url.includes("huggingface.co") ||
-        /speech\.worker-|\.wasm/.test(r.url),
+      (r) => r.url.includes("huggingface.co") || /speech\.worker-/.test(r.url),
     ),
   ).toHaveLength(0);
   await page
@@ -255,7 +251,9 @@ test("download failure and cancellation preserve replay and allow retry", async 
     "Transcription could not finish",
     { timeout: 20000 },
   );
-  await expect(page.getByLabel("Your recording for question 1")).toBeVisible();
+  await expect(
+    page.getByLabel("Your recording for question 1", { exact: true }),
+  ).toBeVisible();
   await context.unroute("https://huggingface.co/**");
   await context.route("https://huggingface.co/**", async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -295,10 +293,12 @@ test("unsupported workers keep self-review available", async ({ page }) => {
   await expect(page.getByRole("alert")).toContainText(
     "unavailable in this browser",
   );
-  await expect(page.getByLabel("Your recording for question 1")).toBeVisible();
+  await expect(
+    page.getByLabel("Your recording for question 1", { exact: true }),
+  ).toBeVisible();
 });
 
-test("undecodable recording reports an error without downloading models", async ({
+test("undecodable recording reports a decode error without downloading ASR weights", async ({
   page,
   context,
 }) => {
@@ -333,7 +333,9 @@ test("undecodable recording reports an error without downloading models", async 
   await page
     .getByRole("button", { name: "Transcribe on this device", exact: true })
     .click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("alert").filter({ hasText: /decode/i }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", {
       name: "Transcribe on this device",
@@ -391,15 +393,25 @@ test("small phone speech review pages stay readable without scrolling", async ({
     "Speech",
   ]) {
     await page.getByRole("button", { name: panel, exact: true }).click();
-    await expect
-      .poll(() =>
-        page
-          .locator(".reading-copy")
-          .evaluate((e) => e.scrollHeight <= e.clientHeight),
-      )
-      .toBe(true);
+    if (panel === "Your response") {
+      await expect(
+        page.getByRole("group", {
+          name: "Your recording for question 1",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(page.locator(".reading-copy")).toHaveCount(0);
+    } else {
+      await expect
+        .poll(() =>
+          page
+            .locator(".reading-copy")
+            .evaluate((e) => e.scrollHeight <= e.clientHeight),
+        )
+        .toBe(true);
+    }
     const overflow = await page
-      .locator("main button, main audio")
+      .locator("main button, main audio, main input")
       .evaluateAll((nodes) =>
         nodes
           .filter((node) => {

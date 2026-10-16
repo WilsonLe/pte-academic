@@ -35,3 +35,7 @@ Read the root AGENTS.md, then `agents/content-author.md` and `agents/question-re
 7. Commit source JSON and referenced media together. Submit for review; do not publish automatically.
 
 The starter bank contains 65 original questions and one shared mock. Drills and section practice intentionally reuse those questions. One narrator currently identifies the three discussion speakers; do not advertise distinct voices. Human listening review remains explicit in the narration manifest.
+
+## Speech comparison coverage
+
+Read Aloud text and Repeat Sentence audioText are bound to the required v3 browser pronunciation candidates. When either changes or a new item is added, rebuild its candidates with `uv run --project training --group export python training/export_browser.py`, then run `npm run validate:comparison` and the affected local/browser grading checks. Both static build paths validate model file hashes and every current fixed-word speech script. Curly apostrophes are normalized as contractions in the browser export. Do not change the accepted checkpoint, reset budgets or synthesize new training data just to update a script; preserve source/model/export provenance and rebuild/test any derived pack deliberately. Other question scoring and learner data privacy remain unchanged.
