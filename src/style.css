@@ -215,34 +215,6 @@
   .page-enter {
     animation: page-in 180ms ease-out;
   }
-  .setup-page {
-    @apply mx-auto max-w-2xl px-5 py-6;
-  }
-  .setup-panel {
-    @apply mt-6 rounded-xl border p-5;
-  }
-  .setup-panel > p,
-  .check-row p {
-    @apply text-xs leading-6 text-muted-foreground;
-  }
-  .check-row {
-    @apply flex gap-4 border-b py-5;
-  }
-  .check-row > svg {
-    @apply mt-1 shrink-0 text-muted-foreground;
-  }
-  .check-row > div {
-    @apply min-w-0;
-  }
-  .check-row h3 {
-    @apply mb-3 text-sm font-medium;
-  }
-  .check-row audio {
-    @apply my-3 h-9 max-w-full;
-  }
-  .check-label {
-    @apply mt-3 flex items-center gap-2 text-xs;
-  }
   .notice {
     @apply my-4 rounded-lg bg-muted p-3 text-xs leading-6 text-muted-foreground;
   }
@@ -1288,6 +1260,246 @@
 @media (prefers-reduced-motion: reduce) {
   .confetti {
     display: none;
+  }
+}
+
+/* Preflight shares the practice palette; the timed exam remains isolated. */
+.setup-page {
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top)) 20px
+    max(32px, env(safe-area-inset-bottom));
+  background: #f7f8fc;
+  color: #23243a;
+}
+.setup-content {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.setup-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.setup-back {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1px solid #e7e5ef;
+  border-radius: 13px;
+  background: white;
+  color: #633be2;
+}
+.setup-heading h1 {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 740;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.setup-count {
+  flex-shrink: 0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #ede7fc;
+  color: #633be2;
+  font-size: 12px;
+  font-weight: 650;
+}
+.setup-panel {
+  padding: clamp(24px, 4vw, 36px);
+}
+.setup-intro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.setup-emblem {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 17px;
+  background: #ffffff16;
+  color: #e0ffa2;
+}
+.setup-emblem svg {
+  width: 30px;
+  height: 30px;
+}
+.setup-intro h2 {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 740;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+.setup-rules {
+  display: grid;
+  gap: 12px;
+  margin: 26px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.setup-rules li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.setup-rules svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: #e0ffa2;
+}
+.setup-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+}
+.setup-checks:empty {
+  display: none;
+}
+.check-row {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid #e7e5ef;
+  border-bottom-width: 4px;
+  border-radius: 16px;
+  background: #fff;
+  color: #23243a;
+}
+.check-row > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #6940de;
+}
+.check-row > div {
+  min-width: 0;
+  flex: 1;
+}
+.check-row h3 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+.check-row p,
+.check-label {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.check-row p {
+  color: #656579;
+  margin-bottom: 14px;
+}
+.check-row button.secondary {
+  min-height: 44px;
+  height: auto;
+  white-space: normal;
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 8px;
+}
+.check-label input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: #6940de;
+}
+.setup-action {
+  margin-top: 28px;
+}
+.setup-action .quest-start {
+  width: 100%;
+  min-height: 54px;
+  height: auto;
+  padding: 14px 20px;
+  border-radius: 14px;
+  justify-content: space-between;
+  white-space: normal;
+  font-size: 16px;
+}
+.setup-action p {
+  margin-top: 16px;
+  color: #eee8fc;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.setup-panel .error {
+  background: #fff5f5;
+  color: #9b1c31;
+}
+.setup-details {
+  margin-top: 24px;
+  border: 1px solid #e7e5ef;
+  border-radius: 16px;
+  background: #fff;
+}
+.setup-details-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+}
+.setup-details-trigger:hover {
+  background: #f1edff;
+}
+.setup-chevron {
+  margin-left: auto;
+  transition: transform 220ms;
+}
+.setup-details-trigger[aria-expanded="true"] .setup-chevron {
+  transform: rotate(180deg);
+}
+.setup-details-copy {
+  padding: 0 20px 20px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #656579;
+}
+.setup-details-copy p + p {
+  margin-top: 12px;
+}
+@media (max-width: 480px) {
+  .setup-page {
+    padding-inline: 16px;
+  }
+  .setup-heading {
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .setup-count {
+    margin-left: 54px;
+  }
+  .setup-heading h1 {
+    flex-basis: calc(100% - 54px);
+  }
+  .setup-intro {
+    gap: 12px;
+  }
+  .setup-emblem {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+  .check-row {
+    padding: 16px;
   }
 }
 

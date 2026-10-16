@@ -172,7 +172,7 @@ function More({ label, children }: { label: string; children: ReactNode }) {
         {label}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="info-dialog">
+        <DialogContent className="info-dialog practice-ui">
           <DialogTitle>{label}</DialogTitle>
           <DialogDescription className="sr-only">
             Practice information
@@ -427,7 +427,7 @@ export default function App() {
     );
   return (
     <TooltipProvider delay={150}>
-      <div className="app-shell">
+      <div className="app-shell practice-ui">
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
@@ -564,7 +564,7 @@ export default function App() {
                 <div className="screen-stack catalogue-screen">
                   <div className="catalogue-toolbar flex flex-wrap items-center gap-3">
                     <div
-                      className="flex gap-1 rounded-lg bg-muted p-1"
+                      className="catalogue-filters flex gap-1 rounded-lg p-1"
                       role="group"
                       aria-label="Filter by section"
                     >
@@ -605,7 +605,7 @@ export default function App() {
                           </Tooltip>
                         ))}
                     </div>
-                    <label className="flex min-w-40 flex-1 items-center gap-2 rounded-lg border px-3">
+                    <label className="catalogue-search flex min-w-40 flex-1 items-center gap-2 rounded-lg border px-3">
                       <Search className="size-4 text-muted-foreground" />
                       <input
                         type="search"
@@ -671,11 +671,6 @@ export default function App() {
                       <h2 className="text-lg font-semibold">Mock 01</h2>
                     </div>
                     <Badge variant="secondary">65</Badge>
-                    <IconAction
-                      label="Prepare for mock"
-                      icon={Play}
-                      onClick={() => begin("mock", "mock-01")}
-                    />
                   </div>
                   <ol className="arena-stages" aria-label="Mock test stages">
                     {sections.map((s, i) => {
@@ -692,26 +687,38 @@ export default function App() {
                       );
                     })}
                   </ol>
-                  <More label="Mock details">
-                    <p className="mb-3">
-                      One original 65-question form, covering all 22 question
-                      types. Items are shared with drills and section practice.
-                    </p>
-                    <ul className="space-y-2 text-xs">
-                      {sections.map((s) => (
-                        <li key={s.id} className="flex justify-between">
-                          <span>{s.title}</span>
-                          <span>{mocks[0].sectionMinutes[s.id]} min limit</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="mt-4 text-xs">
-                      Synthetic prompts may be shorter than live test prompts.
-                      Read Aloud and Repeat Sentence have local syllable
-                      comparison; open responses use self-review. Exact
-                      live-test UI parity is unverified.
-                    </p>
-                  </More>
+                  <div className="mock-actions">
+                    <Button
+                      className="big-play"
+                      onClick={() => begin("mock", "mock-01")}
+                    >
+                      <Play aria-hidden="true" />
+                      Prepare for mock
+                    </Button>
+                    <More label="Mock details">
+                      <p className="mb-3">
+                        One original 65-question form, covering all 22 question
+                        types. Items are shared with drills and section
+                        practice.
+                      </p>
+                      <ul className="space-y-2 text-xs">
+                        {sections.map((s) => (
+                          <li key={s.id} className="flex justify-between">
+                            <span>{s.title}</span>
+                            <span>
+                              {mocks[0].sectionMinutes[s.id]} min limit
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-4 text-xs">
+                        Synthetic prompts may be shorter than live test prompts.
+                        Read Aloud and Repeat Sentence have local syllable
+                        comparison; open responses use self-review. Exact
+                        live-test UI parity is unverified.
+                      </p>
+                    </More>
+                  </div>
                 </section>
               ) : active === "guide" ? (
                 <LearnScreen
@@ -736,17 +743,20 @@ export default function App() {
         </div>
         <Nav active={active} mobile />
         <Dialog open={clearConfirm} onOpenChange={setClearConfirm}>
-          <DialogContent showCloseButton={false}>
+          <DialogContent className="practice-ui" showCloseButton={false}>
             <DialogTitle>Clear your practice history?</DialogTitle>
             <DialogDescription>
               This removes responses, recordings, transcripts, XP, streaks,
               badges and attempt history from this browser.
             </DialogDescription>
-            <div className="flex justify-end gap-3 pt-3">
+            <div className="dialog-actions">
               <Button variant="outline" onClick={() => setClearConfirm(false)}>
                 Keep history
               </Button>
-              <Button onClick={() => void removeHistory()}>
+              <Button
+                variant="destructive"
+                onClick={() => void removeHistory()}
+              >
                 Clear history
               </Button>
             </div>

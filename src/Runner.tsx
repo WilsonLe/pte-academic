@@ -22,6 +22,8 @@ import {
   ArrowRight,
   ArrowLeft,
   Info,
+  Rocket,
+  ChevronDown,
 } from "lucide-react";
 import {
   type Question,
@@ -129,84 +131,131 @@ export function Preflight({
     }
   }
   return (
-    <main className="setup-page">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Back to practice"
-          onClick={onCancel}
+    <main className="setup-page practice-ui">
+      <div className="setup-content">
+        <header className="setup-heading">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="setup-back"
+            aria-label="Back to practice"
+            onClick={onCancel}
+          >
+            <ArrowLeft className="size-4" />
+          </Button>
+          <h1>{plan.label}</h1>
+          <span className="setup-count">{plan.questions.length} questions</span>
+        </header>
+        <section
+          className="setup-panel quest-card"
+          aria-labelledby="setup-title"
         >
-          <ArrowLeft className="size-4" />
-        </Button>
-        <h1 className="text-sm font-medium">{plan.label}</h1>
-        <span className="ml-auto text-xs text-muted-foreground">
-          {plan.questions.length} questions
-        </span>
-      </div>
-      <div className="setup-panel">
-        <p>
-          The timer starts when you begin. Move forward only; audio prompts play
-          once.
-        </p>
-        {needAudio && (
-          <div className="check-row">
-            <Volume2 size={22} />
-            <div>
-              <h3>Check your headphones</h3>
-              <AudioPlayer
-                src={asset(plan.questions.find((q) => q.audio)!.audio!)}
-                label="Headphone check"
-              />
-              <label className="check-label">
-                <input
-                  type="checkbox"
-                  checked={heard}
-                  onChange={(e) => setHeard(e.target.checked)}
-                />{" "}
-                I can hear the audio clearly
-              </label>
-            </div>
+          <div className="setup-intro">
+            <span className="setup-emblem" aria-hidden="true">
+              <Rocket />
+            </span>
+            <h2 id="setup-title">Ready to begin?</h2>
           </div>
-        )}
-        {needMic && (
-          <div className="check-row">
-            <Mic size={22} />
-            <div>
-              <h3>Check your microphone</h3>
-              <p>
-                Record three seconds, play it back, and check that you can hear
-                yourself. Recordings stay on this device.
-              </p>
-              <Button
-                variant="outline"
-                className="secondary"
-                disabled={recording || installing}
-                onClick={testMic}
-              >
-                {recording
-                  ? "Recording… speak now"
-                  : installing
-                    ? "Requesting access…"
-                    : mic
-                      ? "Record another sample"
-                      : "Test microphone"}
-              </Button>
-              {sample && (
+          <ul className="setup-rules">
+            <li>
+              <Clock3 aria-hidden="true" />
+              The timer starts when you begin.
+            </li>
+            <li>
+              <ArrowRight aria-hidden="true" />
+              Move forward only.
+            </li>
+            {needAudio && (
+              <li>
+                <Volume2 aria-hidden="true" />
+                Audio prompts play once.
+              </li>
+            )}
+          </ul>
+          <div className="setup-checks">
+            {needAudio && (
+              <section className="check-row" aria-labelledby="headphone-title">
+                <Volume2 size={22} aria-hidden="true" />
                 <div>
-                  <AudioPlayer src={sample} label="Microphone check playback" />
+                  <h3 id="headphone-title">Check your headphones</h3>
+                  <AudioPlayer
+                    src={asset(plan.questions.find((q) => q.audio)!.audio!)}
+                    label="Headphone check"
+                  />
+                  <label className="check-label">
+                    <input
+                      type="checkbox"
+                      checked={heard}
+                      onChange={(e) => setHeard(e.target.checked)}
+                    />{" "}
+                    I can hear the audio clearly
+                  </label>
                 </div>
-              )}
-            </div>
+              </section>
+            )}
+            {needMic && (
+              <section className="check-row" aria-labelledby="microphone-title">
+                <Mic size={22} aria-hidden="true" />
+                <div>
+                  <h3 id="microphone-title">Check your microphone</h3>
+                  <p>
+                    Record three seconds, play it back, and check that you can
+                    hear yourself. Recordings stay on this device.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="secondary"
+                    disabled={recording || installing}
+                    onClick={testMic}
+                  >
+                    {recording
+                      ? "Recording… speak now"
+                      : installing
+                        ? "Requesting access…"
+                        : mic
+                          ? "Record another sample"
+                          : "Test microphone"}
+                  </Button>
+                  {sample && (
+                    <div>
+                      <AudioPlayer
+                        src={sample}
+                        label="Microphone check playback"
+                      />
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
-        )}
-        <Collapsible className="more mt-3">
-          <CollapsibleTrigger className="flex min-h-10 items-center gap-2 text-xs text-muted-foreground">
-            <Info className="size-3.5" />
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="setup-action">
+            <Button
+              className="quest-start"
+              disabled={(needMic && !mic) || (needAudio && !heard) || recording}
+              onClick={() => {
+                handed.current = true;
+                onStart(stream.current);
+              }}
+            >
+              Begin {plan.mode === "mock" ? "mock test" : "practice"}
+              <ArrowRight size={20} aria-hidden="true" />
+            </Button>
+            <p>Once you begin, leaving or refreshing ends this attempt.</p>
+          </div>
+        </section>
+        <Collapsible className="setup-details more">
+          <CollapsibleTrigger className="setup-details-trigger">
+            <Info className="size-4" aria-hidden="true" />
             Practice details
+            <ChevronDown className="setup-chevron size-4" aria-hidden="true" />
           </CollapsibleTrigger>
           <CollapsibleContent className="disclosure-panel">
-            <div className="space-y-3 py-3 text-xs leading-6 text-muted-foreground">
+            <div className="setup-details-copy">
               <p>
                 Independent practice simulation. Exact live-test parity is
                 unverified. Synthetic audio is included. Read Aloud and Repeat
@@ -221,6 +270,10 @@ export function Preflight({
                 </p>
               )}
               <p>
+                Completed attempts are saved locally when browser storage is
+                available.
+              </p>
+              <p>
                 A desktop or laptop gives the closest test experience. Keep
                 paper nearby for notes. Responses and recordings stay on this
                 device.
@@ -228,27 +281,7 @@ export function Preflight({
             </div>
           </CollapsibleContent>
         </Collapsible>
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-        <Button
-          className="primary"
-          disabled={(needMic && !mic) || (needAudio && !heard) || recording}
-          onClick={() => {
-            handed.current = true;
-            onStart(stream.current);
-          }}
-        >
-          Begin {plan.mode === "mock" ? "mock test" : "practice"}{" "}
-          <ArrowRight size={17} />
-        </Button>
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">
-        Leaving or refreshing ends this attempt. Completed attempts are saved
-        locally when browser storage is available.
-      </p>
     </main>
   );
 }
@@ -727,7 +760,7 @@ export function Runner({
           }
         }}
       >
-        <DialogContent showCloseButton={false}>
+        <DialogContent className="exam-dialog" showCloseButton={false}>
           <DialogTitle>
             {confirmExit ? "End this attempt?" : "Move to the next question?"}
           </DialogTitle>
@@ -736,7 +769,7 @@ export function Runner({
               ? "Your completed responses will be available for review. Remaining questions will be marked unanswered."
               : "You have not entered a response. You cannot return to this question."}
           </DialogDescription>
-          <div className="flex justify-end gap-3 pt-3">
+          <div className="dialog-actions">
             <Button
               variant="outline"
               onClick={() => {
