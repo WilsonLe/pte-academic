@@ -1,0 +1,15 @@
+{
+  "general-american-v1": {
+    "syllables": 23,
+    "maxSimilarityChange": 0.0,
+    "device": "cpu",
+    "sample": "passage-083--am_puck"
+  },
+  "blended-english-v2": {
+    "syllables": 21,
+    "maxSimilarityChange": 0.009999999999990905,
+    "device": "cpu",
+    "sample": "passage-083--am_puck"
+  },
+  "networkConnections": 0
+}

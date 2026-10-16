@@ -1,0 +1,236 @@
+{
+  "hardware": {
+    "logicalCpus": 18,
+    "memoryGiB": 48,
+    "accelerator": "Apple Silicon MPS"
+  },
+  "encoderBenchmarkBefore": {
+    "device": "mps",
+    "threads": 16,
+    "recommendedGpuGB": 40.200896512,
+    "results": [
+      {
+        "batchSize": 1,
+        "files": 64,
+        "seconds": 9.304582332959399,
+        "filesPerSecond": 6.878331311368414,
+        "maxHiddenDifferenceFromBatch1": 0.0,
+        "driverAllocatedGB": 2.316304384
+      },
+      {
+        "batchSize": 4,
+        "files": 64,
+        "seconds": 9.515958999982104,
+        "filesPerSecond": 6.725543899476696,
+        "maxHiddenDifferenceFromBatch1": 0.0,
+        "driverAllocatedGB": 14.147534848
+      },
+      {
+        "batchSize": 8,
+        "files": 64,
+        "seconds": 7.282125249970704,
+        "filesPerSecond": 8.788643123140112,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 22.821896192
+      },
+      {
+        "batchSize": 16,
+        "files": 64,
+        "seconds": 8.759112374973483,
+        "filesPerSecond": 7.306676437085184,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 30.820712448
+      },
+      {
+        "batchSize": 32,
+        "files": 64,
+        "seconds": 5.69131483300589,
+        "filesPerSecond": 11.245204645654464,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 10.522525696
+      }
+    ],
+    "selectedBatchSize": 32,
+    "speedupVsBatch1": 1.6348739449448357,
+    "note": "Same 64 recordings and phoneme encoder. Padding uses attention masks and exact per-sample convolution output lengths."
+  },
+  "encoderBenchmarkAfter": {
+    "device": "mps",
+    "threads": 16,
+    "recommendedGpuGB": 40.200896512,
+    "comparisonCodeSha256": "117a567811776f18e99b2f68ea39d64ff1cc6dee6cbedb135785dd64082db108",
+    "benchmarkCodeSha256": "1bd9d1f14d76d3e57655c51a0a2afdbf87175887de6f9a6eef6e4075d68f917d",
+    "inputCorpus": "reference-v1",
+    "inputTakeIds": [
+      "passage-013--af_heart",
+      "passage-014--am_puck",
+      "passage-013--am_puck",
+      "passage-014--af_heart",
+      "passage-003--af_heart",
+      "passage-003--am_puck",
+      "passage-013--af_bella",
+      "passage-003--af_bella",
+      "passage-014--af_bella",
+      "passage-002--af_heart",
+      "passage-008--am_puck",
+      "passage-010--am_puck",
+      "passage-015--am_puck",
+      "passage-013--am_michael",
+      "passage-002--am_puck",
+      "passage-005--af_heart",
+      "passage-015--af_heart",
+      "passage-009--am_puck",
+      "passage-005--am_puck",
+      "passage-011--af_heart",
+      "passage-001--af_heart",
+      "passage-010--af_heart",
+      "passage-006--am_puck",
+      "passage-009--af_heart",
+      "passage-010--af_bella",
+      "passage-011--am_puck",
+      "passage-014--am_michael",
+      "passage-008--af_heart",
+      "passage-004--am_puck",
+      "passage-006--af_heart",
+      "passage-001--am_puck",
+      "passage-002--af_bella",
+      "passage-010--am_michael",
+      "passage-007--am_puck",
+      "passage-005--af_bella",
+      "passage-004--af_heart",
+      "passage-009--af_bella",
+      "passage-003--am_michael",
+      "passage-011--af_bella",
+      "passage-015--af_bella",
+      "passage-002--am_michael",
+      "passage-007--af_heart",
+      "passage-009--am_michael",
+      "passage-006--af_bella",
+      "passage-008--af_bella",
+      "passage-012--am_puck",
+      "passage-001--af_bella",
+      "passage-005--am_michael",
+      "passage-012--af_heart",
+      "passage-016--af_heart",
+      "passage-001--am_michael",
+      "passage-006--am_michael",
+      "passage-011--am_michael",
+      "passage-016--am_puck",
+      "passage-007--af_bella",
+      "passage-015--am_michael",
+      "passage-004--af_bella",
+      "passage-008--am_michael",
+      "passage-012--af_bella",
+      "passage-016--af_bella",
+      "passage-012--am_michael",
+      "passage-007--am_michael",
+      "passage-004--am_michael",
+      "passage-016--am_michael"
+    ],
+    "results": [
+      {
+        "batchSize": 1,
+        "files": 64,
+        "seconds": 4.63131774996873,
+        "filesPerSecond": 13.818961137018103,
+        "maxHiddenDifferenceFromBatch1": 0.0,
+        "driverAllocatedGB": 2.2355968
+      },
+      {
+        "batchSize": 4,
+        "files": 64,
+        "seconds": 3.831750374985859,
+        "filesPerSecond": 16.70254941913751,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 2.321793024
+      },
+      {
+        "batchSize": 8,
+        "files": 64,
+        "seconds": 3.9223862080834806,
+        "filesPerSecond": 16.31659826564378,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 2.621898752
+      },
+      {
+        "batchSize": 16,
+        "files": 64,
+        "seconds": 3.8772899999748915,
+        "filesPerSecond": 16.506374297618812,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 2.945073152
+      },
+      {
+        "batchSize": 32,
+        "files": 64,
+        "seconds": 3.9247150829760358,
+        "filesPerSecond": 16.30691620841685,
+        "maxHiddenDifferenceFromBatch1": 0.00177001953125,
+        "driverAllocatedGB": 3.299639296
+      }
+    ],
+    "selectedBatchSize": 4,
+    "speedupVsBatch1": 1.2086689624153353,
+    "note": "Same 64 recordings and phoneme encoder. Padding uses attention masks and exact per-sample convolution output lengths."
+  },
+  "bestEncoderThroughputSpeedup": 1.4853041759086132,
+  "newReferenceGenerationWindowSeconds": 1973.4438042640686,
+  "newReferenceRecordings": 4700,
+  "generationIncludesRateLimitRecovery": true,
+  "generationWaves": [
+    {
+      "completed": 4500,
+      "newlyGenerated": 4200,
+      "reused": 300,
+      "seconds": 27982.080000000053,
+      "estimatedInputCostUsd": 3.1286579999999846,
+      "concurrency": 16,
+      "wallSeconds": 1845.675,
+      "requestsPerMinute": 136.5354138729733,
+      "manifest": "/Users/wilsonle/projects/pte-academic.worktrees/syllable-comparison/artifacts/pronunciation/reference-v2/manifest.json"
+    },
+    {
+      "savedRecordings": 4839,
+      "newAuRecordings": 339,
+      "allReservationsCompleted": true,
+      "unmanifestedPendingAudio": [],
+      "failedOperation": "No speech reservation was created for the failed worker; error was from provider key preflight GET, not a reserved speech request.",
+      "error": "HTTP 429",
+      "automaticPaidRetries": 0,
+      "retainedCostUsd": 5.329983599999988,
+      "manifestSha256": "d589a0f61ff826bb553a326a11bc9679a1e85272044976eda5c85b5147f3266b",
+      "observedAtUnix": 1792108431.847271
+    },
+    {
+      "completed": 5000,
+      "newlyGenerated": 161,
+      "reused": 300,
+      "seconds": 30695.68800000019,
+      "estimatedInputCostUsd": 0.9904199999999999,
+      "concurrency": 8,
+      "requestsPerSecond": 4,
+      "wallSeconds": 41.339,
+      "requestsPerMinute": 233.6776409685769,
+      "manifest": "/Users/wilsonle/projects/pte-academic.worktrees/syllable-comparison/artifacts/pronunciation/reference-v2/manifest.json"
+    }
+  ],
+  "featureCpuProcesses": 8,
+  "featureGpuBatchSize": 32,
+  "auditCpuTorchThreads": 8,
+  "auditBatchSize": 8,
+  "observedGpuDriverGB": {
+    "min": 2.191294464,
+    "max": 3.674177536,
+    "note": "Sampled progress values, not a measured peak physical footprint."
+  },
+  "training": {
+    "device": "mps",
+    "threads": 16,
+    "batchSize": 2048,
+    "wallSeconds": 41.496641666977666,
+    "trainingRows": 137967,
+    "parameters": 143486
+  },
+  "diagnosis": "Concurrent large GPU models stalled under shared-memory pressure; use one GPU encoder and CPU ASR. Required-layer capture, bounded queues, whole-second length buckets and explicit buffer release stabilize GPU allocation. Native MPEG opening is serialized after reproduced initialization crashes. Final-manifest refresh handles generator completion races.",
+  "scope": "Fixed 64-recording encoder benchmark; rates are local measurements, not browser or provider-wide performance guarantees."
+}

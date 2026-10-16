@@ -1,0 +1,121 @@
+{
+  "stressAccuracy": {
+    "validation": 0.9471544715447154,
+    "voice_validation": 0.9471544715447154,
+    "test": 0.9504337050805453,
+    "voice_test": 0.9405204460966543
+  },
+  "modelSha256": "41a51dc6ccb421c62bf01c5b0c2a9fdfa2a865a968bf3a1eb717c69bc1ba5a50",
+  "referenceManifestSha256": "a2394fa5e3ee9d480def2063b47abdfad5b572a4497a8efe80325b97888c514d",
+  "partitions": {
+    "validation": {
+      "phones": 3039,
+      "phoneClassificationAccuracy": 0.9536031589338598,
+      "correctVsWrongPhoneAuc": 0.9952788803143862,
+      "correctDistanceMedian": 0.012725107371807098,
+      "wrongDistanceMedian": 0.958816409111023,
+      "similarityMedian": 85.0,
+      "supportedScoreFraction": 1.0,
+      "voices": ["af_bella", "af_heart", "am_michael"],
+      "passages": [
+        "passage-071",
+        "passage-072",
+        "passage-073",
+        "passage-074",
+        "passage-075",
+        "passage-076",
+        "passage-077",
+        "passage-078",
+        "passage-079",
+        "passage-080",
+        "passage-081",
+        "passage-082",
+        "passage-083",
+        "passage-084",
+        "passage-085"
+      ]
+    },
+    "voice_validation": {
+      "phones": 1013,
+      "phoneClassificationAccuracy": 0.928923988153998,
+      "correctVsWrongPhoneAuc": 0.9943352410762749,
+      "correctDistanceMedian": 0.0183979794383049,
+      "wrongDistanceMedian": 0.9607572555541992,
+      "similarityMedian": 83.89,
+      "supportedScoreFraction": 1.0,
+      "voices": ["am_puck"],
+      "passages": [
+        "passage-071",
+        "passage-072",
+        "passage-073",
+        "passage-074",
+        "passage-075",
+        "passage-076",
+        "passage-077",
+        "passage-078",
+        "passage-079",
+        "passage-080",
+        "passage-081",
+        "passage-082",
+        "passage-083",
+        "passage-084",
+        "passage-085"
+      ]
+    },
+    "test": {
+      "phones": 3048,
+      "phoneClassificationAccuracy": 0.9596456692913385,
+      "correctVsWrongPhoneAuc": 0.9965430625305695,
+      "correctDistanceMedian": 0.012172739952802658,
+      "wrongDistanceMedian": 0.9631190299987793,
+      "similarityMedian": 85.08,
+      "supportedScoreFraction": 0.9990157480314961,
+      "voices": ["af_bella", "af_heart", "am_michael"],
+      "passages": [
+        "passage-086",
+        "passage-087",
+        "passage-088",
+        "passage-089",
+        "passage-090",
+        "passage-091",
+        "passage-092",
+        "passage-093",
+        "passage-094",
+        "passage-095",
+        "passage-096",
+        "passage-097",
+        "passage-098",
+        "passage-099",
+        "passage-100"
+      ]
+    },
+    "voice_test": {
+      "phones": 1016,
+      "phoneClassificationAccuracy": 0.9409448818897638,
+      "correctVsWrongPhoneAuc": 0.9943550824601649,
+      "correctDistanceMedian": 0.01768852025270462,
+      "wrongDistanceMedian": 0.9707723259925842,
+      "similarityMedian": 84.01,
+      "supportedScoreFraction": 0.9990157480314961,
+      "voices": ["am_puck"],
+      "passages": [
+        "passage-086",
+        "passage-087",
+        "passage-088",
+        "passage-089",
+        "passage-090",
+        "passage-091",
+        "passage-092",
+        "passage-093",
+        "passage-094",
+        "passage-095",
+        "passage-096",
+        "passage-097",
+        "passage-098",
+        "passage-099",
+        "passage-100"
+      ]
+    }
+  },
+  "scope": "Synthetic reference generalization and wrong-phone controls. No human learner validation."
+}

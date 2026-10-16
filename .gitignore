@@ -9,3 +9,8 @@ test-results/
 .DS_Store
 *.tsbuildinfo
 dist-subpath/
+
+# Local reference audio, model downloads, extracted features and training runs
+/artifacts/
+/training/.venv/
+__pycache__/

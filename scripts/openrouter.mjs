@@ -23,7 +23,7 @@ process.umask(0o077);
 function fail(message) {
   throw new Error(message);
 }
-async function safeStore() {
+export async function safeStore() {
   for (const p of [join(ROOT, ".cli"), STORE]) {
     try {
       await mkdir(p, { mode: 0o700 });
@@ -58,7 +58,9 @@ async function safeStore() {
   )
     fail("Credential directory contains tracked files.");
 }
+let processToken;
 async function readToken() {
+  if (processToken) return processToken;
   await safeStore();
   let handle;
   try {
@@ -66,7 +68,8 @@ async function readToken() {
     const stat = await handle.stat();
     if (!stat.isFile() || stat.uid !== process.getuid() || stat.mode & 0o077)
       fail("Token must be an owner-only regular file.");
-    return (await handle.readFile("utf8")).trim();
+    processToken = (await handle.readFile("utf8")).trim();
+    return processToken;
   } catch (e) {
     if (e.code === "ENOENT")
       fail("Not logged in. Run npm run openrouter -- login.");
@@ -75,7 +78,7 @@ async function readToken() {
     await handle?.close();
   }
 }
-async function api(path, options = {}, authenticated = true) {
+export async function api(path, options = {}, authenticated = true) {
   const headers = { "Content-Type": "application/json", ...options.headers };
   if (authenticated) headers.Authorization = `Bearer ${await readToken()}`;
   let response;
@@ -238,6 +241,12 @@ async function login() {
 async function status() {
   const j = await (await api("/key")).json();
   const d = j.data || {};
+  const policy = JSON.parse(
+    await readFile(join(ROOT, "content/authoring.json"), "utf8"),
+  );
+  const ledger = await readLedger();
+  const limit = authorizedBudget(policy, ledger);
+  const reserved = ledger.reservations.reduce((sum, r) => sum + r.costUsd, 0);
   console.log(
     JSON.stringify(
       {
@@ -247,6 +256,12 @@ async function status() {
         limit: d.limit,
         limitRemaining: d.limit_remaining,
         isFreeTier: d.is_free_tier,
+        cumulativeReservedUsd: reserved,
+        cumulativeAuthorizedCapUsd: limit,
+        conservativeRemainingUsd: Math.max(
+          0,
+          Math.min(limit, d.limit ?? limit) - Math.max(reserved, d.usage ?? 0),
+        ),
       },
       null,
       2,
@@ -288,7 +303,51 @@ export function enforceBudget(cost, limit, used) {
       "Project spending limit would be exceeded. Stop and ask the operator before raising the budget.",
     );
 }
-async function readLedger() {
+export function authorizedBudget(policy, ledger) {
+  const limit = policy.spendingLimitUsd;
+  if (
+    !policy.requiresOperatorApprovalToIncrease ||
+    !Number.isFinite(limit) ||
+    limit <= 0
+  )
+    fail("An operator-authorized finite cumulative budget is required.");
+  const authorization = policy.budgetAuthorizations?.at(-1);
+  if (!authorization && limit !== 10)
+    fail(
+      "An increased cap requires an explicit operator budget authorization record.",
+    );
+  if (authorization) {
+    const {
+      priorReservationCount: count,
+      priorCumulativeReservedUsd: prior,
+      additionalAllowanceUsd: allowance,
+    } = authorization;
+    if (
+      !Number.isInteger(count) ||
+      count < 0 ||
+      ledger.reservations.length < count ||
+      !Number.isFinite(prior) ||
+      prior < 0 ||
+      !Number.isFinite(allowance) ||
+      allowance <= 0 ||
+      authorization.cumulativeCapUsd !== limit ||
+      Math.abs(prior + allowance - limit) > 1e-9 ||
+      !authorization.historyPreserved
+    )
+      fail("Budget authorization or historical cutoff is invalid.");
+    const prefix = ledger.reservations.slice(0, count);
+    if (
+      Math.abs(prefix.reduce((sum, r) => sum + r.costUsd, 0) - prior) > 1e-9 ||
+      createHash("sha256").update(JSON.stringify(prefix)).digest("hex") !==
+        authorization.priorReservationsSha256
+    )
+      fail(
+        "Historical spending was changed; restore and reconcile the ledger.",
+      );
+  }
+  return limit;
+}
+export async function readLedger() {
   const path = join(STORE, "spending.json");
   try {
     const stat = await lstat(path);
@@ -314,7 +373,7 @@ async function readLedger() {
     throw e;
   }
 }
-async function writeLedger(data) {
+export async function writeLedger(data) {
   const tmp = join(
     STORE,
     "spending." + randomBytes(8).toString("hex") + ".tmp",
@@ -325,7 +384,7 @@ async function writeLedger(data) {
   });
   await rename(tmp, join(STORE, "spending.json"));
 }
-async function generate(args) {
+export async function withGenerationLock(task) {
   await safeStore();
   const lockPath = join(STORE, "generation.lock");
   let lock;
@@ -345,11 +404,14 @@ async function generate(args) {
   }
   try {
     await lock.writeFile(String(process.pid));
-    await generateLocked(args);
+    return await task();
   } finally {
     await lock.close();
     await rm(lockPath, { force: true });
   }
+}
+async function generate(args) {
+  return withGenerationLock(() => generateLocked(args));
 }
 async function generateLocked(args) {
   const { qs, selected, model, voice, cost } = await selection(args);
@@ -379,6 +441,7 @@ async function generateLocked(args) {
       "Set this OpenRouter key to the project total budget without a reset before generation.",
     );
   const ledger = await readLedger();
+  authorizedBudget(policy, ledger);
   const reserved = ledger.reservations.reduce((n, r) => n + r.costUsd, 0);
   enforceBudget(cost, limit, Math.max(reserved, Number(keyState.usage) || 0));
   const manifestPath = join(ROOT, "content/narration.json");

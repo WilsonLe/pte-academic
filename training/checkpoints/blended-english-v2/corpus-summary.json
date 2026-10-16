@@ -1,0 +1,34 @@
+{
+  "recordings": 5000,
+  "distinctPassages": 500,
+  "voices": 10,
+  "countsByAccent": {
+    "en-US": 1500,
+    "en-GB": 1500,
+    "en-IN": 1000,
+    "en-AU": 1000
+  },
+  "distinctAudioHashes": 5000,
+  "allAudioHashesVerified": true,
+  "newPaidRecordings": 4700,
+  "reusedBaselineRecordings": 300,
+  "manifestSha256": "c76f7dc1410ca5e82ef1691b250678a6acc8b675e35de0f4b0c5a73008405575",
+  "estimatedReferenceInputCostUsd": 6.139243199999996,
+  "cumulativeConservativeReservedUsd": 6.320403599999997,
+  "cumulativeProjectCapUsd": 10,
+  "ledgerEntries": 5136,
+  "ledgerStatuses": {
+    "completed": 5136
+  },
+  "providerReadback": {
+    "authenticated": true,
+    "usageUsd": 0.17573912,
+    "limit": 10,
+    "limitRemaining": 9.82426088,
+    "isFreeTier": false
+  },
+  "canonicalLedgerReconciled": true,
+  "automaticPaidRetries": 0,
+  "humanListeningReview": "pending",
+  "billingLimitations": "Provider key usage is a readback, not proof of settled synthesis costs; conservative estimated reservations are retained."
+}

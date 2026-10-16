@@ -4,6 +4,10 @@ import type { Result } from "./Runner";
 import { questions } from "./content";
 import { transcriptionSchema, type Transcription } from "./speech/scoring";
 import {
+  pronunciationSchema,
+  type Pronunciation,
+} from "./speech/comparison-schema";
+import {
   progressSchema,
   rewardSchema,
   emptyProgress,
@@ -17,6 +21,7 @@ const answerSchema = z.object({
   text: z.string().optional(),
   values: z.array(z.string()).optional(),
   transcription: transcriptionSchema.optional(),
+  pronunciation: pronunciationSchema.optional(),
 });
 const resultSchema = z.object({
   id: z.string(),
@@ -69,7 +74,12 @@ export function saveAttempt(result: Result) {
         answers: Object.fromEntries(
           Object.entries(result.answers).map(([id, a]) => [
             id,
-            { text: a.text, values: a.values, transcription: a.transcription },
+            {
+              text: a.text,
+              values: a.values,
+              transcription: a.transcription,
+              pronunciation: a.pronunciation,
+            },
           ]),
         ),
       });
@@ -160,7 +170,24 @@ export function saveTranscription(
   questionId: string,
   value: Transcription,
 ) {
-  const transcription = transcriptionSchema.parse(value);
+  return saveSpeechResult(attemptId, questionId, {
+    transcription: transcriptionSchema.parse(value),
+  });
+}
+export function savePronunciation(
+  attemptId: string,
+  questionId: string,
+  value: Pronunciation,
+) {
+  return saveSpeechResult(attemptId, questionId, {
+    pronunciation: pronunciationSchema.parse(value),
+  });
+}
+function saveSpeechResult(
+  attemptId: string,
+  questionId: string,
+  value: { transcription?: Transcription; pronunciation?: Pronunciation },
+) {
   const operation = queue
     .catch(() => {})
     .then(async () => {
@@ -178,7 +205,7 @@ export function saveTranscription(
         }
         saved.result.answers[questionId] = {
           ...saved.result.answers[questionId],
-          transcription,
+          ...value,
         };
         await tx.store.put(saved, attemptId);
         await tx.done;

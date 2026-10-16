@@ -81,8 +81,10 @@ import {
   type Progress,
 } from "./progress";
 import { Chart } from "./QuestionInput";
+import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
 import { SpeechReview } from "./speech/SpeechReview";
 import type { Transcription } from "./speech/scoring";
+import type { Pronunciation } from "./speech/comparison-schema";
 const navigation = [
   { id: "home", label: "Practice", mobileLabel: "Practice", icon: House },
   { id: "types", label: "Question types", icon: Target },
@@ -489,6 +491,7 @@ export default function App() {
               )}
             </div>
           </header>
+          <RequiredSpeechModel />
           {(storageError || pwa.error) && (
             <div
               className="border-b bg-destructive/5 px-5 py-3 text-xs text-destructive"
@@ -530,6 +533,22 @@ export default function App() {
                 <Review
                   result={result}
                   celebrate={celebration === result.id}
+                  onPronunciation={(questionId, value) =>
+                    setResult((current) =>
+                      current && current.id === result.id
+                        ? {
+                            ...current,
+                            answers: {
+                              ...current.answers,
+                              [questionId]: {
+                                ...current.answers[questionId],
+                                pronunciation: value,
+                              },
+                            },
+                          }
+                        : current,
+                    )
+                  }
                   onTranscription={(questionId, value) =>
                     setResult((current) =>
                       current && current.id === result.id
@@ -773,11 +792,13 @@ function modelAnswer(q: Question) {
 function Review({
   result: r,
   onTranscription,
+  onPronunciation,
   celebrate,
 }: {
   celebrate: boolean;
   result: Result;
   onTranscription: (questionId: string, value: Transcription) => void;
+  onPronunciation: (questionId: string, value: Pronunciation) => void;
 }) {
   const [index, setIndex] = useState(0);
   const [tab, setTab] = useState("Your response");
@@ -860,6 +881,7 @@ function Review({
             attemptId={r.id}
             questionNumber={index + 1}
             onChange={(value) => onTranscription(id, value)}
+            onPronunciation={(value) => onPronunciation(id, value)}
           />
         </div>
       ) : tab === "Image" && q.chart ? (

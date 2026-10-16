@@ -1,0 +1,87 @@
+{
+  "modelSha256": "fc68aa74c34a4c76dc172ec10df0344cfcc320588b1869a217aca88af6d35bdf",
+  "referenceManifestSha256": "c76f7dc1410ca5e82ef1691b250678a6acc8b675e35de0f4b0c5a73008405575",
+  "referenceVersion": "blended-english-synthetic-v2",
+  "sampleTakeId": "passage-083--am_puck",
+  "sampleSyllables": 21,
+  "scoredSyllables": 21,
+  "medianSimilarity": 78.5,
+  "gainControlMaxSimilarityChange": 0.009999999999990905,
+  "silenceStatus": "no-reliable-speech",
+  "noiseStatus": "no-reliable-speech",
+  "audioOnlyStatus": "scored",
+  "audioOnlyTranscript": "the nurse spoke calmly and answered every question before showing the patient where to wait",
+  "checkpointReloadIdentical": true,
+  "inferenceNetworkConnections": 0,
+  "correctVowelSyllableSimilarity": 74.69,
+  "wrongVowelSyllableSimilarity": 47.38,
+  "wrongVowelStatus": "scored",
+  "outputFolder": "/Users/wilsonle/projects/pte-academic.worktrees/syllable-comparison/artifacts/pronunciation/verification-blended-english-synthetic-v2",
+  "heldOutAccentSamples": {
+    "en-GB": {
+      "takeId": "passage-083--bm_george",
+      "syllables": 21,
+      "scored": 21,
+      "medianSimilarity": 80.74
+    },
+    "en-AU": {
+      "takeId": "passage-083--au_bloke",
+      "syllables": 21,
+      "scored": 20,
+      "medianSimilarity": 56.235
+    },
+    "en-IN": {
+      "takeId": "passage-083--in_dhruv",
+      "syllables": 21,
+      "scored": 21,
+      "medianSimilarity": 79.26
+    }
+  },
+  "timings": [
+    {
+      "name": "expected-text",
+      "wallSeconds": 1.5319691250333562
+    },
+    {
+      "name": "gain-control",
+      "wallSeconds": 0.3243471250170842
+    },
+    {
+      "name": "silence",
+      "wallSeconds": 0.005065041943453252
+    },
+    {
+      "name": "noise",
+      "wallSeconds": 0.004720292054116726
+    },
+    {
+      "name": "audio-only",
+      "wallSeconds": 0.515101958066225
+    },
+    {
+      "name": "correct-vowel",
+      "wallSeconds": 0.32322287501301616
+    },
+    {
+      "name": "wrong-vowel",
+      "wallSeconds": 0.2907140420284122
+    },
+    {
+      "name": "checkpoint-reload",
+      "wallSeconds": 0.2889107090886682
+    },
+    {
+      "name": "en-GB",
+      "wallSeconds": 0.32852504099719226
+    },
+    {
+      "name": "en-AU",
+      "wallSeconds": 0.3434012499637902
+    },
+    {
+      "name": "en-IN",
+      "wallSeconds": 0.32019083306659013
+    }
+  ],
+  "scope": "Synthetic local audio controls; not human-speaker or browser validation."
+}
