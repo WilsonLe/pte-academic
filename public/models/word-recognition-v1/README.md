@@ -1,0 +1,1 @@
+Audio-only word recognizer derived from facebook/wav2vec2-base-960h at 22aad52d435eb6dbaf354bdad9b0da84ce7d6156. Apache-2.0. Local ONNX export, no new fitting. CMUdict supplies vocabulary spellings (BSD-style license in CMUDICT-LICENSE); phonetics are generated locally with eSpeak-ng. See training/WORD_RECOGNITION.md.

@@ -1,4 +1,10 @@
 import manifest from "./comparison-manifest.json";
+import recognition from "./recognition-manifest.json";
+const packs = [manifest, recognition];
+const totalBytes = packs.reduce((n, pack) => n + pack.totalBytes, 0);
+const files = packs.flatMap((pack) =>
+  pack.files.map((file) => ({ ...file, url: pack.assetDirectory + file.path })),
+);
 export { manifest as comparisonManifest };
 export type ModelProgress = {
   status: "loading" | "ready" | "error";
@@ -27,19 +33,23 @@ export function modelBase() {
   return new URL(import.meta.env.BASE_URL, globalThis.location.origin).href;
 }
 export function modelCache(base = modelBase()) {
-  return `pte-comparison:${base}:${manifest.id}`;
+  return `pte-comparison:${base}:${manifest.id}:${recognition.id}`;
 }
 export class ModelAssetError extends Error {}
 export function invalidateComparisonModel(message: string) {
   pending = undefined;
   update({ status: "error", percent: 0, message });
 }
-export async function verifiedAsset(path: string, base = modelBase()) {
-  const descriptor = manifest.files.find((f) => f.path === path);
+export async function verifiedAsset(
+  path: string,
+  base = modelBase(),
+  pack: typeof manifest | typeof recognition = manifest,
+) {
+  const descriptor = pack.files.find((f) => f.path === path);
   if (!descriptor) throw new Error("Unknown speech model asset.");
   const cache = await caches.open(modelCache(base));
   const response = await cache.match(
-    new URL(manifest.assetDirectory + path, base).href,
+    new URL(pack.assetDirectory + path, base).href,
   );
   if (!response)
     throw new ModelAssetError(
@@ -84,8 +94,8 @@ export function prepareComparisonModel(
       const loaded = complete + [...active.values()].reduce((a, b) => a + b, 0);
       update({
         status: "loading",
-        percent: Math.floor((loaded / manifest.totalBytes) * 100),
-        message: `Preparing required speech model · ${Math.floor((loaded / manifest.totalBytes) * 100)}% of ${Math.ceil(manifest.totalBytes / 1024 / 1024)} MB`,
+        percent: Math.floor((loaded / totalBytes) * 100),
+        message: `Preparing required speech model · ${Math.floor((loaded / totalBytes) * 100)}% of ${Math.ceil(totalBytes / 1024 / 1024)} MB`,
       });
     };
     update({
@@ -96,9 +106,9 @@ export function prepareComparisonModel(
     // Bounded parallel downloads avoid buffering the whole encoder in the page.
     let failed: Error | undefined;
     async function next() {
-      while (index < manifest.files.length && !failed) {
-        const file = manifest.files[index++],
-          url = new URL(manifest.assetDirectory + file.path, base).href;
+      while (index < files.length && !failed) {
+        const file = files[index++],
+          url = new URL(file.url, base).href;
         try {
           const cached = await cache.match(url);
           let bytes: Uint8Array | undefined;
@@ -133,7 +143,7 @@ export function prepareComparisonModel(
                   throw new Error("Unexpected model download size.");
                 data.set(value, offset);
                 offset += value.length;
-                active.set(file.path, offset);
+                active.set(file.url, offset);
                 progress();
               }
             } finally {
@@ -154,7 +164,7 @@ export function prepareComparisonModel(
             );
             bytes = data;
           }
-          active.delete(file.path);
+          active.delete(file.url);
           complete += bytes.length;
           progress();
         } catch (e) {
@@ -205,3 +215,6 @@ export function prepareComparisonModel(
   pending.catch(() => {});
   return pending;
 }
+
+export const verifiedRecognitionAsset = (path: string, base = modelBase()) =>
+  verifiedAsset(path, base, recognition);

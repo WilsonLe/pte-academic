@@ -16,8 +16,20 @@ import references from "./reference-clips.json";
 import { scoreRecording } from "./comparison-client";
 import { type Pronunciation } from "./comparison-schema";
 import type { FeedbackWord } from "./SpeechDiff";
+import { loadWordReference, type ReferenceSyllable } from "./word-reference";
+import {
+  ModelAssetError,
+  invalidateComparisonModel,
+} from "./comparison-assets";
 import { similarityTone } from "./syllable-display";
 
+const referenceAccentNames: Record<string, string> = {
+  "en-US": "American English",
+  "en-GB": "British English",
+  "en-AU": "Australian English",
+  "en-IN": "Indian English",
+  en: "English (accent unverified)",
+};
 export function SyllablePractice({
   word,
   questionId,
@@ -35,30 +47,78 @@ export function SyllablePractice({
   ready: boolean;
   onClose: () => void;
 }) {
-  const reference = references[questionId as keyof typeof references];
+  const [corpusReference, setCorpusReference] =
+    useState<Awaited<ReturnType<typeof loadWordReference>>>();
+  const [referenceError, setReferenceError] = useState("");
+  const referenceLabels = word.syllables.map((s) => s.label).join("|");
+  useEffect(() => {
+    if (!word.spoken) return;
+    setCorpusReference(undefined);
+    setReferenceError("");
+    if (!ready) return;
+    let live = true,
+      url = "";
+    loadWordReference(
+      word.spoken.word,
+      referenceLabels ? referenceLabels.split("|") : [],
+    )
+      .then((value) => {
+        if (!value) {
+          if (live)
+            setReferenceError(
+              "No reference recording is available for this word yet.",
+            );
+          return;
+        }
+        url = value.audio;
+        if (live) setCorpusReference(value);
+        else URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        if (error instanceof ModelAssetError)
+          invalidateComparisonModel(error.message);
+        if (live) setReferenceError("The word reference could not be loaded.");
+      });
+    return () => {
+      live = false;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [word.spoken?.word, referenceLabels, ready]);
+  const reference = word.spoken
+    ? corpusReference
+      ? {
+          audio: corpusReference.audio,
+          variants: [{ syllables: corpusReference.syllables }],
+        }
+      : undefined
+    : references[questionId as keyof typeof references];
   const referenceVariant =
-    reference.variants.find((variant) => {
+    reference?.variants.find((variant) => {
       const target = variant.syllables.filter(
-        (s) => s.wordIndex === word.index,
+        (s) => word.spoken || s.wordIndex === word.index,
       );
       return (
         word.syllables.length > 0 &&
         target.length === word.syllables.length &&
         target.every((s, i) => s.label === word.syllables[i].label)
       );
-    }) || reference.variants[0];
-  const refWord = referenceVariant.syllables.filter(
-    (s) => s.wordIndex === word.index,
-  );
+    }) || reference?.variants[0];
+  const refWord: ReferenceSyllable[] =
+    referenceVariant?.syllables.filter(
+      (s) => word.spoken || s.wordIndex === word.index,
+    ) || [];
   const syllables = word.syllables.length
     ? word.syllables
     : refWord.map((s) => ({ ...s, similarity: null }));
   const [index, setIndex] = useState(0);
   const activeIndex = Math.min(index, Math.max(0, syllables.length - 1));
   const current = syllables[activeIndex];
-  const standard = refWord.find(
-    (s) => s.syllableIndex === current?.syllableIndex,
-  );
+  const standard =
+    !word.spoken ||
+    !word.syllables.length ||
+    refWord.map((s) => s.label).join("|") === referenceLabels
+      ? refWord.find((s) => s.syllableIndex === current?.syllableIndex)
+      : undefined;
   const original = word.syllables.find(
     (s) => s.syllableIndex === current?.syllableIndex,
   );
@@ -162,6 +222,7 @@ export function SyllablePractice({
             if (alive.current) setMessage(value);
           },
           {
+            word: word.spoken?.word,
             wordIndex: word.index,
             syllableIndex: current.syllableIndex,
             syllableCount: syllables.length,
@@ -244,21 +305,42 @@ export function SyllablePractice({
           className="paired-audio"
           aria-label="Word audio comparison"
         >
-          {recording && word.syllables.length > 0 && (
+          {recording && (word.spoken || word.syllables.length > 0) && (
             <AudioPlayer
               src={recording}
               label="Your word"
-              start={Math.min(...word.syllables.map((s) => s.start))}
-              end={Math.max(...word.syllables.map((s) => s.end))}
+              start={
+                word.spoken?.start ??
+                Math.min(...word.syllables.map((s) => s.start))
+              }
+              end={
+                word.spoken?.end ??
+                Math.max(...word.syllables.map((s) => s.end))
+              }
             />
           )}
-          <AudioPlayer
-            src={asset(reference.audio)}
-            label="Reference word"
-            start={Math.min(...refWord.map((s) => s.start))}
-            end={Math.max(...refWord.map((s) => s.end))}
-          />
+          {reference && refWord.length > 0 && (
+            <AudioPlayer
+              src={word.spoken ? reference.audio : asset(reference.audio)}
+              label="Reference pronunciation"
+              start={Math.min(...refWord.map((s) => s.start))}
+              end={Math.max(...refWord.map((s) => s.end))}
+            />
+          )}
         </fieldset>
+        {referenceError && <p role="status">{referenceError}</p>}
+        {word.spoken && !word.syllables.length && (
+          <p>
+            No reliable syllable grade is available for this recognised word.
+          </p>
+        )}
+        {corpusReference && (
+          <p className="speech-stats">
+            Synthetic{" "}
+            {referenceAccentNames[corpusReference.accent] || "English"}{" "}
+            reference · not human verified
+          </p>
+        )}
         <div
           className="syllable-choices"
           role="group"
@@ -308,10 +390,10 @@ export function SyllablePractice({
                   label="Your syllable"
                 />
               )}
-              {standard && (
+              {standard && reference && (
                 <AudioPlayer
                   key={`reference-${activeIndex}`}
-                  src={asset(reference.audio)}
+                  src={word.spoken ? reference.audio : asset(reference.audio)}
                   start={standard.start}
                   end={standard.end}
                   label="Reference syllable"

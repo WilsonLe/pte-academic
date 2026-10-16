@@ -1,5 +1,6 @@
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Pager, observePageLayout } from "../Pages";
+import type { RecognizedWord } from "./recognition-core";
 import type { Pronunciation } from "./comparison-schema";
 import { scriptKey } from "./comparison-core";
 import {
@@ -12,11 +13,15 @@ export type FeedbackWord = {
   word: string;
   index: number;
   syllables: Syllable[];
+  spoken?: RecognizedWord;
+  expected?: string;
+  omitted?: boolean;
 };
 export function feedbackWords(
   text: string,
   result?: Pronunciation,
 ): FeedbackWord[] {
+  if (result?.recognition) return recognizedFeedbackWords(text, result);
   const display = text.match(/[a-z]+(?:['’‘][a-z]+)?[^a-z]*/gi) || [];
   return scriptKey(text)
     .split(" ")
@@ -26,6 +31,69 @@ export function feedbackWords(
       index,
       syllables: result?.syllables.filter((s) => s.wordIndex === index) || [],
     }));
+}
+/** Edit-distance diff is display-only; it cannot feed back into recognition/scoring. */
+export function recognizedFeedbackWords(
+  text: string,
+  result: Pronunciation,
+): FeedbackWord[] {
+  const spoken = result.recognition!.words;
+  const source = scriptKey(text).split(" ").filter(Boolean);
+  const displays = text.match(/[a-z]+(?:['’‘][a-z]+)?[^a-z]*/gi) || [];
+  const asWord = (i: number, expected?: string): FeedbackWord => ({
+    word:
+      expected && source[Number(expected)] === spoken[i].word
+        ? displays[Number(expected)]?.trim() || spoken[i].word
+        : spoken[i].word,
+    index: i,
+    spoken: spoken[i],
+    expected:
+      expected !== undefined && source[Number(expected)] !== spoken[i].word
+        ? displays[Number(expected)]?.trim() || source[Number(expected)]
+        : undefined,
+    syllables: result.syllables.filter((s) => s.wordIndex === i),
+  });
+  if (!source.length) return spoken.map((_, i) => asWord(i));
+  const rows = Array.from(
+    { length: source.length + 1 },
+    () => new Uint16Array(spoken.length + 1),
+  );
+  for (let i = 0; i <= source.length; i++) rows[i][0] = i;
+  for (let j = 0; j <= spoken.length; j++) rows[0][j] = j;
+  for (let i = 1; i <= source.length; i++)
+    for (let j = 1; j <= spoken.length; j++)
+      rows[i][j] = Math.min(
+        rows[i - 1][j] + 1,
+        rows[i][j - 1] + 1,
+        rows[i - 1][j - 1] + (source[i - 1] === spoken[j - 1].word ? 0 : 1),
+      );
+  const output: FeedbackWord[] = [];
+  let i = source.length,
+    j = spoken.length;
+  while (i || j) {
+    if (
+      i &&
+      j &&
+      rows[i][j] ===
+        rows[i - 1][j - 1] + (source[i - 1] === spoken[j - 1].word ? 0 : 1)
+    ) {
+      output.push(asWord(j - 1, String(i - 1)));
+      i--;
+      j--;
+    } else if (j && rows[i][j] === rows[i][j - 1] + 1) {
+      output.push(asWord(j - 1));
+      j--;
+    } else {
+      output.push({
+        word: displays[i - 1]?.trim() || source[i - 1],
+        index: -i,
+        syllables: [],
+        omitted: true,
+      });
+      i--;
+    }
+  }
+  return output.reverse();
 }
 export function SpeechDiff({
   words,
@@ -77,10 +145,15 @@ export function SpeechDiff({
   const wordButton = (word: FeedbackWord, measuring = false) => (
     <button
       key={word.index}
-      className="feedback-word"
+      className={`feedback-word${word.omitted ? " omitted-word" : ""}`}
+      disabled={word.omitted}
       type="button"
       aria-label={
-        measuring ? undefined : `Practise word ${word.index + 1}: ${word.word}`
+        measuring
+          ? undefined
+          : word.omitted
+            ? `Not heard: ${word.word}`
+            : `Practise word ${word.index + 1}: ${word.word}`
       }
       aria-describedby={
         measuring ? undefined : `${descriptionId}-${word.index}`
@@ -106,6 +179,10 @@ export function SpeechDiff({
           </span>
         ))}
       </span>
+      {word.expected && (
+        <span className="word-replacement">instead of {word.expected}</span>
+      )}
+      {word.omitted && <span className="word-replacement">Not heard</span>}
       {!measuring && (
         <span id={`${descriptionId}-${word.index}`} className="sr-only">
           {word.syllables.length

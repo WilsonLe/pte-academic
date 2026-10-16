@@ -278,6 +278,10 @@ export function reliableSignal(audio: Float32Array) {
   if (Math.sqrt(energy / audio.length) < 1e-5) return false;
   const flatness: number[] = [];
   for (let offset = 0; offset + 400 <= audio.length; offset += 400) {
+    let windowEnergy = 0;
+    for (let j = 0; j < 400; j++) windowEnergy += audio[offset + j] ** 2;
+    // Silence must not dominate the spectral median in a response with pauses.
+    if (windowEnergy / 400 < 1e-10) continue;
     const re = new Float64Array(512),
       im = new Float64Array(512);
     for (let j = 0; j < 400; j++)
@@ -315,6 +319,7 @@ export function reliableSignal(audio: Float32Array) {
     }
     flatness.push(Math.exp(log / 257) / (sum / 257));
   }
+  if (!flatness.length) return false;
   flatness.sort((a, b) => a - b);
   const mid = Math.floor(flatness.length / 2),
     median =
@@ -325,6 +330,7 @@ export function reliableSignal(audio: Float32Array) {
 }
 
 export type SyllableTarget = {
+  word?: string;
   wordIndex: number;
   syllableIndex: number;
   syllableCount?: number;

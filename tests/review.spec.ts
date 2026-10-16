@@ -225,7 +225,7 @@ test("all 65 questions: unified complete and incorrect feedback on desktop and p
         if (q.audio)
           await expect(
             page.getByRole("group", {
-              name: fixedSpeech ? "Reference recording" : "Prompt recording",
+              name: "Prompt recording",
               exact: true,
             }),
           ).toBeVisible();

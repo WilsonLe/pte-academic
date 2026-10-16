@@ -1,6 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, readdir, writeFile } from "node:fs/promises";
-import { COMPARISON_MODEL_SHA } from "../src/speech/comparison-schema";
+import {
+  COMPARISON_MODEL_SHA,
+  pronunciationSchema,
+} from "../src/speech/comparison-schema";
 const base = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
 async function seed(page: Page, waitForModel = true) {
   await page.goto(base);
@@ -66,9 +69,14 @@ async function workerPath() {
     ).find((f) => /^comparison\.worker-.*\.js$/.test(f))
   );
 }
-async function runWorker(page: Page, pcm: Buffer, text: string) {
+async function runWorker(
+  page: Page,
+  pcm: Buffer,
+  text: string,
+  recognize = false,
+) {
   return await page.evaluate(
-    async ({ data, text, workerPath, base }) => {
+    async ({ data, text, workerPath, base, recognize }) => {
       const audio = new Float32Array(
         Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer,
       );
@@ -95,7 +103,7 @@ async function runWorker(page: Page, pcm: Buffer, text: string) {
           }
         };
         worker.postMessage(
-          { audio, text, base: new URL(base, location.origin).href },
+          { audio, text, recognize, base: new URL(base, location.origin).href },
           [audio.buffer],
         );
       });
@@ -105,6 +113,7 @@ async function runWorker(page: Page, pcm: Buffer, text: string) {
       text,
       workerPath: await workerPath(),
       base,
+      recognize,
     },
   );
 }
@@ -178,6 +187,204 @@ test("actual v3 browser inference matches all four Python accent controls and wr
     JSON.stringify(reports, null, 2) + "\n",
   );
 });
+
+test("audio-only word recognition is prompt-independent across four accents and open speaking review", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(240000);
+  const external: string[] = [];
+  context.on("request", (r) => {
+    if (r.url().startsWith("https:") || r.method() !== "GET")
+      external.push(r.url());
+  });
+  await seed(page);
+  const cases = JSON.parse(
+    await readFile("artifacts/word-recognition-export/cases.json", "utf8"),
+  );
+  let first: any;
+  for (const control of cases) {
+    const pcm = await readFile(control.pcm);
+    const result = await runWorker(
+      page,
+      pcm,
+      "unrelated prompt words must never supply recognition targets",
+      true,
+    );
+    expect(result.recognition.words.map((w: any) => w.word).join(" ")).toBe(
+      control.expected,
+    );
+    expect(result.syllables.length).toBeGreaterThan(0);
+    expect(
+      result.syllables.every(
+        (s: any) => result.recognition.words[s.wordIndex].word === s.word,
+      ),
+    ).toBe(true);
+    expect(
+      result.recognition.words.every(
+        (w: any, i: number, all: any[]) =>
+          w.end > w.start && (!i || w.start >= all[i - 1].end),
+      ),
+    ).toBe(true);
+    if (!first) first = result;
+  }
+  const noPrompt = await runWorker(
+    page,
+    await readFile(cases[0].pcm),
+    "",
+    true,
+  );
+  expect(noPrompt).toEqual(first);
+  // Read Buffer bytes with its actual offset; build a 125-second open response
+  // with separated speech, exercising nonadjacent windows and global positions.
+  const sourceBytes = await readFile(cases[0].pcm);
+  const source = new Float32Array(
+    sourceBytes.buffer,
+    sourceBytes.byteOffset,
+    sourceBytes.byteLength / 4,
+  );
+  const long = new Float32Array(125 * 16000);
+  for (const at of [1, 61, 111]) long.set(source, at * 16000);
+  const longResult = await runWorker(page, Buffer.from(long.buffer), "", true);
+  expect(longResult.recognition.words.map((w: any) => w.word).join(" ")).toBe(
+    Array(3).fill(cases[0].expected).join(" "),
+  );
+  expect(longResult.recognition.words.at(-1).start).toBeGreaterThan(111);
+  expect(pronunciationSchema.safeParse(longResult).success).toBe(true);
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      const r = indexedDB.open("pte-studio", 2);
+      r.onsuccess = () => resolve(r.result);
+    });
+    const old = await new Promise<any>((resolve) => {
+      const r = db
+        .transaction("attempts")
+        .objectStore("attempts")
+        .get("comparison-fixture");
+      r.onsuccess = () => resolve(r.result);
+    });
+    const result = {
+      id: "independent-open",
+      label: "Describe Image",
+      date: new Date().toISOString(),
+      questionIds: ["describe-image-01"],
+      answers: { "describe-image-01": {} },
+      finished: true,
+    };
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction("attempts", "readwrite");
+      tx.objectStore("attempts").put(
+        {
+          result,
+          recordings: {
+            "describe-image-01": old.recordings["repeat-sentence-01"],
+          },
+        },
+        result.id,
+      );
+      tx.oncomplete = () => resolve();
+    });
+    db.close();
+    localStorage.setItem("pte-studio-history-v1", JSON.stringify([result]));
+  });
+  await page.goto(base + "history/independent-open");
+  await expect(
+    page.getByText(/Words are recognised from your recording/),
+  ).toBeVisible({ timeout: 90000 });
+  await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+  await page.getByText("Question details", { exact: true }).click();
+  await expect(page.getByRole("figure")).toBeVisible();
+  await page.getByText("Question details", { exact: true }).click();
+  await expect(
+    page.getByText("Syllable feedback saved on this device", { exact: true }),
+  ).toBeHidden({ timeout: 10000 });
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(
+    dialog.getByRole("group", { name: "Your word", exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("group", { name: "Reference pronunciation", exact: true }),
+  ).toBeVisible({ timeout: 15000 });
+  await dialog
+    .getByRole("button", { name: "Play Your word", exact: true })
+    .click();
+  await dialog
+    .getByRole("button", { name: "Play Reference pronunciation", exact: true })
+    .click();
+  await expect(
+    dialog.getByRole("button", { name: "Play Your word", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("independent-word-desktop.png"),
+  });
+  await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => (document.activeElement as HTMLElement)?.blur());
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: info.outputPath("independent-feedback-mobile.png"),
+  });
+  await context.setOffline(true);
+  await page.reload();
+  await expect(
+    page.getByText(/Words are recognised from your recording/),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  await expect(
+    page.getByRole("group", { name: "Reference pronunciation", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  // A controlled unsupported-word result checks the finite audio-library boundary.
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      const r = indexedDB.open("pte-studio", 2);
+      r.onsuccess = () => resolve(r.result);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction("attempts", "readwrite"),
+        store = tx.objectStore("attempts"),
+        r = store.get("independent-open");
+      r.onsuccess = () => {
+        const saved = r.result,
+          p = saved.result.answers["describe-image-01"].speechAssessment;
+        p.recognition.words = [
+          {
+            word: "quizzacious",
+            index: 0,
+            start: 0,
+            end: 0.4,
+            confidence: 0.8,
+            status: "unsupported",
+          },
+        ];
+        p.syllables = [];
+        p.status = "unscored";
+        store.put(saved, "independent-open");
+      };
+      tx.oncomplete = () => resolve();
+    });
+    db.close();
+  });
+  await page.reload();
+  await page
+    .getByRole("button", { name: "Practise word 1: quizzacious", exact: true })
+    .click();
+  await expect(
+    page.getByText("No reference recording is available for this word yet."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("group", { name: "Your word", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("group", { name: "Reference pronunciation", exact: true }),
+  ).toHaveCount(0);
+  expect(external).toEqual([]);
+});
 test("automatic initial feedback persists; isolated syllable retry grades locally, rewards once, and survives offline reload", async ({
   page,
   context,
@@ -219,7 +426,7 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
     db.close();
     const syllable = result.result.answers[
       "repeat-sentence-01"
-    ].pronunciation.syllables.find(
+    ].speechAssessment.syllables.find(
       (s: any) => s.wordIndex === 0 && s.syllableIndex === 0,
     );
     const samples = decoded
@@ -312,7 +519,10 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
     dialog.getByRole("button", { name: "Stop and grade" }),
   ).toBeVisible();
   await expect(
-    dialog.getByRole("button", { name: "Play Reference word", exact: true }),
+    dialog.getByRole("button", {
+      name: "Play Reference pronunciation",
+      exact: true,
+    }),
   ).toBeDisabled();
   await page.keyboard.press("Escape");
   await expect
@@ -406,7 +616,7 @@ test("failed required download blocks model grading and retries without a word-m
   await seed(page, false);
   await expect(
     page.getByRole("button", { name: /^Practise word 1:/ }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
   await page
     .getByRole("group", { name: "Your recording", exact: true })
@@ -445,7 +655,7 @@ test("automatic feedback cancels, retains playback, and reports worker failure w
             get = store.get("comparison-fixture");
           get.onsuccess = () => {
             const saved = get.result;
-            delete saved.result.answers["repeat-sentence-01"].pronunciation;
+            delete saved.result.answers["repeat-sentence-01"].speechAssessment;
             store.put(saved, "comparison-fixture");
           };
           tx.oncomplete = () => {
@@ -493,7 +703,7 @@ test("direct practice entry starts the required model preparation before the wor
   ).toBeVisible();
 });
 
-test("an open word refreshes its learner clips when delayed initial grading completes", async ({
+test("word controls wait for independent recognition rather than inventing prompt-aligned speech", async ({
   page,
   context,
 }) => {
@@ -512,11 +722,10 @@ test("an open word refreshes its learner clips when delayed initial grading comp
     };
   });
   await seed(page, false);
-  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
-  const dialog = page.getByRole("dialog");
   await expect(
-    dialog.getByRole("group", { name: "Your word", exact: true }),
+    page.getByRole("button", { name: /^Practise word/ }),
   ).toHaveCount(0);
+  const dialog = page.getByRole("dialog");
   await expect
     .poll(
       () =>
@@ -527,6 +736,7 @@ test("an open word refreshes its learner clips when delayed initial grading comp
     )
     .toBe(true);
   await page.evaluate(() => (window as any).__releaseInitialGrade());
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
   await expect(
     dialog.getByRole("group", { name: "Your word", exact: true }),
   ).toBeVisible();
@@ -543,36 +753,45 @@ test("post-ready missing and corrupt model metadata recover through notification
 }) => {
   test.setTimeout(180000);
   await seed(page);
-  for (const corrupt of [false, true]) {
-    await page.evaluate(async (corrupt) => {
-      const name = (await caches.keys()).find((n) =>
-        n.startsWith("pte-comparison:"),
-      )!;
-      const cache = await caches.open(name);
-      const url = (await cache.keys()).find((r) =>
-        r.url.endsWith("/comparison.json"),
-      )!;
-      if (corrupt) await cache.put(url, new Response("corrupt"));
-      else await cache.delete(url);
-      await new Promise<void>((resolve) => {
-        const r = indexedDB.open("pte-studio", 2);
-        r.onsuccess = () => {
-          const db = r.result,
-            tx = db.transaction("attempts", "readwrite"),
-            store = tx.objectStore("attempts"),
-            get = store.get("comparison-fixture");
-          get.onsuccess = () => {
-            const saved = get.result;
-            delete saved.result.answers["repeat-sentence-01"].pronunciation;
-            store.put(saved, "comparison-fixture");
+  for (const [path, corrupt] of [
+    ["comparison.json", false],
+    ["comparison.json", true],
+    ["vocab.json", false],
+    ["lexicon.json", true],
+  ] as const) {
+    await page.evaluate(
+      async ({ path, corrupt }) => {
+        const name = (await caches.keys()).find((n) =>
+          n.startsWith("pte-comparison:"),
+        )!;
+        const cache = await caches.open(name);
+        const url = (await cache.keys()).find((r) =>
+          r.url.endsWith("/" + path),
+        )!;
+        if (corrupt) await cache.put(url, new Response("corrupt"));
+        else await cache.delete(url);
+        await new Promise<void>((resolve) => {
+          const r = indexedDB.open("pte-studio", 2);
+          r.onsuccess = () => {
+            const db = r.result,
+              tx = db.transaction("attempts", "readwrite"),
+              store = tx.objectStore("attempts"),
+              get = store.get("comparison-fixture");
+            get.onsuccess = () => {
+              const saved = get.result;
+              delete saved.result.answers["repeat-sentence-01"]
+                .speechAssessment;
+              store.put(saved, "comparison-fixture");
+            };
+            tx.oncomplete = () => {
+              db.close();
+              resolve();
+            };
           };
-          tx.oncomplete = () => {
-            db.close();
-            resolve();
-          };
-        };
-      });
-    }, corrupt);
+        });
+      },
+      { path, corrupt },
+    );
     await page
       .getByRole("button", { name: "My practice", exact: true })
       .click();

@@ -22,6 +22,7 @@ export function Review({
     (id) =>
       answered(r.answers[id]) ||
       r.answers[id]?.pronunciation ||
+      r.answers[id]?.speechAssessment ||
       r.answers[id]?.transcription,
   );
   const id = responded[Math.min(index, responded.length - 1)];

@@ -522,7 +522,9 @@ export default function App() {
                               ...current.answers,
                               [questionId]: {
                                 ...current.answers[questionId],
-                                pronunciation: value,
+                                ...(value.recognition
+                                  ? { speechAssessment: value }
+                                  : { pronunciation: value }),
                               },
                             },
                           }

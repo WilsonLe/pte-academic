@@ -1,7 +1,7 @@
 import { openDB, type DBSchema } from "idb";
 import { z } from "zod";
 import type { Result } from "./Runner";
-import { questions } from "./content";
+import { questions, guideFor } from "./content";
 import {
   transcriptionSchema,
   type Transcription,
@@ -26,6 +26,7 @@ const answerSchema = z.object({
   values: z.array(z.string()).optional(),
   transcription: transcriptionSchema.optional(),
   pronunciation: pronunciationSchema.optional(),
+  speechAssessment: pronunciationSchema.optional(),
 });
 const resultSchema = z.object({
   id: z.string(),
@@ -83,6 +84,7 @@ export function saveAttempt(result: Result) {
               values: a.values,
               transcription: a.transcription,
               pronunciation: a.pronunciation,
+              speechAssessment: a.speechAssessment,
             },
           ]),
         ),
@@ -183,14 +185,23 @@ export function savePronunciation(
   questionId: string,
   value: Pronunciation,
 ) {
-  return saveSpeechResult(attemptId, questionId, {
-    pronunciation: pronunciationSchema.parse(value),
-  });
+  const checked = pronunciationSchema.parse(value);
+  return saveSpeechResult(
+    attemptId,
+    questionId,
+    checked.recognition
+      ? { speechAssessment: checked }
+      : { pronunciation: checked },
+  );
 }
 function saveSpeechResult(
   attemptId: string,
   questionId: string,
-  value: { transcription?: Transcription; pronunciation?: Pronunciation },
+  value: {
+    transcription?: Transcription;
+    pronunciation?: Pronunciation;
+    speechAssessment?: Pronunciation;
+  },
 ) {
   const operation = queue
     .catch(() => {})
@@ -257,8 +268,8 @@ export function saveReviewReward(input: {
         const before = raw.success ? raw.data : emptyProgress();
         const valid =
           saved?.result.questionIds.includes(input.questionId) &&
-          ["read-aloud", "repeat-sentence"].includes(
-            questions.find((q) => q.id === input.questionId)?.type || "",
+          questions.some(
+            (q) => q.id === input.questionId && guideFor(q).kind === "speak",
           ) &&
           result.syllables.length === 1 &&
           result.status !== "no-reliable-speech" &&

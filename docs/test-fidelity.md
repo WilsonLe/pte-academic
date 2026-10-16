@@ -10,7 +10,7 @@ The learning interface uses the default shadcn preset. The test runner has a sep
 - Microphone/headphone preflight; one recording per item; tone where applicable; a local RMS approximation of the short-speaking silence cutoff.
 - Writing word counts, local cut/copy/paste controls, accessible keyboard alternatives to word/paragraph dragging.
 - Full 65-question form and complete section practice; no review hints during an active attempt.
-- Review keys, transcripts, examples and item-specific explanations. Selection counts, correct gaps and adjacent paragraph pairs describe the saved response; they do not estimate exam credit. Read Aloud and Repeat Sentence have local v3 syllable reference-similarity feedback; other speaking tasks and extended writing retain self-review without a proficiency score. Previously saved learner transcripts remain readable.
+- Review keys, transcripts, examples and item-specific explanations. Selection counts, correct gaps and adjacent paragraph pairs describe the saved response; they do not estimate exam credit. All speaking tasks have independent local word recognition followed by v3 syllable reference-similarity feedback; extended writing retains self-review without a proficiency score. Previously saved learner transcripts remain readable.
 
 ## Limits to preserve in product copy
 
@@ -18,7 +18,7 @@ The learning interface uses the default shadcn preset. The test runner has a sep
 - The static starter content is original. Audio is synthetic, with some shorter prompts. The group-discussion take identifies speakers with one narrator rather than three distinct voices.
 - One mock is shared with drills and section practice. Repeated attempts are not unseen forms.
 - Check-in, unscored introduction, test-centre software, certified scoring, accommodations and identification procedures are not simulated.
-- Syllable comparison measures experimental synthetic-reference similarity, not correctness, accent, fluency or proficiency. All four reference accents are equally valid; uncertain syllables have no score. Other speaking tasks have no automatic semantic score or transcription.
+- Syllable comparison measures experimental synthetic-reference similarity, not correctness, accent, fluency or proficiency. All four reference accents are equally valid; uncertain syllables have no score. Audio-only word recognition can be inaccurate; it is separate from pronunciation grading and does not provide semantic/task-relevance scores. Missing word recordings are explicit; the reference library is finite and not human-verified gold.
 - Local v3 comparison requires an automatic model download (~624 MiB plus runtime) and sufficient memory; offline reuse depends on verified caches. Scoring is available only after an attempt, supports recordings up to 45 seconds and can be cancelled.
 - A local sound threshold is sensitive to microphones and background noise. It cannot replicate an undisclosed speech detector.
 - App timing/media checks use real browser APIs with controlled synthetic devices and accelerated clocks where documented. They are distinct from a human completing a timed exam or reviewing audio pronunciation.

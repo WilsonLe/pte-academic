@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "audio-only-words-v1",
+  "repository": "facebook/wav2vec2-base-960h",
+  "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+  "encoderBytes": 189043500,
+  "encoderSha256": "b81a5907a87709ff9a83ac87a74473128c76ab3cefa8416bdebd4dbbc1eea931",
+  "sourceWeightSha256": "8aa76ab2243c81747a1f832954586bc566090c83a0ac167df6f31f0fa917d74a",
+  "assetDirectory": "models/word-recognition-v1/",
+  "files": [
+    {
+      "path": "recognizer-00.bin",
+      "bytes": 50331648,
+      "sha256": "cb12ee8d7250bdb64c35f2643b86a6dd880837ee41e8376d3f7dcffe2f3b346d",
+      "kind": "recognizer"
+    },
+    {
+      "path": "recognizer-01.bin",
+      "bytes": 50331648,
+      "sha256": "f93be457b98f911e77366eb00d09cabab24587198361b0181882099453c47574",
+      "kind": "recognizer"
+    },
+    {
+      "path": "recognizer-02.bin",
+      "bytes": 50331648,
+      "sha256": "6a7e82323951e153ea8ca76dd97439efbf16a58e7e7073f41319d98e48a4f1bb",
+      "kind": "recognizer"
+    },
+    {
+      "path": "recognizer-03.bin",
+      "bytes": 38048556,
+      "sha256": "ca45e429cae1b26131f7e2a9173784b27b8b0f67f9aac09b054860a153f77135",
+      "kind": "recognizer"
+    },
+    {
+      "path": "vocab.json",
+      "bytes": 292,
+      "sha256": "5422e0b4569d4ff8b76fcfaa35523ac9b964d59510ad16751ae72dddd7a66311",
+      "kind": "vocabulary"
+    },
+    {
+      "path": "lexicon.json",
+      "bytes": 6942664,
+      "sha256": "af6a5ae6b943d9a7944f511b5bca256366616912cf6d30f08db50858b2a308fb",
+      "kind": "lexicon"
+    },
+    {
+      "path": "word-references.json",
+      "bytes": 1847891,
+      "sha256": "4e359c6f15e70c490e339ef088a925a13b91382fbbf7e4c82e4498ff50961624",
+      "kind": "reference-index"
+    },
+    {
+      "path": "word-reference-en-AU.mp3",
+      "bytes": 3462308,
+      "sha256": "f1b94c6f91a9105eaa54ec49b199a39b85c66be4ba94cade51e95fcc74a83a16",
+      "kind": "reference-audio"
+    },
+    {
+      "path": "word-reference-en-GB.mp3",
+      "bytes": 3094676,
+      "sha256": "0bd1b5675494260231533a294e823894a66dc10e5ce74ec24f7af62d77444f42",
+      "kind": "reference-audio"
+    },
+    {
+      "path": "word-reference-en-IN.mp3",
+      "bytes": 3439844,
+      "sha256": "92e593c3228957a8515dd90b0cef5f725ead02965d262ea11e5a61841606c156",
+      "kind": "reference-audio"
+    },
+    {
+      "path": "word-reference-en-US.mp3",
+      "bytes": 3526244,
+      "sha256": "7514b9fbba6ffae7f8d9949db89b07b97a08b553aadb0bd5cda2c431b2623fec",
+      "kind": "reference-audio"
+    }
+  ],
+  "totalBytes": 211357419,
+  "lexiconWords": 124082,
+  "exporterSha256": "eaff6484b91be26c7addfa42fcfc91a5d3dcb8c499fd9c4e986b5f14fa483d98",
+  "representation": "float16 constant storage; float32 operations",
+  "limits": "Audio-only greedy English CTC; estimated words/times, not correctness. No prompt input. Synthetic sound comparison remains separate.",
+  "referenceExporterSha256": "c70b7dd519e4cf36080b4ea953a8f05f5d70620b2ceddebeb5b12475b9fcbafd",
+  "referenceWords": 998
+}

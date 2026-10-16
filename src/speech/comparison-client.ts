@@ -10,6 +10,7 @@ import {
 } from "./comparison-assets";
 import {
   COMPARISON_MAX_SECONDS,
+  RECOGNITION_MAX_SECONDS,
   pronunciationSchema,
   type Pronunciation,
 } from "./comparison-schema";
@@ -20,6 +21,7 @@ export function scoreRecording(
   text: string,
   onProgress: (message: string) => void,
   target?: SyllableTarget,
+  recognize = false,
 ) {
   let aborted = false,
     worker: Worker | undefined,
@@ -50,9 +52,12 @@ export function scoreRecording(
       const response = await fetch(url, { signal: abort.signal });
       const audio = await decodeRecording(await response.blob());
       if (aborted) throw cancelled();
-      if (audio.length / 16000 > COMPARISON_MAX_SECONDS)
+      if (
+        audio.length / 16000 >
+        (recognize ? RECOGNITION_MAX_SECONDS : COMPARISON_MAX_SECONDS)
+      )
         throw new Error(
-          "Syllable comparison supports recordings up to 45 seconds.",
+          `Speech feedback supports recordings up to ${recognize ? RECOGNITION_MAX_SECONDS : COMPARISON_MAX_SECONDS} seconds.`,
         );
       worker = new Worker(comparisonWorkerUrl, {
         type: "module",
@@ -97,9 +102,10 @@ export function scoreRecording(
               );
           }
         };
-        worker!.postMessage({ audio, text, target, base: modelBase() }, [
-          audio.buffer,
-        ]);
+        worker!.postMessage(
+          { audio, text, target, recognize, base: modelBase() },
+          [audio.buffer],
+        );
       });
     } finally {
       worker?.terminate();

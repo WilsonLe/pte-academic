@@ -126,7 +126,7 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
     dialog.getByRole("group", { name: "Your word", exact: true }),
   ).toBeVisible();
   await expect(
-    dialog.getByRole("group", { name: "Reference word", exact: true }),
+    dialog.getByRole("group", { name: "Reference pronunciation", exact: true }),
   ).toBeVisible();
   const syllable = dialog.getByRole("group", {
     name: "Reference syllable",
@@ -187,6 +187,7 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
     "data-question-id",
     "describe-image-01",
   );
+  await page.getByText("Question details", { exact: true }).click();
   await expect(page.getByRole("figure")).toBeVisible();
   await expect(
     page.getByRole("group", { name: "Your recording", exact: true }),

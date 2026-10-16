@@ -113,7 +113,7 @@ test("app feedback uses the saved v3 grade rather than a transcript word match",
   );
   assert.equal(
     feedback(q, { recording: "blob:local" }).label,
-    "Ready to compare",
+    "Ready for speech feedback",
   );
 });
 

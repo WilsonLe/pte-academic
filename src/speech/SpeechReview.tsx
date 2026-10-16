@@ -37,7 +37,9 @@ export function SpeechReview({
   attemptId: string;
   onPronunciation: (value: Pronunciation) => void;
 }) {
-  const [pronunciation, setPronunciation] = useState(answer.pronunciation);
+  const [pronunciation, setPronunciation] = useState(
+    answer.speechAssessment || answer.pronunciation,
+  );
   const [selectedIndex, setSelectedIndex] = useState<number>();
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
@@ -62,13 +64,20 @@ export function SpeechReview({
     };
   }, []);
   async function score() {
-    if (!answer.recording || !expected || scoreJob.current || pronunciation)
+    if (!answer.recording || scoreJob.current || pronunciation?.recognition)
       return;
     tried.current = true;
+    setSelectedIndex(undefined);
     setError("");
-    const operation = scoreRecording(answer.recording, expected, (message) => {
-      if (alive.current) setProgress(message);
-    });
+    const operation = scoreRecording(
+      answer.recording,
+      "",
+      (message) => {
+        if (alive.current) setProgress(message);
+      },
+      undefined,
+      true,
+    );
     scoreJob.current = operation;
     try {
       const value = await operation.promise;
@@ -105,17 +114,19 @@ export function SpeechReview({
   }
   useEffect(() => {
     if (
-      expected &&
       answer.recording &&
-      !pronunciation &&
+      !pronunciation?.recognition &&
       !tried.current &&
       model.status === "ready"
     )
       void score();
   }, [expected, answer.recording, pronunciation, model.status]);
   const words = useMemo(
-    () => feedbackWords(expected || "", pronunciation),
-    [expected, pronunciation],
+    () =>
+      pronunciation || !answer.recording
+        ? feedbackWords(expected || "", pronunciation)
+        : [],
+    [expected, pronunciation, answer.recording],
   );
   const selected = words.find((word) => word.index === selectedIndex);
   const similarity = pronunciation ? pronunciationSummary(pronunciation) : null;
@@ -131,7 +142,11 @@ export function SpeechReview({
         {(referenceAudio || question.audio) && (
           <AudioPlayer
             src={asset(referenceAudio || question.audio!)}
-            label={referenceAudio ? "Reference recording" : "Prompt recording"}
+            label={
+              question.type === "read-aloud"
+                ? "Example reading"
+                : "Prompt recording"
+            }
           />
         )}
       </div>
@@ -151,7 +166,7 @@ export function SpeechReview({
       {error && (
         <p role="alert">
           {error}{" "}
-          {!pronunciation && !progress && (
+          {!pronunciation?.recognition && !progress && (
             <Button
               variant="outline"
               size="sm"
@@ -163,7 +178,7 @@ export function SpeechReview({
           )}
         </p>
       )}
-      {expected ? (
+      {expected || answer.recording || pronunciation?.recognition ? (
         <>
           <div className="speech-summary" aria-label="Local syllable scores">
             {similarity !== null && (
@@ -190,9 +205,11 @@ export function SpeechReview({
             )}
           </div>
           <p className="speech-stats">
-            Select a word to listen and practise its syllables. Scores compare
-            your audio with the prompt sounds; they do not transcribe what you
-            said.
+            {pronunciation?.recognition
+              ? "Words are recognised from your recording. Select one to hear and practise its pronunciation. Recognition and word timings can be uncertain."
+              : pronunciation
+                ? "Saved prompt-aligned syllable feedback. Select a word to listen and practise."
+                : "Words will appear after on-device recognition."}
           </p>
           <SpeechDiff
             words={words}
@@ -212,11 +229,37 @@ export function SpeechReview({
               />
             </details>
           )}
+          {!expected && (
+            <details className="legacy-transcript">
+              <summary>Question details</summary>
+              {question.chart && (
+                <div className="review-chart">
+                  <Chart q={question} responsive />
+                </div>
+              )}
+              <ReadingPages
+                label="question detail pages"
+                blocks={[
+                  { label: "What to check", text: question.explanation },
+                  ...(question.model
+                    ? [{ label: exampleLabel(question), text: question.model }]
+                    : []),
+                  ...promptBlocks(question),
+                ]}
+              />
+            </details>
+          )}
+          {!expected &&
+            !words.length &&
+            !progress &&
+            pronunciation?.recognition && (
+              <p>No words could be recognised reliably.</p>
+            )}
           <p className="speech-stats">
             Reference similarity, not pronunciation correctness or an exam
             score. Uncertain syllables have no score.
           </p>
-          {selected && referenceAudio && (
+          {selected && (
             <Suspense
               fallback={<p role="status">Opening syllable practice…</p>}
             >
@@ -224,7 +267,7 @@ export function SpeechReview({
                 key={selected.index}
                 word={selected}
                 questionId={question.id}
-                expected={expected}
+                expected={expected || ""}
                 recording={answer.recording}
                 attemptId={attemptId}
                 ready={model.status === "ready" && !progress}
@@ -261,7 +304,9 @@ export function SpeechReview({
                     },
                   ]
                 : []),
-              { text: "This response is not automatically graded." },
+              {
+                text: "A saved recording is needed for on-device pronunciation feedback.",
+              },
             ]}
           />
         </div>

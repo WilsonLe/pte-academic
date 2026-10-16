@@ -116,6 +116,7 @@ export type Answer = {
   recording?: string;
   transcription?: Transcription;
   pronunciation?: Pronunciation;
+  speechAssessment?: Pronunciation;
 };
 export function answerMatches(q: Question, a: Answer) {
   const kind = guideFor(q).kind;
@@ -144,19 +145,16 @@ export function answerMatches(q: Question, a: Answer) {
 export function feedback(q: Question, a: Answer) {
   const g = guideFor(q);
   if (g.kind === "speak") {
-    const score = a.pronunciation
-      ? pronunciationSummary(a.pronunciation)
-      : null;
+    const assessment = a.speechAssessment || a.pronunciation;
+    const score = assessment ? pronunciationSummary(assessment) : null;
     return {
       label:
         score !== null
           ? `${score}/100 reference similarity`
-          : a.pronunciation
+          : assessment
             ? "No reliable score"
             : a.recording
-              ? q.type === "read-aloud" || q.type === "repeat-sentence"
-                ? "Ready to compare"
-                : "Self-review"
+              ? "Ready for speech feedback"
               : "No recording",
       detail: q.explanation,
     };

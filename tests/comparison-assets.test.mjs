@@ -3,6 +3,83 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
+test("audio-only recognizer, word dictionary and synthetic word library have complete pinned assets", async () => {
+  const manifest = JSON.parse(
+    await readFile("src/speech/recognition-manifest.json", "utf8"),
+  );
+  const dir = "public/" + manifest.assetDirectory;
+  assert.deepEqual(
+    JSON.parse(await readFile(dir + "manifest.json", "utf8")),
+    manifest,
+  );
+  assert.equal(manifest.revision, "22aad52d435eb6dbaf354bdad9b0da84ce7d6156");
+  assert.equal(
+    manifest.exporterSha256,
+    sha(await readFile("training/export_recognition.py")),
+  );
+  assert.equal(
+    manifest.referenceExporterSha256,
+    sha(await readFile("training/export_word_references.py")),
+  );
+  let total = 0;
+  const encoder = createHash("sha256");
+  for (const f of manifest.files) {
+    const bytes = await readFile(dir + f.path);
+    assert.equal(bytes.length, f.bytes);
+    assert.equal(sha(bytes), f.sha256, f.path);
+    assert.ok(f.bytes <= 48 * 1024 * 1024);
+    total += f.bytes;
+    if (f.kind === "recognizer") encoder.update(bytes);
+  }
+  assert.equal(total, manifest.totalBytes);
+  assert.equal(encoder.digest("hex"), manifest.encoderSha256);
+  const lexicon = JSON.parse(await readFile(dir + "lexicon.json", "utf8"));
+  assert.equal(Object.keys(lexicon).length, manifest.lexiconWords);
+  assert.ok(manifest.lexiconWords > 120000);
+  const phones = JSON.parse(
+    await readFile("public/models/blended-english-v3/comparison.json", "utf8"),
+  ).vocab;
+  for (const [word, variants] of Object.entries(lexicon)) {
+    assert.match(word, /^[a-z]+(?:'[a-z]+)?$/);
+    for (const labels of variants) {
+      assert.ok(labels.length);
+      for (const label of labels)
+        for (const phone of label.split(" "))
+          assert.ok(
+            Number.isInteger(phones[phone.replace(/[012]+$/g, "")]),
+            word,
+          );
+    }
+  }
+  const index = JSON.parse(
+    await readFile(dir + "word-references.json", "utf8"),
+  );
+  assert.equal(Object.keys(index.words).length, manifest.referenceWords);
+  assert.equal(index.heldOutVoices, false);
+  for (const [word, refs] of Object.entries(index.words))
+    for (const ref of refs) {
+      assert.equal(ref.synthetic, true);
+      if (ref.sourceTake?.startsWith("review-"))
+        assert.equal(
+          ref.accent,
+          "en",
+          "review examples have no verified accent label",
+        );
+      assert.match(ref.listeningStatus, /pending/);
+      assert.ok(manifest.files.some((f) => f.path === ref.audio));
+      assert.ok(ref.end > ref.start);
+      assert.ok(
+        ref.syllables.every(
+          (s) =>
+            s.word === word &&
+            s.start >= ref.start - 0.001 &&
+            s.end <= ref.end + 0.001,
+        ),
+      );
+    }
+  await readFile(dir + "LICENSE");
+  await readFile(dir + "CMUDICT-LICENSE");
+});
 test("browser model pack is complete, pinned to accepted v3, and covers every fixed-word speech question", async () => {
   const manifest = JSON.parse(
       await readFile("src/speech/comparison-manifest.json", "utf8"),
