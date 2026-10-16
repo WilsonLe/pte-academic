@@ -1,0 +1,51 @@
+{
+  "hardware": {
+    "logicalCpus": 18,
+    "memoryGiB": 48,
+    "accelerator": "MPS"
+  },
+  "generation": {
+    "completed": 5600,
+    "newlyGenerated": 600,
+    "reused": 5000,
+    "seconds": 34169.952000000165,
+    "estimatedInputCostUsd": 0.690960299999999,
+    "concurrency": 16,
+    "requestsPerSecond": 4,
+    "wallSeconds": 179.117,
+    "requestsPerMinute": 200.98594773248772,
+    "manifest": "/Users/wilsonle/projects/pte-academic.worktrees/syllable-comparison/artifacts/pronunciation/reference-v3/manifest.json"
+  },
+  "preparation": {
+    "failures": [],
+    "encoder": [
+      "facebook/wav2vec2-xlsr-53-espeak-cv-ft",
+      "2c733782da5604684829819a5eb744c193fe9398"
+    ],
+    "count": 5600,
+    "processedNew": 5600,
+    "wallSeconds": 384.5863568329951,
+    "batchSize": 16,
+    "cpuProcesses": 8
+  },
+  "preparationFilesPerSecond": 14.561098958671005,
+  "observedGpuDriverGB": {
+    "min": 2.19136,
+    "max": 3.279978496,
+    "note": "Sampled progress values, not peak RAM."
+  },
+  "training": {
+    "device": "mps",
+    "threads": 16,
+    "batchSize": 2048,
+    "wallSeconds": 44.83542012493126,
+    "trainingRows": 137967,
+    "parameters": 193662
+  },
+  "audit": {
+    "recordings": 5600,
+    "usable": 5532,
+    "decodedSeconds": 34007.848,
+    "newAudited": 600
+  }
+}

@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+import { screenPath } from "./routing";
 import { useState, type CSSProperties } from "react";
 import {
   ArrowRight,
@@ -25,7 +27,6 @@ import {
   currentStreak,
   dayCount,
   levelFor,
-  questQuestions,
   shiftDay,
   unlockedBadges,
   type Progress,
@@ -126,8 +127,7 @@ export function GameHub({
     complete = done >= 3,
     level = levelFor(p.xp),
     unlocked = unlockedBadges(p);
-  const quest = questQuestions(p, today),
-    selectedBadge = badges.find((b) => b.id === selected);
+  const selectedBadge = badges.find((b) => b.id === selected);
   const date = new Date(today + "T12:00:00"),
     monday = shiftDay(today, -((date.getDay() + 6) % 7));
   return (
@@ -135,10 +135,10 @@ export function GameHub({
       <div className="hub-heading">
         <h2>
           {view === "play"
-            ? "Ready to play"
+            ? "Ready to practise"
             : view === "progress"
               ? "Your progress"
-              : "Your collection"}
+              : "Your achievements"}
           <span className="accent-dot">.</span>
         </h2>
         <div className="hub-tools">
@@ -148,14 +148,14 @@ export function GameHub({
                 <Button
                   size="icon"
                   variant={view === "play" ? "secondary" : "outline"}
-                  aria-label="Play screen"
+                  aria-label="Practice screen"
                   onClick={() => setView("play")}
                 />
               }
             >
               <Rocket />
             </TooltipTrigger>
-            <TooltipContent>Play</TooltipContent>
+            <TooltipContent>Practice</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger
@@ -193,12 +193,12 @@ export function GameHub({
         {view === "play" && (
           <section
             className={"quest-card " + (complete ? "quest-complete" : "")}
-            aria-label="Daily quest"
+            aria-label="Daily practice"
           >
             <div className="quest-topline">
               <span>
                 <Sparkles className="size-3.5" />
-                DAILY QUEST
+                DAILY PRACTICE
               </span>
               <span className="quest-prize">
                 <Zap className="size-3.5" fill="currentColor" />
@@ -208,28 +208,6 @@ export function GameHub({
               </span>
             </div>
             <div className="quest-body">
-              <div>
-                <h3>
-                  {complete ? (
-                    <>
-                      Daily win.
-                      <br />
-                      Nicely done.
-                    </>
-                  ) : (
-                    <>
-                      Three questions.
-                      <br />
-                      One daily win.
-                    </>
-                  )}
-                </h3>
-                <p>
-                  {complete
-                    ? "Come back tomorrow for your next quest."
-                    : "A small reading round to build your rhythm."}
-                </p>
-              </div>
               <div className="quest-orbit">
                 <svg viewBox="0 0 120 120" aria-hidden="true">
                   <circle cx="60" cy="60" r="49" className="orbit-track" />
@@ -256,38 +234,6 @@ export function GameHub({
                 <span className="orbit-spark spark-two" />
               </div>
             </div>
-            <div
-              className="quest-steps"
-              aria-label={done + " of 3 daily questions answered"}
-            >
-              {[0, 1, 2].map((n) => (
-                <span key={n} className={n < done ? "step-done" : ""}>
-                  <span>{n < done ? <Check className="size-3" /> : n + 1}</span>
-                  {n < done
-                    ? "Done"
-                    : guideFor(
-                        quest[n - done] ||
-                          questions.find((q) => q.id === "reading-single-01")!,
-                      )
-                        .title.replace(
-                          "Multiple Choice, Single Answer",
-                          "Single answer",
-                        )
-                        .replace(
-                          "Fill in the Blanks (Dropdown)",
-                          "Fill the gaps",
-                        )
-                        .replace(
-                          "Fill in the Blanks (Drag and Drop)",
-                          "Word bank",
-                        )
-                        .replace(
-                          "Multiple Choice, Multiple Answers",
-                          "Multiple answers",
-                        )}
-                </span>
-              ))}
-            </div>
             <div className="quest-bottom">
               <Button
                 disabled={!ready}
@@ -297,8 +243,8 @@ export function GameHub({
                 {complete
                   ? "Keep practising"
                   : done
-                    ? "Continue quest"
-                    : "Start quest"}
+                    ? "Continue daily quest"
+                    : "Start daily quest"}
                 <ArrowRight className="size-4" />
               </Button>
               <Tooltip>
@@ -306,7 +252,7 @@ export function GameHub({
                   render={
                     <button
                       className="quest-help"
-                      aria-label="How quest XP works"
+                      aria-label="How practice XP works"
                     />
                   }
                 >
@@ -455,9 +401,8 @@ export function GameHub({
               },
             ]}
             render={(mode, i) => (
-              <a
-                href={"#" + mode.id}
-                onClick={() => navigate(mode.id)}
+              <Link
+                to={screenPath(mode.id)}
                 key={mode.id}
                 className={"game-mode mode-" + mode.tone}
                 style={{ "--order": i } as CSSProperties}
@@ -477,7 +422,7 @@ export function GameHub({
                     <ArrowRight className="size-4" />
                   </span>
                 </div>
-              </a>
+              </Link>
             )}
           />
         </>
@@ -485,9 +430,9 @@ export function GameHub({
       {view === "badges" && (
         <>
           <div className="mode-heading badge-heading">
-            <h3>Little wins, collected</h3>
+            <h3>Your achievements</h3>
             <span>
-              {unlocked.length} / {badges.length} unlocked
+              {unlocked.length} / {badges.length} earned
             </span>
           </div>
           <CardsList
@@ -517,7 +462,7 @@ export function GameHub({
                         aria-label={
                           badge.title +
                           ", " +
-                          (earned ? "unlocked" : "locked") +
+                          (earned ? "earned" : "not earned") +
                           ". View achievement"
                         }
                         onClick={() => setSelected(badge.id)}
@@ -537,7 +482,7 @@ export function GameHub({
                     <span>{badge.title}</span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {earned ? "Unlocked" : badge.description}
+                    {earned ? "Earned" : badge.description}
                   </TooltipContent>
                 </Tooltip>
               );
@@ -566,7 +511,7 @@ export function GameHub({
               <DialogDescription>
                 {selectedBadge.description}{" "}
                 {unlocked.includes(selectedBadge.id)
-                  ? "Achievement unlocked!"
+                  ? "Achievement earned!"
                   : Math.min(
                       selectedBadge.target,
                       badgeCount(selectedBadge.id, p),
@@ -645,16 +590,16 @@ export function RewardMoment({
       <div className="flex-1">
         <h2>
           {reward.levelUp
-            ? "Level up!"
+            ? "New practice level"
             : reward.dailyComplete
-              ? "Daily quest complete!"
+              ? "Daily practice complete!"
               : "A little stronger."}
         </h2>
         <p>
           {reward.badges.length
             ? reward.badges
                 .map((id) => badges.find((b) => b.id === id)?.title)
-                .join(" + ") + " unlocked"
+                .join(" + ") + " earned"
             : "Practice saved. Keep your momentum."}
         </p>
       </div>

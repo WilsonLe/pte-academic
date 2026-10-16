@@ -13,3 +13,9 @@ dependencies = [
   "phonemizer==3.3.0",
   "espeakng-loader==0.2.4",
 ]
+
+[dependency-groups]
+export = [
+    "onnx>=1.23.2",
+    "onnxruntime>=1.31.0",
+]

@@ -241,6 +241,12 @@ async function login() {
 async function status() {
   const j = await (await api("/key")).json();
   const d = j.data || {};
+  const policy = JSON.parse(
+    await readFile(join(ROOT, "content/authoring.json"), "utf8"),
+  );
+  const ledger = await readLedger();
+  const limit = authorizedBudget(policy, ledger);
+  const reserved = ledger.reservations.reduce((sum, r) => sum + r.costUsd, 0);
   console.log(
     JSON.stringify(
       {
@@ -250,6 +256,12 @@ async function status() {
         limit: d.limit,
         limitRemaining: d.limit_remaining,
         isFreeTier: d.is_free_tier,
+        cumulativeReservedUsd: reserved,
+        cumulativeAuthorizedCapUsd: limit,
+        conservativeRemainingUsd: Math.max(
+          0,
+          Math.min(limit, d.limit ?? limit) - Math.max(reserved, d.usage ?? 0),
+        ),
       },
       null,
       2,
@@ -290,6 +302,50 @@ export function enforceBudget(cost, limit, used) {
     fail(
       "Project spending limit would be exceeded. Stop and ask the operator before raising the budget.",
     );
+}
+export function authorizedBudget(policy, ledger) {
+  const limit = policy.spendingLimitUsd;
+  if (
+    !policy.requiresOperatorApprovalToIncrease ||
+    !Number.isFinite(limit) ||
+    limit <= 0
+  )
+    fail("An operator-authorized finite cumulative budget is required.");
+  const authorization = policy.budgetAuthorizations?.at(-1);
+  if (!authorization && limit !== 10)
+    fail(
+      "An increased cap requires an explicit operator budget authorization record.",
+    );
+  if (authorization) {
+    const {
+      priorReservationCount: count,
+      priorCumulativeReservedUsd: prior,
+      additionalAllowanceUsd: allowance,
+    } = authorization;
+    if (
+      !Number.isInteger(count) ||
+      count < 0 ||
+      ledger.reservations.length < count ||
+      !Number.isFinite(prior) ||
+      prior < 0 ||
+      !Number.isFinite(allowance) ||
+      allowance <= 0 ||
+      authorization.cumulativeCapUsd !== limit ||
+      Math.abs(prior + allowance - limit) > 1e-9 ||
+      !authorization.historyPreserved
+    )
+      fail("Budget authorization or historical cutoff is invalid.");
+    const prefix = ledger.reservations.slice(0, count);
+    if (
+      Math.abs(prefix.reduce((sum, r) => sum + r.costUsd, 0) - prior) > 1e-9 ||
+      createHash("sha256").update(JSON.stringify(prefix)).digest("hex") !==
+        authorization.priorReservationsSha256
+    )
+      fail(
+        "Historical spending was changed; restore and reconcile the ledger.",
+      );
+  }
+  return limit;
 }
 export async function readLedger() {
   const path = join(STORE, "spending.json");
@@ -385,6 +441,7 @@ async function generateLocked(args) {
       "Set this OpenRouter key to the project total budget without a reset before generation.",
     );
   const ledger = await readLedger();
+  authorizedBudget(policy, ledger);
   const reserved = ledger.reservations.reduce((n, r) => n + r.costUsd, 0);
   enforceBudget(cost, limit, Math.max(reserved, Number(keyState.usage) || 0));
   const manifestPath = join(ROOT, "content/narration.json");

@@ -321,12 +321,26 @@ class Acoustic:
             torch.mps.empty_cache()
         return outputs
 
-    def extract(self, audio, text, mode="cmu-american"):
+    def extract(self, audio, text, mode="cmu-american", representation="hidden7"):
         logs, hidden = self.run(audio)
-        return self.extract_outputs(audio, text, logs, hidden, mode)
+        return self.extract_outputs(audio, text, logs, hidden, mode, representation)
 
-    def extract_outputs(self, audio, text, logs, hidden, mode="cmu-american"):
-        return Aligner(self.vocab).extract_outputs(audio, text, logs, hidden, mode)
+    def extract_outputs(
+        self, audio, text, logs, hidden, mode="cmu-american", representation="hidden7"
+    ):
+        return Aligner(self.vocab).extract_outputs(
+            audio, text, logs, hidden, mode, representation
+        )
+
+
+def sound_feature(hidden, logs, start, end, representation="hidden7"):
+    acoustic = hidden[start:end].mean(0)
+    if representation == "hidden7":
+        return acoustic
+    if representation == "hidden-ctc-v1":
+        # Keep the complete observed sound distribution, never the supplied target ID.
+        return np.concatenate([acoustic, logs[start:end].mean(0)])
+    raise ValueError("Unsupported feature representation.")
 
 
 class Aligner:
@@ -335,7 +349,9 @@ class Aligner:
     def __init__(self, vocab):
         self.vocab = vocab
 
-    def extract_outputs(self, audio, text, logs, hidden, mode="cmu-american"):
+    def extract_outputs(
+        self, audio, text, logs, hidden, mode="cmu-american", representation="hidden7"
+    ):
         if mode == "english-variants":
             from phonetics import units
 
@@ -345,7 +361,9 @@ class Aligner:
                 if unknown or not phones:
                     continue
                 try:
-                    aligned = self.align_units(audio, phones, syllables, logs, hidden)
+                    aligned = self.align_units(
+                        audio, phones, syllables, logs, hidden, representation
+                    )
                     confidence = np.mean(
                         [
                             np.log(max(p["alignmentConfidence"], 1e-10))
@@ -366,16 +384,18 @@ class Aligner:
             )
         if not phones:
             raise ValueError("No supported syllables.")
-        return self.align_units(audio, phones, syllables, logs, hidden)
+        return self.align_units(audio, phones, syllables, logs, hidden, representation)
 
-    def align_units(self, audio, phones, syllables, logs, hidden):
+    def align_units(
+        self, audio, phones, syllables, logs, hidden, representation="hidden7"
+    ):
         targets = [self.vocab[ipa(p)] for p in phones]
         spans = ctc_align(logs, targets)
         scale = len(audio) / 16000 / len(logs)
         records, features = [], []
         intervals = phone_intervals(spans, len(logs))
         for i, (phone, (a, b, conf)) in enumerate(zip(phones, spans)):
-            features.append(hidden[a:b].mean(0))
+            features.append(sound_feature(hidden, logs, a, b, representation))
             records.append(
                 {
                     "phone": phone,
@@ -492,11 +512,11 @@ def reference_stream(initial, follow, expected, experiment=None):
 
 
 def prepare_reference_feature(item):
-    take, audio, result, vocab, output, mode = item
+    take, audio, result, vocab, output, mode, representation = item
     out = Path(output) / (take["takeId"] + ".npz")
     try:
         x, phones, syllables = Aligner(vocab).extract_outputs(
-            audio, take["text"], *result, mode
+            audio, take["text"], *result, mode, representation
         )
         sx = syllable_features(audio, x, syllables)
         temp = out.with_suffix(".pending.npz")
@@ -509,6 +529,7 @@ def prepare_reference_feature(item):
             ),
             audio_sha256=take["audioSha256"],
             encoder_revision=ENCODERS["phones"][1],
+            representation=representation,
         )
         temp.replace(out)
         return None
@@ -591,6 +612,7 @@ def prepare(args):
                         acoustic.vocab,
                         str(output),
                         experiment.phonetic_mode,
+                        experiment.representation,
                     ),
                 )
                 for take, audio, result in zip(takes, audios, results)
@@ -607,6 +629,8 @@ def prepare(args):
                     if (
                         str(cache["audio_sha256"]) == take["audioSha256"]
                         and str(cache["encoder_revision"]) == acoustic.revision
+                        and str(cache.get("representation", "hidden7"))
+                        == experiment.representation
                     ):
                         continue
                 raise ValueError("Stale feature cache.")
@@ -668,6 +692,8 @@ def verified_feature_files(experiment=None):
             if (
                 str(cache["audio_sha256"]) != take["audioSha256"]
                 or str(cache["encoder_revision"]) != ENCODERS["phones"][1]
+                or str(cache.get("representation", "hidden7"))
+                != experiment.representation
                 or any(
                     metadata["take"].get(key) != take.get(key)
                     for key in [
@@ -765,9 +791,17 @@ def train_stress(seed, experiment=None, device="cpu", batch_size=256):
     history = []
     for epoch in range(30):
         head.train()
-        for ids in np.array_split(
-            train[np.random.permutation(len(train))], max(1, len(train) // batch_size)
-        ):
+        order = (
+            np.random.choice(
+                train,
+                size=len(train),
+                replace=True,
+                p=equal_accent_weights(records, train),
+            )
+            if experiment and experiment.representation == "hidden-ctc-v1"
+            else train[np.random.permutation(len(train))]
+        )
+        for ids in np.array_split(order, max(1, len(train) // batch_size)):
             loss = F.cross_entropy(head(x[ids]), y[ids])
             opt.zero_grad()
             loss.backward()
@@ -858,6 +892,24 @@ def distribution_distances(z, labels, bank):
     return result
 
 
+def equal_accent_weights(records, ids):
+    from collections import Counter
+
+    counts = Counter(records[i]["accent"] for i in ids)
+    weights = np.array([1 / counts[records[i]["accent"]] for i in ids])
+    return weights / weights.sum()
+
+
+def weighted_quantiles(values, weights, quantiles):
+    order = np.argsort(values, kind="stable")
+    cumulative = np.cumsum(np.asarray(weights)[order])
+    cumulative /= cumulative[-1]
+    indexes = np.searchsorted(cumulative, quantiles, side="left").clip(
+        0, len(order) - 1
+    )
+    return np.asarray(values)[order[indexes]]
+
+
 def fit(args):
     started = time.perf_counter()
     experiment = Experiment.load(args.config)
@@ -888,6 +940,7 @@ def fit(args):
     opt = torch.optim.AdamW(head.parameters(), lr=args.lr, weight_decay=0.01)
     history = []
     best = -1
+    best_accuracy = -1
     best_state = None
     for epoch in range(args.epochs):
         head.train()
@@ -919,15 +972,31 @@ def fit(args):
         with torch.inference_mode():
             _, logits = head(xt[val])
             acc = float((logits.argmax(1) == yt[val]).float().mean())
+            prediction = logits.argmax(1).cpu().numpy()
+        val_accents = np.array([records[i]["accent"] for i in val])
+        macro = float(
+            np.mean(
+                [
+                    np.mean(
+                        prediction[val_accents == accent]
+                        == labels[val][val_accents == accent]
+                    )
+                    for accent in np.unique(val_accents)
+                ]
+            )
+        )
         history.append(
             {
                 "epoch": epoch + 1,
                 "trainLoss": float(np.mean(losses)),
                 "validationPhoneAccuracy": acc,
+                "validationMacroAccentAccuracy": macro,
             }
         )
-        if acc > best:
-            best = acc
+        selection = macro if experiment.representation == "hidden-ctc-v1" else acc
+        if selection > best:
+            best = selection
+            best_accuracy = acc
             best_state = {
                 k: v.detach().cpu().clone() for k, v in head.state_dict().items()
             }
@@ -960,16 +1029,28 @@ def fit(args):
         ids = val[labels[val] == label]
         ds = distribution_distances(z[ids], labels[ids], bank)
         if len(ds) >= 5:
+            quantiles = (
+                weighted_quantiles(ds, equal_accent_weights(records, ids), [0.5, 0.95])
+                if experiment.representation == "hidden-ctc-v1"
+                else np.quantile(ds, [0.5, 0.95])
+            )
             calibration[str(label)] = [
-                float(np.quantile(ds, 0.5)),
-                float(np.quantile(ds, 0.95)),
+                float(quantiles[0]),
+                float(quantiles[1]),
                 int(len(ds)),
             ]
     duration = {}
     for p in classes:
         ids = [i for i in train if records[i]["phone"].rstrip("012") == p]
         d = np.log([max(0.01, records[i]["end"] - records[i]["start"]) for i in ids])
-        duration[p] = [float(d.mean()), float(max(d.std(), 0.2))]
+        weights = (
+            equal_accent_weights(records, ids)
+            if experiment.representation == "hidden-ctc-v1"
+            else None
+        )
+        mu = float(np.average(d, weights=weights))
+        sigma = float(np.sqrt(np.average((d - mu) ** 2, weights=weights)))
+        duration[p] = [mu, max(sigma, 0.2)]
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     stress_model = train_stress(args.seed, experiment, device, args.batch_size)
@@ -993,6 +1074,10 @@ def fit(args):
         ),
         "scoreTarget": experiment.config.get("scoreTarget", "american-reference"),
         "phoneticMode": experiment.phonetic_mode,
+        "featureRepresentation": experiment.representation,
+        "calibrationMode": "equal-accent-mixture-v1"
+        if experiment.representation == "hidden-ctc-v1"
+        else "pooled-validation",
         "configPath": str(experiment.path.relative_to(ROOT)),
         "seed": args.seed,
     }
@@ -1004,7 +1089,11 @@ def fit(args):
             "epochs": args.epochs,
             "lr": args.lr,
             "history": history,
-            "bestValidationPhoneAccuracy": best,
+            "bestValidationPhoneAccuracy": best_accuracy,
+            "selectionScore": best,
+            "selectionCriterion": "macro-accent-validation-accuracy"
+            if experiment.representation == "hidden-ctc-v1"
+            else "pooled-validation-accuracy",
             "splitCounts": {k: len(v) for k, v in splits.items()},
             "splitRecordings": {
                 name: len({records[i]["takeId"] for i in ids})
@@ -1056,6 +1145,8 @@ def load_checkpoint(path):
         raise ValueError(
             "Checkpoint schema or pinned acoustic encoder does not match this pipeline."
         )
+    if c.get("featureRepresentation", "hidden7") not in {"hidden7", "hidden-ctc-v1"}:
+        raise ValueError("Unsupported checkpoint feature representation.")
     head = ComparisonHead(c["input_dim"], c["embedding_dim"], len(c["classes"]))
     head.load_state_dict(c["state_dict"])
     head.eval()
@@ -1130,7 +1221,10 @@ def predict(args):
     acoustic = Acoustic(device=args.device)
     try:
         x, phones, syllables = acoustic.extract(
-            audio, text, checkpoint.get("phoneticMode", "cmu-american")
+            audio,
+            text,
+            checkpoint.get("phoneticMode", "cmu-american"),
+            checkpoint.get("featureRepresentation", "hidden7"),
         )
     except ValueError as e:
         base.update(status="unscored", reason=str(e))
@@ -1194,16 +1288,37 @@ def predict(args):
     )
 
 
+def evaluation_features(x, source, target, syllables=False):
+    """Explicit transfer only: hidden7 is the unchanged prefix of hidden-ctc-v1."""
+    if source == target:
+        return x
+    if source == "hidden-ctc-v1" and target == "hidden7":
+        return (
+            np.concatenate([x[:, :1024], x[:, -3:]], axis=1)
+            if syllables
+            else x[:, :1024]
+        )
+    raise ValueError("Incompatible evaluation feature representations.")
+
+
 def evaluate(args):
     experiment = Experiment.load(args.config)
     c, head = load_checkpoint(args.model)
-    if c["referenceVersion"] != experiment.reference_version:
+    transfer = getattr(args, "transfer", False)
+    if c.get("phoneticMode", "cmu-american") != experiment.phonetic_mode:
+        raise ValueError("Checkpoint and evaluation phonetic label systems differ.")
+    if not transfer and c["referenceVersion"] != experiment.reference_version:
         raise ValueError("Checkpoint and evaluation corpus versions differ.")
-    if c.get("referenceManifestSha256") and c["referenceManifestSha256"] != digest(
-        experiment.corpus / "manifest.json"
+    if (
+        not transfer
+        and c.get("referenceManifestSha256")
+        and c["referenceManifestSha256"] != digest(experiment.corpus / "manifest.json")
     ):
         raise ValueError("Evaluation corpus hash differs from training.")
     x, records = load_features(experiment)
+    x = evaluation_features(
+        x, experiment.representation, c.get("featureRepresentation", "hidden7")
+    )
     splits = make_splits(records)
     lookup = {p: i for i, p in enumerate(c["classes"])}
     labels = np.array([lookup.get(r["phone"].rstrip("012"), -1) for r in records])
@@ -1213,6 +1328,12 @@ def evaluate(args):
         logits = logits.numpy()
     bank = {k: v.numpy() for k, v in c["bank"].items()}
     sx, srecords = load_syllable_features(experiment)
+    sx = evaluation_features(
+        sx,
+        experiment.representation,
+        c.get("featureRepresentation", "hidden7"),
+        syllables=True,
+    )
     ssplits = make_splits(srecords)
     stress = c["stress"]
     sh = StressHead(stress["input_dim"])
@@ -1246,6 +1367,8 @@ def evaluate(args):
         },
         "modelSha256": digest(args.model),
         "referenceManifestSha256": digest(experiment.corpus / "manifest.json"),
+        "trainingReferenceManifestSha256": c.get("referenceManifestSha256"),
+        "transferEvaluation": transfer,
         "partitions": {},
         "scope": "Synthetic reference generalization and wrong-phone controls. No human learner validation.",
     }
@@ -1369,6 +1492,11 @@ def main():
     ev.add_argument("--model", required=True)
     ev.add_argument("--output", required=True)
     ev.add_argument("--include-test", action="store_true")
+    ev.add_argument(
+        "--transfer",
+        action="store_true",
+        help="Explicitly evaluate another corpus using compatible feature semantics; does not update the model.",
+    )
     ev.set_defaults(run=evaluate)
     for parser in [prep, train, ev]:
         parser.add_argument("--config")

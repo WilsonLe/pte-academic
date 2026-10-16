@@ -1,0 +1,1384 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "blended-english-synthetic-v3",
+  "modelSha256": "2a8e9680e71c85d98f2adc8da725c56f21bd866340cf545916fdf5dff7389d1b",
+  "syntheticReference": true,
+  "referenceAccents": [
+    "en-AU",
+    "en-GB",
+    "en-IN",
+    "en-US"
+  ],
+  "scoreTarget": "blended-english-reference",
+  "scoreMeaning": "0-100 similarity index to the generated English reference corpus; not percent correct or a proficiency score",
+  "textSource": "expected",
+  "syllables": [
+    {
+      "word": "the",
+      "wordIndex": 0,
+      "syllableIndex": 0,
+      "phonemes": [
+        "\u00f0",
+        "\u02590"
+      ],
+      "phoneIndexes": [
+        0,
+        1
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 0.04013937282229965,
+      "end": 0.1605574912891986,
+      "alignmentConfidence": 0.9659455418586731,
+      "wordSyllables": 1,
+      "label": "\u00f0 \u02590",
+      "similarity": 81.46,
+      "confidence": 0.966,
+      "status": "scored",
+      "soundSimilarity": 81.46,
+      "timingSimilarity": 98.16,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "\u00f0",
+          "ipa": "\u00f0",
+          "start": 0.04013937282229965,
+          "end": 0.10034843205574913,
+          "alignmentConfidence": 0.9843219518661499,
+          "left": "#",
+          "right": "\u02590",
+          "similarity": 80.85,
+          "distance": 0.01155,
+          "timingSimilarity": 96.87,
+          "status": "scored"
+        },
+        {
+          "phone": "\u02590",
+          "ipa": "\u0259",
+          "start": 0.10034843205574913,
+          "end": 0.1605574912891986,
+          "alignmentConfidence": 0.9475691318511963,
+          "left": "\u00f0",
+          "right": "n",
+          "similarity": 82.07,
+          "distance": 0.03893,
+          "timingSimilarity": 99.46,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "nurse",
+      "wordIndex": 1,
+      "syllableIndex": 0,
+      "phonemes": [
+        "n",
+        "\u025c\u02d01",
+        "s"
+      ],
+      "phoneIndexes": [
+        2,
+        3,
+        4
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 0.1605574912891986,
+      "end": 0.5418815331010453,
+      "alignmentConfidence": 0.6980184515317281,
+      "wordSyllables": 1,
+      "label": "n \u025c\u02d01 s",
+      "similarity": 77.44,
+      "confidence": 0.698,
+      "status": "scored",
+      "soundSimilarity": 77.44,
+      "timingSimilarity": 88.02,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "n",
+          "ipa": "n",
+          "start": 0.1605574912891986,
+          "end": 0.2609059233449477,
+          "alignmentConfidence": 0.9828419089317322,
+          "left": "\u02590",
+          "right": "\u025c\u02d01",
+          "similarity": 87.02,
+          "distance": 0.00837,
+          "timingSimilarity": 91.35,
+          "status": "scored"
+        },
+        {
+          "phone": "\u025c\u02d01",
+          "ipa": "\u025c\u02d0",
+          "start": 0.2609059233449477,
+          "end": 0.3813240418118467,
+          "alignmentConfidence": 0.1264864206314087,
+          "left": "n",
+          "right": "s",
+          "similarity": 84.86,
+          "distance": 0.00587,
+          "timingSimilarity": 94.58,
+          "status": "scored"
+        },
+        {
+          "phone": "s",
+          "ipa": "s",
+          "start": 0.4013937282229965,
+          "end": 0.5418815331010453,
+          "alignmentConfidence": 0.9847270250320435,
+          "left": "\u025c\u02d01",
+          "right": "s",
+          "similarity": 60.44,
+          "distance": 0.02179,
+          "timingSimilarity": 78.13,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "spoke",
+      "wordIndex": 2,
+      "syllableIndex": 0,
+      "phonemes": [
+        "s",
+        "p",
+        "o\u028a1",
+        "k"
+      ],
+      "phoneIndexes": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 0.5418815331010453,
+      "end": 0.923205574912892,
+      "alignmentConfidence": 0.7958392351865768,
+      "wordSyllables": 1,
+      "label": "s p o\u028a1 k",
+      "similarity": 63.23,
+      "confidence": 0.796,
+      "status": "scored",
+      "soundSimilarity": 63.23,
+      "timingSimilarity": 92.42,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "s",
+          "ipa": "s",
+          "start": 0.5418815331010453,
+          "end": 0.6221602787456446,
+          "alignmentConfidence": 0.9872287511825562,
+          "left": "s",
+          "right": "p",
+          "similarity": 82.67,
+          "distance": 0.01006,
+          "timingSimilarity": 91.5,
+          "status": "scored"
+        },
+        {
+          "phone": "p",
+          "ipa": "p",
+          "start": 0.6221602787456446,
+          "end": 0.7024390243902439,
+          "alignmentConfidence": 0.9552766680717468,
+          "left": "s",
+          "right": "o\u028a1",
+          "similarity": 82.35,
+          "distance": 0.01267,
+          "timingSimilarity": 99.51,
+          "status": "scored"
+        },
+        {
+          "phone": "o\u028a1",
+          "ipa": "o\u028a",
+          "start": 0.7024390243902439,
+          "end": 0.802787456445993,
+          "alignmentConfidence": 0.26190102100372314,
+          "left": "p",
+          "right": "k",
+          "similarity": 86.01,
+          "distance": 0.0025,
+          "timingSimilarity": 97.0,
+          "status": "scored"
+        },
+        {
+          "phone": "k",
+          "ipa": "k",
+          "start": 0.802787456445993,
+          "end": 0.923205574912892,
+          "alignmentConfidence": 0.9789505004882812,
+          "left": "o\u028a1",
+          "right": "k",
+          "similarity": 1.9,
+          "distance": 0.03994,
+          "timingSimilarity": 81.68,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "calmly",
+      "wordIndex": 3,
+      "syllableIndex": 0,
+      "phonemes": [
+        "k",
+        "\u0251\u02d01",
+        "m"
+      ],
+      "phoneIndexes": [
+        9,
+        10,
+        11
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 0.923205574912892,
+      "end": 1.264390243902439,
+      "alignmentConfidence": 0.7921393911043803,
+      "wordSyllables": 2,
+      "label": "k \u0251\u02d01 m",
+      "similarity": 83.33,
+      "confidence": 0.792,
+      "status": "scored",
+      "soundSimilarity": 83.33,
+      "timingSimilarity": 86.59,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "k",
+          "ipa": "k",
+          "start": 0.923205574912892,
+          "end": 1.023554006968641,
+          "alignmentConfidence": 0.9853658676147461,
+          "left": "k",
+          "right": "\u0251\u02d01",
+          "similarity": 87.36,
+          "distance": 0.00654,
+          "timingSimilarity": 91.05,
+          "status": "scored"
+        },
+        {
+          "phone": "\u0251\u02d01",
+          "ipa": "\u0251\u02d0",
+          "start": 1.023554006968641,
+          "end": 1.1439721254355402,
+          "alignmentConfidence": 0.39717650413513184,
+          "left": "k",
+          "right": "m",
+          "similarity": 85.56,
+          "distance": 0.03479,
+          "timingSimilarity": 84.95,
+          "status": "scored"
+        },
+        {
+          "phone": "m",
+          "ipa": "m",
+          "start": 1.1439721254355402,
+          "end": 1.264390243902439,
+          "alignmentConfidence": 0.9938758015632629,
+          "left": "\u0251\u02d01",
+          "right": "l",
+          "similarity": 77.08,
+          "distance": 0.01758,
+          "timingSimilarity": 83.76,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "calmly",
+      "wordIndex": 3,
+      "syllableIndex": 1,
+      "phonemes": [
+        "l",
+        "i0"
+      ],
+      "phoneIndexes": [
+        12,
+        13
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 1.264390243902439,
+      "end": 1.4249477351916375,
+      "alignmentConfidence": 0.9177016913890839,
+      "wordSyllables": 2,
+      "label": "l i0",
+      "similarity": 81.31,
+      "confidence": 0.918,
+      "status": "scored",
+      "soundSimilarity": 81.31,
+      "timingSimilarity": 80.49,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "l",
+          "ipa": "l",
+          "start": 1.264390243902439,
+          "end": 1.3045296167247387,
+          "alignmentConfidence": 0.9886077642440796,
+          "left": "m",
+          "right": "i0",
+          "similarity": 77.44,
+          "distance": 0.01432,
+          "timingSimilarity": 79.07,
+          "status": "scored"
+        },
+        {
+          "phone": "i0",
+          "ipa": "i",
+          "start": 1.3045296167247387,
+          "end": 1.4249477351916375,
+          "alignmentConfidence": 0.8467956185340881,
+          "left": "l",
+          "right": "\u00e60",
+          "similarity": 85.19,
+          "distance": 0.01467,
+          "timingSimilarity": 81.91,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "and",
+      "wordIndex": 4,
+      "syllableIndex": 0,
+      "phonemes": [
+        "\u00e60",
+        "n",
+        "d"
+      ],
+      "phoneIndexes": [
+        14,
+        15,
+        16
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 1.7460627177700347,
+      "end": 1.946759581881533,
+      "alignmentConfidence": 0.8267602721850077,
+      "wordSyllables": 1,
+      "label": "\u00e60 n d",
+      "similarity": 80.02,
+      "confidence": 0.827,
+      "status": "scored",
+      "soundSimilarity": 80.02,
+      "timingSimilarity": 84.94,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "\u00e60",
+          "ipa": "\u00e6",
+          "start": 1.7460627177700347,
+          "end": 1.846411149825784,
+          "alignmentConfidence": 0.6360969543457031,
+          "left": "i0",
+          "right": "n",
+          "similarity": 80.54,
+          "distance": 0.01635,
+          "timingSimilarity": 91.62,
+          "status": "scored"
+        },
+        {
+          "phone": "n",
+          "ipa": "n",
+          "start": 1.846411149825784,
+          "end": 1.8865505226480836,
+          "alignmentConfidence": 0.9525689482688904,
+          "left": "\u00e60",
+          "right": "d",
+          "similarity": 77.72,
+          "distance": 0.01459,
+          "timingSimilarity": 70.39,
+          "status": "scored"
+        },
+        {
+          "phone": "d",
+          "ipa": "d",
+          "start": 1.8865505226480836,
+          "end": 1.946759581881533,
+          "alignmentConfidence": 0.8916149139404297,
+          "left": "n",
+          "right": "\u00e61",
+          "similarity": 81.79,
+          "distance": 0.01446,
+          "timingSimilarity": 92.82,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "answered",
+      "wordIndex": 5,
+      "syllableIndex": 0,
+      "phonemes": [
+        "\u00e61",
+        "n"
+      ],
+      "phoneIndexes": [
+        17,
+        18
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 1.946759581881533,
+      "end": 2.107317073170732,
+      "alignmentConfidence": 0.5382228866219521,
+      "wordSyllables": 2,
+      "label": "\u00e61 n",
+      "similarity": 83.32,
+      "confidence": 0.538,
+      "status": "scored",
+      "soundSimilarity": 83.32,
+      "timingSimilarity": 99.19,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "\u00e61",
+          "ipa": "\u00e6",
+          "start": 1.946759581881533,
+          "end": 2.0270383275261326,
+          "alignmentConfidence": 0.08284039795398712,
+          "left": "d",
+          "right": "n",
+          "similarity": 81.7,
+          "distance": 0.01417,
+          "timingSimilarity": 99.05,
+          "status": "scored"
+        },
+        {
+          "phone": "n",
+          "ipa": "n",
+          "start": 2.0270383275261326,
+          "end": 2.107317073170732,
+          "alignmentConfidence": 0.993605375289917,
+          "left": "\u00e61",
+          "right": "s",
+          "similarity": 84.94,
+          "distance": 0.00977,
+          "timingSimilarity": 99.33,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "answered",
+      "wordIndex": 5,
+      "syllableIndex": 1,
+      "phonemes": [
+        "s",
+        "\u025a0",
+        "d"
+      ],
+      "phoneIndexes": [
+        19,
+        20,
+        21
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 2.107317073170732,
+      "end": 2.3481533101045295,
+      "alignmentConfidence": 0.7398689389228821,
+      "wordSyllables": 2,
+      "label": "s \u025a0 d",
+      "similarity": 83.62,
+      "confidence": 0.74,
+      "status": "scored",
+      "soundSimilarity": 83.62,
+      "timingSimilarity": 81.3,
+      "stressSimilarity": 99.94,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "s",
+          "ipa": "s",
+          "start": 2.107317073170732,
+          "end": 2.167526132404181,
+          "alignmentConfidence": 0.8881588578224182,
+          "left": "n",
+          "right": "\u025a0",
+          "similarity": 80.26,
+          "distance": 0.01133,
+          "timingSimilarity": 75.89,
+          "status": "scored"
+        },
+        {
+          "phone": "\u025a0",
+          "ipa": "\u025a",
+          "start": 2.167526132404181,
+          "end": 2.2277351916376307,
+          "alignmentConfidence": 0.3488699793815613,
+          "left": "s",
+          "right": "d",
+          "similarity": 85.06,
+          "distance": 0.0164,
+          "timingSimilarity": 84.32,
+          "status": "scored"
+        },
+        {
+          "phone": "d",
+          "ipa": "d",
+          "start": 2.2277351916376307,
+          "end": 2.3481533101045295,
+          "alignmentConfidence": 0.9825779795646667,
+          "left": "\u025a0",
+          "right": "\u025b1",
+          "similarity": 85.53,
+          "distance": 0.00903,
+          "timingSimilarity": 83.68,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "every",
+      "wordIndex": 6,
+      "syllableIndex": 0,
+      "phonemes": [
+        "\u025b1",
+        "v"
+      ],
+      "phoneIndexes": [
+        22,
+        23
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 2.3481533101045295,
+      "end": 2.528780487804878,
+      "alignmentConfidence": 0.9436728060245514,
+      "wordSyllables": 2,
+      "label": "\u025b1 v",
+      "similarity": 74.19,
+      "confidence": 0.944,
+      "status": "scored",
+      "soundSimilarity": 74.19,
+      "timingSimilarity": 82.51,
+      "stressSimilarity": 99.87,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "\u025b1",
+          "ipa": "\u025b",
+          "start": 2.3481533101045295,
+          "end": 2.4685714285714284,
+          "alignmentConfidence": 0.9264916181564331,
+          "left": "d",
+          "right": "v",
+          "similarity": 83.69,
+          "distance": 0.00694,
+          "timingSimilarity": 76.7,
+          "status": "scored"
+        },
+        {
+          "phone": "v",
+          "ipa": "v",
+          "start": 2.4685714285714284,
+          "end": 2.528780487804878,
+          "alignmentConfidence": 0.9608539938926697,
+          "left": "\u025b1",
+          "right": "\u0279",
+          "similarity": 64.68,
+          "distance": 0.02614,
+          "timingSimilarity": 88.32,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "every",
+      "wordIndex": 6,
+      "syllableIndex": 1,
+      "phonemes": [
+        "\u0279",
+        "i0"
+      ],
+      "phoneIndexes": [
+        24,
+        25
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 2.528780487804878,
+      "end": 2.6291289198606274,
+      "alignmentConfidence": 0.7243251204490662,
+      "wordSyllables": 2,
+      "label": "\u0279 i0",
+      "similarity": 82.0,
+      "confidence": 0.724,
+      "status": "scored",
+      "soundSimilarity": 82.0,
+      "timingSimilarity": 79.0,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "\u0279",
+          "ipa": "\u0279",
+          "start": 2.528780487804878,
+          "end": 2.5488501742160277,
+          "alignmentConfidence": 0.932120680809021,
+          "left": "v",
+          "right": "i0",
+          "similarity": 84.94,
+          "distance": 0.00877,
+          "timingSimilarity": 63.86,
+          "status": "scored"
+        },
+        {
+          "phone": "i0",
+          "ipa": "i",
+          "start": 2.5488501742160277,
+          "end": 2.6291289198606274,
+          "alignmentConfidence": 0.5165295600891113,
+          "left": "\u0279",
+          "right": "k",
+          "similarity": 79.05,
+          "distance": 0.07407,
+          "timingSimilarity": 94.13,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "question",
+      "wordIndex": 7,
+      "syllableIndex": 0,
+      "phonemes": [
+        "k",
+        "w",
+        "\u025b1",
+        "s"
+      ],
+      "phoneIndexes": [
+        26,
+        27,
+        28,
+        29
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 2.6291289198606274,
+      "end": 2.9101045296167247,
+      "alignmentConfidence": 0.8952401578426361,
+      "wordSyllables": 2,
+      "label": "k w \u025b1 s",
+      "similarity": 71.44,
+      "confidence": 0.895,
+      "status": "scored",
+      "soundSimilarity": 71.44,
+      "timingSimilarity": 89.65,
+      "stressSimilarity": 99.99,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "k",
+          "ipa": "k",
+          "start": 2.6291289198606274,
+          "end": 2.7094076655052266,
+          "alignmentConfidence": 0.9255220890045166,
+          "left": "i0",
+          "right": "w",
+          "similarity": 85.14,
+          "distance": 0.00741,
+          "timingSimilarity": 97.49,
+          "status": "scored"
+        },
+        {
+          "phone": "w",
+          "ipa": "w",
+          "start": 2.7094076655052266,
+          "end": 2.7495470383275262,
+          "alignmentConfidence": 0.9593133330345154,
+          "left": "k",
+          "right": "\u025b1",
+          "similarity": 74.24,
+          "distance": 0.01749,
+          "timingSimilarity": 72.8,
+          "status": "scored"
+        },
+        {
+          "phone": "\u025b1",
+          "ipa": "\u025b",
+          "start": 2.7495470383275262,
+          "end": 2.8298257839721255,
+          "alignmentConfidence": 0.9384670853614807,
+          "left": "w",
+          "right": "s",
+          "similarity": 78.3,
+          "distance": 0.01378,
+          "timingSimilarity": 96.8,
+          "status": "scored"
+        },
+        {
+          "phone": "s",
+          "ipa": "s",
+          "start": 2.8298257839721255,
+          "end": 2.9101045296167247,
+          "alignmentConfidence": 0.7576581239700317,
+          "left": "\u025b1",
+          "right": "t\u0283",
+          "similarity": 48.09,
+          "distance": 0.02831,
+          "timingSimilarity": 91.5,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "question",
+      "wordIndex": 7,
+      "syllableIndex": 1,
+      "phonemes": [
+        "t\u0283",
+        "\u02590",
+        "n"
+      ],
+      "phoneIndexes": [
+        30,
+        31,
+        32
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 2.9101045296167247,
+      "end": 3.1710104529616725,
+      "alignmentConfidence": 0.8613511919975281,
+      "wordSyllables": 2,
+      "label": "t\u0283 \u02590 n",
+      "similarity": 80.56,
+      "confidence": 0.861,
+      "status": "scored",
+      "soundSimilarity": 80.56,
+      "timingSimilarity": 81.62,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "t\u0283",
+          "ipa": "t\u0283",
+          "start": 2.9101045296167247,
+          "end": 2.9703135888501744,
+          "alignmentConfidence": 0.6561540365219116,
+          "left": "s",
+          "right": "\u02590",
+          "similarity": 70.7,
+          "distance": 0.0157,
+          "timingSimilarity": 68.1,
+          "status": "scored"
+        },
+        {
+          "phone": "\u02590",
+          "ipa": "\u0259",
+          "start": 2.9703135888501744,
+          "end": 3.0305226480836236,
+          "alignmentConfidence": 0.9488140344619751,
+          "left": "t\u0283",
+          "right": "n",
+          "similarity": 85.19,
+          "distance": 0.00526,
+          "timingSimilarity": 99.46,
+          "status": "scored"
+        },
+        {
+          "phone": "n",
+          "ipa": "n",
+          "start": 3.0305226480836236,
+          "end": 3.1710104529616725,
+          "alignmentConfidence": 0.9790855050086975,
+          "left": "\u02590",
+          "right": "b",
+          "similarity": 85.79,
+          "distance": 0.0092,
+          "timingSimilarity": 77.31,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "before",
+      "wordIndex": 8,
+      "syllableIndex": 0,
+      "phonemes": [
+        "b",
+        "\u1d7b",
+        "f",
+        "\u0254\u02d0\u02791"
+      ],
+      "phoneIndexes": [
+        33,
+        34,
+        35,
+        36
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 3.2512891986062717,
+      "end": 3.6326132404181184,
+      "alignmentConfidence": 0.5140460412949324,
+      "wordSyllables": 1,
+      "label": "b \u1d7b f \u0254\u02d0\u02791",
+      "similarity": 83.27,
+      "confidence": 0.514,
+      "status": "scored",
+      "soundSimilarity": 83.27,
+      "timingSimilarity": 91.94,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "b",
+          "ipa": "b",
+          "start": 3.2512891986062717,
+          "end": 3.351637630662021,
+          "alignmentConfidence": 0.9740920662879944,
+          "left": "n",
+          "right": "\u1d7b",
+          "similarity": 72.9,
+          "distance": 0.01684,
+          "timingSimilarity": 92.02,
+          "status": "scored"
+        },
+        {
+          "phone": "\u1d7b",
+          "ipa": "\u1d7b",
+          "start": 3.351637630662021,
+          "end": 3.4118466898954702,
+          "alignmentConfidence": 0.05595618486404419,
+          "left": "b",
+          "right": "f",
+          "similarity": 84.3,
+          "distance": 0.03121,
+          "timingSimilarity": 93.71,
+          "status": "scored"
+        },
+        {
+          "phone": "f",
+          "ipa": "f",
+          "start": 3.4118466898954702,
+          "end": 3.5121951219512195,
+          "alignmentConfidence": 0.983981192111969,
+          "left": "\u1d7b",
+          "right": "\u0254\u02d0\u02791",
+          "similarity": 88.52,
+          "distance": 0.00773,
+          "timingSimilarity": 94.2,
+          "status": "scored"
+        },
+        {
+          "phone": "\u0254\u02d0\u02791",
+          "ipa": "\u0254\u02d0\u0279",
+          "start": 3.5121951219512195,
+          "end": 3.6326132404181184,
+          "alignmentConfidence": 0.04215472191572189,
+          "left": "f",
+          "right": "\u0283",
+          "similarity": 87.36,
+          "distance": 0.00758,
+          "timingSimilarity": 87.81,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "showing",
+      "wordIndex": 9,
+      "syllableIndex": 0,
+      "phonemes": [
+        "\u0283",
+        "o\u028a1"
+      ],
+      "phoneIndexes": [
+        37,
+        38
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 3.6526829268292684,
+      "end": 3.8734494773519166,
+      "alignmentConfidence": 0.574580579996109,
+      "wordSyllables": 2,
+      "label": "\u0283 o\u028a1",
+      "similarity": 84.9,
+      "confidence": 0.575,
+      "status": "scored",
+      "soundSimilarity": 84.9,
+      "timingSimilarity": 90.14,
+      "stressSimilarity": 99.42,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "\u0283",
+          "ipa": "\u0283",
+          "start": 3.6526829268292684,
+          "end": 3.7731010452961673,
+          "alignmentConfidence": 0.9168216586112976,
+          "left": "\u0254\u02d0\u02791",
+          "right": "o\u028a1",
+          "similarity": 84.94,
+          "distance": 0.00706,
+          "timingSimilarity": 83.28,
+          "status": "scored"
+        },
+        {
+          "phone": "o\u028a1",
+          "ipa": "o\u028a",
+          "start": 3.7731010452961673,
+          "end": 3.8734494773519166,
+          "alignmentConfidence": 0.2323395013809204,
+          "left": "\u0283",
+          "right": "\u026a0",
+          "similarity": 84.86,
+          "distance": 0.00467,
+          "timingSimilarity": 97.0,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "showing",
+      "wordIndex": 9,
+      "syllableIndex": 1,
+      "phonemes": [
+        "\u026a0",
+        "\u014b"
+      ],
+      "phoneIndexes": [
+        39,
+        40
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 3.8734494773519166,
+      "end": 4.013937282229965,
+      "alignmentConfidence": 0.9142195880413055,
+      "wordSyllables": 2,
+      "label": "\u026a0 \u014b",
+      "similarity": 80.87,
+      "confidence": 0.914,
+      "status": "scored",
+      "soundSimilarity": 80.87,
+      "timingSimilarity": 88.0,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "\u026a0",
+          "ipa": "\u026a",
+          "start": 3.8734494773519166,
+          "end": 3.953728222996516,
+          "alignmentConfidence": 0.8683462738990784,
+          "left": "o\u028a1",
+          "right": "\u014b",
+          "similarity": 84.69,
+          "distance": 0.01128,
+          "timingSimilarity": 90.89,
+          "status": "scored"
+        },
+        {
+          "phone": "\u014b",
+          "ipa": "\u014b",
+          "start": 3.953728222996516,
+          "end": 4.013937282229965,
+          "alignmentConfidence": 0.9600929021835327,
+          "left": "\u026a0",
+          "right": "\u00f0",
+          "similarity": 77.05,
+          "distance": 0.01794,
+          "timingSimilarity": 85.11,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "the",
+      "wordIndex": 10,
+      "syllableIndex": 0,
+      "phonemes": [
+        "\u00f0",
+        "\u02590"
+      ],
+      "phoneIndexes": [
+        41,
+        42
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 4.013937282229965,
+      "end": 4.094216027874564,
+      "alignmentConfidence": 0.9513843953609467,
+      "wordSyllables": 1,
+      "label": "\u00f0 \u02590",
+      "similarity": 85.27,
+      "confidence": 0.951,
+      "status": "scored",
+      "soundSimilarity": 85.27,
+      "timingSimilarity": 83.94,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "\u00f0",
+          "ipa": "\u00f0",
+          "start": 4.013937282229965,
+          "end": 4.054076655052265,
+          "alignmentConfidence": 0.9842500686645508,
+          "left": "\u014b",
+          "right": "\u02590",
+          "similarity": 85.32,
+          "distance": 0.00874,
+          "timingSimilarity": 86.44,
+          "status": "scored"
+        },
+        {
+          "phone": "\u02590",
+          "ipa": "\u0259",
+          "start": 4.054076655052265,
+          "end": 4.094216027874564,
+          "alignmentConfidence": 0.9185187220573425,
+          "left": "\u00f0",
+          "right": "p",
+          "similarity": 85.22,
+          "distance": 0.00496,
+          "timingSimilarity": 81.43,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "patient",
+      "wordIndex": 11,
+      "syllableIndex": 0,
+      "phonemes": [
+        "p",
+        "e\u026a1"
+      ],
+      "phoneIndexes": [
+        43,
+        44
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 4.094216027874564,
+      "end": 4.294912891986063,
+      "alignmentConfidence": 0.8751538991928101,
+      "wordSyllables": 2,
+      "label": "p e\u026a1",
+      "similarity": 85.94,
+      "confidence": 0.875,
+      "status": "scored",
+      "soundSimilarity": 85.94,
+      "timingSimilarity": 94.47,
+      "stressSimilarity": 99.99,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "p",
+          "ipa": "p",
+          "start": 4.094216027874564,
+          "end": 4.1744947735191635,
+          "alignmentConfidence": 0.9858177304267883,
+          "left": "\u02590",
+          "right": "e\u026a1",
+          "similarity": 85.8,
+          "distance": 0.00928,
+          "timingSimilarity": 99.51,
+          "status": "scored"
+        },
+        {
+          "phone": "e\u026a1",
+          "ipa": "e\u026a",
+          "start": 4.1744947735191635,
+          "end": 4.294912891986063,
+          "alignmentConfidence": 0.7644900679588318,
+          "left": "p",
+          "right": "\u0283",
+          "similarity": 86.09,
+          "distance": 0.00303,
+          "timingSimilarity": 89.44,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "patient",
+      "wordIndex": 11,
+      "syllableIndex": 1,
+      "phonemes": [
+        "\u0283",
+        "\u02590",
+        "n",
+        "t"
+      ],
+      "phoneIndexes": [
+        45,
+        46,
+        47,
+        48
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 4.294912891986063,
+      "end": 4.65616724738676,
+      "alignmentConfidence": 0.9308758825063705,
+      "wordSyllables": 2,
+      "label": "\u0283 \u02590 n t",
+      "similarity": 84.3,
+      "confidence": 0.931,
+      "status": "scored",
+      "soundSimilarity": 84.3,
+      "timingSimilarity": 82.3,
+      "stressSimilarity": 100.0,
+      "stressStatus": "synthetic-reference-model",
+      "phones": [
+        {
+          "phone": "\u0283",
+          "ipa": "\u0283",
+          "start": 4.294912891986063,
+          "end": 4.415331010452961,
+          "alignmentConfidence": 0.8976621627807617,
+          "left": "e\u026a1",
+          "right": "\u02590",
+          "similarity": 85.59,
+          "distance": 0.00664,
+          "timingSimilarity": 83.28,
+          "status": "scored"
+        },
+        {
+          "phone": "\u02590",
+          "ipa": "\u0259",
+          "start": 4.415331010452961,
+          "end": 4.455470383275261,
+          "alignmentConfidence": 0.9545553922653198,
+          "left": "\u0283",
+          "right": "n",
+          "similarity": 85.04,
+          "distance": 0.00691,
+          "timingSimilarity": 81.43,
+          "status": "scored"
+        },
+        {
+          "phone": "n",
+          "ipa": "n",
+          "start": 4.455470383275261,
+          "end": 4.515679442508711,
+          "alignmentConfidence": 0.976216733455658,
+          "left": "\u02590",
+          "right": "t",
+          "similarity": 87.31,
+          "distance": 0.00818,
+          "timingSimilarity": 87.32,
+          "status": "scored"
+        },
+        {
+          "phone": "t",
+          "ipa": "t",
+          "start": 4.515679442508711,
+          "end": 4.65616724738676,
+          "alignmentConfidence": 0.8950692415237427,
+          "left": "n",
+          "right": "w",
+          "similarity": 79.26,
+          "distance": 0.03155,
+          "timingSimilarity": 77.16,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "where",
+      "wordIndex": 12,
+      "syllableIndex": 0,
+      "phonemes": [
+        "w",
+        "\u025b\u02791"
+      ],
+      "phoneIndexes": [
+        49,
+        50
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 4.65616724738676,
+      "end": 4.836794425087108,
+      "alignmentConfidence": 0.4889393481425941,
+      "wordSyllables": 1,
+      "label": "w \u025b\u02791",
+      "similarity": 77.13,
+      "confidence": 0.489,
+      "status": "scored",
+      "soundSimilarity": 77.13,
+      "timingSimilarity": 78.13,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "w",
+          "ipa": "w",
+          "start": 4.65616724738676,
+          "end": 4.756515679442509,
+          "alignmentConfidence": 0.9768152236938477,
+          "left": "t",
+          "right": "\u025b\u02791",
+          "similarity": 77.13,
+          "distance": 0.01555,
+          "timingSimilarity": 85.13,
+          "status": "scored"
+        },
+        {
+          "phone": "\u025b\u02791",
+          "ipa": "\u025b\u0279",
+          "start": 4.756515679442509,
+          "end": 4.836794425087108,
+          "alignmentConfidence": 0.0010634725913405418,
+          "left": "w",
+          "right": "t",
+          "similarity": 77.13,
+          "distance": 0.06442,
+          "timingSimilarity": 71.13,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "to",
+      "wordIndex": 13,
+      "syllableIndex": 0,
+      "phonemes": [
+        "t",
+        "u\u02d00"
+      ],
+      "phoneIndexes": [
+        51,
+        52
+      ],
+      "stress": 0,
+      "pronunciationVariant": "en-us",
+      "start": 4.836794425087108,
+      "end": 4.977282229965157,
+      "alignmentConfidence": 0.4729292520787567,
+      "wordSyllables": 1,
+      "label": "t u\u02d00",
+      "similarity": 68.0,
+      "confidence": 0.473,
+      "status": "scored",
+      "soundSimilarity": 68.0,
+      "timingSimilarity": 96.45,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "t",
+          "ipa": "t",
+          "start": 4.836794425087108,
+          "end": 4.897003484320558,
+          "alignmentConfidence": 0.9421919584274292,
+          "left": "\u025b\u02791",
+          "right": "u\u02d00",
+          "similarity": 80.51,
+          "distance": 0.02755,
+          "timingSimilarity": 93.22,
+          "status": "scored"
+        },
+        {
+          "phone": "u\u02d00",
+          "ipa": "u\u02d0",
+          "start": 4.897003484320558,
+          "end": 4.977282229965157,
+          "alignmentConfidence": 0.003666545730084181,
+          "left": "t",
+          "right": "w",
+          "similarity": 55.48,
+          "distance": 0.1354,
+          "timingSimilarity": 99.69,
+          "status": "scored"
+        }
+      ]
+    },
+    {
+      "word": "wait",
+      "wordIndex": 14,
+      "syllableIndex": 0,
+      "phonemes": [
+        "w",
+        "e\u026a1",
+        "t"
+      ],
+      "phoneIndexes": [
+        53,
+        54,
+        55
+      ],
+      "stress": 1,
+      "pronunciationVariant": "en-us",
+      "start": 4.977282229965157,
+      "end": 5.378675958188153,
+      "alignmentConfidence": 0.8906525373458862,
+      "wordSyllables": 1,
+      "label": "w e\u026a1 t",
+      "similarity": 84.06,
+      "confidence": 0.891,
+      "status": "scored",
+      "soundSimilarity": 84.06,
+      "timingSimilarity": 83.91,
+      "stressSimilarity": null,
+      "stressStatus": "single-syllable-word",
+      "phones": [
+        {
+          "phone": "w",
+          "ipa": "w",
+          "start": 4.977282229965157,
+          "end": 5.077630662020906,
+          "alignmentConfidence": 0.9698320627212524,
+          "left": "u\u02d00",
+          "right": "e\u026a1",
+          "similarity": 82.32,
+          "distance": 0.01207,
+          "timingSimilarity": 85.13,
+          "status": "scored"
+        },
+        {
+          "phone": "e\u026a1",
+          "ipa": "e\u026a",
+          "start": 5.077630662020906,
+          "end": 5.198048780487805,
+          "alignmentConfidence": 0.7234660983085632,
+          "left": "w",
+          "right": "t",
+          "similarity": 84.4,
+          "distance": 0.01027,
+          "timingSimilarity": 89.44,
+          "status": "scored"
+        },
+        {
+          "phone": "t",
+          "ipa": "t",
+          "start": 5.238188153310104,
+          "end": 5.378675958188153,
+          "alignmentConfidence": 0.978659451007843,
+          "left": "e\u026a1",
+          "right": "#",
+          "similarity": 85.47,
+          "distance": 0.01166,
+          "timingSimilarity": 77.16,
+          "status": "scored"
+        }
+      ]
+    }
+  ],
+  "text": "The nurse spoke calmly and answered every question before showing the patient where to wait.",
+  "status": "scored"
+}

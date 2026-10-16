@@ -1,0 +1,277 @@
+{
+  "scope": "V2 held-out-profile validation only. No fresh final-test results opened.",
+  "byAccent": {
+    "en-US": {
+      "phones": 5082,
+      "classificationErrors": 264,
+      "meanAlignmentConfidence": 0.7514750182812703,
+      "lowConfidenceFraction": 0.0444706808343172,
+      "largestConfusions": [
+        {
+          "target": "\u027e",
+          "predicted": "d",
+          "count": 16
+        },
+        {
+          "target": "\u026a",
+          "predicted": "\u025b",
+          "count": 10
+        },
+        {
+          "target": "\u1d7b",
+          "predicted": "\u026a",
+          "count": 10
+        },
+        {
+          "target": "z",
+          "predicted": "s",
+          "count": 9
+        },
+        {
+          "target": "\u0254\u02d0\u0279",
+          "predicted": "\u0254\u02d0",
+          "count": 9
+        },
+        {
+          "target": "\u026a",
+          "predicted": "\u0259",
+          "count": 9
+        },
+        {
+          "target": "d",
+          "predicted": "t",
+          "count": 9
+        },
+        {
+          "target": "o\u028a",
+          "predicted": "\u0254\u02d0",
+          "count": 8
+        },
+        {
+          "target": "\u025b",
+          "predicted": "\u00e6",
+          "count": 8
+        },
+        {
+          "target": "t",
+          "predicted": "d",
+          "count": 7
+        },
+        {
+          "target": "\u0250",
+          "predicted": "e\u026a",
+          "count": 6
+        },
+        {
+          "target": "\u028a\u0279",
+          "predicted": "\u026a",
+          "count": 6
+        }
+      ]
+    },
+    "en-GB": {
+      "phones": 5083,
+      "classificationErrors": 375,
+      "meanAlignmentConfidence": 0.7483722048696274,
+      "lowConfidenceFraction": 0.04111745032461145,
+      "largestConfusions": [
+        {
+          "target": "\u026a",
+          "predicted": "\u1d7b",
+          "count": 40
+        },
+        {
+          "target": "\u027e",
+          "predicted": "t",
+          "count": 29
+        },
+        {
+          "target": "a",
+          "predicted": "\u00e6",
+          "count": 28
+        },
+        {
+          "target": "\u0254\u02d0\u0279",
+          "predicted": "\u0254\u02d0",
+          "count": 23
+        },
+        {
+          "target": "\u1d7b",
+          "predicted": "\u026a",
+          "count": 21
+        },
+        {
+          "target": "\u025a",
+          "predicted": "\u0259",
+          "count": 21
+        },
+        {
+          "target": "\u0259",
+          "predicted": "\u025a",
+          "count": 16
+        },
+        {
+          "target": "\u0254\u02d0",
+          "predicted": "\u0254\u02d0\u0279",
+          "count": 15
+        },
+        {
+          "target": "z",
+          "predicted": "s",
+          "count": 9
+        },
+        {
+          "target": "\u0259",
+          "predicted": "e\u026a",
+          "count": 9
+        },
+        {
+          "target": "\u0259",
+          "predicted": "\u0250",
+          "count": 8
+        },
+        {
+          "target": "\u1d7b",
+          "predicted": "\u0259",
+          "count": 8
+        }
+      ]
+    },
+    "en-AU": {
+      "phones": 4877,
+      "classificationErrors": 689,
+      "meanAlignmentConfidence": 0.7135797325773858,
+      "lowConfidenceFraction": 0.05700225548492926,
+      "largestConfusions": [
+        {
+          "target": "e\u026a",
+          "predicted": "a\u026a",
+          "count": 46
+        },
+        {
+          "target": "\u025a",
+          "predicted": "\u0259",
+          "count": 26
+        },
+        {
+          "target": "i\u02d0",
+          "predicted": "e\u026a",
+          "count": 23
+        },
+        {
+          "target": "\u027e",
+          "predicted": "t",
+          "count": 18
+        },
+        {
+          "target": "\u1d7b",
+          "predicted": "\u0259",
+          "count": 16
+        },
+        {
+          "target": "\u0254\u02d0\u0279",
+          "predicted": "\u0254\u02d0",
+          "count": 16
+        },
+        {
+          "target": "t",
+          "predicted": "s",
+          "count": 15
+        },
+        {
+          "target": "\u027e",
+          "predicted": "d",
+          "count": 14
+        },
+        {
+          "target": "\u026a",
+          "predicted": "\u0259",
+          "count": 14
+        },
+        {
+          "target": "a\u026a",
+          "predicted": "\u0251\u02d0",
+          "count": 14
+        },
+        {
+          "target": "\u1d7b",
+          "predicted": "\u026a",
+          "count": 12
+        },
+        {
+          "target": "a\u028a",
+          "predicted": "\u00e6",
+          "count": 12
+        }
+      ]
+    },
+    "en-IN": {
+      "phones": 5082,
+      "classificationErrors": 658,
+      "meanAlignmentConfidence": 0.7351899866054407,
+      "lowConfidenceFraction": 0.05824478551751279,
+      "largestConfusions": [
+        {
+          "target": "t",
+          "predicted": "d",
+          "count": 41
+        },
+        {
+          "target": "\u1d7b",
+          "predicted": "\u026a",
+          "count": 35
+        },
+        {
+          "target": "\u027e",
+          "predicted": "t",
+          "count": 27
+        },
+        {
+          "target": "\u026a",
+          "predicted": "\u1d7b",
+          "count": 26
+        },
+        {
+          "target": "\u025a",
+          "predicted": "\u0259",
+          "count": 24
+        },
+        {
+          "target": "\u0254\u02d0\u0279",
+          "predicted": "\u0254\u02d0",
+          "count": 23
+        },
+        {
+          "target": "\u00e6",
+          "predicted": "a",
+          "count": 21
+        },
+        {
+          "target": "e\u026a",
+          "predicted": "\u026a",
+          "count": 17
+        },
+        {
+          "target": "a",
+          "predicted": "\u00e6",
+          "count": 17
+        },
+        {
+          "target": "\u0259",
+          "predicted": "\u025a",
+          "count": 16
+        },
+        {
+          "target": "\u026a",
+          "predicted": "\u0259",
+          "count": 16
+        },
+        {
+          "target": "d",
+          "predicted": "n",
+          "count": 15
+        }
+      ]
+    }
+  }
+}

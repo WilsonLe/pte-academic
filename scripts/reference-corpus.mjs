@@ -21,6 +21,7 @@ import {
   withGenerationLock,
   readLedger,
   writeLedger,
+  authorizedBudget,
 } from "./openrouter.mjs";
 const exec = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -231,12 +232,8 @@ async function main() {
     const policy = JSON.parse(
       await readFile(join(ROOT, "content/authoring.json"), "utf8"),
     );
-    if (
-      policy.spendingLimitUsd !== 10 ||
-      !policy.requiresOperatorApprovalToIncrease
-    )
-      throw Error("Original spending policy required.");
     const ledger = await readLedger();
+    const limit = authorizedBudget(policy, ledger);
     if (ledger.reservations.some((r) => r.status !== "completed"))
       throw Error(
         "An uncertain paid request requires reconciliation before generation.",
@@ -256,15 +253,24 @@ async function main() {
     }
     if (manifest.referenceVersion !== config.referenceVersion)
       throw Error("Existing corpus version differs.");
-    let old = [];
-    if (directory !== "reference-v1") {
+    const old = [];
+    for (const reuseDirectory of config.reuseDirectories ||
+      (directory !== "reference-v1" ? ["reference-v1"] : [])) {
+      if (!/^[a-z0-9-]+$/.test(reuseDirectory) || reuseDirectory === directory)
+        throw Error("Unsafe corpus reuse directory.");
       try {
-        old = JSON.parse(
+        const source = JSON.parse(
           await readFile(
-            join(ROOT, "artifacts/pronunciation/reference-v1/manifest.json"),
+            join(
+              ROOT,
+              "artifacts/pronunciation",
+              reuseDirectory,
+              "manifest.json",
+            ),
             "utf8",
           ),
         ).takes;
+        old.push(...source.map((take) => ({ ...take, reuseDirectory })));
       } catch (e) {
         if (e.code !== "ENOENT") throw e;
       }
@@ -299,7 +305,7 @@ async function main() {
       if (reusable) {
         const source = join(
           ROOT,
-          "artifacts/pronunciation/reference-v1",
+          "artifacts/pronunciation/" + reusable.reuseDirectory,
           reusable.file,
         );
         if (hash(await readFile(source)) !== reusable.audioSha256)
@@ -313,7 +319,11 @@ async function main() {
           )
             throw e;
         }
-        const record = { ...reusable, ...take, reusedFrom: "reference-v1" };
+        const record = {
+          ...reusable,
+          ...take,
+          reusedFrom: reusable.reuseDirectory,
+        };
         manifest.takes.push(record);
         existing.set(take.takeId, record);
         continue;
@@ -330,7 +340,7 @@ async function main() {
     const remainingCost = pending.reduce((s, t) => s + costOf(t), 0);
     checkKeyBudget(
       (await (await api("/key")).json()).data,
-      10,
+      limit,
       remainingCost,
       ledger.reservations.reduce((s, r) => s + r.costUsd, 0),
     );
@@ -353,7 +363,7 @@ async function main() {
         const costUsd = costOf(take);
         checkKeyBudget(
           key,
-          10,
+          limit,
           costUsd,
           ledger.reservations.reduce((s, r) => s + r.costUsd, 0),
         );

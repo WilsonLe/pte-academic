@@ -25,6 +25,15 @@ class Experiment:
         ]:
             if not re.fullmatch("[a-z0-9-]+", config.get(key, default)):
                 raise ValueError("Unsafe experiment artifact directory.")
+        if not re.fullmatch(
+            r"[a-z0-9-]+\.json", config.get("auditFile", "corpus-audit.json")
+        ):
+            raise ValueError("Unsafe experiment audit filename.")
+        if config.get("featureRepresentation", "hidden7") not in {
+            "hidden7",
+            "hidden-ctc-v1",
+        }:
+            raise ValueError("Unsupported feature representation.")
         return cls(path, config)
 
     @property
@@ -41,6 +50,8 @@ class Experiment:
 
     @property
     def audit(self):
+        if "auditFile" in self.config:
+            return self.base / self.config["auditFile"]
         return self.base / (
             "corpus-audit-v2.json"
             if self.config["schemaVersion"] == 2
@@ -54,6 +65,10 @@ class Experiment:
     @property
     def reference_version(self):
         return self.config["referenceVersion"]
+
+    @property
+    def representation(self):
+        return self.config.get("featureRepresentation", "hidden7")
 
     @property
     def phonetic_mode(self):

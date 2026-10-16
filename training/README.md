@@ -1,8 +1,10 @@
 # English pronunciation comparison experiment
 
-This development-only pipeline generates synthetic English reference speech through OpenRouter, trains a local comparison model, and returns a reference similarity index for every supported syllable in a local recording. It is separate from PTE Studio's learner-facing Whisper review. Nothing in this directory is imported by the PWA.
+**Training is paused at accepted v3 (2026-10-16).** Start with the [pause and resume guide](RESUME.md) for the checkpoint, local data to preserve, budget snapshot and future restart procedure. The operator chose to keep training audio out of Git.
 
-The operator authorized generated-output training. The existing US$10 **total project** authoring budget still applies. The corpus generator reads the existing private credential internally and shares the authoring lock and conservative spending ledger. Never reset the ledger, automatically retry a failed paid request, or put a credential in a command argument.
+This development-only pipeline generates synthetic English reference speech through OpenRouter, trains a local comparison model, and returns a reference similarity index for every supported syllable in a local recording. It is separate from PTE Studio's learner-facing Whisper review. The PWA uses its derived browser export for v3 syllable sound similarity; raw training inputs and Python runtime are not imported into the app.
+
+The operator authorized generated-output training. The current authorized cumulative cap is **US$17.0113639**: on 2026-10-16 the operator explicitly granted a fresh US$10 allowance after US$7.0113639 in reservations. The original spending history remains intact; there is no automatic reset. `content/authoring.json` records the authorization. The corpus generator reads the existing private credential internally and shares the authoring lock and conservative spending ledger. Never reset the ledger, automatically retry a failed paid request, or put a credential in a command argument.
 
 ## Reference recordings
 
@@ -16,7 +18,7 @@ node scripts/reference-corpus.mjs plan --config training/reference-corpus-v2.jso
 node scripts/reference-corpus.mjs generate --config training/reference-corpus-v2.json --concurrency 16 --requests-per-second 4 --confirm-spend --max-usd 7
 ```
 
-Review the live estimate first. The batch ceiling never overrides the cumulative US$10 cap. Concurrency accepts 1–32 workers. Request starts are paced at four per second by default (`--requests-per-second`, greater than zero and at most 32); an unpaced 32-worker burst reached a provider preflight rate limit, so higher concurrency alone is not a throughput guarantee. One serialized coordinator reserves budget and checkpoints each manifest/ledger mutation, while independent requests overlap. A failed request stops new scheduling and drains in-flight work. There are no automatic paid retries. Failed/uncertain reservations block resumption until reconciled.
+Review the live estimate first. The batch ceiling never overrides the currently authorized cumulative cap. Concurrency accepts 1–32 workers. Request starts are paced at four per second by default (`--requests-per-second`, greater than zero and at most 32); an unpaced 32-worker burst reached a provider preflight rate limit, so higher concurrency alone is not a throughput guarantee. One serialized coordinator reserves budget and checkpoints each manifest/ledger mutation, while independent requests overlap. A failed request stops new scheduling and drains in-flight work. There are no automatic paid retries. Failed/uncertain reservations block resumption until reconciled.
 
 Matching completed takes are hash checked and retained; 300 matching baseline recordings are reused in v2. Files include synthetic flags, model/voice/accent, split/family, generation-header ID, script/audio hashes, duration and truthful listening status. Decoder or recognizer checks do not establish human listening review. Public model availability and prices are verified when planning/generating.
 
@@ -64,7 +66,7 @@ Use `--follow` on preparation/audit to process incoming generator checkpoints. E
 
 ```sh
 uv run --project training python training/comparison.py predict \
-  --model training/checkpoints/blended-english-v2/model.pt \
+  --model training/checkpoints/blended-english-v3/model.pt \
   --audio /absolute/path/to/recording.wav \
   --text 'The sentence the learner intended to read.' \
   --output artifacts/pronunciation/prediction.json
@@ -86,4 +88,38 @@ The experiment tests synthetic unseen-text/voice generalization, sound discrimin
 
 Synthetic positives establish the chosen generators' reference distribution. They cannot establish human English pronunciation validity, intelligibility, proficiency, or certified exam scores. Human listening review of references and a separate consented human-speaker evaluation remain necessary before learner-facing diagnostic claims. Similarity to this corpus can change with context and is not evidence that every accent difference is an error. The prototype does not validate mouth/tongue correction advice.
 
-The trained model is a Python research artifact. No browser export, mobile performance claim, practice-screen integration, merge or deployment is included. The pinned pretrained encoders are larger than the trained comparison heads; model setup downloads them separately. See the checked-in model card/evidence for the actual completed run and measured limitations.
+The fitted checkpoint remains a Python research artifact. Its subsequently authorized browser export powers local Read Aloud/Repeat Sentence sound similarity; see [browser export](checkpoints/blended-english-v3/BROWSER_EXPORT.md) for scope and verification. No broad mobile performance or human diagnostic validity is established. The pinned pretrained encoders are larger than the trained comparison heads; model setup downloads them separately. See the checked-in model card/evidence for the actual completed run and measured limitations.
+
+## Australian/Indian generalization iteration (v3)
+
+`reference-corpus-v3.json` preserves the existing ten profiles and all 5,000 audio files. It adds 60 fresh, independent final-test passages (600 recordings), reuses the existing 350 training passages and treats all 150 previously exposed validation/test passages as development validation. The original held-out profiles remain excluded from fitted data and the reference bank. Do not use the fresh final test to select a model. Live provider discovery did not expose additional distinct Australian/Indian identities; the pipeline does not relabel the same voice on another synthesis model as an independent speaker.
+
+The versioned `hidden-ctc-v1` feature concatenates the original layer-7 representation with the **full observed phonetic log-probability vector**, pooled over the same aligned frames. No expected sound ID, accent ID, target one-hot vector or accent-specific score offset is appended. Preparation and prediction share `sound_feature`; checkpoints and caches record the representation, and mismatches fail closed. Legacy checkpoints default to `hidden7`, retaining their original prediction behavior. Balanced training/banks remain; v3 also balances stress-training sampling and each sound’s shared calibration/duration distributions across represented accents. Calibration uses the inverse weighted empirical distribution (one equal total mass per accent), producing one common scale for all speakers. V3 epoch selection uses macro-average validation sound accuracy with equal weight for each accent group.
+
+```sh
+node scripts/reference-corpus.mjs plan --config training/reference-corpus-v3.json
+node scripts/reference-corpus.mjs generate --config training/reference-corpus-v3.json --concurrency 16 --requests-per-second 4 --confirm-spend --max-usd 7
+uv run --project training python training/comparison.py prepare --config training/reference-corpus-v3.json --batch-size 16 --workers 8
+uv run --project training python training/audit_corpus.py --config training/reference-corpus-v3.json --device cpu --threads 8 --batch-size 8 --workers 4
+uv run --project training python training/comparison.py train --config training/reference-corpus-v3.json --output artifacts/pronunciation/runs/accent-candidate-1 --epochs 30 --device auto --threads 16 --batch-size 2048
+uv run --project training python training/comparison.py evaluate --config training/reference-corpus-v3.json --model artifacts/pronunciation/runs/accent-candidate-1/model.pt --output artifacts/pronunciation/runs/accent-candidate-1/validation.json
+```
+
+The generator's batch ceiling describes the full configuration estimate (including already paid/reused audio). The ledger/provider guards still check only missing requests against the cumulative project cap. Reusing a corpus verifies model, voice, script and audio hashes before copying and records its source. `auditFile` isolates v3 audit state from v2; matching old audit rows may be reused only with matching raw audio hashes.
+
+After validation and actual inference checks, freeze the checkpoint, then evaluate it and v2 on exactly the same fresh test recordings. Baseline transfer evaluation requires explicit `--transfer`; it does not update the checkpoint. Only the documented `hidden-ctc-v1` → `hidden7` prefix conversion is allowed, preserving the last three relative stress features separately. Different phonetic label systems are rejected. Normal evaluation still requires matching training corpus/version identities. Reports distinguish training and evaluation manifest hashes.
+
+```sh
+uv run --project training python training/comparison.py evaluate --config training/reference-corpus-v3.json --model training/checkpoints/blended-english-v2/model.pt --output artifacts/pronunciation/runs/accent-candidate-1/baseline-validation.json --transfer
+```
+
+See the new model card for actual paired results, budget, timings and limits. Synthetic sound discrimination and reference similarity remain distinct from human pronunciation-score validity; raw audio is not shipped in the PWA. The subsequently authorized required v3 browser model is documented separately.
+
+## Rebuild the browser export
+
+```sh
+uv sync --project training --locked --group export
+uv run --project training --group export python training/export_browser.py
+```
+
+This converts the existing accepted checkpoint and pinned encoder without fitting or paid generation. It writes versioned model weight parts/metadata under `public/models/blended-english-v3/` and the pinned application manifest `src/speech/comparison-manifest.json`. Preserve the original model and training corpus. Export dependencies are isolated in the locked `export` group; the historical fitting lock hash remains recorded in v3 provenance at commit `8827348`. Validate export identities and browser/Python agreement before shipping a rebuilt pack. The required pack downloads automatically into its own verified cache; no opt-in or word-match grade fallback.
