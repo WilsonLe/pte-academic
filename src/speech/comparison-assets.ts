@@ -29,6 +29,11 @@ export function modelBase() {
 export function modelCache(base = modelBase()) {
   return `pte-comparison:${base}:${manifest.id}`;
 }
+export class ModelAssetError extends Error {}
+export function invalidateComparisonModel(message: string) {
+  pending = undefined;
+  update({ status: "error", percent: 0, message });
+}
 export async function verifiedAsset(path: string, base = modelBase()) {
   const descriptor = manifest.files.find((f) => f.path === path);
   if (!descriptor) throw new Error("Unknown speech model asset.");
@@ -37,13 +42,17 @@ export async function verifiedAsset(path: string, base = modelBase()) {
     new URL(manifest.assetDirectory + path, base).href,
   );
   if (!response)
-    throw new Error("Required speech model is missing. Retry its download.");
+    throw new ModelAssetError(
+      "Required speech model is missing. Retry its download.",
+    );
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (
     bytes.length !== descriptor.bytes ||
     (await sha256(bytes)) !== descriptor.sha256
   )
-    throw new Error("Speech model integrity check failed. Retry its download.");
+    throw new ModelAssetError(
+      "Speech model integrity check failed. Retry its download.",
+    );
   return bytes;
 }
 async function sha256(data: Uint8Array) {

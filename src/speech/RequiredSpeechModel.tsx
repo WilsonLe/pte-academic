@@ -1,5 +1,5 @@
 import { comparisonRuntimeFiles } from "./comparison-runtime";
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import {
   modelStatus,
   prepareComparisonModel,
@@ -8,16 +8,16 @@ import {
 import { Button } from "../components/ui/button";
 export function RequiredSpeechModel() {
   const state = useSyncExternalStore(subscribeModel, modelStatus);
-  useEffect(() => {
-    void prepareComparisonModel(false, comparisonRuntimeFiles).catch(() => {});
-  }, []);
   if (state.status === "ready") return null;
   return (
     <aside
       aria-label="Required speech model"
-      className="fixed right-3 bottom-20 z-50 max-w-[min(26rem,calc(100vw-1.5rem))] rounded-xl border bg-background p-3 text-xs shadow-lg"
+      className="required-speech-model flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b bg-background px-4 py-2 text-xs"
     >
-      <p role={state.status === "error" ? "alert" : "status"}>
+      <p
+        className="min-w-0 flex-1"
+        role={state.status === "error" ? "alert" : "status"}
+      >
         {state.message}
       </p>
       {state.status === "loading" ? (
@@ -25,12 +25,12 @@ export function RequiredSpeechModel() {
           aria-label="Speech model download"
           value={state.percent}
           max={100}
-          className="mt-2 w-full"
+          className="h-2 w-28 shrink-0"
         />
       ) : (
         <Button
           size="sm"
-          className="mt-2"
+          className="ml-auto shrink-0"
           onClick={() =>
             void prepareComparisonModel(true, comparisonRuntimeFiles).catch(
               () => {},

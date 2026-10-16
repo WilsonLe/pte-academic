@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { COMPARISON_MODEL_SHA } from "../src/speech/comparison-schema";
 const base = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
-async function seed(page: Page) {
+async function seed(page: Page, waitForModel = true) {
   await page.goto(base);
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
@@ -49,9 +49,10 @@ async function seed(page: Page) {
   });
   await page.goto(base + "history/comparison-fixture");
   await page.getByRole("button", { name: "Speech", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Score speech with v3 model" }),
-  ).toBeEnabled({ timeout: 90000 });
+  if (waitForModel)
+    await expect(
+      page.getByRole("button", { name: "Score speech with v3 model" }),
+    ).toBeEnabled({ timeout: 90000 });
 }
 async function workerPath() {
   return (
@@ -291,18 +292,97 @@ test("required automatic download, actual app grading, saved scores, cancellatio
 });
 test("failed required download blocks model grading and retries without a word-match fallback", async ({
   page,
+  context,
 }) => {
   test.setTimeout(120000);
-  await page.route("**/models/blended-english-v3/encoder-00.bin", (r) =>
-    r.abort(),
-  );
-  await page.goto(base);
+  await page.setViewportSize({ width: 390, height: 844 });
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/models/blended-english-v3/encoder-00.bin", async (r) => {
+    await held;
+    await r.abort();
+  });
+  await page.goto(base + "types");
+  await expect(page.getByLabel("Speech model download")).toBeVisible();
+  const next = page.getByRole("button", { name: "Next question type pages" });
+  await next.click();
+  if (base === "/")
+    await page.screenshot({
+      path: "artifacts/pronunciation/browser-export/model-loading-mobile.png",
+    });
+  release();
   await expect(
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible({ timeout: 60000 });
+  await next.click();
+  if (base === "/")
+    await page.screenshot({
+      path: "artifacts/pronunciation/browser-export/model-error-mobile.png",
+    });
+  await page
+    .getByRole("navigation", { name: "Mobile navigation" })
+    .getByRole("link", { name: "History" })
+    .click();
+  await expect(page.getByRole("heading", { name: "History" })).toBeVisible();
+  // A controlling service worker can bypass page routes on a fresh document.
+  // Real offline transport keeps the missing part unavailable across reloads.
+  await context.setOffline(true);
+  await seed(page, false);
+  await expect(
+    page.getByRole("button", { name: "Score speech with v3 model" }),
+  ).toBeDisabled();
+  await page
+    .getByRole("group", { name: "Your recording for question 1", exact: true })
+    .getByRole("button", { name: /Play/ })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Retry model download" }),
+  ).toBeVisible();
+  await context.setOffline(false);
   await page.unroute("**/models/blended-english-v3/encoder-00.bin");
   await page.getByRole("button", { name: "Retry model download" }).click();
   await expect(page.getByLabel("Required speech model")).toHaveCount(0, {
     timeout: 90000,
   });
+});
+
+test("post-ready missing and corrupt cached assets expose retry and recover without reload", async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  await seed(page);
+  const score = page.getByRole("button", {
+    name: "Score speech with v3 model",
+  });
+  for (const corrupt of [false, true]) {
+    await page.evaluate(async (corrupt) => {
+      const name = (await caches.keys()).find((n) =>
+        n.startsWith("pte-comparison:"),
+      )!;
+      const cache = await caches.open(name);
+      const url = (await cache.keys()).find((r) =>
+        r.url.endsWith("/comparison.json"),
+      )!;
+      if (corrupt) await cache.put(url, new Response("corrupt"));
+      else await cache.delete(url);
+    }, corrupt);
+    await score.click();
+    const retry = page.getByRole("button", { name: "Retry model download" });
+    await expect(retry).toBeVisible({ timeout: 30000 });
+    await expect(score).toBeDisabled();
+    await retry.click();
+    await expect(score).toBeEnabled({ timeout: 60000 });
+    await score.click();
+    await expect(
+      page.getByLabel(/^Reference similarity \d+ out of 100$/),
+    ).toBeVisible({ timeout: 60000 });
+    await expect(score).toBeEnabled();
+    await expect(
+      page
+        .getByRole("region", { name: "On-device speech feedback" })
+        .getByRole("alert"),
+    ).toHaveCount(0);
+  }
 });

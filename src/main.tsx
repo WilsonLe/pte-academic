@@ -2,7 +2,8 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { screenRoutes, screenPath } from "./routing";
 import App from "./App";
-import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
+import { prepareComparisonModel } from "./speech/comparison-assets";
+import { comparisonRuntimeFiles } from "./speech/comparison-runtime";
 import "./style.css";
 import "./screens.css";
 // Absolute asset/base paths keep nested history links and refreshes reliable.
@@ -21,9 +22,8 @@ const router = createBrowserRouter(
   [{ element: <App />, children: screenRoutes }],
   { basename },
 );
+// Required preparation starts once, including direct links into active practice.
+void prepareComparisonModel(false, comparisonRuntimeFiles).catch(() => {});
 createRoot(document.getElementById("root")!).render(
-  <>
-    <RequiredSpeechModel />
-    <RouterProvider router={router} />
-  </>,
+  <RouterProvider router={router} />,
 );

@@ -81,6 +81,7 @@ import {
   type Progress,
 } from "./progress";
 import { Chart } from "./QuestionInput";
+import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
 import { SpeechReview } from "./speech/SpeechReview";
 import type { Transcription } from "./speech/scoring";
 import type { Pronunciation } from "./speech/comparison-schema";
@@ -490,6 +491,7 @@ export default function App() {
               )}
             </div>
           </header>
+          <RequiredSpeechModel />
           {(storageError || pwa.error) && (
             <div
               className="border-b bg-destructive/5 px-5 py-3 text-xs text-destructive"

@@ -1,7 +1,11 @@
 import * as ort from "onnxruntime-web";
 import wasmUrl from "../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm?url";
 import factoryUrl from "../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs?url";
-import { comparisonManifest, verifiedAsset } from "./comparison-assets";
+import {
+  comparisonManifest,
+  verifiedAsset,
+  ModelAssetError,
+} from "./comparison-assets";
 import {
   logProbabilities,
   normalizedAudio,
@@ -99,6 +103,7 @@ self.onmessage = async (
   } catch (error) {
     self.postMessage({
       type: "error",
+      code: error instanceof ModelAssetError ? "model-assets" : undefined,
       message:
         error instanceof Error
           ? error.message

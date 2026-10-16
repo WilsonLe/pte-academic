@@ -3,7 +3,11 @@ import {
   comparisonRuntimeFiles,
 } from "./comparison-runtime";
 import { decodeRecording } from "./client";
-import { prepareComparisonModel, modelBase } from "./comparison-assets";
+import {
+  prepareComparisonModel,
+  modelBase,
+  invalidateComparisonModel,
+} from "./comparison-assets";
 import {
   COMPARISON_MAX_SECONDS,
   pronunciationSchema,
@@ -76,8 +80,12 @@ export function scoreRecording(
           if (aborted) return;
           const data = event.data;
           if (data.type === "progress") onProgress(String(data.message));
-          else if (data.type === "error") fail(new Error(String(data.message)));
-          else if (data.type === "complete") {
+          else if (data.type === "error") {
+            const message = String(data.message);
+            if (data.code === "model-assets")
+              invalidateComparisonModel(message);
+            fail(new Error(message));
+          } else if (data.type === "complete") {
             const checked = pronunciationSchema.safeParse(data.result);
             clearTimeout(timeout);
             if (checked.success) resolve(checked.data);
