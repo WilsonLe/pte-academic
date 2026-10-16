@@ -85,6 +85,150 @@ async function screenFits(page: Page) {
     );
   expect(bad).toEqual([]);
 }
+test("fixed viewport blocks app zoom and document scrolling without blocking input", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+    { width: 360, height: 400 },
+    { width: 320, height: 451 },
+    { width: 320, height: 560 },
+  ]) {
+    await page.setViewportSize(size);
+    for (const route of ["/", "/types", "/guide", "/history"]) {
+      await page.goto(route);
+      await expect(page.locator("main")).toBeVisible();
+      expect(
+        await page.locator('meta[name="viewport"]').getAttribute("content"),
+      ).toContain("maximum-scale=1.0,user-scalable=no");
+      const result = await page.evaluate(() => {
+        window.scrollTo(500, 500);
+        document.body.scrollTo(500, 500);
+        return {
+          x: scrollX,
+          y: scrollY,
+          bodyX: document.body.scrollLeft,
+          bodyY: document.body.scrollTop,
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight,
+          touch: getComputedStyle(document.body).touchAction,
+        };
+      });
+      expect(result).toEqual({
+        x: 0,
+        y: 0,
+        bodyX: 0,
+        bodyY: 0,
+        width: size.width,
+        height: size.height,
+        touch: "pan-x pan-y",
+      });
+      await page.mouse.move(size.width - 10, 80);
+      await page.mouse.wheel(0, 800);
+      await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+    }
+  }
+  await page.goto("/types");
+  const search = page.getByRole("searchbox");
+  await search.fill("Read Aloud");
+  await expect(search).toHaveValue("Read Aloud");
+  expect(
+    await search.evaluate((node) => getComputedStyle(node).touchAction),
+  ).toBe("pan-x pan-y");
+  const cancelled = await search.evaluate((node) => {
+    const events = [
+      ...["+", "=", "-", "0"].flatMap((key) => [
+        new KeyboardEvent("keydown", {
+          key,
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+        new KeyboardEvent("keydown", {
+          key,
+          metaKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      ]),
+      new WheelEvent("wheel", {
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+      new WheelEvent("wheel", {
+        metaKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+      new Event("gesturestart", { bubbles: true, cancelable: true }),
+      new Event("gesturechange", { bubbles: true, cancelable: true }),
+    ];
+    return events.map((event) => !node.dispatchEvent(event));
+  });
+  expect(cancelled.every(Boolean)).toBe(true);
+  expect(
+    await search.evaluate((node) =>
+      [
+        new KeyboardEvent("keydown", {
+          key: "-",
+          bubbles: true,
+          cancelable: true,
+        }),
+        new KeyboardEvent("keydown", {
+          key: "a",
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+        new WheelEvent("wheel", { bubbles: true, cancelable: true }),
+      ].every((event) => node.dispatchEvent(event)),
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: "test-results/viewport-short.png" });
+});
+
+test("fixed viewport keeps preparation and timed response controls reachable", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+    { width: 360, height: 400 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/practice/type/write-essay");
+    await start(page);
+    const response = page.getByRole("textbox", {
+      name: "Your response",
+      exact: true,
+    });
+    await response.fill("A short response remains editable.");
+    await expect(response).toHaveValue("A short response remains editable.");
+    const footer = await page.locator(".exam-footer").boundingBox();
+    expect(footer!.y).toBeGreaterThanOrEqual(0);
+    expect(footer!.y + footer!.height).toBeLessThanOrEqual(size.height);
+    await page.evaluate(() => window.scrollTo(500, 500));
+    expect(
+      await page.evaluate(() => ({
+        x: scrollX,
+        y: scrollY,
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+      })),
+    ).toEqual({ x: 0, y: 0, width: size.width, height: size.height });
+    await page.screenshot({
+      path: `test-results/viewport-exam-${size.width}.png`,
+    });
+    await end(page);
+  }
+});
+
 test("shared cards list fits responsive panels and exposes every question type", async ({
   page,
 }) => {

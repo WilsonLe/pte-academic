@@ -55,6 +55,7 @@ import { type PracticePlan, type Result } from "./Runner";
 import { PracticeSession } from "./PracticeSession";
 import { loadAttempt } from "./storage";
 import { usePwa } from "./pwa";
+import { useViewportLock } from "./useViewportLock";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
 import {
@@ -219,6 +220,7 @@ function Nav({ active, mobile = false }: { active: string; mobile?: boolean }) {
   );
 }
 export default function App() {
+  useViewportLock();
   const client = useQueryClient();
   const progressState = useQuery(progressQuery());
   const progress = progressState.data ?? emptyProgress();

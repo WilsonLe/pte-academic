@@ -1148,7 +1148,9 @@
 
 /* Preflight shares the practice palette; the timed exam remains isolated. */
 .setup-page {
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: max(24px, env(safe-area-inset-top)) 20px
     max(32px, env(safe-area-inset-bottom));
   background: #f7f8fc;
@@ -1352,7 +1354,9 @@
 
 /* Exam surface intentionally has its own layout and type system. */
 .exam {
-  min-height: 100dvh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   background: #fff;
   color: #202b2e;
   font-family: Arial, Helvetica, sans-serif;
@@ -1360,6 +1364,7 @@
   flex-direction: column;
 }
 .exam-header {
+  flex-shrink: 0;
   background: #076c80;
   color: #fff;
   min-height: 58px;
@@ -1383,6 +1388,7 @@
   font-variant-numeric: tabular-nums;
 }
 .exam-subheader {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   background: #e7eef0;
@@ -1392,6 +1398,9 @@
   border-bottom: 1px solid #ccdadd;
 }
 .exam-main {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   max-width: 1200px;
   width: 100%;
   margin: auto;
@@ -1450,6 +1459,7 @@
   font-size: 12px;
 }
 .exam-footer {
+  flex-shrink: 0;
   background: #096c80;
   color: #fff;
   padding: 14px 28px;
