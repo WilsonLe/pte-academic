@@ -1,5 +1,7 @@
 # English pronunciation comparison experiment
 
+**Training is paused at accepted v3 (2026-10-16).** Start with the [pause and resume guide](RESUME.md) for the checkpoint, local data to preserve, budget snapshot and future restart procedure. The operator chose to keep training audio out of Git.
+
 This development-only pipeline generates synthetic English reference speech through OpenRouter, trains a local comparison model, and returns a reference similarity index for every supported syllable in a local recording. It is separate from PTE Studio's learner-facing Whisper review. Nothing in this directory is imported by the PWA.
 
 The operator authorized generated-output training. The current authorized cumulative cap is **US$17.0113639**: on 2026-10-16 the operator explicitly granted a fresh US$10 allowance after US$7.0113639 in reservations. The original spending history remains intact; there is no automatic reset. `content/authoring.json` records the authorization. The corpus generator reads the existing private credential internally and shares the authoring lock and conservative spending ledger. Never reset the ledger, automatically retry a failed paid request, or put a credential in a command argument.
