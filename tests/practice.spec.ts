@@ -1485,3 +1485,37 @@ test("header notifications disclose speech preparation, errors and recovery", as
       .getByText("No notifications", { exact: true }),
   ).toBeVisible();
 });
+
+test.describe("short mock recovery layout", () => {
+  test.use({ serviceWorkers: "block" });
+  test("mock details and preparation remain reachable above the mobile footer", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.route("**/models/**", (route) => route.abort());
+    for (const scale of [1, 2]) {
+      await page.goto("/mocks");
+      await expect(page.getByRole("alert")).toContainText(
+        "Offline setup failed",
+      );
+      if (scale === 2)
+        await page.addStyleTag({
+          content: "html { font-size: 200% !important; }",
+        });
+      await page
+        .getByRole("button", { name: "Mock details", exact: true })
+        .click({ timeout: 2000 });
+      await expect(
+        page.getByRole("dialog", { name: "Mock details", exact: true }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await page
+        .getByRole("button", { name: "Prepare for mock", exact: true })
+        .click();
+      await expect(
+        page.getByRole("heading", { name: "Full mock 01", exact: true }),
+      ).toBeVisible();
+    }
+  });
+});
