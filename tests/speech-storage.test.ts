@@ -8,11 +8,6 @@ import {
   clearHistory,
   readHistory,
 } from "../src/storage";
-import {
-  SPEECH_MODEL,
-  SPEECH_REVISION,
-  SPEECH_ENGINE,
-} from "../src/speech/config";
 import type { Result } from "../src/Runner";
 const values = new Map<string, string>();
 Object.defineProperty(globalThis, "localStorage", {
@@ -25,9 +20,9 @@ Object.defineProperty(globalThis, "localStorage", {
 const transcript = {
   text: "The library is open.",
   seconds: 3,
-  model: SPEECH_MODEL,
-  revision: SPEECH_REVISION,
-  engine: SPEECH_ENGINE,
+  model: "onnx-community/whisper-tiny.en",
+  revision: "2575352d61be1bf7225cf8f8b268a4678025fc58",
+  engine: "transformers.js-4.3.1/whisper-q8-wasm",
 };
 const url = URL.createObjectURL(
   new Blob(["local recording"], { type: "audio/webm" }),

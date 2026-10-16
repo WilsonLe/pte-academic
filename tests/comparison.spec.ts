@@ -393,10 +393,16 @@ test("post-ready missing and corrupt cached assets expose retry and recover with
     await expect(score).toBeEnabled({ timeout: 60000 });
     await page.keyboard.press("Escape");
     await score.click();
+    // The previous grade remains visible during rescoring. Observe this job's
+    // lifecycle before checking its result, using the suite's inference budget.
+    const running = page.getByRole("button", { name: "Cancel speech scoring" });
+    await expect(running).toBeVisible();
+    await expect(score).toBeDisabled();
+    await expect(running).toHaveCount(0, { timeout: 60000 });
+    await expect(score).toBeEnabled();
     await expect(
       page.getByLabel(/^Reference similarity \d+ out of 100$/),
-    ).toBeVisible({ timeout: 60000 });
-    await expect(score).toBeEnabled();
+    ).toBeVisible();
     await expect(
       page
         .getByRole("region", { name: "On-device speech feedback" })

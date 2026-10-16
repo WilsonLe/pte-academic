@@ -21,7 +21,7 @@ const modelManifest = JSON.parse(
 await copyFile(`${outDir}/index.html`, `${outDir}/404.html`);
 const paths = (await files(outDir)).filter((p) => !p.endsWith("sw.js"));
 const onDemand = paths.filter((p) =>
-  /\/(speech\.worker-|comparison\.worker-|ort-wasm-)/.test(p),
+  /\/(comparison\.worker-|ort-wasm-)/.test(p),
 );
 // Required comparison weights have their own verified, scope-specific cache.
 const eager = paths.filter(

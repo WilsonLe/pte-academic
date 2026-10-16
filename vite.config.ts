@@ -13,7 +13,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
-    // Both speech workers supply pinned wasmPaths. Exclude ORT's embedded
+    // The comparison worker supplies pinned wasmPaths. Exclude ORT's embedded
     // fallback factories and unused WASM variants from their bundles.
     conditions: ["onnxruntime-web-use-extern-wasm", ...defaultClientConditions],
   },
