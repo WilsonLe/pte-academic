@@ -9,7 +9,6 @@ import {
   Target,
   Check,
   History,
-  Trash2,
   Trophy,
   Info,
 } from "lucide-react";
@@ -184,10 +183,11 @@ export function LearnScreen({
   if (!article)
     return (
       <div className="screen-stack">
-        <h2 className="screen-title">Learn about PTE.</h2>
+        <h2 className="screen-title">About PTE.</h2>
         <CardsList
           items={articles}
           label="learning topics"
+          scroll
           render={(a) => (
             <button
               className="type-row"
@@ -239,6 +239,8 @@ export function LearnScreen({
       <ReadingPages
         key={article.id + block}
         texts={[block < 0 ? article.intro : article.blocks[block].text]}
+        label="Learning article"
+        scroll
       />
     </div>
   );
@@ -291,38 +293,27 @@ export function GuideScreen({
 }
 export function HistoryScreen({
   history,
-  onClear,
   onPractice,
 }: {
   history: Result[];
-  onClear: () => void;
   onPractice: () => void;
 }) {
   return (
     <div className="screen-stack">
       <div className="screen-toolbar flex-wrap">
-        <h2 className="screen-title">Your sessions.</h2>
-        <div className="ml-auto flex items-center gap-2">
-          <Link
-            to="/achievements"
-            className={buttonVariants({ variant: "outline" })}
-            data-slot="button"
-            data-size="default"
-            data-variant="outline"
-          >
-            <Trophy /> Achievements
-          </Link>
-          {!!history.length && (
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Clear practice history"
-              onClick={onClear}
-            >
-              <Trash2 />
-            </Button>
-          )}
-        </div>
+        <h2 className="screen-title">Sessions.</h2>
+        <Link
+          to="/achievements"
+          className={buttonVariants({
+            variant: "outline",
+            className: "ml-auto",
+          })}
+          data-slot="button"
+          data-size="default"
+          data-variant="outline"
+        >
+          <Trophy /> Achievements
+        </Link>
       </div>
       <CardsList
         items={history}

@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  historyQuery,
-  progressQuery,
-  saveAttemptMutation,
-  clearHistoryMutation,
-} from "./queries";
+import { historyQuery, progressQuery, saveAttemptMutation } from "./queries";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { screenPath, useScreen, isScreenId, type ScreenId } from "./routing";
 import { AudioPlayer } from "./components/AudioPlayer";
@@ -230,7 +225,6 @@ export default function App() {
   const historyState = useQuery(historyQuery());
   const history = historyState.data ?? [];
   const save = useMutation(saveAttemptMutation(client));
-  const clear = useMutation(clearHistoryMutation(client));
   const route = useScreen();
   const location = useLocation();
   const go = useNavigate();
@@ -259,7 +253,6 @@ export default function App() {
   const [attemptError, setAttemptError] = useState("");
   const [storageError, setStorageError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [clearConfirm, setClearConfirm] = useState(false);
   const main = useRef<HTMLElement>(null);
   const pwa = usePwa();
   useEffect(() => {
@@ -403,20 +396,6 @@ export default function App() {
         setSaving(false);
         save.reset();
       });
-  }
-  async function removeHistory() {
-    try {
-      await clear.mutateAsync();
-      setClearConfirm(false);
-      setStorageError("");
-      toast.success("History cleared");
-    } catch {
-      setStorageError(
-        "History could not be cleared. Check browser storage permissions.",
-      );
-      setClearConfirm(false);
-      toast.error("Unable to clear history");
-    }
   }
   const currentGuide = guides.find((g) => g.id === guideId);
   const active = titles[page] ? page : "home";
@@ -737,7 +716,6 @@ export default function App() {
               ) : (
                 <HistoryScreen
                   history={history}
-                  onClear={() => setClearConfirm(true)}
                   onPractice={() => navigate("types")}
                 />
               )}
@@ -745,26 +723,6 @@ export default function App() {
           </main>
         </div>
         <Nav active={navActive} mobile />
-        <Dialog open={clearConfirm} onOpenChange={setClearConfirm}>
-          <DialogContent className="practice-ui" showCloseButton={false}>
-            <DialogTitle>Clear your practice history?</DialogTitle>
-            <DialogDescription>
-              This removes responses, recordings, transcripts, XP, streaks,
-              badges and attempt history from this browser.
-            </DialogDescription>
-            <div className="dialog-actions">
-              <Button variant="outline" onClick={() => setClearConfirm(false)}>
-                Keep history
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => void removeHistory()}
-              >
-                Clear history
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
         <Toaster theme="light" position="top-center" />
       </div>
     </TooltipProvider>
