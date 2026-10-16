@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdir, readFile, access } from "node:fs/promises";
+import { readdir, readFile, access, stat } from "node:fs/promises";
 import { resolve, join } from "node:path";
 const directory = process.env.PTE_STATIC_DIR || "dist";
 const base = directory === "dist-subpath" ? "/pte-academic/" : "/";
@@ -15,6 +15,17 @@ async function files(dir) {
     )
   ).flat();
 }
+test("published JavaScript stays within the default 500 kB chunk budget", async () => {
+  for (const file of (await files(directory)).filter((p) =>
+    /\.m?js$/.test(p),
+  )) {
+    const { size } = await stat(file);
+    assert.ok(
+      size < 500_000,
+      `${file}: ${size} bytes exceeds the chunk budget`,
+    );
+  }
+});
 test("published artifact contains a base-aware SPA shell, public assets and scoped offline worker", async () => {
   const shell = await readFile(`${directory}/index.html`, "utf8");
   assert.equal(await readFile(`${directory}/404.html`, "utf8"), shell);
@@ -44,6 +55,9 @@ test("published artifact contains a base-aware SPA shell, public assets and scop
   const worker = await readFile(`${directory}/sw.js`, "utf8");
   assert.ok(worker.includes("self.registration.scope"));
   const assets = JSON.parse(worker.match(/const ASSETS=(\[.*?\]);/)[1]);
+  const onDemand = JSON.parse(
+    worker.match(/const ON_DEMAND=(\[.*?\])\.map/)[1],
+  );
   assert.ok(assets.includes("./index.html"));
   assert.ok(
     !assets.some((path) =>
@@ -57,5 +71,15 @@ test("published artifact contains a base-aware SPA shell, public assets and scop
   assert.ok(
     assets.some((path) => path.includes("_workspace-")),
     "lazy workspace must be available offline before its first use",
+  );
+  for (const file of output.filter((p) =>
+    /\/(speech\.worker-|comparison\.worker-|ort-wasm-)/.test(p),
+  )) {
+    assert.ok(onDemand.includes(`./${file.slice(directory.length + 1)}`));
+  }
+  assert.equal(
+    output.filter((p) => p.endsWith(".wasm")).length,
+    1,
+    "only the explicitly pinned speech WASM binary should be published",
   );
 });
