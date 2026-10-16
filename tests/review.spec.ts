@@ -388,3 +388,77 @@ test("long writing remains complete on short phones and enlarged text; source au
     page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
 });
+
+test("playtest: small-phone feedback keeps numbered paragraphs and sentences intact", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seed(page);
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("pte-studio", 2);
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction("attempts", "readwrite");
+        const get = tx.objectStore("attempts").get("review-wrong");
+        get.onsuccess = () => {
+          const saved = get.result;
+          saved.result.questionIds = ["reorder-paragraphs-01"];
+          saved.result.answers = { "reorder-paragraphs-01": { values: ["1"] } };
+          tx.objectStore("attempts").put(saved, "review-wrong");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  });
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/history/review-wrong");
+  const parts: string[] = [];
+  for (let i = 0; i < 30; i++) {
+    const copy = page.locator(".review-screen .reading-copy");
+    await expect(copy.locator("p").first()).toBeVisible();
+    await expect
+      .poll(() => copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1))
+      .toBe(true);
+    parts.push((await copy.locator("p").allTextContents()).join(" "));
+    const next = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    await expect(
+      page.getByRole("navigation", { name: "feedback pages", exact: true }),
+    ).toContainText("Feedback");
+    if (!(await next.count()) || (await next.isDisabled())) break;
+    await next.click();
+  }
+  const q = questions.find((q) => q.id === "reorder-paragraphs-01")!;
+  for (const [i, value] of q.answers!.entries()) {
+    expect(
+      parts.some((part) =>
+        part.includes(`${i + 1}. ${q.options![Number(value)]}`),
+      ),
+    ).toBe(true);
+  }
+  expect(
+    parts.some((part) =>
+      part.includes(
+        "“This cycle” refers to returning seeds and explains how the collection continues.",
+      ),
+    ),
+  ).toBe(true);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/history/review-wrong");
+  const complete = await readPages(page);
+  expect(complete).toContain(compact(q.explanation));
+  await page.goto("/history/review-correct");
+  await expect(
+    page.getByRole("navigation", { name: "review questions", exact: true }),
+  ).toContainText("Question");
+});

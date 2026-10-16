@@ -42,6 +42,7 @@ export function Review({
           index={index}
           count={responded.length}
           label="review questions"
+          counterLabel="Question"
           onChange={setIndex}
         />
       </div>
@@ -78,6 +79,7 @@ export function Review({
               ...promptBlocks(q),
             ]}
             label="feedback pages"
+            counterLabel="Feedback"
           />
         </div>
       )}

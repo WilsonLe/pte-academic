@@ -313,6 +313,7 @@ export default function App() {
       return {
         mode: "type",
         label: "Daily practice",
+        previewGuidance: true,
         questions: questQuestions(progress, today),
         minutes: mocks[0].sectionMinutes,
       };

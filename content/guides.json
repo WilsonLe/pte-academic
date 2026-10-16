@@ -228,7 +228,7 @@
     "answerSeconds": 0,
     "skills": "Reading",
     "summary": "Put a scrambled passage back in order.",
-    "instructions": "Move the text boxes from the left into the correct order on the right.",
+    "instructions": "Select a Source paragraph, then use the arrow to place it in order in Target.",
     "tips": [
       "Find an opening that does not depend on earlier information.",
       "Track pronouns and repeated nouns.",

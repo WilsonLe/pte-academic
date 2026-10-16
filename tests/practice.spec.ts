@@ -645,7 +645,9 @@ test("single answer submits once and persisted review survives reload", async ({
       name: "River health can improve within urban constraints.",
     })
     .check();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
   await expect(page.getByText("Correct", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Next review questions" }).click();
   await expect(page.getByText("Correct", { exact: true })).toBeVisible();
@@ -1171,7 +1173,12 @@ test("daily quest earns real XP and badges and stays saved in history", async ({
   await start(page);
   for (let i = 0; i < 3; i++) {
     await answerReading(page);
-    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page
+      .getByRole("button", {
+        name: i === 2 ? "Finish practice" : "Next",
+        exact: true,
+      })
+      .click();
   }
   const completion = page
     .locator("[data-sonner-toast]")
@@ -2402,4 +2409,99 @@ test("all practice cleanup: every active response kind keeps its controls and on
     await page.clock.resume();
   }
   expect(kinds.size).toBe(10);
+});
+
+test("playtest: daily preparation stays compact and previews one guide at a time", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/practice/type/daily");
+    const preview = page.getByRole("button", {
+      name: /Preview .* daily practice questions/,
+    });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByLabel("Upcoming question type")).toHaveCount(0);
+    await expect(page.locator(".setup-rules li")).toHaveCount(3);
+    await page.screenshot({
+      path: info.outputPath(`preparation-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    await preview.click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    const choices = await dialog.locator("option").allTextContents();
+    await page.screenshot({
+      path: info.outputPath(`preview-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    expect(choices.length).toBeGreaterThan(1);
+    for (const title of choices) {
+      await page
+        .getByLabel("Upcoming question type")
+        .selectOption({ label: title });
+      await expect(dialog).toContainText("30 min shared timer");
+      await expect(
+        dialog.locator('[data-slot="dialog-description"]'),
+      ).not.toBeEmpty();
+    }
+    await expect(page.locator(".exam")).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(preview).toBeFocused();
+    await expect(
+      page.getByRole("button", { name: "Begin practice", exact: true }),
+    ).toBeEnabled();
+  }
+  await page.goto("/practice/type/reorder-paragraphs");
+  await expect(
+    page.getByRole("button", { name: /Preview .* daily practice questions/ }),
+  ).toHaveCount(0);
+});
+
+test("playtest: final blank answer can cancel or finish without changing earlier Next", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.goto("/practice/type/reading-single");
+  await start(page);
+  await page
+    .getByRole("radio", { name: "Difficulty scheduling early meetings" })
+    .check();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("2 of 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Next", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Finish practice?");
+  await page
+    .getByRole("button", { name: "Keep practising", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByText("2 of 2", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Review", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "review questions", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "My practice", exact: true }).click();
+  await expect(page.locator(".history-row")).toHaveCount(1);
 });
