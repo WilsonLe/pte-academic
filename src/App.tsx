@@ -422,7 +422,11 @@ export default function App() {
   }
   const currentGuide = guides.find((g) => g.id === guideId);
   const active = titles[page] ? page : "home";
-  const title = result ? "Review" : currentGuide?.title || titles[active];
+  const navActive = hubView === "badges" ? "history" : active;
+  const title = result
+    ? "Review"
+    : currentGuide?.title ||
+      (hubView === "badges" ? "Achievements" : titles[active]);
   const practicePlan =
     page === "practice" && progressReady
       ? makePlan(route.mode, route.practiceId)
@@ -445,7 +449,7 @@ export default function App() {
           <Link to="/" className="rail-logo" aria-label="PTE Studio home">
             <img src={asset("icon.svg")} alt="" className="size-9 rounded-xl" />
           </Link>
-          <Nav active={active} />
+          <Nav active={navActive} />
         </aside>
         <div className="workspace">
           <header className="topbar">
@@ -561,7 +565,6 @@ export default function App() {
                 <div className="home-screen">
                   <GameHub
                     view={hubView}
-                    onViewChange={setHubView}
                     progress={progress}
                     today={today}
                     ready={progressReady}
@@ -743,7 +746,7 @@ export default function App() {
             </div>
           </main>
         </div>
-        <Nav active={active} mobile />
+        <Nav active={navActive} mobile />
         <Dialog open={clearConfirm} onOpenChange={setClearConfirm}>
           <DialogContent className="practice-ui" showCloseButton={false}>
             <DialogTitle>Clear your practice history?</DialogTitle>

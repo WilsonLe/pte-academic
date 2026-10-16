@@ -49,7 +49,8 @@ body {
   height: 25px;
 }
 .topbar {
-  position: relative;
+  position: sticky;
+  top: 0;
   flex: 0 0 80px;
   height: 80px;
   padding: 0 32px;
@@ -1485,9 +1486,134 @@ body {
   }
 }
 
-.quest-body {
+/* Keep the daily goal and its action together instead of stretching empty space. */
+.hub-play {
+  width: 100%;
+  max-width: 1040px;
+  margin-inline: auto;
   justify-content: center;
+}
+.hub-play .quest-grid {
+  flex: 1 1 420px;
+  max-height: 460px;
+}
+.hub-play .quest-card {
+  justify-content: initial;
+  gap: 24px;
+  box-shadow: 0 4px 0 #4528a1;
+}
+.hub-play .quest-topline {
+  flex-shrink: 0;
+}
+.hub-play .quest-body {
   flex: 1;
+  justify-content: center;
+  gap: clamp(24px, 5vw, 64px);
+  margin: 0;
+}
+.quest-summary {
+  max-width: 460px;
+  min-width: 0;
+}
+.quest-summary .quest-prize {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  padding: 0;
+  margin-bottom: 12px;
+}
+.hub-play .quest-body h3 {
+  font-size: clamp(32px, 4.4vw, 56px);
+  text-wrap: balance;
+}
+.hub-play .quest-orbit {
+  width: clamp(130px, 20dvh, 180px);
+  height: auto;
+  aspect-ratio: 1;
+}
+.hub-play .quest-bottom {
+  margin: 0;
+  width: 100%;
+  max-width: 520px;
+  align-self: center;
+  flex-shrink: 0;
+}
+.hub-play .quest-start {
+  flex: 1;
+  min-width: 0;
+}
+.hub-play .quest-help {
+  flex-shrink: 0;
+}
+@media (max-width: 767px) {
+  .hub-play .quest-card {
+    padding: 18px 20px 22px;
+    gap: 20px;
+  }
+  .hub-play .quest-body {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .hub-play .quest-body h3 {
+    font-size: clamp(26px, 7.5vw, 36px);
+  }
+  .hub-play .quest-orbit {
+    width: clamp(112px, 18dvh, 156px);
+  }
+  .hub-play .orbit-centre {
+    inset: 16px;
+  }
+  .hub-play .orbit-centre > span {
+    font-size: 30px;
+  }
+  .hub-play .orbit-centre small {
+    font-size: 15px;
+  }
+  .quest-summary .quest-prize {
+    margin-bottom: 8px;
+  }
+}
+@media (max-height: 740px) {
+  .hub-play .quest-card {
+    padding: 16px 20px 20px;
+    gap: 14px;
+  }
+  .hub-play .quest-body {
+    flex-direction: row;
+    gap: 18px;
+    text-align: left;
+  }
+  .hub-play .quest-body h3 {
+    font-size: clamp(24px, 4vw, 36px);
+  }
+  .hub-play .quest-orbit {
+    width: 100px;
+  }
+  .hub-play .orbit-centre {
+    inset: 13px;
+  }
+  .hub-play .orbit-centre > span {
+    font-size: 24px;
+  }
+}
+/* The daily panel needs more room than a catalogue at these short heights. */
+@media (min-height: 451px) and (max-height: 560px) {
+  .app-shell:has(.hub-play) {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .workspace:has(.hub-play) {
+    min-height: 100dvh;
+  }
+  .main-content:has(.hub-play) {
+    min-height: 550px;
+  }
+  .home-screen:has(.hub-play) {
+    min-height: 520px;
+  }
 }
 .history-row {
   height: auto;

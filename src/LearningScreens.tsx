@@ -10,9 +10,10 @@ import {
   Check,
   History,
   Trash2,
+  Trophy,
   Info,
 } from "lucide-react";
-import { Button } from "./components/ui/button";
+import { Button, buttonVariants } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
 import { ReadingPages } from "./Pages";
 import { CardsList } from "./components/CardsList";
@@ -299,18 +300,29 @@ export function HistoryScreen({
 }) {
   return (
     <div className="screen-stack">
-      <div className="screen-toolbar">
+      <div className="screen-toolbar flex-wrap">
         <h2 className="screen-title">Your sessions.</h2>
-        {!!history.length && (
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Clear practice history"
-            onClick={onClear}
+        <div className="ml-auto flex items-center gap-2">
+          <Link
+            to="/achievements"
+            className={buttonVariants({ variant: "outline" })}
+            data-slot="button"
+            data-size="default"
+            data-variant="outline"
           >
-            <Trash2 />
-          </Button>
-        )}
+            <Trophy /> Achievements
+          </Link>
+          {!!history.length && (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Clear practice history"
+              onClick={onClear}
+            >
+              <Trash2 />
+            </Button>
+          )}
+        </div>
       </div>
       <CardsList
         items={history}
