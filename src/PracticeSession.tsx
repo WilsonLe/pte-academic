@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useScreen } from "./routing";
 import { Preflight, Runner, type PracticePlan, type Result } from "./Runner";
 
 /** A route-scoped attempt owns its plan, microphone and runner lifecycle. */
@@ -17,18 +18,22 @@ export function PracticeSession({
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isRun = pathname.endsWith("/run");
-  const preflightPath = pathname.replace(/\/run$/, "");
+  const { mode = "", practiceId = "" } = useScreen();
   useEffect(() => {
     if (isRun && !started.current) {
       // Reload/forward cannot restore a live recording or wall-clock deadline.
-      void navigate(preflightPath, { replace: true });
+      void navigate({
+        to: "/practice/$mode/$practiceId",
+        params: { mode, practiceId },
+        replace: true,
+      });
     } else if (!isRun) {
       started.current = false;
       setRunning(false);
       stream.current?.getTracks().forEach((track) => track.stop());
       stream.current = null;
     }
-  }, [pathname, isRun, preflightPath, navigate]);
+  }, [pathname, isRun, mode, practiceId, navigate]);
   useEffect(
     () => () => stream.current?.getTracks().forEach((track) => track.stop()),
     [],
@@ -44,9 +49,12 @@ export function PracticeSession({
         started.current = true;
         stream.current = value;
         setRunning(true);
-        void navigate(preflightPath + "/run");
+        void navigate({
+          to: "/practice/$mode/$practiceId/run",
+          params: { mode, practiceId },
+        });
       }}
-      onCancel={() => void navigate("/")}
+      onCancel={() => void navigate({ to: "/" })}
     />
   );
 }

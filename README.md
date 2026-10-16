@@ -22,7 +22,9 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:4178`. The stack is React 19.3, TypeScript 7, Vite 8.3, Tailwind 4.3, and shadcn's default Nova preset with Base UI and neutral tokens. Geist is bundled locally. Generated shadcn components and default helper CSS are committed; the scaffolding CLI is run through `npx shadcn@latest` when adding components, rather than shipped as an application dependency. There is no backend or cloud runtime AI. Opt-in speech recognition runs locally in a browser worker.
+Open `http://127.0.0.1:4178`. The stack uses TanStack Start 1.x in static SPA mode, TanStack Router, Query and Form, React 19.3, TypeScript 7, Vite 8.3, Tailwind 4.3, and shadcn's default Nova preset with Base UI and neutral tokens. Geist is bundled locally. Generated shadcn components and default helper CSS are committed; the scaffolding CLI is run through `npx shadcn@latest` when adding components, rather than shipped as an application dependency. There is no backend or cloud runtime AI. The in-house syllable comparison model runs locally in a browser worker; automatic transcription is no longer included.
+
+The complete [TanStack library assessment](docs/tanstack-adoption.md) records adoption decisions and ownership. Router and Query developer tools load only in development.
 
 ## Verify
 
@@ -45,6 +47,8 @@ Browser tests use installed Google Chrome in an isolated profile and a synthetic
 ```sh
 BASE_PATH=/pte-academic/ npm run build
 ```
+
+Start generates the public SPA shell at build time in `.start/`; `scripts/publish-static.mjs` copies only `.start/client/` to `dist/`. Never upload `.start/server/`. `npm run preview` serves the copied static files without a Start runtime server.
 
 Keep the trailing slash. Browser routing uses real paths such as `/history` and `/history/:sessionID` under the configured base path. Hosts with rewrite support should serve `index.html` for application routes; Vite preview already does this. The build also copies the app shell to [`404.html` for GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-custom-404-page-for-your-github-pages-site), so direct route entry works without server rewrites. Pages still returns HTTP 404 for that initial response, while the app handles the URL. The service worker serves cached route navigation offline. Older top-level hash links convert to real paths. Use HTTPS for microphone and service-worker support; localhost also works for development.
 

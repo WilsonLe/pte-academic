@@ -1,3 +1,4 @@
+import { useForm, useStore } from "@tanstack/react-form";
 import { AudioPlayer, AudioStartButton } from "./components/AudioPlayer";
 import {
   Dialog,
@@ -269,7 +270,10 @@ export function Runner({
   onComplete: (result: Result) => void;
 }) {
   const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const form = useForm({
+    defaultValues: { answers: {} as Record<string, Answer> },
+  });
+  const answers = useStore(form.store, (state) => state.values.answers);
   const answerRef = useRef(answers);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
@@ -311,7 +315,7 @@ export function Runner({
       [q.id]: { ...answerRef.current[q.id], ...a },
     };
     answerRef.current = next;
-    setAnswers(next);
+    form.setFieldValue("answers", next);
   }
   async function stopRecording() {
     const r = recorder.current;
@@ -424,7 +428,7 @@ export function Runner({
                 [q.id]: { ...answerRef.current[q.id], recording: url },
               };
               answerRef.current = next;
-              if (!localCancelled) setAnswers(next);
+              if (!localCancelled) form.setFieldValue("answers", next);
             }
             resolve();
           };

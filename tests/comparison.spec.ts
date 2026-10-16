@@ -175,7 +175,7 @@ test("actual v3 browser inference matches all four Python accent controls and wr
     contentType: "application/json",
   });
   await writeFile(
-    "artifacts/pronunciation/browser-export/verified-browser-controls.json",
+    `artifacts/pronunciation/browser-export/verified-browser-controls${base === "/" ? "" : "-subpath"}.json`,
     JSON.stringify(reports, null, 2) + "\n",
   );
 });
@@ -305,9 +305,16 @@ test("failed required download blocks model grading and retries without a word-m
     await r.abort();
   });
   await page.goto(base + "types");
+  const notifications = page.getByRole("button", {
+    name: "Notifications",
+    exact: true,
+  });
+  await notifications.click();
   await expect(page.getByLabel("Speech model download")).toBeVisible();
+  await page.keyboard.press("Escape");
   const next = page.getByRole("button", { name: "Next question type pages" });
   await next.click();
+  await notifications.click();
   if (base === "/")
     await page.screenshot({
       path: "artifacts/pronunciation/browser-export/model-loading-mobile.png",
@@ -316,11 +323,14 @@ test("failed required download blocks model grading and retries without a word-m
   await expect(
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible({ timeout: 60000 });
+  await page.keyboard.press("Escape");
   await next.click();
+  await notifications.click();
   if (base === "/")
     await page.screenshot({
       path: "artifacts/pronunciation/browser-export/model-error-mobile.png",
     });
+  await page.keyboard.press("Escape");
   await page
     .getByRole("navigation", { name: "Mobile navigation" })
     .getByRole("link", { name: "History" })
@@ -337,15 +347,19 @@ test("failed required download blocks model grading and retries without a word-m
     .getByRole("group", { name: "Your recording for question 1", exact: true })
     .getByRole("button", { name: /Play/ })
     .click();
+  await notifications.click();
   await expect(
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible();
   await context.setOffline(false);
   await page.unroute("**/models/blended-english-v3/encoder-00.bin");
   await page.getByRole("button", { name: "Retry model download" }).click();
-  await expect(page.getByLabel("Required speech model")).toHaveCount(0, {
+  await expect(notifications).toHaveAccessibleDescription("No notifications.", {
     timeout: 90000,
   });
+  await expect(
+    page.getByText("No notifications", { exact: true }),
+  ).toBeVisible();
 });
 
 test("post-ready missing and corrupt cached assets expose retry and recover without reload", async ({
@@ -369,11 +383,15 @@ test("post-ready missing and corrupt cached assets expose retry and recover with
       else await cache.delete(url);
     }, corrupt);
     await score.click();
+    await page
+      .getByRole("button", { name: "Notifications", exact: true })
+      .click();
     const retry = page.getByRole("button", { name: "Retry model download" });
     await expect(retry).toBeVisible({ timeout: 30000 });
     await expect(score).toBeDisabled();
     await retry.click();
     await expect(score).toBeEnabled({ timeout: 60000 });
+    await page.keyboard.press("Escape");
     await score.click();
     await expect(
       page.getByLabel(/^Reference similarity \d+ out of 100$/),
@@ -385,4 +403,19 @@ test("post-ready missing and corrupt cached assets expose retry and recover with
         .getByRole("alert"),
     ).toHaveCount(0);
   }
+});
+
+test("direct practice entry starts the required model preparation before the workspace is shown", async ({
+  page,
+}) => {
+  const download = page.waitForRequest((request) =>
+    request.url().includes("/models/blended-english-v3/encoder-00.bin"),
+  );
+  await page.goto(base + "practice/type/reading-single");
+  const request = await download;
+  expect(request.method()).toBe("GET");
+  expect(request.postData()).toBeNull();
+  await expect(
+    page.getByRole("button", { name: "Begin practice", exact: true }),
+  ).toBeVisible();
 });

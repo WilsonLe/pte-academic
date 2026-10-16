@@ -1,9 +1,7 @@
 import { defineConfig } from "@playwright/test";
 const comparison = process.env.PTE_TEST_COMPARISON === "1";
-const port = Number(
-  process.env.PTE_TEST_PORT ||
-    (process.env.PTE_TEST_SUBPATH === "1" ? 4180 : 4178),
-);
+const port = Number(process.env.PTE_TEST_PORT || 4178);
+const subpathPort = Number(process.env.PTE_TEST_SUBPATH_PORT || 4180);
 const subpath = process.env.PTE_TEST_SUBPATH === "1";
 export default defineConfig({
   testDir: "tests",
@@ -13,7 +11,9 @@ export default defineConfig({
       ? "subpath.spec.ts"
       : /(?:practice|speech-review)\.spec\.ts$/,
   outputDir: comparison
-    ? "test-results/comparison"
+    ? subpath
+      ? "test-results/comparison-subpath"
+      : "test-results/comparison"
     : subpath
       ? "test-results/subpath"
       : "test-results/practice",
@@ -21,7 +21,9 @@ export default defineConfig({
   workers: 1,
   timeout: 45000,
   use: {
-    baseURL: `http://127.0.0.1:${port}`,
+    baseURL: subpath
+      ? `http://127.0.0.1:${subpathPort}`
+      : `http://127.0.0.1:${port}`,
     channel: "chrome",
     viewport: { width: 1440, height: 1000 },
     launchOptions: {
@@ -36,9 +38,11 @@ export default defineConfig({
   },
   webServer: {
     command: subpath
-      ? `npm run build:subpath && npm run preview:subpath -- --port ${port}`
-      : `npm run preview -- --port ${port}`,
-    url: `http://127.0.0.1:${port}${subpath ? "/pte-academic/" : ""}`,
-    reuseExistingServer: true,
+      ? `npm run build:subpath && npm run preview:subpath -- --port ${subpathPort} --strictPort`
+      : `npm run preview -- --port ${port} --strictPort`,
+    url: subpath
+      ? `http://127.0.0.1:${subpathPort}/pte-academic/`
+      : `http://127.0.0.1:${port}`,
+    reuseExistingServer: false,
   },
 });

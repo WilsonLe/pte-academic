@@ -1146,9 +1146,6 @@
     font-size: 10px;
     height: 27px;
   }
-  .topbar > div:last-child > button:last-child {
-    display: none;
-  }
   .hub-heading {
     margin-bottom: 19px;
   }
