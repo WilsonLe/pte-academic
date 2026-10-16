@@ -13,7 +13,7 @@ Issue [#46](https://github.com/WilsonLe/pte-academic/issues/46) covers all 65 or
 
 ## Complete question inventory
 
-Every ID below is covered by the browser matrix in correct, incorrect and unanswered states at 1440×900 and 390×844. These are controlled saved-response fixtures; they do not certify human speech quality.
+Every ID below is visited by the browser matrix at 1440×900 and 390×844. Objective and written responses use a key/example fixture, an altered-response fixture and an unanswered fixture. Speaking entries in these three fixtures omit recordings; separate speech fixtures and real-model journeys verify recorded, saved-grade, uncertain/no-speech, transcript and playback states. These controlled fixtures do not certify human speech quality.
 
 | Type                         | Included question IDs                                                                                                                                                                                                      |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
