@@ -278,7 +278,9 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
         .toBe(true);
     }
     await page.goto("/#home");
-    await page.getByRole("button", { name: "View level and streak" }).click();
+    await page
+      .getByRole("button", { name: /XP, level \d+\. View progress/ })
+      .click();
     await expect(
       page.getByRole("region", { name: "Practice level" }),
     ).toBeVisible();
@@ -290,7 +292,9 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
       }),
     ).toBeVisible();
     await screenFits(page);
-    await page.getByRole("button", { name: "Practice screen" }).click();
+    await page
+      .getByRole("link", { name: "PTE Studio home", exact: true })
+      .click();
     await page
       .getByRole("navigation", {
         name: size.width > 767 ? "Main navigation" : "Mobile navigation",
@@ -354,7 +358,7 @@ test("screen-sized game navigation, all question pages and beginner guidance", a
   await expect(page.getByText("No question types found.")).toBeVisible();
   await page.getByRole("button", { name: "Clear filters" }).click();
   await page.getByRole("button", { name: /^Read Aloud/ }).click();
-  await expect(page.getByText(/Read the text silently/)).toBeHidden();
+  await expect(page.getByText(/Read the text silently/)).toBeVisible();
   await page.getByRole("button", { name: "Instructions", exact: true }).click();
   await expect(page.getByText(/Read the text silently/)).toBeVisible();
   await page
@@ -491,7 +495,6 @@ test("listening is single play, transcript hidden, highlight input available", a
   ).toBeEnabled({ timeout: 35000 });
   await end(page);
   await page.getByRole("button", { name: "Prompt", exact: true }).click();
-  await page.getByRole("button", { name: "Next feedback pages" }).click();
   await expect(page.getByText(/surveys the site carefully/)).toBeVisible();
 });
 test("microphone preflight, timed recording and persistent audio review", async ({
@@ -534,7 +537,9 @@ test("microphone preflight, timed recording and persistent audio review", async 
         .evaluate((node: HTMLAudioElement) => node.currentTime),
     )
     .toBeGreaterThan(0);
-  await page.getByRole("button", { name: "Speech", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Your response", exact: true })
+    .click();
   await expect(
     page.getByRole("group", {
       name: "Your recording for question 1",
@@ -871,7 +876,9 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
     .click();
   await expect(page.getByRole("dialog")).toContainText("0 / 1 so far");
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Practice screen" }).click();
+  await page
+    .getByRole("link", { name: "PTE Studio home", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Start daily quest", exact: true })
     .click();
@@ -883,15 +890,14 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
     await answerReading(page);
     await page.getByRole("button", { name: "Next", exact: true }).click();
   }
+  const completion = page
+    .locator("[data-sonner-toast]")
+    .filter({ hasText: "Daily practice complete!" });
+  await expect(completion).toContainText("+60 XP");
+  await expect(completion).toContainText("First spark");
   await expect(
     page.getByRole("region", { name: "Practice rewards" }),
-  ).toContainText("+60");
-  await expect(
-    page.getByRole("heading", {
-      name: "Daily practice complete!",
-      exact: true,
-    }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "60 XP, level 1. View progress" }),
   ).toBeVisible();
@@ -920,7 +926,9 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
   await expect(
     page.getByRole("button", { name: "60 XP, level 1. View progress" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "View level and streak" }).click();
+  await page
+    .getByRole("button", { name: /XP, level \d+\. View progress/ })
+    .click();
   await settleView(page);
   await page.screenshot({
     path: "docs/evidence/game-progress.png",
@@ -934,7 +942,7 @@ test("daily quest earns real XP and badges, persists after reload and resets wit
   await page.locator(".history-row").first().click();
   await expect(
     page.getByRole("region", { name: "Practice rewards" }),
-  ).toContainText("+60");
+  ).toHaveCount(0);
   await expect(page.locator(".confetti")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "60 XP, level 1. View progress" }),
@@ -972,7 +980,9 @@ test("an empty quest earns no XP; a partial quest resumes remaining questions; r
   await page
     .getByRole("button", { name: "0 XP, level 1. View progress" })
     .click();
-  await page.getByRole("button", { name: "Practice screen" }).click();
+  await page
+    .getByRole("link", { name: "PTE Studio home", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Start daily quest", exact: true })
     .click();
@@ -980,13 +990,18 @@ test("an empty quest earns no XP; a partial quest resumes remaining questions; r
   await answerReading(page);
   await end(page);
   await expect(
+    page.locator("[data-sonner-toast]").filter({ hasText: "+10 XP" }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("region", { name: "Practice rewards" }),
-  ).toContainText("+10");
+  ).toHaveCount(0);
   await expect(page.locator(".confetti")).toBeHidden();
   await page
     .getByRole("button", { name: "10 XP, level 1. View progress" })
     .click();
-  await page.getByRole("button", { name: "Practice screen" }).click();
+  await page
+    .getByRole("link", { name: "PTE Studio home", exact: true })
+    .click();
   await expect(
     page.getByRole("region", { name: "Daily practice" }),
   ).toContainText("1");
@@ -1183,6 +1198,11 @@ test("simplified workspace fits desktop and mobile, with compact history and sha
     ).toBeVisible();
     await expect(
       page.locator(".quest-steps, .beginner-entry, .review-heading"),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: /^(Practice screen|View level and streak)$/,
+      }),
     ).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Install app" })).toHaveCount(
       0,
@@ -1522,4 +1542,645 @@ test.describe("short mock recovery layout", () => {
       ).toBeVisible();
     }
   });
+});
+
+test("review combines duplicate answers and packs related text without stacked pagers", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const longResponse =
+    "A distinct example sentence explains the argument clearly. ".repeat(80) +
+    "FINAL RESPONSE WORDS";
+  await page.evaluate(async (text) => {
+    const result = {
+      id: "review-simplification",
+      label: "Review examples",
+      date: new Date().toISOString(),
+      questionIds: [
+        "reading-multiple-01",
+        "reading-single-01",
+        "reading-single-02",
+        "write-essay-01",
+        "describe-image-01",
+        "listening-blanks-01",
+        "respond-to-situation-01",
+      ],
+      answers: {
+        "reading-multiple-01": { values: ["1", "0"] },
+        "listening-blanks-01": { values: ["Society!", "Discarded"] },
+        "reading-single-01": { values: ["0"] },
+        "write-essay-01": { text },
+      },
+      finished: true,
+      reward: {
+        xp: 60,
+        badges: ["first", "daily"],
+        dailyComplete: true,
+        levelUp: false,
+      },
+    };
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("pte-studio", 2);
+      request.onupgradeneeded = () => {
+        for (const name of ["attempts", "progress"])
+          if (!request.result.objectStoreNames.contains(name))
+            request.result.createObjectStore(name);
+      };
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction("attempts", "readwrite");
+        tx.objectStore("attempts").put({ result, recordings: {} }, result.id);
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error);
+        };
+      };
+    });
+    localStorage.setItem(
+      "pte-studio-history-v1",
+      JSON.stringify([{ ...result, answers: {} }]),
+    );
+  }, longResponse);
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 320, height: 568 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/history/review-simplification");
+    const copy = page.locator(".review-screen .reading-copy");
+    await expect(copy).toContainText("Students valued the ability to pause.");
+    await expect(copy).toContainText("Recordings can support revision.");
+    await expect(copy).not.toContainText("Answer key:");
+    await expect(
+      page.getByRole("button", { name: "Answer key", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("region", { name: "Practice rewards" }),
+    ).toHaveCount(0);
+    await expect(page.locator(".review-question nav")).toHaveAttribute(
+      "aria-label",
+      "review questions",
+    );
+    await screenFits(page);
+    await page.getByRole("button", { name: "Feedback", exact: true }).click();
+    await expect(copy).toContainText("2 correct selections, 0 incorrect");
+    let feedbackText = await copy.innerText();
+    const nextFeedback = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    while ((await nextFeedback.count()) && (await nextFeedback.isEnabled())) {
+      await nextFeedback.click();
+      feedbackText += " " + (await copy.innerText());
+    }
+    expect(feedbackText).toContain(
+      "The passage explicitly supports revision and pausing.",
+    );
+    if (viewport.width !== 320)
+      await expect(
+        page.getByRole("navigation", { name: "feedback pages", exact: true }),
+      ).toHaveCount(0);
+    await screenFits(page);
+    if (viewport.width === 390)
+      await page.screenshot({
+        path: info.outputPath("review-feedback-mobile.png"),
+      });
+    await page.getByRole("button", { name: "Prompt", exact: true }).click();
+    await expect(copy).toContainText(
+      "Which statements are supported by the passage?",
+    );
+    await expect(copy).toContainText("A university survey found");
+    if (viewport.width !== 320)
+      await expect(
+        page.getByRole("navigation", { name: "feedback pages", exact: true }),
+      ).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Your response", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await expect(copy).toContainText("Your response: Longer train journeys");
+    await expect(copy).toContainText(
+      "Answer key: Difficulty scheduling early meetings",
+    );
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await expect(copy).toContainText("Your response: No response");
+    await expect(copy).toContainText(
+      "Answer key: River health can improve within urban constraints.",
+    );
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    const nextText = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    await expect(nextText).toBeVisible();
+    let complete = "";
+    for (let i = 0; i < 80; i++) {
+      await expect
+        .poll(() =>
+          copy.evaluate((node) => node.scrollHeight <= node.clientHeight + 1),
+        )
+        .toBe(true);
+      complete += " " + (await copy.innerText());
+      if (await nextText.isDisabled()) break;
+      await nextText.click();
+    }
+    expect(complete).toContain("FINAL RESPONSE WORDS");
+    expect(complete).toContain("Answer key:");
+    expect(complete).toContain("200–300 words.");
+    await screenFits(page);
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Image", exact: true }).click();
+    await expect(page.locator(".review-chart")).toBeVisible();
+    await page
+      .getByRole("button", { name: "Previous review questions", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Your response", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await expect(copy).toContainText("Society! · Discarded");
+    await expect(copy).not.toContainText("Answer key:");
+    await expect(page.locator(".review-question")).toContainText("Correct");
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Prompt", exact: true }).click();
+    let promptText = await copy.innerText();
+    const nextPrompt = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    while ((await nextPrompt.count()) && (await nextPrompt.isEnabled())) {
+      await nextPrompt.click();
+      promptText += " " + (await copy.innerText());
+    }
+    expect(promptText.match(/You have been ill/g)).toHaveLength(1);
+    expect(promptText).toContain("submit the report on Monday.");
+    await page.reload();
+    await expect(copy).toContainText("Students valued the ability to pause.");
+  }
+});
+
+test("all practice cleanup: every guide, section and mock keeps useful text without filler pages", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(180000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const { readFile } = await import("node:fs/promises");
+  const read = async (name: string) =>
+    JSON.parse(
+      await readFile(
+        new URL(`../content/${name}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+  const sourceGuides = await read("guides");
+  const sourceSections = await read("sections");
+  const sourceMocks = await read("mock-tests");
+  const readPages = async (label: string) => {
+    const panel = page.locator(".reading-copy");
+    const next = page.getByRole("button", {
+      name: `Next ${label}`,
+      exact: true,
+    });
+    const parts = [];
+    for (let i = 0; i < 80; i++) {
+      await expect
+        .poll(() =>
+          panel.evaluate((node) => node.scrollHeight <= node.clientHeight + 1),
+        )
+        .toBe(true);
+      parts.push(await panel.innerText());
+      if (!(await next.count()) || (await next.isDisabled()))
+        return parts.join(" ");
+      await next.click();
+    }
+    throw new Error("Reading failed to reach its last page");
+  };
+  const covered = [];
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const guide of sourceGuides) {
+      await page.goto(`/types/${guide.id}`);
+      await expect(
+        page.getByRole("heading", { name: guide.title, exact: true }),
+      ).toHaveCount(1);
+      await expect(
+        page.getByRole("button", { name: "Instructions", exact: true }),
+      ).toHaveAttribute("aria-pressed", "true");
+      expect(await readPages("reading pages")).toContain(guide.instructions);
+      await expect(
+        page.getByText(/One skill at a time|Open a guide, or jump straight in/),
+      ).toHaveCount(0);
+      for (const [tab, expected] of [
+        ["Strategy & tips", [...guide.tips, guide.pitfall].join(" ")],
+        ["How to review", guide.scoring],
+      ]) {
+        await page.getByRole("button", { name: tab, exact: true }).click();
+        expect(await readPages("reading pages")).toBe(expected);
+        await screenFits(page);
+      }
+      covered.push(`guide:${guide.id}:${viewport.width}`);
+    }
+    for (const section of sourceSections) {
+      await page.goto(`/sections/${section.id}`);
+      await page
+        .getByRole("button", { name: "Section details", exact: true })
+        .click();
+      const text = await readPages("section information pages");
+      expect(text).toContain(section.description);
+      for (const guide of sourceGuides.filter(
+        (g: { section: string }) => g.section === section.id,
+      ))
+        expect(text).toContain(guide.title);
+      await screenFits(page);
+      covered.push(`section:${section.id}:${viewport.width}`);
+    }
+    await page.goto("/mocks");
+    await page
+      .getByRole("button", { name: "Mock details", exact: true })
+      .click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText(
+      "shared with question-type and section practice",
+    );
+    await expect(dialog).not.toContainText("min limit");
+    await expect(dialog).toContainText(
+      "Exact live-test UI parity is unverified",
+    );
+    await page.keyboard.press("Escape");
+    for (const mock of sourceMocks)
+      covered.push(`mock:${mock.id}:${viewport.width}`);
+    if (viewport.width === 390) {
+      await page.goto("/types/reading-multiple");
+      await page
+        .getByRole("button", { name: "Strategy & tips", exact: true })
+        .click();
+      await page.screenshot({
+        path: info.outputPath("compact-guide-mobile.png"),
+      });
+    }
+  }
+  expect(covered).toHaveLength(
+    (sourceGuides.length + sourceSections.length + sourceMocks.length) * 2,
+  );
+  await info.attach("coverage", {
+    body: JSON.stringify(covered),
+    contentType: "application/json",
+  });
+});
+
+test("all practice cleanup: every setup route retains exactly its required device checks", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const { readFile } = await import("node:fs/promises");
+  const read = async (name: string) =>
+    JSON.parse(
+      await readFile(
+        new URL(`../content/${name}.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+  const sourceGuides = await read("guides"),
+    sourceQuestions = await read("questions"),
+    sourceSections = await read("sections"),
+    sourceMocks = await read("mock-tests");
+  const plans = [
+    ...sourceGuides.map((g: { id: string }) => ({
+      path: `/practice/type/${g.id}`,
+      items: sourceQuestions.filter((q: { type: string }) => q.type === g.id),
+    })),
+    ...sourceSections.map((s: { id: string }) => ({
+      path: `/practice/section/${s.id}`,
+      items: sourceQuestions.filter(
+        (q: { type: string }) =>
+          sourceGuides.find((g: { id: string }) => g.id === q.type).section ===
+          s.id,
+      ),
+    })),
+    ...sourceMocks.map((m: { id: string; questionIds: string[] }) => ({
+      path: `/practice/mock/${m.id}`,
+      items: sourceQuestions.filter((q: { id: string }) =>
+        m.questionIds.includes(q.id),
+      ),
+    })),
+    { path: "/practice/type/daily", items: [] },
+  ];
+  for (const viewport of [
+    { width: 320, height: 568 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const plan of plans) {
+      await page.goto(plan.path);
+      const needMic = plan.items.some(
+        (q: { type: string }) =>
+          sourceGuides.find((g: { id: string }) => g.id === q.type).kind ===
+          "speak",
+      );
+      const needAudio = plan.items.some((q: { audio?: string }) => q.audio);
+      await expect(
+        page.getByRole("group", { name: "Headphone check", exact: true }),
+      ).toHaveCount(needAudio ? 1 : 0);
+      await expect(
+        page.getByRole("button", { name: "Test microphone", exact: true }),
+      ).toHaveCount(needMic ? 1 : 0);
+      const begin = page.getByRole("button", {
+        name: /Begin (practice|mock test)/,
+      });
+      if (needAudio || needMic) await expect(begin).toBeDisabled();
+      else await expect(begin).toBeEnabled();
+      await expect(
+        page.getByText("Ready to begin?", { exact: true }),
+      ).toHaveCount(0);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBe(viewport.width);
+      await begin.scrollIntoViewIfNeeded();
+      await expect(begin).toBeInViewport();
+    }
+    await page.goto("/practice/mock/" + sourceMocks[0].id);
+    await page.getByText("Practice details", { exact: true }).click();
+    await expect(page.locator(".setup-details-copy")).toContainText(
+      "Section limits:",
+    );
+    await expect(page.locator(".setup-details-copy")).not.toContainText(
+      "This form has",
+    );
+    if (viewport.width === 320)
+      await page.screenshot({
+        path: info.outputPath("compact-mock-setup-mobile.png"),
+        fullPage: true,
+      });
+  }
+});
+
+test("all practice cleanup: all original questions and full mock review use the same compact panels", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(180000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const { readFile } = await import("node:fs/promises");
+  const sourceQuestions = JSON.parse(
+    await readFile(
+      new URL("../content/questions.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const sourceMocks = JSON.parse(
+    await readFile(
+      new URL("../content/mock-tests.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  await page.goto("/");
+  await page.evaluate(
+    async ({ questions, mocks }) => {
+      const attempts = [
+        ...mocks.map(
+          (m: { id: string; title: string; questionIds: string[] }) => ({
+            id: `cleanup-${m.id}`,
+            label: m.title,
+            questionIds: m.questionIds,
+          }),
+        ),
+        {
+          id: "cleanup-every-question",
+          label: "Every original question",
+          questionIds: questions.map((q: { id: string }) => q.id),
+        },
+      ].map((r) => ({
+        ...r,
+        date: new Date().toISOString(),
+        answers: {},
+        finished: true,
+      }));
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onupgradeneeded = () => {
+          for (const name of ["attempts", "progress"])
+            if (!request.result.objectStoreNames.contains(name))
+              request.result.createObjectStore(name);
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result,
+            tx = db.transaction("attempts", "readwrite");
+          for (const result of attempts)
+            tx.objectStore("attempts").put(
+              { result, recordings: {} },
+              result.id,
+            );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+          };
+        };
+      });
+      localStorage.setItem("pte-studio-history-v1", JSON.stringify(attempts));
+    },
+    { questions: sourceQuestions, mocks: sourceMocks },
+  );
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const attempt of [
+      {
+        id: "cleanup-every-question",
+        questionIds: sourceQuestions.map((q: { id: string }) => q.id),
+      },
+      ...sourceMocks.map((m: { id: string; questionIds: string[] }) => ({
+        id: `cleanup-${m.id}`,
+        questionIds: m.questionIds,
+      })),
+    ]) {
+      await page.goto(`/history/${attempt.id}`);
+      for (const id of attempt.questionIds) {
+        const q = sourceQuestions.find((q: { id: string }) => q.id === id);
+        const panels = page.getByRole("group", {
+          name: "Review panels",
+          exact: true,
+        });
+        await expect(
+          panels.getByRole("button", { name: "Answer key", exact: true }),
+        ).toHaveCount(0);
+        await expect(
+          panels.getByRole("button", { name: "Speech", exact: true }),
+        ).toHaveCount(0);
+        await expect(
+          page.getByRole("region", { name: "Practice rewards" }),
+        ).toHaveCount(0);
+        for (const tab of [
+          "Your response",
+          "Feedback",
+          ...(q.prompt || q.text || q.audioText ? ["Prompt"] : []),
+          ...(q.chart ? ["Image"] : []),
+        ]) {
+          await panels.getByRole("button", { name: tab, exact: true }).click();
+          await expect(
+            panels.getByRole("button", { name: tab, exact: true }),
+          ).toHaveAttribute("aria-pressed", "true");
+          await screenFits(page);
+        }
+        const next = page.getByRole("button", {
+          name: "Next review questions",
+          exact: true,
+        });
+        if (await next.isEnabled()) await next.click();
+      }
+    }
+  }
+  await info.attach("review-coverage", {
+    body: JSON.stringify({
+      questions: sourceQuestions.map((q: { id: string }) => q.id),
+      mocks: sourceMocks.map((m: { id: string }) => m.id),
+      viewports: [390, 1440],
+    }),
+    contentType: "application/json",
+  });
+});
+
+test("all practice cleanup: every active response kind keeps its controls and one media status", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(180000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const { readFile } = await import("node:fs/promises");
+  const sourceGuides = JSON.parse(
+    await readFile(new URL("../content/guides.json", import.meta.url), "utf8"),
+  );
+  const sourceQuestions = JSON.parse(
+    await readFile(
+      new URL("../content/questions.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  await page.clock.install();
+  const kinds = new Set();
+  for (const guide of sourceGuides) {
+    const q = sourceQuestions.find(
+      (q: { type: string }) => q.type === guide.id,
+    );
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/practice/type/${guide.id}`);
+    if (guide.kind === "speak") {
+      await page
+        .getByRole("button", { name: "Test microphone", exact: true })
+        .click();
+      await expect(
+        page.getByRole("group", {
+          name: "Microphone check playback",
+          exact: true,
+        }),
+      ).toBeVisible();
+    }
+    const checkbox = page.getByRole("checkbox", {
+      name: "I can hear the audio clearly",
+    });
+    if (await checkbox.count()) await checkbox.check();
+    await start(page);
+    if (q.audio) {
+      await page.clock.fastForward(3100);
+      await expect(page.locator(".recording-panel")).toHaveCount(1);
+      // An ended event bounds the per-type rendering audit. Native audio playback,
+      // one-play behavior and recording timing have separate focused journeys.
+      await page
+        .locator(".exam-main audio")
+        .evaluate((audio: HTMLAudioElement) => {
+          audio.pause();
+          audio.dispatchEvent(new Event("ended"));
+        });
+      if (guide.kind === "speak" && guide.prepSeconds)
+        await page.clock.fastForward(guide.prepSeconds * 1000 + 100);
+    } else if (guide.kind === "speak")
+      await page.clock.fastForward((guide.prepSeconds + 1) * 1000);
+    if (guide.kind === "speak")
+      await expect(page.getByText("Recording", { exact: true })).toBeVisible();
+    else if (q.audio)
+      await expect(page.locator(".recording-panel")).toHaveCount(0);
+    for (const viewport of [
+      { width: 390, height: 844 },
+      { width: 1440, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await expect(
+        page.getByText(
+          /Current Status:|Recorded Answer|Original practice data/,
+        ),
+      ).toHaveCount(0);
+      await expect(
+        page.getByText(guide.instructions, { exact: true }),
+      ).toBeVisible();
+      if (guide.kind === "single")
+        await expect(page.getByRole("radio")).toHaveCount(q.options.length);
+      else if (guide.kind === "multi")
+        await expect(page.getByRole("checkbox")).toHaveCount(q.options.length);
+      else if (["write", "dictation"].includes(guide.kind))
+        await expect(
+          page.getByRole("textbox", { name: "Your response", exact: true }),
+        ).toBeEnabled();
+      else if (guide.kind === "dropdown")
+        await expect(page.getByRole("combobox")).toHaveCount(q.answers.length);
+      else if (guide.kind === "blanks")
+        await expect(page.getByRole("textbox")).toHaveCount(q.answers.length);
+      else if (guide.kind === "bank")
+        await expect(
+          page.getByRole("button", { name: "Blank 1", exact: true }),
+        ).toBeEnabled();
+      else if (guide.kind === "order")
+        await expect(page.locator(".paragraph")).toHaveCount(q.options.length);
+      else if (guide.kind === "highlight")
+        await expect(page.locator(".highlight-text button")).toHaveCount(
+          q.text.split(/\s+/).length,
+        );
+      if (q.chart) await expect(page.getByRole("figure")).toBeVisible();
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBe(viewport.width);
+    }
+    kinds.add(guide.kind);
+    await page.clock.resume();
+  }
+  expect(kinds.size).toBe(10);
 });

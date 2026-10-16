@@ -29,7 +29,15 @@ export function AudioStartButton({
   );
 }
 
-export function AudioPlayer({ src, label }: { src: string; label: string }) {
+export function AudioPlayer({
+  src,
+  label,
+  showLabel = true,
+}: {
+  src: string;
+  label: string;
+  showLabel?: boolean;
+}) {
   const audio = useRef<HTMLAudioElement>(null);
   const generation = useRef(0);
   const [playing, setPlaying] = useState(false);
@@ -122,7 +130,7 @@ export function AudioPlayer({ src, label }: { src: string; label: string }) {
       </Button>
       <div className="audio-track">
         <div className="audio-caption">
-          <span>{label}</span>
+          <span className={showLabel ? undefined : "sr-only"}>{label}</span>
           <span>
             {time(position)} / {time(duration)}
           </span>

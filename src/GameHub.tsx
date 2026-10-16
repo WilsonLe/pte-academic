@@ -30,7 +30,6 @@ import {
   shiftDay,
   unlockedBadges,
   type Progress,
-  type Reward,
 } from "./progress";
 import { questions, guideFor } from "./content";
 import { Button } from "./components/ui/button";
@@ -133,60 +132,32 @@ export function GameHub({
   return (
     <div className={"game-hub hub-" + view}>
       <div className="hub-heading">
-        <h2>
+        <h2 className={view === "play" ? "sr-only" : undefined}>
           {view === "play"
-            ? "Ready to practise"
+            ? "Practice"
             : view === "progress"
               ? "Your progress"
               : "Your achievements"}
           <span className="accent-dot">.</span>
         </h2>
         <div className="hub-tools">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant={view === "play" ? "secondary" : "outline"}
-                  aria-label="Practice screen"
-                  onClick={() => setView("play")}
-                />
-              }
-            >
-              <Rocket />
-            </TooltipTrigger>
-            <TooltipContent>Practice</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant={view === "progress" ? "secondary" : "outline"}
-                  aria-label="View level and streak"
-                  onClick={() => setView("progress")}
-                />
-              }
-            >
-              <Flame />
-            </TooltipTrigger>
-            <TooltipContent>Progress</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant={view === "badges" ? "secondary" : "outline"}
-                  aria-label="View achievements"
-                  onClick={() => setView("badges")}
-                />
-              }
-            >
-              <Trophy />
-            </TooltipTrigger>
-            <TooltipContent>Achievements</TooltipContent>
-          </Tooltip>
+          {view !== "badges" && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    size="icon"
+                    variant={view === "badges" ? "secondary" : "outline"}
+                    aria-label="View achievements"
+                    onClick={() => setView("badges")}
+                  />
+                }
+              >
+                <Trophy />
+              </TooltipTrigger>
+              <TooltipContent>Achievements</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
       <div className="quest-grid">
@@ -552,60 +523,5 @@ export function TrackProgress({
         <span style={{ width: (count / available.length) * 100 + "%" }} />
       </div>
     </div>
-  );
-}
-export function RewardMoment({
-  reward,
-  celebrate,
-}: {
-  reward: Reward;
-  celebrate: boolean;
-}) {
-  if (!reward.xp) return null;
-  return (
-    <section
-      className={"reward-moment " + (celebrate ? "celebrating" : "")}
-      aria-label="Practice rewards"
-    >
-      {celebrate && (
-        <div className="confetti" aria-hidden="true">
-          {Array.from({ length: 14 }, (_, i) => (
-            <i
-              key={i}
-              style={
-                {
-                  "--i": i,
-                  "--x": ((i * 37) % 100) - 50 + "px",
-                  "--turn": i * 57 + "deg",
-                } as CSSProperties
-              }
-            />
-          ))}
-        </div>
-      )}
-      <div className="reward-bolt">
-        <Zap className="size-6" fill="currentColor" />
-      </div>
-      <div className="flex-1">
-        <h2>
-          {reward.levelUp
-            ? "New practice level"
-            : reward.dailyComplete
-              ? "Daily practice complete!"
-              : "A little stronger."}
-        </h2>
-        <p>
-          {reward.badges.length
-            ? reward.badges
-                .map((id) => badges.find((b) => b.id === id)?.title)
-                .join(" + ") + " earned"
-            : "Practice saved. Keep your momentum."}
-        </p>
-      </div>
-      <strong>
-        +{reward.xp}
-        <small>XP</small>
-      </strong>
-    </section>
   );
 }

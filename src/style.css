@@ -977,104 +977,6 @@
   padding: 0 15px;
   border: 1px solid #e9e7f0;
 }
-.reward-moment {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 25px;
-  padding: 23px;
-  border: 1px solid #d4e7a7;
-  border-radius: 18px;
-  background: #eeffd5;
-  box-shadow: 0 4px 0 #d9e8bc;
-}
-.reward-bolt {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  color: #687b2d;
-  background: #ddf7ae;
-}
-.reward-moment h2 {
-  font-size: 17px;
-  font-weight: 750;
-  color: #374623;
-  letter-spacing: -0.03em;
-}
-.reward-moment p {
-  font-size: 10px;
-  line-height: 1.6;
-  color: #657253;
-  margin-top: 4px;
-}
-.reward-moment > strong {
-  font-size: 30px;
-  color: #496725;
-  letter-spacing: -0.06em;
-}
-.reward-moment > strong > small {
-  display: block;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-align: center;
-}
-.celebrating {
-  animation: reward-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.confetti {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  border-radius: inherit;
-}
-.confetti i {
-  position: absolute;
-  left: calc(8% + var(--i) * 6%);
-  top: 5%;
-  width: 5px;
-  height: 9px;
-  background: #9770d6;
-  border-radius: 1px;
-  opacity: 0;
-  animation: confetti-burst 1.2s ease-out both;
-  animation-delay: calc(var(--i) * 18ms);
-}
-.confetti i:nth-child(3n) {
-  background: #b8d94f;
-}
-.confetti i:nth-child(3n + 1) {
-  background: #f0b461;
-  border-radius: 50%;
-  width: 6px;
-  height: 6px;
-}
-@keyframes confetti-burst {
-  0% {
-    transform: translate(var(--x), -15px) rotate(0);
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(0, 130px) rotate(var(--turn));
-    opacity: 0;
-  }
-}
-@keyframes reward-pop {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
 @keyframes tile-in {
   from {
     opacity: 0;
@@ -1242,25 +1144,6 @@
     font-size: 9px;
     gap: 10px;
   }
-  .reward-moment {
-    padding: 18px 16px;
-    gap: 11px;
-  }
-  .reward-moment h2 {
-    font-size: 15px;
-  }
-  .reward-bolt {
-    width: 39px;
-    height: 43px;
-  }
-  .reward-moment > strong {
-    font-size: 27px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .confetti {
-    display: none;
-  }
 }
 
 /* Preflight shares the practice palette; the timed exam remains isolated. */
@@ -1312,35 +1195,10 @@
 .setup-panel {
   padding: clamp(24px, 4vw, 36px);
 }
-.setup-intro {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.setup-emblem {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 17px;
-  background: #ffffff16;
-  color: #e0ffa2;
-}
-.setup-emblem svg {
-  width: 30px;
-  height: 30px;
-}
-.setup-intro h2 {
-  font-size: clamp(26px, 4vw, 36px);
-  font-weight: 740;
-  letter-spacing: -0.045em;
-  line-height: 1.15;
-}
 .setup-rules {
   display: grid;
   gap: 12px;
-  margin: 26px 0;
+  margin: 0 0 26px;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -1359,9 +1217,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 16px;
-}
-.setup-checks:empty {
-  display: none;
 }
 .check-row {
   display: flex;
@@ -1490,14 +1345,6 @@
   .setup-heading h1 {
     flex-basis: calc(100% - 54px);
   }
-  .setup-intro {
-    gap: 12px;
-  }
-  .setup-emblem {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-  }
   .check-row {
     padding: 16px;
   }
@@ -1573,12 +1420,6 @@
   padding: 15px 20px;
   margin: 24px 0 33px;
   font-size: 13px;
-}
-.recording-panel > strong {
-  display: block;
-  border-bottom: 1px solid #bdcbd0;
-  padding-bottom: 9px;
-  font-weight: normal;
 }
 .recording-panel > p {
   margin: 14px 0 13px;
@@ -1878,12 +1719,6 @@
   font-size: 10px;
   margin-top: -19px;
   white-space: nowrap;
-}
-.chart-note {
-  font-size: 9px;
-  text-align: right;
-  margin-top: 45px;
-  color: #82959b;
 }
 .exam .modal-backdrop {
   font-family: Arial, sans-serif;

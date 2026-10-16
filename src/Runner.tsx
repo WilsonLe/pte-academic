@@ -22,7 +22,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Info,
-  Rocket,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -150,12 +149,9 @@ export function Preflight({
           className="setup-panel quest-card"
           aria-labelledby="setup-title"
         >
-          <div className="setup-intro">
-            <span className="setup-emblem" aria-hidden="true">
-              <Rocket />
-            </span>
-            <h2 id="setup-title">Ready to begin?</h2>
-          </div>
+          <h2 id="setup-title" className="sr-only">
+            Practice preparation
+          </h2>
           <ul className="setup-rules">
             <li>
               <Clock3 aria-hidden="true" />
@@ -172,62 +168,69 @@ export function Preflight({
               </li>
             )}
           </ul>
-          <div className="setup-checks">
-            {needAudio && (
-              <section className="check-row" aria-labelledby="headphone-title">
-                <Volume2 size={22} aria-hidden="true" />
-                <div>
-                  <h3 id="headphone-title">Check your headphones</h3>
-                  <AudioPlayer
-                    src={asset(plan.questions.find((q) => q.audio)!.audio!)}
-                    label="Headphone check"
-                  />
-                  <label className="check-label">
-                    <input
-                      type="checkbox"
-                      checked={heard}
-                      onChange={(e) => setHeard(e.target.checked)}
-                    />{" "}
-                    I can hear the audio clearly
-                  </label>
-                </div>
-              </section>
-            )}
-            {needMic && (
-              <section className="check-row" aria-labelledby="microphone-title">
-                <Mic size={22} aria-hidden="true" />
-                <div>
-                  <h3 id="microphone-title">Check your microphone</h3>
-                  <p>
-                    Record three seconds, play it back, and check that you can
-                    hear yourself. Recordings stay on this device.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="secondary"
-                    disabled={recording || installing}
-                    onClick={testMic}
-                  >
-                    {recording
-                      ? "Recording… speak now"
-                      : installing
-                        ? "Requesting access…"
-                        : mic
-                          ? "Record another sample"
-                          : "Test microphone"}
-                  </Button>
-                  {sample && (
-                    <div>
-                      <AudioPlayer
-                        src={sample}
-                        label="Microphone check playback"
-                      />
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-          </div>
+          {(needAudio || needMic) && (
+            <div className="setup-checks">
+              {needAudio && (
+                <section
+                  className="check-row"
+                  aria-labelledby="headphone-title"
+                >
+                  <Volume2 size={22} aria-hidden="true" />
+                  <div>
+                    <h3 id="headphone-title">Check your headphones</h3>
+                    <AudioPlayer
+                      src={asset(plan.questions.find((q) => q.audio)!.audio!)}
+                      label="Headphone check"
+                      showLabel={false}
+                    />
+                    <label className="check-label">
+                      <input
+                        type="checkbox"
+                        checked={heard}
+                        onChange={(e) => setHeard(e.target.checked)}
+                      />{" "}
+                      I can hear the audio clearly
+                    </label>
+                  </div>
+                </section>
+              )}
+              {needMic && (
+                <section
+                  className="check-row"
+                  aria-labelledby="microphone-title"
+                >
+                  <Mic size={22} aria-hidden="true" />
+                  <div>
+                    <h3 id="microphone-title">Check your microphone</h3>
+                    <p>Record a three-second sample, then listen back.</p>
+                    <Button
+                      variant="outline"
+                      className="secondary"
+                      disabled={recording || installing}
+                      onClick={testMic}
+                    >
+                      {recording
+                        ? "Recording… speak now"
+                        : installing
+                          ? "Requesting access…"
+                          : mic
+                            ? "Record another sample"
+                            : "Test microphone"}
+                    </Button>
+                    {sample && (
+                      <div>
+                        <AudioPlayer
+                          src={sample}
+                          label="Microphone check playback"
+                          showLabel={false}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
           {error && (
             <p className="error" role="alert">
               {error}
@@ -264,9 +267,15 @@ export function Preflight({
               </p>
               {plan.mode === "mock" && (
                 <p>
-                  This form has 65 questions. Section limits are 80, 30 and 39
-                  minutes. Shorter prompts can make practice faster than test
-                  day. Personal introduction and check-in are not simulated.
+                  Section limits:{" "}
+                  {sections
+                    .map(
+                      (section) =>
+                        `${section.title}: ${plan.minutes[section.id]} minutes`,
+                    )
+                    .join(" · ")}
+                  . Shorter prompts can make practice faster than test day.
+                  Personal introduction and check-in are not simulated.
                 </p>
               )}
               <p>
@@ -663,17 +672,10 @@ export function Runner({
           !["bank", "dropdown", "blanks", "highlight"].includes(g.kind) && (
             <div className="stimulus">{q.text}</div>
           )}
-        {(q.audio || isSpeak) && (
+        {isSpeak || (q.audio && !["answer", "complete"].includes(phase)) ? (
           <div className="recording-panel">
-            <strong>
-              {phase === "audio" || phase === "countdown" || phase === "blocked"
-                ? "Audio"
-                : isSpeak
-                  ? "Recorded Answer"
-                  : "Audio"}
-            </strong>
             <p role="status">
-              Current Status: <b>{status}</b>
+              <b>{status}</b>
             </p>
             <div
               className="exam-progress"
@@ -720,7 +722,11 @@ export function Runner({
               />
             )}
           </div>
-        )}
+        ) : q.audio ? (
+          <span className="sr-only" role="status">
+            {status}
+          </span>
+        ) : null}
         {!isSpeak && g.answerSeconds > 0 && (
           <div className="item-clock">
             Item time remaining: {formatTime(phaseSeconds)}

@@ -120,7 +120,7 @@ export function feedback(q: Question, a: Answer) {
             : "No recording"
           : `${score}/100 reference similarity`,
       detail:
-        "Open Speech to compare each syllable with the v3 reference model. All four included accents are accepted equally. Experimental similarity is not correctness or an exam score.",
+        "Use the speech tools in Your response to compare each syllable with the v3 reference model. All four included accents are accepted equally. Experimental similarity is not correctness or an exam score.",
     };
   }
   if (g.kind === "speak")
@@ -159,7 +159,7 @@ export function feedback(q: Question, a: Answer) {
         actual.every((x) => expected.includes(x))
       : expected.length === actual.length &&
         expected.every((x, i) => normalize(x) === normalize(actual[i] || ""));
-  let detail = "Compare your answer with the key below.";
+  let detail = "";
   if (g.kind === "multi" || g.kind === "highlight") {
     const hit = actual.filter((x) => expected.includes(x)).length,
       extra = actual.length - hit;

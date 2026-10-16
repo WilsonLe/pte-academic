@@ -147,9 +147,10 @@ export function SectionSelect({
             key={section.id}
             texts={[
               section.description,
-              ...guides
+              guides
                 .filter((g) => g.section === section.id)
-                .map((g) => g.title),
+                .map((g) => g.title)
+                .join(" · "),
             ]}
             label="section information pages"
           />
@@ -248,7 +249,7 @@ export function GuideScreen({
   guide: Guide;
   onStart: () => void;
 }) {
-  const [tab, setTab] = useState<string | null>(null);
+  const [tab, setTab] = useState("Instructions");
   const texts =
     tab === "Instructions"
       ? [
@@ -257,10 +258,7 @@ export function GuideScreen({
         ]
       : tab === "Strategy & tips"
         ? [...g.tips, g.pitfall]
-        : [
-            g.scoring,
-            "Compare an open response with the model. This app does not predict a PTE score.",
-          ];
+        : [g.scoring];
   return (
     <div className="screen-stack guide-screen">
       <div className="guide-start">
@@ -286,15 +284,7 @@ export function GuideScreen({
           </Button>
         ))}
       </div>
-      {tab ? (
-        <ReadingPages key={g.id + tab} texts={texts} />
-      ) : (
-        <div className="guide-ready">
-          <Target />
-          <h2>One skill at a time.</h2>
-          <p>Open a guide, or jump straight in.</p>
-        </div>
-      )}
+      <ReadingPages key={g.id + tab} texts={texts} />
     </div>
   );
 }
