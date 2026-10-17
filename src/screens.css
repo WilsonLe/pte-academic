@@ -1721,13 +1721,15 @@ body {
     font-size: 24px;
   }
 }
-/* The daily panel needs more room than a catalogue at these short heights. */
+/* Daily practice and progress need room in short panels. */
 @media (min-height: 451px) and (max-height: 560px) {
-  .main-content:has(.hub-play) {
+  .main-content:has(.hub-play),
+  .main-content:has(.hub-progress) {
     overflow: auto;
     overscroll-behavior: contain;
   }
-  .home-screen:has(.hub-play) {
+  .home-screen:has(.hub-play),
+  .home-screen:has(.hub-progress) {
     min-height: 520px;
   }
 }
