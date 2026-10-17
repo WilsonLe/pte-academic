@@ -1134,6 +1134,118 @@ test("listening is single play, transcript hidden, highlight input available", a
   await expect(dialog).toHaveCount(0);
   await expect(source).toBeFocused();
 });
+test("speaking status explains silence stops and resets for the next recording", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(180000);
+  await context.route("**/models/**", (route) => route.abort());
+  // Control only the silence detector's input. Capture/save still use Chromium's
+  // native MediaRecorder and the suite's synthetic microphone, not model grades.
+  await page.addInitScript(() => {
+    (window as unknown as { testRms: number }).testRms = 0;
+    AnalyserNode.prototype.getFloatTimeDomainData = function (data) {
+      data.fill((window as unknown as { testRms: number }).testRms);
+    };
+  });
+  const { readFile } = await import("node:fs/promises");
+  const guides = JSON.parse(
+    await readFile(new URL("../content/guides.json", import.meta.url), "utf8"),
+  );
+  const questions = JSON.parse(
+    await readFile(
+      new URL("../content/questions.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  await page.clock.install();
+  const stopped = page.getByText(
+    "Recording stopped after 3 seconds of silence.",
+    {
+      exact: true,
+    },
+  );
+  const cutoffTypes = [
+    "read-aloud",
+    "repeat-sentence",
+    "describe-image",
+    "retell-lecture",
+    "answer-short-question",
+  ];
+  for (const type of [
+    ...cutoffTypes,
+    "summarize-group-discussion",
+    "respond-to-situation",
+  ]) {
+    const guide = guides.find((g: { id: string }) => g.id === type);
+    const first = questions.find((q: { type: string }) => q.type === type);
+    await page.goto(`/practice/type/${type}`);
+    await page
+      .getByRole("button", { name: "Test microphone", exact: true })
+      .click();
+    await expect(
+      page.getByLabel("Microphone check playback", { exact: true }),
+    ).toBeVisible();
+    const headphones = page.getByRole("checkbox", {
+      name: "I can hear the audio clearly",
+    });
+    if (await headphones.count()) await headphones.check();
+    await start(page);
+    const beginResponse = async (hasAudio: boolean) => {
+      if (hasAudio) {
+        await page.clock.fastForward(3100);
+        await page
+          .locator(".exam-main audio")
+          .evaluate((audio: HTMLAudioElement) => {
+            audio.pause();
+            audio.dispatchEvent(new Event("ended"));
+          });
+      }
+      if (guide.prepSeconds)
+        await page.clock.fastForward(guide.prepSeconds * 1000 + 100);
+      await expect(page.getByText("Recording", { exact: true })).toBeVisible();
+    };
+    await beginResponse(Boolean(first.audio));
+    await page.clock.fastForward(3100);
+    if (cutoffTypes.includes(type)) {
+      await expect(stopped).toBeVisible();
+      await expect(page.getByText("Completed", { exact: true })).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Next", exact: true }),
+      ).toBeEnabled();
+      for (const viewport of [
+        { width: 320, height: 480 },
+        { width: 1280, height: 720 },
+      ]) {
+        await page.setViewportSize(viewport);
+        await stopped.scrollIntoViewIfNeeded();
+        await expect(stopped).toBeInViewport();
+      }
+      await page.evaluate(() => {
+        (window as unknown as { testRms: number }).testRms = 0.03;
+      });
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+      await expect(stopped).toHaveCount(0);
+      await beginResponse(Boolean(first.audio));
+      await page.clock.fastForward(3100);
+      await expect(page.getByText("Recording", { exact: true })).toBeVisible();
+    } else {
+      await expect(page.getByText("Recording", { exact: true })).toBeVisible();
+      await expect(stopped).toHaveCount(0);
+    }
+    await page.clock.fastForward(guide.answerSeconds * 1000 + 100);
+    await expect(page.getByText("Completed", { exact: true })).toBeVisible();
+    await expect(stopped).toHaveCount(0);
+    await end(page);
+    await expect(
+      page.getByRole("group", { name: "Your recording", exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() => {
+      (window as unknown as { testRms: number }).testRms = 0;
+    });
+  }
+});
+
 test("microphone preflight, timed recording and persistent audio review", async ({
   page,
 }) => {
