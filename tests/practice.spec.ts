@@ -3238,3 +3238,130 @@ test("playtest: full question titles open on touch and keyboard without crowding
     ).toBeVisible();
   }
 });
+
+test("short progress keeps every weekly activity mark above the fixed footer", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Start daily quest", exact: true }),
+  ).toBeEnabled();
+  // These profiles exercise every current level-title variant, not reward logic.
+  for (const xp of [270, 0, 600, 1200]) {
+    await page.evaluate(async (amount) => {
+      const date = new Date();
+      const today = [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0"),
+      ].join("-");
+      const ids = amount
+        ? ["reading-single-01", "reading-single-02", "reading-multiple-01"]
+        : [];
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onsuccess = () => {
+          const db = request.result;
+          const tx = db.transaction("progress", "readwrite");
+          tx.objectStore("progress").put(
+            {
+              version: 1,
+              xp: amount,
+              seen: ids,
+              earned: [],
+              days: amount ? [{ date: today, questionIds: ids }] : [],
+              lastDay: amount ? today : "",
+              streak: amount ? 1 : 0,
+              longest: amount ? 1 : 0,
+            },
+            "profile",
+          );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+          };
+        };
+        request.onerror = () => reject(request.error);
+      });
+    }, xp);
+    for (const size of [
+      { width: 320, height: 480 },
+      { width: 320, height: 400 },
+      { width: 320, height: 451 },
+      { width: 320, height: 560 },
+      { width: 320, height: 561 },
+      { width: 320, height: 640 },
+      { width: 390, height: 480 },
+      { width: 390, height: 844 },
+      { width: 844, height: 390 },
+      { width: 1280, height: 720 },
+    ]) {
+      await page.setViewportSize(size);
+      await page.goto("/progress");
+      await expect(
+        page.getByRole("button", { name: new RegExp(`^${xp} XP, level`) }),
+      ).toBeVisible();
+      const days = page.locator(".activity-day");
+      await expect(days).toHaveCount(7);
+      for (const day of await days.all()) {
+        await day.focus();
+        await expect
+          .poll(
+            async () =>
+              day.evaluate((node) => {
+                const r = node.getBoundingClientRect();
+                const main = document
+                  .querySelector("main")!
+                  .getBoundingClientRect();
+                const footer = document
+                  .querySelector('[aria-label="Mobile navigation"]')
+                  ?.getBoundingClientRect();
+                const bottom =
+                  footer && footer.height
+                    ? Math.min(main.bottom, footer.top)
+                    : main.bottom;
+                return (
+                  r.top >= main.top - 1 &&
+                  r.bottom <= bottom + 1 &&
+                  r.left >= main.left - 1 &&
+                  r.right <= main.right + 1
+                );
+              }),
+            {
+              message: `${xp} XP at ${size.width}x${size.height}: complete day mark must be reachable above footer`,
+            },
+          )
+          .toBe(true);
+      }
+      expect(
+        await page.evaluate(() => ({
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight,
+          headerTop: document.querySelector("header")!.getBoundingClientRect()
+            .top,
+          scrollY,
+        })),
+      ).toEqual({
+        width: size.width,
+        height: size.height,
+        headerTop: 0,
+        scrollY: 0,
+      });
+      if (size.height > 560) {
+        expect(
+          await page
+            .locator("main")
+            .evaluate((node) => node.scrollHeight <= node.clientHeight + 1),
+        ).toBe(true);
+      }
+    }
+  }
+});
