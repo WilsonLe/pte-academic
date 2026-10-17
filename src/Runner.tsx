@@ -659,7 +659,8 @@ export function Runner({
         <div>
           <span>{sections.find((s) => s.id === g.section)!.title}</span>
           <span className="exam-clock">
-            <Clock3 size={17} /> Time Remaining {formatTime(sectionSeconds)}
+            <Clock3 size={17} /> Section time remaining{" "}
+            {formatTime(sectionSeconds)}
           </span>
         </div>
       </header>
@@ -737,7 +738,7 @@ export function Runner({
         ) : null}
         {!isSpeak && g.answerSeconds > 0 && (
           <div className="item-clock">
-            Item time remaining: {formatTime(phaseSeconds)}
+            Question time remaining: {formatTime(phaseSeconds)}
           </div>
         )}
         {q.audio && <audio ref={audio} src={asset(q.audio)} preload="auto" />}

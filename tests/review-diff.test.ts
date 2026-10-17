@@ -222,3 +222,22 @@ test("writing and legacy speech use neutral response selections with disclosed a
       assert.ok(items[0].detail.some((b) => b.label === "Planning outline"));
   }
 });
+
+test("every writing type retains a whole response including paragraph boundaries", () => {
+  const text = [
+    "Academic knowledge gives students a foundation for unfamiliar problems. "
+      .repeat(8)
+      .trim(),
+    "Practical experience lets them apply that foundation and reflect on the result. "
+      .repeat(8)
+      .trim(),
+    "Both approaches can support a thoughtful education.",
+  ].join("\n\n");
+  for (const q of questions.filter((q) => guideFor(q).kind === "write")) {
+    const [response, ...extra] = reviewItems(q, { text });
+    assert.equal(extra.length, 0, q.id);
+    assert.equal(response.title, "Response");
+    assert.deepEqual(response.parts, [{ text, tone: "neutral", mark: "" }]);
+    assert.ok(response.detail.some((block) => block.text === q.model));
+  }
+});

@@ -441,6 +441,19 @@ body {
   font-size: 13px;
   color: var(--muted-foreground);
 }
+.written-response {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 8px;
+}
+.response-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+}
 .comparison-card[data-size], .comparison-card {
   height: auto;
   display: flex;
@@ -1160,6 +1173,30 @@ body {
 .topbar button > .lucide {
   width: 21px;
   height: 21px;
+}
+.practice-ui .topbar .workspace-title-trigger[data-size] {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  gap: 4px;
+  font: inherit;
+  text-align: left;
+  justify-content: flex-start;
+}
+.workspace-title-trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar .workspace-title-trigger > .lucide {
+  width: 14px;
+  height: 14px;
+}
+.workspace-title-popover {
+  max-width: calc(100vw - 32px);
+  font-size: 18px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 @media (max-width: 767px) {
   .hub-tools button {

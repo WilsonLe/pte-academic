@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   BookOpen,
   Check,
+  ChevronDown,
   Headphones,
   History,
   House,
@@ -54,6 +55,12 @@ import { usePwa } from "./pwa";
 import { useViewportLock } from "./useViewportLock";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverTitle,
+} from "./components/ui/popover";
 import {
   Tooltip,
   TooltipTrigger,
@@ -448,8 +455,34 @@ export default function App() {
                   }
                 />
               )}
-              <h1 className="truncate text-sm font-medium tracking-normal">
-                {title}
+              <h1
+                className="min-w-0 text-sm font-medium tracking-normal"
+                aria-label={title}
+              >
+                {currentGuide ? (
+                  <Popover key={currentGuide.id}>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          className="workspace-title-trigger"
+                        />
+                      }
+                      aria-label={`Show full title: ${title}`}
+                    >
+                      <span>{title}</span>
+                      <ChevronDown aria-hidden="true" />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="start"
+                      className="practice-ui workspace-title-popover"
+                    >
+                      <PopoverTitle>{title}</PopoverTitle>
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <span className="block truncate">{title}</span>
+                )}
               </h1>
             </div>
             <div className="flex shrink-0 items-center gap-1">

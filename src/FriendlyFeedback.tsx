@@ -59,6 +59,7 @@ export function FriendlyFeedback({
   const [selected, setSelected] = useState<ReviewItem>();
   const items = reviewItems(q, a);
   const source = promptBlocks(q);
+  const writing = guideFor(q).kind === "write";
   return (
     <div className="friendly-feedback" data-kind={guideFor(q).kind}>
       {(source.length > 0 || q.chart || guideFor(q).kind === "write") && (
@@ -75,108 +76,135 @@ export function FriendlyFeedback({
           )}
         </div>
       )}
-      <Dialog
-        open={!!selected}
-        onOpenChange={(open) => {
-          if (!open) setSelected(undefined);
-        }}
-      >
-        <CardsList
-          items={items}
-          label="feedback pages"
-          counterLabel="Feedback"
-          className="comparison-list"
-          maxColumns={1}
-          minCardWidth={240}
-          minCardHeight={160}
-          maxCardHeight={180}
-          maxRows={4}
-          render={(item) =>
-            item.words ? (
-              <div className="comparison-card comparison-words" key={item.id}>
-                <span className="comparison-title">{item.title}</span>
-                <div>
-                  {item.parts.map((part, i) => (
-                    <DialogTrigger
-                      key={i}
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={`comparison-token diff-${part.tone}`}
-                        />
-                      }
-                      onClick={() =>
-                        setSelected({
-                          ...item,
-                          title: part.text,
-                          detail: [
-                            {
-                              text:
-                                part.mark === "✓"
-                                  ? "This word matches the recorded sentence; case and punctuation are ignored."
-                                  : part.tone === "bad"
-                                    ? "This typed word is extra or differs from the recorded sentence at this point."
-                                    : "This recorded word is missing or different at this point in your response.",
-                            },
-                            { label: "Recorded sentence", text: q.model! },
-                            ...item.detail,
-                          ],
-                        })
-                      }
-                      aria-label={`${item.title}: ${part.text}, ${part.tone === "good" ? "recorded word" : "typed word"}. Explain`}
-                    >
-                      <span aria-hidden="true">{part.mark}</span> {part.text}
-                    </DialogTrigger>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <DialogTrigger
-                key={item.id}
-                render={<Button variant="ghost" className="comparison-card" />}
-                onClick={() => setSelected(item)}
-                aria-label={`${item.title}: ${item.state}. Explain`}
+      {writing ? (
+        <section className="written-response" aria-label="Written response">
+          <div className="response-heading">
+            <h4>Response</h4>
+            <ReviewDisclosure title="Response details" blocks={items[0].detail}>
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label="Open response details"
               >
-                <span className="comparison-title">
-                  {item.title}
-                  <span
-                    className={
-                      item.state === "Not automatically graded" ||
-                      item.parts.some((part) => part.text === item.state)
-                        ? "sr-only"
-                        : undefined
-                    }
-                  >
-                    {item.state}
+                Details <ChevronRight aria-hidden="true" />
+              </Button>
+            </ReviewDisclosure>
+          </div>
+          <ReadingPages
+            blocks={items[0].parts.map((part) => ({ text: part.text }))}
+            label="feedback pages"
+            counterLabel="Feedback"
+          />
+        </section>
+      ) : (
+        <Dialog
+          open={!!selected}
+          onOpenChange={(open) => {
+            if (!open) setSelected(undefined);
+          }}
+        >
+          <CardsList
+            items={items}
+            label="feedback pages"
+            counterLabel="Feedback"
+            className="comparison-list"
+            maxColumns={1}
+            minCardWidth={240}
+            minCardHeight={160}
+            maxCardHeight={180}
+            maxRows={4}
+            render={(item) =>
+              item.words ? (
+                <div className="comparison-card comparison-words" key={item.id}>
+                  <span className="comparison-title">{item.title}</span>
+                  <div>
+                    {item.parts.map((part, i) => (
+                      <DialogTrigger
+                        key={i}
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`comparison-token diff-${part.tone}`}
+                          />
+                        }
+                        onClick={() =>
+                          setSelected({
+                            ...item,
+                            title: part.text,
+                            detail: [
+                              {
+                                text:
+                                  part.mark === "✓"
+                                    ? "This word matches the recorded sentence; case and punctuation are ignored."
+                                    : part.tone === "bad"
+                                      ? "This typed word is extra or differs from the recorded sentence at this point."
+                                      : "This recorded word is missing or different at this point in your response.",
+                              },
+                              { label: "Recorded sentence", text: q.model! },
+                              ...item.detail,
+                            ],
+                          })
+                        }
+                        aria-label={`${item.title}: ${part.text}, ${part.tone === "good" ? "recorded word" : "typed word"}. Explain`}
+                      >
+                        <span aria-hidden="true">{part.mark}</span> {part.text}
+                      </DialogTrigger>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <DialogTrigger
+                  key={item.id}
+                  render={
+                    <Button variant="ghost" className="comparison-card" />
+                  }
+                  onClick={() => setSelected(item)}
+                  aria-label={`${item.title}: ${item.state}. Explain`}
+                >
+                  <span className="comparison-title">
+                    {item.title}
+                    <span
+                      className={
+                        item.state === "Not automatically graded" ||
+                        item.parts.some((part) => part.text === item.state)
+                          ? "sr-only"
+                          : undefined
+                      }
+                    >
+                      {item.state}
+                    </span>
+                    <ChevronRight aria-hidden="true" className="size-4" />
                   </span>
-                  <ChevronRight aria-hidden="true" className="size-4" />
-                </span>
-                {item.parts.map((part, i) => (
-                  <span className={`comparison-line diff-${part.tone}`} key={i}>
-                    <span aria-hidden="true">{part.mark}</span>
-                    <span>{part.text}</span>
-                  </span>
-                ))}
-              </DialogTrigger>
-            )
-          }
-        />
-        {selected && (
-          <DialogContent className="practice-ui info-dialog feedback-dialog">
-            <DialogTitle>{selected.title}</DialogTitle>
-            <DialogDescription className="sr-only">
-              {selected.state}
-            </DialogDescription>
-            <ReadingPages
-              key={selected.id}
-              blocks={selected.detail}
-              label="detail pages"
-              counterLabel="Details"
-            />
-          </DialogContent>
-        )}
-      </Dialog>
+                  {item.parts.map((part, i) => (
+                    <span
+                      className={`comparison-line diff-${part.tone}`}
+                      key={i}
+                    >
+                      <span aria-hidden="true">{part.mark}</span>
+                      <span>{part.text}</span>
+                    </span>
+                  ))}
+                </DialogTrigger>
+              )
+            }
+          />
+          {selected && (
+            <DialogContent className="practice-ui info-dialog feedback-dialog">
+              <DialogTitle>{selected.title}</DialogTitle>
+              <DialogDescription className="sr-only">
+                {selected.state}
+              </DialogDescription>
+              <ReadingPages
+                key={selected.id}
+                blocks={selected.detail}
+                label="detail pages"
+                counterLabel="Details"
+              />
+            </DialogContent>
+          )}
+        </Dialog>
+      )}
     </div>
   );
 }
