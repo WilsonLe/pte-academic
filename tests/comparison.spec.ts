@@ -718,6 +718,189 @@ test("automatic feedback cancels, retains playback, and reports worker failure w
   await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
 });
 
+test("cancelled feedback hands off to the latest review without overlapping decodes or stealing a live job", async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  await seed(page);
+  const ids = ["handoff-first", "handoff-skipped", "handoff-latest"];
+  const originals = await page.evaluate(async (ids) => {
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      const request = indexedDB.open("pte-studio", 2);
+      request.onsuccess = () => resolve(request.result);
+    });
+    const fixture = await new Promise<any>((resolve) => {
+      const request = db
+        .transaction("attempts")
+        .objectStore("attempts")
+        .get("comparison-fixture");
+      request.onsuccess = () => resolve(request.result);
+    });
+    const legacy = structuredClone(
+      fixture.result.answers["repeat-sentence-01"].speechAssessment,
+    );
+    delete legacy.recognition;
+    const results = ids.map((id, index) => ({
+      ...fixture.result,
+      id,
+      label: id,
+      date: new Date(Date.now() - index * 1000).toISOString(),
+      answers: { "repeat-sentence-01": { pronunciation: legacy } },
+    }));
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("attempts", "readwrite");
+      for (const result of results)
+        tx.objectStore("attempts").put(
+          { result, recordings: fixture.recordings },
+          result.id,
+        );
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+    localStorage.setItem(
+      "pte-studio-history-v1",
+      JSON.stringify(results.map((r) => ({ ...r, answers: {} }))),
+    );
+    const recording = fixture.recordings["repeat-sentence-01"] as Blob;
+    return {
+      legacy,
+      hash: Array.from(
+        new Uint8Array(
+          await crypto.subtle.digest("SHA-256", await recording.arrayBuffer()),
+        ),
+      ),
+      type: recording.type,
+      size: recording.size,
+    };
+  }, ids);
+  // Refresh only the history cache before installing the test-only native decode barrier.
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Repeat Sentence", exact: true }),
+  ).toBeVisible();
+  await page.evaluate(() => {
+    const decode = AudioContext.prototype.decodeAudioData;
+    (window as any).__handoff = { calls: 0, release: [] };
+    AudioContext.prototype.decodeAudioData = async function (data) {
+      const buffer = await decode.call(this, data);
+      const control = (window as any).__handoff;
+      const index = control.calls++;
+      if (index < 2)
+        await new Promise<void>((resolve) => {
+          control.release[index] = resolve;
+        });
+      return buffer;
+    };
+  });
+  const open = async (id: string) => {
+    await page.getByRole("link", { name: "My practice", exact: true }).click();
+    await page.getByRole("link", { name: new RegExp(id) }).click();
+    await expect(page).toHaveURL(new RegExp("history/" + id + "$"));
+  };
+  const calls = () => page.evaluate(() => (window as any).__handoff.calls);
+  const busy =
+    "Another syllable comparison is running. Finish or cancel it first.";
+  await open(ids[0]);
+  await expect.poll(calls).toBe(1);
+  await open(ids[1]);
+  await expect(
+    page.getByText("Stopping previous speech feedback…", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Cancel speech scoring", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(busy, { exact: true })).toHaveCount(0);
+  await open(ids[2]);
+  await expect(
+    page.getByText("Stopping previous speech feedback…", { exact: true }),
+  ).toBeVisible();
+  expect(await calls()).toBe(1);
+  await page.evaluate(() => (window as any).__handoff.release[0]());
+  await expect.poll(calls).toBe(2);
+  await expect(
+    page.getByText("Reading recording…", { exact: true }),
+  ).toBeVisible();
+  // Legacy word details remain readable, but the existing UI guard prevents
+  // starting a competing retry while automatic feedback owns the slot.
+  await page.getByRole("button", { name: /^Practise word 1:/ }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(
+    dialog.getByRole("button", { name: "Record syllable", exact: true }),
+  ).toBeDisabled();
+  expect(await calls()).toBe(2);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator(".xp-chip")).toHaveAttribute(
+    "aria-label",
+    "0 XP, level 1. View progress",
+  );
+  await page.evaluate(() => (window as any).__handoff.release[1]());
+  const stored = () =>
+    page.evaluate(async (ids) => {
+      const db = await new Promise<IDBDatabase>((resolve) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onsuccess = () => resolve(request.result);
+      });
+      const records = await Promise.all(
+        ids.map(
+          (id) =>
+            new Promise<any>((resolve) => {
+              const request = db
+                .transaction("attempts")
+                .objectStore("attempts")
+                .get(id);
+              request.onsuccess = () => resolve(request.result);
+            }),
+        ),
+      );
+      db.close();
+      return await Promise.all(
+        records.map(async (record) => {
+          const blob = record.recordings["repeat-sentence-01"] as Blob;
+          return {
+            answer: record.result.answers["repeat-sentence-01"],
+            hash: Array.from(
+              new Uint8Array(
+                await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()),
+              ),
+            ),
+            type: blob.type,
+            size: blob.size,
+          };
+        }),
+      );
+    }, ids);
+  await expect
+    .poll(
+      async () => !!(await stored())[2].answer.speechAssessment?.recognition,
+      { timeout: 90000 },
+    )
+    .toBe(true);
+  const records = await stored();
+  for (const [index, record] of records.entries()) {
+    expect(record.answer.pronunciation).toEqual(originals.legacy);
+    expect(record.hash).toEqual(originals.hash);
+    expect(record.type).toBe(originals.type);
+    expect(record.size).toBe(originals.size);
+    if (index < 2) expect(record.answer.speechAssessment).toBeUndefined();
+  }
+  await expect(
+    page.getByRole("button", { name: "Retry feedback", exact: true }),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(
+    page.getByText(/Words are recognised from your recording/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Cancel speech scoring", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".xp-chip")).toHaveAttribute(
+    "aria-label",
+    "0 XP, level 1. View progress",
+  );
+});
+
 test("direct practice entry starts the required model preparation before the workspace is shown", async ({
   page,
 }) => {
