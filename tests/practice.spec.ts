@@ -257,6 +257,11 @@ test("shared cards list fits responsive panels and exposes every question type",
     await page.goto("/#types");
     await page.reload();
     await expect(page.locator(".type-row").first()).toBeVisible();
+    // Reload restores the previous viewport's last page; inventory from the start.
+    const previous = page.getByRole("button", {
+      name: "Previous question type pages",
+    });
+    while (await previous.isEnabled()) await previous.click();
     const titles = new Set<string>();
     for (let i = 0; i < 22; i++) {
       await screenFits(page);
