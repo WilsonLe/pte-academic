@@ -20,7 +20,9 @@ export function readingBoundary(text: string, limit: number): number {
   for (const part of sentences?.segment(firstLine) ?? []) {
     const end = part.index + part.segment.trimEnd().length;
     if (end > limit) break;
-    if (!/^\d+\.$/.test(part.segment.trim())) boundary = end;
+    // A paragraph number or discussion speaker cue belongs to the next words.
+    if (!/^(?:\d+|Speaker (?:one|two|three))\.$/.test(part.segment.trim()))
+      boundary = end;
   }
   if (boundary) return boundary;
 
