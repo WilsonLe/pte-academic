@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { asset, feedback, guideFor, questions } from "./content";
-import { responseBlocks, feedbackBlocks, promptBlocks } from "./review-content";
+import { asset, guideFor, questions } from "./content";
 import { AudioPlayer } from "./components/AudioPlayer";
-import { Badge } from "./components/ui/badge";
-import { Pager, ReadingPages } from "./Pages";
-import { Chart } from "./QuestionInput";
+import { Pager } from "./Pages";
+import { FriendlyFeedback } from "./FriendlyFeedback";
 import { SpeechReview } from "./speech/SpeechReview";
 import { answered } from "./progress";
 import type { Pronunciation } from "./speech/comparison-schema";
@@ -37,11 +35,11 @@ export function Review({
     <div className="screen-stack review-screen" data-question-id={id}>
       <div className="review-question">
         <h2>{guideFor(q).title}</h2>
-        {!speaking && <Badge variant="outline">{feedback(q, a).label}</Badge>}
         <Pager
           index={index}
           count={responded.length}
           label="review questions"
+          counterLabel="Question"
           onChange={setIndex}
         />
       </div>
@@ -65,20 +63,7 @@ export function Review({
               label="Prompt recording"
             />
           )}
-          {q.chart && (
-            <div className="review-chart">
-              <Chart q={q} responsive />
-            </div>
-          )}
-          <ReadingPages
-            key={`reading-${id}`}
-            blocks={[
-              ...responseBlocks(q, a),
-              ...feedbackBlocks(q, a),
-              ...promptBlocks(q),
-            ]}
-            label="feedback pages"
-          />
+          <FriendlyFeedback key={id} question={q} answer={a} />
         </div>
       )}
     </div>

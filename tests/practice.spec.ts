@@ -645,10 +645,16 @@ test("single answer submits once and persisted review survives reload", async ({
       name: "River health can improve within urban constraints.",
     })
     .check();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: /Option B: Selected · Correct/ }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Next review questions" }).click();
-  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Selected · Correct/ }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "My practice" }).click();
   await page.reload();
   await page.locator(".history-row").first().click();
@@ -674,40 +680,30 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
     .getByRole("combobox", { name: "Blank 2" })
     .selectOption("reliability");
   await end(page);
-  const response = page.locator(".review-screen .reading-copy");
   for (const [index, word] of ["support", "reliability"].entries()) {
-    await expect(
-      response.getByRole("heading", {
-        name: `Gap ${index + 1} · Correct`,
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(
-      response.getByText(`Your response: ${word}`, { exact: true }),
-    ).toHaveCount(1);
+    const comparison = page.getByRole("button", {
+      name: `Gap ${index + 1}: Correct. Explain`,
+      exact: true,
+    });
+    await expect(comparison).toContainText(word);
+    await comparison.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      index === 0 ? "Evidence is used" : "reliability",
+    );
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   }
   await expect(
     page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
-  await expect(response).toContainText("2/2 gaps correct");
-  await expect(response).toContainText(
-    "Evidence is used to “support” a claim.",
-  );
-  await expect(response).toContainText(
-    "A larger sample can improve an estimate’s “reliability”",
-  );
   await page.reload();
-  for (const [index, word] of ["support", "reliability"].entries()) {
+  for (const [index, word] of ["support", "reliability"].entries())
     await expect(
-      response.getByRole("heading", {
-        name: `Gap ${index + 1} · Correct`,
+      page.getByRole("button", {
+        name: `Gap ${index + 1}: Correct. Explain`,
         exact: true,
       }),
-    ).toBeVisible();
-    await expect(
-      response.getByText(`Your response: ${word}`, { exact: true }),
-    ).toHaveCount(1);
-  }
+    ).toContainText(word);
 });
 test("word bank and paragraph controls are keyboard operable", async ({
   page,
@@ -774,7 +770,23 @@ test("listening is single play, transcript hidden, highlight input available", a
   await expect(
     page.getByRole("group", { name: "Prompt recording", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/surveys the site carefully/)).toBeVisible();
+  const transcript = page.getByText(/surveys the site carefully/);
+  await expect(transcript).toHaveCount(0);
+  const source = page.getByRole("button", { name: "Open source", exact: true });
+  await source.click();
+  const dialog = page.getByRole("dialog");
+  const next = dialog.getByRole("button", {
+    name: "Next detail pages",
+    exact: true,
+  });
+  for (let i = 0; i < 20 && !(await transcript.isVisible()); i++) {
+    await expect(next).toBeEnabled();
+    await next.click();
+  }
+  await expect(dialog.getByText(/surveys the site carefully/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(source).toBeFocused();
 });
 test("microphone preflight, timed recording and persistent audio review", async ({
   page,
@@ -940,9 +952,12 @@ test("multiple choices expose incorrect selections and explain the result", asyn
   await expect(
     page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByText(/2 correct selections, 2 incorrect, 0 missed/),
-  ).toBeVisible();
+  await page
+    .getByRole("button", { name: /Option C: Selected · Incorrect/ })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText(
+    "2 correct selections, 2 incorrect, 0 missed",
+  );
 });
 test("listening typed gaps and dictation accept exact text after audio", async ({
   page,
@@ -956,8 +971,8 @@ test("listening typed gaps and dictation accept exact text after audio", async (
   await page.getByRole("textbox", { name: "Blank 2" }).fill("discarded");
   await end(page);
   await expect(
-    page.getByText("Your response: society", { exact: true }),
-  ).toHaveCount(1);
+    page.getByRole("button", { name: "Gap 1: Correct. Explain", exact: true }),
+  ).toContainText("society");
   await page.getByRole("button", { name: "My practice" }).click();
   await drill(page, "Write from Dictation");
   await start(page);
@@ -971,7 +986,10 @@ test("listening typed gaps and dictation accept exact text after audio", async (
     page.getByRole("button", { name: "Next", exact: true }),
   ).toBeEnabled({ timeout: 8000 });
   await end(page);
-  await expect(page.getByText("Exact match", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".comparison-token.diff-good").first(),
+  ).toBeVisible();
+  await expect(page.locator(".friendly-feedback .diff-bad")).toHaveCount(0);
 });
 test("blocked microphone permission has a recoverable explanation", async ({
   page,
@@ -1171,7 +1189,12 @@ test("daily quest earns real XP and badges and stays saved in history", async ({
   await start(page);
   for (let i = 0; i < 3; i++) {
     await answerReading(page);
-    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page
+      .getByRole("button", {
+        name: i === 2 ? "Finish practice" : "Next",
+        exact: true,
+      })
+      .click();
   }
   const completion = page
     .locator("[data-sonner-toast]")
@@ -2412,6 +2435,101 @@ test("all practice cleanup: every active response kind keeps its controls and on
     await page.clock.resume();
   }
   expect(kinds.size).toBe(10);
+});
+
+test("playtest: daily preparation stays compact and previews one guide at a time", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/practice/type/daily");
+    const preview = page.getByRole("button", {
+      name: /Preview .* daily practice questions/,
+    });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByLabel("Upcoming question type")).toHaveCount(0);
+    await expect(page.locator(".setup-rules li")).toHaveCount(3);
+    await page.screenshot({
+      path: info.outputPath(`preparation-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    await preview.click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    const choices = await dialog.locator("option").allTextContents();
+    await page.screenshot({
+      path: info.outputPath(`preview-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    expect(choices.length).toBeGreaterThan(1);
+    for (const title of choices) {
+      await page
+        .getByLabel("Upcoming question type")
+        .selectOption({ label: title });
+      await expect(dialog).toContainText("30 min shared timer");
+      await expect(
+        dialog.locator('[data-slot="dialog-description"]'),
+      ).not.toBeEmpty();
+    }
+    await expect(page.locator(".exam")).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(preview).toBeFocused();
+    await expect(
+      page.getByRole("button", { name: "Begin practice", exact: true }),
+    ).toBeEnabled();
+  }
+  await page.goto("/practice/type/reorder-paragraphs");
+  await expect(
+    page.getByRole("button", { name: /Preview .* daily practice questions/ }),
+  ).toHaveCount(0);
+});
+
+test("playtest: final blank answer can cancel or finish without changing earlier Next", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.goto("/practice/type/reading-single");
+  await start(page);
+  await page
+    .getByRole("radio", { name: "Difficulty scheduling early meetings" })
+    .check();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("2 of 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Next", exact: true }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Finish practice?");
+  await page
+    .getByRole("button", { name: "Keep practising", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByText("2 of 2", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Review", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "review questions", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "My practice", exact: true }).click();
+  await expect(page.locator(".history-row")).toHaveCount(1);
 });
 
 test("a pre-React recovery control survives a missing entry bundle", async ({

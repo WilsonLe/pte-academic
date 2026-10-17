@@ -1194,6 +1194,22 @@
   font-size: 12px;
   font-weight: 650;
 }
+.quest-preview {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.setup-heading button.setup-count {
+  min-height: 44px;
+}
+.quest-preview [data-slot="dialog-title"] {
+  padding-right: 24px;
+}
+.quest-preview .topic-select select {
+  height: auto;
+  min-height: 44px;
+  font-size: 14px;
+  padding: 8px 12px;
+}
 .setup-panel {
   padding: clamp(24px, 4vw, 36px);
 }

@@ -1,17 +1,20 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./components/ui/button";
+import { readingBoundary } from "./reading-boundary";
 
 export function Pager({
   index,
   count,
   onChange,
   label = "pages",
+  counterLabel,
 }: {
   index: number;
   count: number;
   onChange: (index: number) => void;
   label?: string;
+  counterLabel?: string;
 }) {
   if (count <= 1) return null;
   return (
@@ -26,6 +29,9 @@ export function Pager({
         <ArrowLeft />
       </Button>
       <span role="status" aria-live="polite">
+        {counterLabel && (
+          <small className="page-counter-label">{counterLabel}</small>
+        )}
         {index + 1} <span>/ {Math.max(1, count)}</span>
       </span>
       <Button
@@ -86,11 +92,13 @@ export function ReadingPages({
   blocks,
   label = "reading pages",
   scroll = false,
+  counterLabel,
 }: {
   texts?: string[];
   blocks?: ReadingBlock[];
   label?: string;
   scroll?: boolean;
+  counterLabel?: string;
 }) {
   const [index, setIndex] = useState(0);
   const [pages, setPages] = useState<ReadingBlock[][]>([[]]);
@@ -180,8 +188,8 @@ export function ReadingPages({
             page.push({ label: title, text: rest });
             break;
           }
-          // Preserve all text, preferring whitespace boundaries. At extreme
-          // zoom even one word may need splitting; never clip a trailing line.
+          // Measure the maximum fit first, then preserve complete paragraphs
+          // or sentences wherever possible. Oversized units still split safely.
           let low = 1,
             high = rest.length,
             fit = 1;
@@ -192,8 +200,7 @@ export function ReadingPages({
               low = n + 1;
             } else high = n - 1;
           }
-          const boundary = rest.slice(0, fit + 1).search(/\s+\S*$/);
-          if (boundary > 0) fit = boundary;
+          fit = readingBoundary(rest, fit);
           next.push([{ label: title, text: rest.slice(0, fit).trimEnd() }]);
           rest = rest.slice(fit).trimStart();
           continued = true;
@@ -234,6 +241,7 @@ export function ReadingPages({
           count={pages.length}
           onChange={setIndex}
           label={label}
+          counterLabel={counterLabel}
         />
       )}
     </div>

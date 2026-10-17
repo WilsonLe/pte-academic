@@ -8,7 +8,7 @@
     "validate:content": "tsx scripts/validate-content.ts",
     "build": "npm run validate:content && npm run validate:comparison && vite build && tsc -b && node scripts/publish-static.mjs && node scripts/build-sw.mjs && node --test tests/static-output.test.mjs",
     "preview": "vite preview --config vite.static.config.ts --outDir dist --host 127.0.0.1 --port 4178",
-    "test:content": "tsx --test tests/content.test.ts tests/review.test.ts",
+    "test:content": "tsx --test tests/content.test.ts tests/review.test.ts tests/review-diff.test.ts",
     "test:browser": "playwright test",
     "openrouter": "node scripts/openrouter.mjs",
     "build:subpath": "npm run validate:content && npm run validate:comparison && BASE_PATH=/pte-academic/ vite build && tsc -b && node scripts/publish-static.mjs dist-subpath && node scripts/build-sw.mjs dist-subpath && PTE_STATIC_DIR=dist-subpath node --test tests/static-output.test.mjs",

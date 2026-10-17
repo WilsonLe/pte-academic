@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from "./components/ui/dialog";
 
 import { Button } from "./components/ui/button";
@@ -17,6 +18,7 @@ import {
   Check,
   ArrowRight,
   ArrowLeft,
+  ChevronDown,
 } from "lucide-react";
 import {
   type Question,
@@ -33,6 +35,7 @@ export type PracticePlan = {
   mode: "type" | "section" | "mock";
   questions: Question[];
   minutes: Record<Section, number>;
+  previewGuidance?: boolean;
 };
 export type Result = {
   reward?: import("./progress").Reward;
@@ -54,6 +57,11 @@ export function Preflight({
 }) {
   const needMic = plan.questions.some((q) => guideFor(q).kind === "speak");
   const needAudio = plan.questions.some((q) => q.audio);
+  const previewGuides = [
+    ...new Map(plan.questions.map((q) => [q.type, guideFor(q)])).values(),
+  ];
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const previewGuide = previewGuides[previewIndex];
   const [error, setError] = useState("");
   const [mic, setMic] = useState(false);
   const [heard, setHeard] = useState(false);
@@ -137,7 +145,46 @@ export function Preflight({
             <ArrowLeft className="size-4" />
           </Button>
           <h1>{plan.label}</h1>
-          <span className="setup-count">{plan.questions.length} questions</span>
+          {plan.previewGuidance && previewGuide ? (
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button variant="ghost" size="sm" className="setup-count" />
+                }
+                aria-label={`Preview ${plan.questions.length} daily practice questions`}
+              >
+                {plan.questions.length} questions{" "}
+                <ChevronDown aria-hidden="true" className="size-3" />
+              </DialogTrigger>
+              <DialogContent className="practice-ui quest-preview">
+                <DialogTitle>{plan.label}</DialogTitle>
+                <label className="topic-select">
+                  <span className="sr-only">Upcoming question type</span>
+                  <select
+                    value={previewIndex}
+                    onChange={(e) => setPreviewIndex(Number(e.target.value))}
+                  >
+                    {previewGuides.map((guide, i) => (
+                      <option key={guide.id} value={i}>
+                        {guide.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <DialogDescription>
+                  {previewGuide.instructions}
+                </DialogDescription>
+                <p className="text-xs text-muted-foreground">
+                  {sections.find((s) => s.id === previewGuide.section)!.title} ·{" "}
+                  {plan.minutes[previewGuide.section]} min shared timer
+                </p>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <span className="setup-count">
+              {plan.questions.length} questions
+            </span>
+          )}
         </header>
         <section
           className="setup-panel quest-card"
@@ -282,6 +329,9 @@ export function Runner({
   const [transition, setTransition] = useState("");
   const examMain = useRef<HTMLElement>(null);
   const q = plan.questions[index];
+  const lastQuestion = index === plan.questions.length - 1;
+  const finishLabel =
+    plan.mode === "mock" ? "Finish mock test" : "Finish practice";
   useEffect(() => {
     examMain.current?.focus();
     window.scrollTo(0, 0);
@@ -712,7 +762,8 @@ export function Runner({
           disabled={!canNext || busy}
           onClick={() => (hasAnswer ? void advance() : setConfirmNext(true))}
         >
-          {busy ? "Saving…" : "Next"} <ArrowRight size={16} />
+          {busy ? "Saving…" : lastQuestion ? finishLabel : "Next"}{" "}
+          <ArrowRight size={16} />
         </button>
       </footer>
       <Dialog
@@ -726,7 +777,11 @@ export function Runner({
       >
         <DialogContent className="exam-dialog" showCloseButton={false}>
           <DialogTitle>
-            {confirmExit ? "End this attempt?" : "Move to the next question?"}
+            {confirmExit
+              ? "End this attempt?"
+              : lastQuestion
+                ? `${finishLabel}?`
+                : "Move to the next question?"}
           </DialogTitle>
           <DialogDescription>
             {confirmExit
@@ -744,7 +799,11 @@ export function Runner({
               Keep practising
             </Button>
             <Button onClick={() => void advance(confirmExit)}>
-              {confirmExit ? "End & review" : "Continue"}
+              {confirmExit
+                ? "End & review"
+                : lastQuestion
+                  ? finishLabel
+                  : "Continue"}
               <Check size={16} />
             </Button>
           </div>
