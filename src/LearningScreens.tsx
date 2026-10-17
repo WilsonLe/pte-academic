@@ -69,6 +69,9 @@ export function Catalogue({
               <Icon />
             </span>
             <span className="flex-1 text-left">{g.title}</span>
+            <span className="sr-only">
+              {sections.find((section) => section.id === g.section)?.title}
+            </span>
             {questions.some(
               (q) => q.type === g.id && progress.seen.includes(q.id),
             ) && <Check aria-label="Practised" />}

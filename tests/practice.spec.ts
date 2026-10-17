@@ -239,6 +239,11 @@ test("shared cards list fits responsive panels and exposes every question type",
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  const sectionNames: Record<string, string> = {
+    speaking: "Speaking & Writing",
+    reading: "Reading",
+    listening: "Listening",
+  };
   for (const size of [
     { width: 1440, height: 900 },
     { width: 980, height: 960 },
@@ -276,6 +281,12 @@ test("shared cards list fits responsive panels and exposes every question type",
         expect(card.height).toBeLessThanOrEqual(177);
         expect(card.fits).toBe(true);
       }
+      for (const card of await page.locator(".type-row").all())
+        await expect(card).toHaveAccessibleName(
+          new RegExp(
+            ` ${sectionNames[(await card.getAttribute("data-track"))!]}(?: |$)`,
+          ),
+        );
       const next = page.getByRole("button", {
         name: "Next question type pages",
       });
@@ -283,6 +294,43 @@ test("shared cards list fits responsive panels and exposes every question type",
       await next.click();
     }
     expect(titles.size).toBe(22);
+  }
+});
+
+test("catalogue names distinguish Reading and Listening choices before keyboard navigation", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.goto("/types");
+  await page.getByRole("searchbox").fill("Multiple");
+  for (const title of [
+    "Multiple Choice, Multiple Answers",
+    "Multiple Choice, Single Answer",
+  ]) {
+    for (const section of ["Reading", "Listening"])
+      await expect(
+        page.getByRole("button", {
+          name: `${title} ${section} 2`,
+          exact: true,
+        }),
+      ).toHaveCount(1);
+  }
+  for (const [section, route] of [
+    ["Reading", "reading-multiple"],
+    ["Listening", "listening-multiple"],
+  ]) {
+    const choice = page.getByRole("button", {
+      name: `Multiple Choice, Multiple Answers ${section} 2`,
+      exact: true,
+    });
+    await choice.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`/types/${route}$`));
+    await page
+      .getByRole("button", { name: "All question types", exact: true })
+      .click();
+    await expect(page.getByRole("searchbox")).toHaveValue("Multiple");
   }
 });
 
