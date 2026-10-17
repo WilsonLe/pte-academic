@@ -86,6 +86,30 @@ test("subdirectory static build retains manifest, audio and offline navigation",
     .toBe(3);
 });
 
+test("Learn study-step deep links survive offline subdirectory reload and return", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/pte-academic/guide/first-week?section=3");
+  const topic = page.getByRole("combobox", { name: "Learning topic" });
+  await expect(topic).toHaveValue("2");
+  await expect(
+    page.getByRole("region", { name: "Learning article" }),
+  ).toContainText("Try a complete section with the timer running.");
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  await context.setOffline(true);
+  await page.reload();
+  await expect(topic).toHaveValue("2");
+  await page.getByRole("button", { name: "Practise", exact: true }).click();
+  await expect(page).toHaveURL(/\/pte-academic\/types$/);
+  await page.goBack();
+  await expect(topic).toHaveValue("2");
+  await topic.selectOption({ label: "Overview" });
+  await expect(page).toHaveURL(/\/pte-academic\/guide\/first-week$/);
+  await page.reload();
+  await expect(topic).toHaveValue("-1");
+});
+
 test("static 404 shell supports direct history routes without rewrites", async ({
   page,
   context,

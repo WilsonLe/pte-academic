@@ -9,6 +9,7 @@ type Screen = {
   practiceId?: string;
   sectionId?: string;
   topicId?: string;
+  learnSection?: number;
 };
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
@@ -18,7 +19,13 @@ declare module "@tanstack/react-router" {
 export function useScreen(): Screen {
   const matches = useMatches();
   const match = matches.at(-1)!;
-  return { page: "missing", ...match.staticData.screen, ...match.params };
+  const section = (match.search as Record<string, unknown>).section;
+  return {
+    page: "missing",
+    ...match.staticData.screen,
+    ...match.params,
+    learnSection: typeof section === "number" ? section : undefined,
+  };
 }
 const screenPaths = {
   home: "/",
