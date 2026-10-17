@@ -1731,12 +1731,14 @@ body {
     min-height: 520px;
   }
 }
-/* Writing controls and source audio need readable space even on taller phones. */
-.main-content:has(.written-response) {
+/* Text and comparison controls need room without a tiny nested scroll area. */
+.main-content:has(.written-response),
+.main-content:has(.comparison-list) {
   overflow: auto;
   overscroll-behavior: contain;
 }
-.screen-stack:has(.written-response) {
+.screen-stack:has(.written-response),
+.screen-stack:has(.comparison-list) {
   min-height: 520px;
 }
 .history-row {

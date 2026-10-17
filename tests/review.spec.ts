@@ -818,3 +818,145 @@ test("highlight selections explain unchanged, selected and missed words on deskt
     await expect(unchanged.locator(".comparison-line")).toHaveCount(1);
   }
 });
+
+test("short comparison reviews keep answers visible after paging", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(180000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seed(page);
+  const samples = [questions.find((q) => q.type === "listening-multiple")!];
+  for (const q of questions) {
+    if (
+      kind(q) !== "write" &&
+      !["read-aloud", "repeat-sentence"].includes(q.type) &&
+      !samples.some((sample) => sample.type === q.type)
+    )
+      samples.push(q);
+  }
+  await page.evaluate(
+    async (ids) => {
+      const db = await new Promise<IDBDatabase>((resolve) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onsuccess = () => resolve(request.result);
+      });
+      await new Promise<void>((resolve) => {
+        const tx = db.transaction("attempts", "readwrite");
+        const store = tx.objectStore("attempts");
+        const get = store.get("review-wrong");
+        get.onsuccess = () => {
+          const saved = get.result;
+          saved.result.questionIds = ids;
+          for (const id of ids) {
+            const transcript = saved.result.answers[id]?.transcription;
+            if (transcript)
+              transcript.text =
+                "A retained spoken response describes how students learn through practice, feedback and reflection. ".repeat(
+                  8,
+                );
+          }
+          store.put(saved, "review-wrong");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+      });
+    },
+    samples.map((q) => q.id),
+  );
+  for (const size of [
+    { width: 390, height: 480 },
+    { width: 320, height: 568 },
+    { width: 390, height: 568 },
+    { width: 390, height: 844 },
+    { width: 1280, height: 720 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/history/review-wrong");
+    for (let i = 0; i < samples.length; i++) {
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        samples[i].id,
+      );
+      const list = page.locator(".comparison-list");
+      await expect(list).toBeVisible();
+      const card = list.locator(".comparison-card").first();
+      const trigger = (await card.evaluate((node) => node.tagName === "BUTTON"))
+        ? card
+        : card.getByRole("button").first();
+      const next = page.getByRole("button", {
+        name: "Next feedback pages",
+        exact: true,
+      });
+      if ((await next.count()) && (await next.isEnabled()))
+        await next.press("Enter");
+      else await trigger.focus();
+      // Keep actual answer text visible after keyboard paging. Oversized cards
+      // may still use the existing contained accessibility scroll escape.
+      await expect
+        .poll(() =>
+          list.evaluate((node) =>
+            [
+              ...node.querySelectorAll<HTMLElement>(
+                ".comparison-line > span:last-child, .comparison-token",
+              ),
+            ].some((answer) => {
+              const box = answer.getBoundingClientRect();
+              let top = 0;
+              let bottom = innerHeight;
+              for (
+                let parent = answer.parentElement;
+                parent;
+                parent = parent.parentElement
+              ) {
+                if (
+                  /auto|scroll|hidden|clip/.test(
+                    getComputedStyle(parent).overflowY,
+                  )
+                ) {
+                  const clip = parent.getBoundingClientRect();
+                  top = Math.max(top, clip.top);
+                  bottom = Math.min(bottom, clip.bottom);
+                }
+              }
+              const required = answer.classList.contains("comparison-token")
+                ? box.height
+                : Math.min(
+                    box.height,
+                    parseFloat(getComputedStyle(answer).lineHeight),
+                  );
+              return (
+                Math.min(box.bottom, bottom) - Math.max(box.top, top) >=
+                required - 1
+              );
+            }),
+          ),
+        )
+        .toBe(true);
+      await trigger.press("Enter");
+      expect((await readDetails(page)).trim()).not.toBe("");
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+      expect(
+        await page.evaluate(() => ({
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight,
+          top: document.querySelector(".topbar")!.getBoundingClientRect().top,
+        })),
+      ).toEqual({ width: size.width, height: size.height, top: 0 });
+      if (size.height >= 720)
+        expect(
+          await page
+            .locator("main")
+            .evaluate((node) => node.scrollHeight > node.clientHeight),
+        ).toBe(false);
+      if (i < samples.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+  }
+});
