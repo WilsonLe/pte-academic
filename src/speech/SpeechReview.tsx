@@ -14,8 +14,13 @@ import { exampleLabel, promptBlocks } from "../review-content";
 import { AudioPlayer } from "../components/AudioPlayer";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { ReadingPages } from "../Pages";
-import { Chart } from "../QuestionInput";
+import { FriendlyFeedback, ReviewDisclosure } from "../FriendlyFeedback";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "../components/ui/dialog";
 import { savePronunciation } from "../storage";
 import { scoreRecording } from "./comparison-client";
 import { modelStatus, subscribeModel } from "./comparison-assets";
@@ -204,7 +209,7 @@ export function SpeechReview({
               </span>
             )}
           </div>
-          <p className="speech-stats">
+          <p className="sr-only">
             {pronunciation?.recognition
               ? "Words are recognised from your recording. Select one to hear and practise its pronunciation. Recognition and word timings can be uncertain."
               : pronunciation
@@ -218,37 +223,40 @@ export function SpeechReview({
           {!answer.recording && (
             <p>No recording was saved. You can still practise each syllable.</p>
           )}
-          {answer.transcription && (
-            <details className="legacy-transcript">
-              <summary>Saved transcript</summary>
-              <ReadingPages
-                label="saved transcript pages"
-                texts={[
-                  answer.transcription.text || "The saved transcript is empty.",
-                ]}
-              />
-            </details>
-          )}
-          {!expected && (
-            <details className="legacy-transcript">
-              <summary>Question details</summary>
-              {question.chart && (
-                <div className="review-chart">
-                  <Chart q={question} responsive />
-                </div>
-              )}
-              <ReadingPages
-                label="question detail pages"
+          <div className="feedback-actions">
+            <ReviewDisclosure
+              title="Source"
+              question={question}
+              blocks={[
+                { label: "What to check", text: question.explanation },
+                ...(question.model &&
+                !promptBlocks(question).some((b) => b.text === question.model)
+                  ? [{ label: exampleLabel(question), text: question.model }]
+                  : []),
+                ...promptBlocks(question),
+              ]}
+            >
+              <Button variant="ghost" size="sm">
+                Source
+              </Button>
+            </ReviewDisclosure>
+            {answer.transcription && (
+              <ReviewDisclosure
+                title="Saved transcript"
                 blocks={[
-                  { label: "What to check", text: question.explanation },
-                  ...(question.model
-                    ? [{ label: exampleLabel(question), text: question.model }]
-                    : []),
-                  ...promptBlocks(question),
+                  {
+                    text:
+                      answer.transcription.text ||
+                      "The saved transcript is empty.",
+                  },
                 ]}
-              />
-            </details>
-          )}
+              >
+                <Button variant="ghost" size="sm">
+                  Saved transcript
+                </Button>
+              </ReviewDisclosure>
+            )}
+          </div>
           {!expected &&
             !words.length &&
             !progress &&
@@ -259,56 +267,44 @@ export function SpeechReview({
             Reference similarity, not pronunciation correctness or an exam
             score. Uncertain syllables have no score.
           </p>
-          {selected && (
-            <Suspense
-              fallback={<p role="status">Opening syllable practice…</p>}
+          {selected?.omitted ? (
+            <Dialog
+              open
+              onOpenChange={(open) => {
+                if (!open) setSelectedIndex(undefined);
+              }}
             >
-              <SyllablePractice
-                key={selected.index}
-                word={selected}
-                questionId={question.id}
-                expected={expected || ""}
-                recording={answer.recording}
-                attemptId={attemptId}
-                ready={model.status === "ready" && !progress}
-                onClose={() => setSelectedIndex(undefined)}
-              />
-            </Suspense>
+              <DialogContent className="practice-ui">
+                <DialogTitle>{selected.word}</DialogTitle>
+                <DialogDescription>
+                  This prompt word was not recognised in your recording.
+                  Recognition can miss words; this text comparison is not a
+                  pronunciation grade.
+                </DialogDescription>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            selected && (
+              <Suspense
+                fallback={<p role="status">Opening syllable practice…</p>}
+              >
+                <SyllablePractice
+                  key={selected.index}
+                  word={selected}
+                  questionId={question.id}
+                  expected={expected || ""}
+                  recording={answer.recording}
+                  attemptId={attemptId}
+                  ready={model.status === "ready" && !progress}
+                  onClose={() => setSelectedIndex(undefined)}
+                />
+              </Suspense>
+            )
           )}
         </>
       ) : (
         <div className="speech-reading">
-          {question.chart && (
-            <div className="review-chart">
-              <Chart q={question} responsive />
-            </div>
-          )}
-          <ReadingPages
-            label="feedback pages"
-            blocks={[
-              ...(!answer.recording
-                ? [{ text: "No recording was saved." }]
-                : []),
-              { label: "What to check", text: question.explanation },
-              ...(question.model
-                ? [{ label: exampleLabel(question), text: question.model }]
-                : []),
-              ...promptBlocks(question),
-              ...(answer.transcription
-                ? [
-                    {
-                      label: "Saved transcript",
-                      text:
-                        answer.transcription.text ||
-                        "The saved transcript is empty.",
-                    },
-                  ]
-                : []),
-              {
-                text: "A saved recording is needed for on-device pronunciation feedback.",
-              },
-            ]}
-          />
+          <FriendlyFeedback question={question} answer={answer} />
         </div>
       )}
     </section>

@@ -60,8 +60,14 @@ export function validateContent() {
       );
       assert.equal(new Set(q.answers).size, q.answers!.length);
       if (g.kind === "single") assert.equal(q.answers!.length, 1);
-      if (g.kind === "order")
+      if (g.kind === "order") {
         assert.equal(q.answers!.length, q.options!.length);
+        assert.equal(
+          q.orderExplanations?.length,
+          q.answers!.length,
+          `${q.id}: every ordered paragraph needs its own explanation`,
+        );
+      }
     }
     if (["speak", "write", "dictation"].includes(g.kind))
       assert(q.model, `${q.id}: model required`);

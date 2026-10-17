@@ -432,6 +432,12 @@
     "type": "reorder-paragraphs",
     "title": "A seed library",
     "explanation": "Start with the library introducing the scheme. “The scheme” then explains borrowing and growing; harvesting comes next. “This cycle” refers to returning seeds and explains how the collection continues.",
+    "orderExplanations": [
+      "This is first because it introduces the library and the seed-sharing scheme without relying on earlier information. It must come before paragraph 2: “The scheme” in that paragraph needs the scheme to have been introduced. Starting with borrowing, harvesting or “This cycle” would leave the activity or its participants unexplained.",
+      "This follows paragraph 1 because “The scheme” refers back to the seed-sharing scheme just introduced. It explains borrowing seeds and growing vegetables, so it must come before paragraph 3: participants can harvest crops and return new seeds only after growing them. It connects the introduction to the later action.",
+      "This follows paragraph 2 because “their crops” are the vegetables residents have grown, and “After harvesting” moves the process forward in time. It must come before paragraph 4: returning new seeds completes the borrowing–growing–returning cycle that “This cycle” refers to. Putting the conclusion earlier would leave that cycle incomplete.",
+      "This follows paragraph 3 because “This cycle” refers to the full sequence of borrowing seeds, growing crops and returning new seeds. It is last because it explains the result of that completed cycle: keeping the collection available for the following season. It concludes the process rather than introducing another step."
+    ],
     "options": [
       "After harvesting their crops, participants returned some new seeds to the library.",
       "A local library started a seed-sharing scheme last spring.",
@@ -445,6 +451,12 @@
     "type": "reorder-paragraphs",
     "title": "Testing a bridge",
     "explanation": "Start with engineers building the model. “They then” introduces the load test, “The results” reports the weakness it revealed, and “As a result” introduces the design revision.",
+    "orderExplanations": [
+      "This is first because it introduces the engineers and the bridge model, and “first” explicitly begins the sequence. It must come before paragraph 2: “They” needs the engineers as its reference, and weights can be placed on the model only after it has been built. None of the other paragraphs introduces these subjects.",
+      "This follows paragraph 1 because “They” refers to the engineers and “then” signals the next action after building the model. It must come before paragraph 3 because placing the weights is the test that produces “The results”. It links construction of the model to the discovery made during testing.",
+      "This follows paragraph 2 because “The results” refers to the load test just described. It must come before paragraph 4 because the weakness near the central support is the cause of the later design revision. Without this finding, “As a result” would have no stated reason for changing the design.",
+      "This follows paragraph 3 because “As a result” connects the revealed weakness to the decision to revise the design. It is last because the revision is the consequence of the completed build–test–finding sequence, before full construction begins. It resolves the problem rather than providing another test result."
+    ],
     "options": [
       "The results revealed a weakness near the central support.",
       "Engineers first built a small model of the proposed bridge.",

@@ -289,12 +289,15 @@ test("audio-only word recognition is prompt-independent across four accents and 
   });
   await page.goto(base + "history/independent-open");
   await expect(
-    page.getByText(/Words are recognised from your recording/),
+    page.getByRole("button", { name: /^Practise word 1:/ }),
   ).toBeVisible({ timeout: 90000 });
   await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
-  await page.getByText("Question details", { exact: true }).click();
-  await expect(page.getByRole("figure")).toBeVisible();
-  await page.getByText("Question details", { exact: true }).click();
+  const sourceButton = page.getByRole("button", { name: "Source", exact: true });
+  await sourceButton.click();
+  await expect(page.getByRole("dialog").getByRole("figure")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(sourceButton).toBeFocused();
   await expect(
     page.getByText("Syllable feedback saved on this device", { exact: true }),
   ).toBeHidden({ timeout: 10000 });

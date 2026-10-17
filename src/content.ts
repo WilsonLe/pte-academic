@@ -66,6 +66,7 @@ export const questionSchema = z.object({
   explanation: z.string(),
   options: z.array(z.string()).optional(),
   answers: z.array(z.string()).optional(),
+  orderExplanations: z.array(z.string().min(1)).optional(),
   blankOptions: z.array(z.array(z.string())).optional(),
   chart: z
     .object({

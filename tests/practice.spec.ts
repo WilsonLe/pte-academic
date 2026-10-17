@@ -648,9 +648,13 @@ test("single answer submits once and persisted review survives reload", async ({
   await page
     .getByRole("button", { name: "Finish practice", exact: true })
     .click();
-  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Option B: Selected · Correct/ }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Next review questions" }).click();
-  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Selected · Correct/ }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "My practice" }).click();
   await page.reload();
   await page.locator(".history-row").first().click();
@@ -676,40 +680,30 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
     .getByRole("combobox", { name: "Blank 2" })
     .selectOption("reliability");
   await end(page);
-  const response = page.locator(".review-screen .reading-copy");
   for (const [index, word] of ["support", "reliability"].entries()) {
-    await expect(
-      response.getByRole("heading", {
-        name: `Gap ${index + 1} · Correct`,
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(
-      response.getByText(`Your response: ${word}`, { exact: true }),
-    ).toHaveCount(1);
+    const comparison = page.getByRole("button", {
+      name: `Gap ${index + 1}: Correct. Explain`,
+      exact: true,
+    });
+    await expect(comparison).toContainText(word);
+    await comparison.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      index === 0 ? "Evidence is used" : "reliability",
+    );
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   }
   await expect(
     page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
-  await expect(response).toContainText("2/2 gaps correct");
-  await expect(response).toContainText(
-    "Evidence is used to “support” a claim.",
-  );
-  await expect(response).toContainText(
-    "A larger sample can improve an estimate’s “reliability”",
-  );
   await page.reload();
-  for (const [index, word] of ["support", "reliability"].entries()) {
+  for (const [index, word] of ["support", "reliability"].entries())
     await expect(
-      response.getByRole("heading", {
-        name: `Gap ${index + 1} · Correct`,
+      page.getByRole("button", {
+        name: `Gap ${index + 1}: Correct. Explain`,
         exact: true,
       }),
-    ).toBeVisible();
-    await expect(
-      response.getByText(`Your response: ${word}`, { exact: true }),
-    ).toHaveCount(1);
-  }
+    ).toContainText(word);
 });
 test("word bank and paragraph controls are keyboard operable", async ({
   page,
@@ -776,7 +770,23 @@ test("listening is single play, transcript hidden, highlight input available", a
   await expect(
     page.getByRole("group", { name: "Prompt recording", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/surveys the site carefully/)).toBeVisible();
+  const transcript = page.getByText(/surveys the site carefully/);
+  await expect(transcript).toHaveCount(0);
+  const source = page.getByRole("button", { name: "Open source", exact: true });
+  await source.click();
+  const dialog = page.getByRole("dialog");
+  const next = dialog.getByRole("button", {
+    name: "Next detail pages",
+    exact: true,
+  });
+  for (let i = 0; i < 20 && !(await transcript.isVisible()); i++) {
+    await expect(next).toBeEnabled();
+    await next.click();
+  }
+  await expect(dialog.getByText(/surveys the site carefully/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(source).toBeFocused();
 });
 test("microphone preflight, timed recording and persistent audio review", async ({
   page,
@@ -942,9 +952,12 @@ test("multiple choices expose incorrect selections and explain the result", asyn
   await expect(
     page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByText(/2 correct selections, 2 incorrect, 0 missed/),
-  ).toBeVisible();
+  await page
+    .getByRole("button", { name: /Option C: Selected · Incorrect/ })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText(
+    "2 correct selections, 2 incorrect, 0 missed",
+  );
 });
 test("listening typed gaps and dictation accept exact text after audio", async ({
   page,
@@ -958,8 +971,8 @@ test("listening typed gaps and dictation accept exact text after audio", async (
   await page.getByRole("textbox", { name: "Blank 2" }).fill("discarded");
   await end(page);
   await expect(
-    page.getByText("Your response: society", { exact: true }),
-  ).toHaveCount(1);
+    page.getByRole("button", { name: "Gap 1: Correct. Explain", exact: true }),
+  ).toContainText("society");
   await page.getByRole("button", { name: "My practice" }).click();
   await drill(page, "Write from Dictation");
   await start(page);
@@ -973,7 +986,10 @@ test("listening typed gaps and dictation accept exact text after audio", async (
     page.getByRole("button", { name: "Next", exact: true }),
   ).toBeEnabled({ timeout: 8000 });
   await end(page);
-  await expect(page.getByText("Exact match", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".comparison-token.diff-good").first(),
+  ).toBeVisible();
+  await expect(page.locator(".friendly-feedback .diff-bad")).toHaveCount(0);
 });
 test("blocked microphone permission has a recoverable explanation", async ({
   page,

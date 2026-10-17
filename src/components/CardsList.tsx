@@ -11,6 +11,7 @@ type CardsListProps<T> = {
   items: readonly T[];
   render: (item: T, index: number) => ReactNode;
   label: string;
+  counterLabel?: string;
   empty?: ReactNode;
   index?: number;
   onIndex?: (index: number) => void;
@@ -30,6 +31,7 @@ export function CardsList<T>({
   items,
   render,
   label,
+  counterLabel,
   empty,
   index,
   onIndex,
@@ -169,6 +171,7 @@ export function CardsList<T>({
           count={count}
           onChange={onIndex ?? setPage}
           label={label}
+          counterLabel={counterLabel}
         />
       )}
     </div>

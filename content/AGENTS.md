@@ -21,6 +21,7 @@ Read the root AGENTS.md, then `agents/content-author.md` and `agents/question-re
 - `bank`: text uses `{{}}`, shared `options` contains all correct answers plus distractors. A word can be used once.
 - `blanks`: audio plus matching transcript with `{{}}` for missing words; answers match the exact spoken forms and spelling.
 - `order`: options are scrambled paragraphs; answers contain each zero-based index once in the coherent order. Explain the links, not just the final order.
+- Each `order` question also has `orderExplanations`, in answer-key order with one rationale per paragraph. Explain why the opening can stand first, each available predecessor/successor link, and why the conclusion is last. These are selected review details; never expose them during an attempt.
 - `highlight`: text tokenized on whitespace; answers are string indices of words that differ from the audio. Punctuation remains attached to its word.
 - Audio prompts: keep the full original `audioText` for review and authoring. Add `segments` for three-speaker discussions. Runtime hides transcripts until review; source files and compiled answer keys are public static content.
 - Charts: title, equal-length labels/values, units, and an accurate model description. Charts use original practice data.
