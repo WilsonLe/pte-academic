@@ -1473,7 +1473,7 @@ test("section mode has full scope; shared timer finishes without a backward acti
   ).toHaveCount(0);
   await expect(page.locator(".exam")).toHaveCount(0);
 });
-test("full mock has all 65 questions and advances into Reading after section timeout", async ({
+test("full mock keeps current section status across timeout and ordinary handovers", async ({
   page,
 }) => {
   await page.goto("/#mocks");
@@ -1497,6 +1497,35 @@ test("full mock has all 65 questions and advances into Reading after section tim
   await page.clock.fastForward(4800500);
   await expect(page.getByText("36 of 65", { exact: true })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Blank 1" })).toBeVisible();
+  await expect(page.getByText(/^Next section:/)).toHaveCount(0);
+  const sectionStatus = page.locator(".exam-header").getByRole("status");
+  await expect(sectionStatus).toHaveText("Reading");
+  await expect(sectionStatus).toHaveAttribute("aria-live", "polite");
+  await expect(sectionStatus).toHaveAttribute("aria-atomic", "true");
+  const retainedStatus = await sectionStatus.elementHandle();
+  // Timeout entered Reading; ordinary forward-only skips reach Listening.
+  for (let question = 36; question <= 50; question++) {
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(
+      page.getByText(`${question + 1} of 65`, { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText(/^Next section:/)).toHaveCount(0);
+    await expect(sectionStatus).toHaveText(
+      question === 50 ? "Listening" : "Reading",
+    );
+  }
+  expect(await retainedStatus!.evaluate((node) => node.isConnected)).toBe(true);
+  expect(await retainedStatus!.textContent()).toBe("Listening");
+  const clock = (await page.locator(".exam-clock").innerText()).match(
+    /(\d+):(\d+)/,
+  )!;
+  const seconds = Number(clock[1]) * 60 + Number(clock[2]);
+  expect(seconds).toBeGreaterThan(38 * 60);
+  expect(seconds).toBeLessThanOrEqual(39 * 60);
+  await page.clock.fastForward(1000);
+  await expect(sectionStatus).toHaveText("Listening"); // The ticking clock is outside this region.
   await end(page);
   await expect(
     page.getByText("No responses were saved in this session.", { exact: true }),

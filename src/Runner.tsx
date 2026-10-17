@@ -328,7 +328,6 @@ export function Runner({
   const busyRef = useRef(false);
   const [confirmExit, setConfirmExit] = useState(false);
   const [confirmNext, setConfirmNext] = useState(false);
-  const [transition, setTransition] = useState("");
   const examMain = useRef<HTMLElement>(null);
   const q = plan.questions[index];
   const lastQuestion = index === plan.questions.length - 1;
@@ -414,10 +413,6 @@ export function Runner({
       });
       return;
     }
-    if (guideFor(plan.questions[target]).section !== g.section)
-      setTransition(
-        `Next section: ${sections.find((s) => s.id === guideFor(plan.questions[target]).section)!.title}`,
-      );
     setConfirmNext(false);
     setIndex(target);
     busyRef.current = false;
@@ -679,7 +674,9 @@ export function Runner({
       <header className="exam-header">
         <span>PTE Academic · Practice</span>
         <div>
-          <span>{sections.find((s) => s.id === g.section)!.title}</span>
+          <span role="status" aria-live="polite" aria-atomic="true">
+            {sections.find((s) => s.id === g.section)!.title}
+          </span>
           <span className="exam-clock">
             <Clock3 size={17} /> Section time remaining{" "}
             {formatTime(sectionSeconds)}
@@ -694,11 +691,6 @@ export function Runner({
       </div>
       <main className="exam-main" key={q.id} ref={examMain} tabIndex={-1}>
         <p className="exam-instructions">{g.instructions}</p>
-        {transition && (
-          <p className="sr-only" role="status">
-            {transition}
-          </p>
-        )}
         {q.text &&
           !["bank", "dropdown", "blanks", "highlight"].includes(g.kind) && (
             <div className="stimulus">{q.text}</div>
