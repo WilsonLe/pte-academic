@@ -675,6 +675,9 @@ test("playtest: all writing types share one paragraph-preserving response and di
     { width: 390, height: 451 },
     { width: 390, height: 480 },
     { width: 390, height: 560 },
+    { width: 390, height: 568 },
+    { width: 390, height: 640 },
+    { width: 320, height: 568 },
   ]) {
     await page.setViewportSize(size);
     await page.goto("/history/review-wrong");
@@ -692,29 +695,35 @@ test("playtest: all writing types share one paragraph-preserving response and di
       await expect(
         page.getByText(writing[i].explanation, { exact: true }),
       ).toHaveCount(0);
+      // Reading space must account for the actual controls, including a saved
+      // question pager and source player, rather than a viewport-height cutoff.
+      await expect
+        .poll(() =>
+          response.locator(".reading-copy").evaluate((node) => {
+            const style = getComputedStyle(node);
+            return (
+              (node.clientHeight -
+                parseFloat(style.paddingTop) -
+                parseFloat(style.paddingBottom)) /
+              parseFloat(style.lineHeight)
+            );
+          }),
+        )
+        .toBeGreaterThanOrEqual(3);
       if (size.height <= 560) {
-        // Short windows need useful reading space, including when a saved
-        // question pager and source player share the review screen.
-        await expect
-          .poll(() =>
-            response.locator(".reading-copy").evaluate((node) => {
-              const style = getComputedStyle(node);
-              return (
-                (node.clientHeight -
-                  parseFloat(style.paddingTop) -
-                  parseFloat(style.paddingBottom)) /
-                parseFloat(style.lineHeight)
-              );
-            }),
-          )
-          .toBeGreaterThanOrEqual(3);
         expect(
           await page.locator("main").evaluate((node) => ({
             scrolls: node.scrollHeight > node.clientHeight,
             overflow: getComputedStyle(node).overflowY,
           })),
         ).toEqual({ scrolls: true, overflow: "auto" });
-      } else {
+      }
+      if (size.height >= 720) {
+        expect(
+          await page
+            .locator("main")
+            .evaluate((node) => node.scrollHeight > node.clientHeight),
+        ).toBe(false);
         // This whole first paragraph fits in the actual panel; it must not be
         // chopped into the old 180-character response cards.
         await expect(
