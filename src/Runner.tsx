@@ -226,7 +226,7 @@ export function Preflight({
                   <div>
                     <h3 id="headphone-title">Check your headphones</h3>
                     <AudioPlayer
-                      src={asset(plan.questions.find((q) => q.audio)!.audio!)}
+                      src={asset("audio/headphone-check.wav")}
                       label="Headphone check"
                       showLabel={false}
                     />

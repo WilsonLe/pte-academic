@@ -65,6 +65,8 @@ test("published artifact contains a base-aware SPA shell, public assets and scop
     worker.match(/const ON_DEMAND=(\[.*?\])\.map/)[1],
   );
   assert.ok(assets.includes("./index.html"));
+  assert.ok(assets.includes("./audio/headphone-check.wav"));
+  await access(`${directory}/audio/headphone-check.wav`);
   assert.ok(
     !assets.some((path) =>
       /speech\.worker-|comparison\.worker-|ort-wasm-/.test(path),

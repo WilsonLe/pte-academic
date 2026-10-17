@@ -983,9 +983,18 @@ test("manifest, cached media and navigation work offline", async ({
   ).toBeVisible();
   expect(await page.evaluate(() => navigator.onLine)).toBe(false);
   await drill(page, "Highlight Incorrect Words");
+  await expect(page.locator("audio")).toHaveAttribute(
+    "src",
+    "/audio/headphone-check.wav",
+  );
   await page.locator("audio").evaluate(async (el: HTMLAudioElement) => {
     await el.play();
   });
+  await expect
+    .poll(() =>
+      page.locator("audio").evaluate((el: HTMLAudioElement) => el.duration),
+    )
+    .toBe(3);
   await expect
     .poll(() =>
       page.locator("audio").evaluate((el: HTMLAudioElement) => el.currentTime),
@@ -1523,14 +1532,12 @@ test.describe("shared playback", () => {
     await expect
       .poll(() => previous!.evaluate((node: HTMLAudioElement) => node.paused))
       .toBe(true);
-    await page.route("**/audio/repeat-sentence-01.mp3", (route) =>
-      route.abort(),
-    );
+    await page.route("**/audio/headphone-check.wav", (route) => route.abort());
     await page.goto("/practice/type/repeat-sentence");
     await expect(
       page.getByRole("button", { name: "Retry Headphone check", exact: true }),
     ).toBeVisible();
-    await page.unroute("**/audio/repeat-sentence-01.mp3");
+    await page.unroute("**/audio/headphone-check.wav");
     await page
       .getByRole("button", { name: "Retry Headphone check", exact: true })
       .click();
@@ -2243,6 +2250,12 @@ test("all practice cleanup: every setup route retains exactly its required devic
       await expect(
         page.getByRole("group", { name: "Headphone check", exact: true }),
       ).toHaveCount(needAudio ? 1 : 0);
+      if (needAudio)
+        await expect(
+          page
+            .getByRole("group", { name: "Headphone check", exact: true })
+            .locator("audio"),
+        ).toHaveAttribute("src", "/audio/headphone-check.wav");
       await expect(
         page.getByRole("button", { name: "Test microphone", exact: true }),
       ).toHaveCount(needMic ? 1 : 0);
