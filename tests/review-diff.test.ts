@@ -105,6 +105,56 @@ test("choice, gap and highlight diffs retain selected, missed and unanswered pos
   assert.equal(words[1].parts[1].text, "carefully.");
 });
 
+test("highlight feedback distinguishes false positives, correct selections and missed changes", () => {
+  for (const q of questions.filter((q) => guideFor(q).kind === "highlight")) {
+    const written = q.text!.trim().split(/\s+/);
+    const heard = q.audioText!.trim().split(/\s+/);
+    const unchanged = written.findIndex(
+      (_, i) => !q.answers!.includes(String(i)),
+    );
+    const selectedChange = q.answers![0];
+    const values = [String(unchanged), selectedChange];
+    const before = [...values];
+    const selected = reviewItems(q, { values });
+    const falsePositive = selected.find(
+      (item) => item.id === String(unchanged),
+    )!;
+    assert.equal(falsePositive.state, "Selected · Incorrect");
+    assert.deepEqual(falsePositive.parts, [
+      { text: written[unchanged], tone: "neutral", mark: "" },
+    ]);
+    const reason = falsePositive.detail.map((block) => block.text).join(" ");
+    assert.match(reason, /matches the recording/);
+    assert.match(reason, /remain unselected/);
+    assert.ok(!reason.includes(written[Number(selectedChange)]), q.id);
+    assert.ok(
+      !falsePositive.detail.some((block) => block.text === q.explanation),
+    );
+
+    const correct = selected.find((item) => item.id === selectedChange)!;
+    assert.equal(correct.state, "Selected · Correct");
+    assert.deepEqual(
+      correct.parts.map((part) => part.text),
+      [written[Number(selectedChange)], heard[Number(selectedChange)]],
+    );
+    assert.match(correct.detail[0].text, /correctly selected/);
+    const missed = reviewItems(q, { values: [String(unchanged)] }).filter(
+      (item) => q.answers!.includes(item.id),
+    );
+    assert.equal(missed.length, q.answers!.length);
+    for (const item of missed) {
+      assert.equal(item.title, `Word ${Number(item.id) + 1}`);
+      assert.equal(item.state, "Missed");
+      assert.match(item.detail[0].text, /should be selected/);
+      assert.deepEqual(
+        item.parts,
+        selected.find((word) => word.id === item.id)!.parts,
+      );
+    }
+    assert.deepEqual(values, before);
+  }
+});
+
 test("dictation alignment preserves repeated words, extra/missing words and display punctuation", () => {
   for (const [actual, expected] of [
     ["The the results wrong.", "The results will be published."],
