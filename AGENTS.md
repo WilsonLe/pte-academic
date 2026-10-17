@@ -2,6 +2,10 @@
 
 An independent, beginner-friendly PTE Academic practice PWA. All learner-facing content is original and versioned in Git. There is no backend, CMS, account, cloud runtime AI, analytics, external font request or runtime provider credential.
 
+## Playtest
+
+When asked to “playtest”, run a “playtest session”, or act as a student and suggest improvements, read [agents/playtest.md](agents/playtest.md). Use the visible built-in browser, report observed learner friction, and favor less screen clutter with details on demand. Follow the guide's implementation/retest steps when fixes are requested.
+
 ## Architecture
 
 - Keep the learning workspace minimal: desktop icon sidebar and header, mobile header and a three-tab footer with text below icons: Practice, Learn, History. Keep question types, sections and mocks within Practice, and utilities in the header. Use accessible names and tooltips for icons; keep beginner guidance in animated collapsibles/accordions, success feedback in Sonner, and honor reduced motion. The operator subsequently requested a more playful, gamified design: allow purposeful violet/lime game cards, XP, streaks, badges and finite celebration motion. The operator then requested larger game UI without a scrolling dashboard: use a viewport-sized play screen, large controls, button-selected progress/collection screens and paged practice catalogues, guidance, history and review. Learn topic cards and article text scroll instead of paginating. Measure reading pages against the actual font/panel; never clip text to force a fit. The operator subsequently requested disabled zoom and no app/document scrolling: keep the outer viewport fixed, suppress app-controlled zoom gestures/shortcuts, and preserve contained content scrolling in Learn, very short windows or browser accessibility overrides. Keep the timed runner focused and avoid marketing heroes or repeated explanatory copy.
