@@ -1246,6 +1246,141 @@ test("speaking status explains silence stops and resets for the next recording",
   }
 });
 
+test("active speaking captures advance and finish without an empty-response warning", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(180000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.addInitScript(() => {
+    AnalyserNode.prototype.getFloatTimeDomainData = function (data) {
+      data.fill(0.03);
+    };
+  });
+  await page.clock.install();
+  for (const guide of guideData.filter((guide) => guide.kind === "speak")) {
+    const items = questions.filter((question) => question.type === guide.id);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(`/practice/type/${guide.id}`);
+    await page
+      .getByRole("button", { name: "Test microphone", exact: true })
+      .click();
+    await expect(
+      page.getByLabel("Microphone check playback", { exact: true }),
+    ).toBeVisible();
+    await start(page);
+    for (const [index, question] of items.entries()) {
+      if (question.audio) {
+        await page.clock.fastForward(3100);
+        await page
+          .locator(".exam-main audio")
+          .evaluate((audio: HTMLAudioElement) => {
+            audio.pause();
+            audio.dispatchEvent(new Event("ended"));
+          });
+      }
+      if (guide.prepSeconds)
+        await page.clock.fastForward(guide.prepSeconds * 1000 + 100);
+      await expect(page.getByText("Recording", { exact: true })).toBeVisible();
+      // Native capture must have media to flush; prompt timing alone is controlled.
+      await page.waitForTimeout(300);
+      if (index === 0) await page.setViewportSize({ width: 320, height: 480 });
+      const last = index === items.length - 1;
+      await page
+        .getByRole("button", {
+          name: last ? "Finish practice" : "Next",
+          exact: true,
+        })
+        .press("Enter");
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      if (!last)
+        await expect(
+          page.getByText(`${index + 2} of ${items.length}`, { exact: true }),
+        ).toBeVisible();
+    }
+    await expect(
+      page.getByRole("heading", { name: "Review", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "review questions", exact: true }),
+    ).toContainText(new RegExp(`Question\\s*1\\s*/\\s*${items.length}`));
+    const player = page.getByRole("group", {
+      name: "Your recording",
+      exact: true,
+    });
+    await expect(player).toBeVisible();
+    await expect
+      .poll(() =>
+        player
+          .locator("audio")
+          .evaluate((audio: HTMLAudioElement) => audio.duration),
+      )
+      .toBeGreaterThan(0);
+    await page
+      .getByRole("button", { name: "My practice", exact: true })
+      .click();
+    await expect(page.locator(".history-row").first()).toContainText(
+      guide.title,
+    );
+    await page.locator(".history-row").first().click();
+    await page.reload();
+    await expect(player).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "review questions", exact: true }),
+    ).toContainText(new RegExp(`Question\\s*1\\s*/\\s*${items.length}`));
+  }
+});
+
+test("empty or failed speaking capture retains the blank-response confirmation", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.addInitScript(() => {
+    const nativeStart = MediaRecorder.prototype.start;
+    MediaRecorder.prototype.start = function (...args) {
+      const mode = (window as unknown as { captureMode: string }).captureMode;
+      if (mode === "failed") throw new Error("Controlled capture failure");
+      if (mode === "empty") this.ondataavailable = () => {};
+      return nativeStart.apply(this, args);
+    };
+  });
+  await page.clock.install();
+  for (const mode of ["empty", "failed"]) {
+    await page.goto("/practice/type/read-aloud");
+    await page
+      .getByRole("button", { name: "Test microphone", exact: true })
+      .click();
+    await expect(
+      page.getByLabel("Microphone check playback", { exact: true }),
+    ).toBeVisible();
+    await page.evaluate((mode) => {
+      (window as unknown as { captureMode: string }).captureMode = mode;
+    }, mode);
+    await start(page);
+    await page.clock.fastForward(35100);
+    await expect(
+      page.getByText(mode === "empty" ? "Recording" : "Unavailable", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "You have not entered a response.",
+    );
+    await page
+      .getByRole("button", { name: "Keep practising", exact: true })
+      .click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await end(page);
+    await expect(
+      page.getByText("No responses were saved in this session.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+  }
+});
+
 test("microphone preflight, timed recording and persistent audio review", async ({
   page,
 }) => {

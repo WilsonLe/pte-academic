@@ -375,6 +375,19 @@ export function Runner({
     if (r && r.state === "recording") r.stop();
     await recordDone.current;
   }
+  async function requestNext() {
+    if (busyRef.current) return;
+    await stopRecording();
+    if (busyRef.current) return;
+    const current = answerRef.current[q.id] || {};
+    if (
+      current.recording ||
+      current.text?.trim() ||
+      current.values?.some(Boolean)
+    )
+      void advance();
+    else setConfirmNext(true);
+  }
   async function advance(end = false, sectionTimeout = false) {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -493,7 +506,12 @@ export function Runner({
             resolve();
           };
         });
-        r.start();
+        try {
+          r.start();
+        } catch (error) {
+          recordDone.current = null;
+          throw error;
+        }
         const seconds = writingEnd.current
           ? Math.max(0, Math.ceil((writingEnd.current - Date.now()) / 1000))
           : g.answerSeconds;
@@ -656,9 +674,6 @@ export function Runner({
               : phase === "blocked"
                 ? "Audio paused"
                 : "Unavailable";
-  const hasAnswer = Boolean(
-    answer.recording || answer.text?.trim() || answer.values?.some(Boolean),
-  );
   return (
     <div className="exam">
       <header className="exam-header">
@@ -768,7 +783,7 @@ export function Runner({
         <button
           className="exam-next"
           disabled={!canNext || busy}
-          onClick={() => (hasAnswer ? void advance() : setConfirmNext(true))}
+          onClick={() => void requestNext()}
         >
           {busy ? "Saving…" : lastQuestion ? finishLabel : "Next"}{" "}
           <ArrowRight size={16} />
