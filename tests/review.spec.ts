@@ -248,6 +248,160 @@ async function fits(page: Page) {
   expect(box!.y + box!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
 }
 
+for (const mode of ["legacy", "acoustic"]) {
+  test(`saved chart bars retain their data and proportions in ${mode} review`, async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(180000);
+    await context.route("**/models/**", (route) => route.abort());
+    await seed(page);
+    const charts = questions.filter((question) => question.chart);
+    await page.evaluate(
+      async ({ charts, mode, sha, exportId }) => {
+        const db = await new Promise<IDBDatabase>((resolve) => {
+          const request = indexedDB.open("pte-studio", 2);
+          request.onsuccess = () => resolve(request.result);
+        });
+        await new Promise<void>((resolve) => {
+          const tx = db.transaction("attempts", "readwrite");
+          const store = tx.objectStore("attempts"),
+            get = store.get("review-correct");
+          get.onsuccess = () => {
+            const saved = get.result;
+            saved.result.questionIds = charts.map((q) => q.id);
+            saved.result.answers = Object.fromEntries(
+              charts.map((q) => [
+                q.id,
+                mode === "legacy"
+                  ? {
+                      transcription: {
+                        text: "Saved spoken response",
+                        seconds: 3,
+                        engine: "legacy-local",
+                        model: "legacy",
+                        revision: "old",
+                      },
+                    }
+                  : {
+                      speechAssessment: {
+                        schemaVersion: 1,
+                        modelSha256: sha,
+                        exportId,
+                        referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+                        seconds: 3,
+                        status: "unscored",
+                        syllables: [],
+                        recognition: {
+                          modelId: "audio-only-words-v1",
+                          words: [],
+                        },
+                      },
+                    },
+              ]),
+            );
+            saved.recordings = {};
+            store.put(saved, "review-correct");
+          };
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+        });
+      },
+      { charts, mode, sha: COMPARISON_MODEL_SHA, exportId: COMPARISON_EXPORT },
+    );
+    await page.goto("/history/review-correct");
+    for (const [index, question] of charts.entries()) {
+      for (const viewport of [
+        { width: 1280, height: 720 },
+        { width: 390, height: 844 },
+        { width: 320, height: 480 },
+      ]) {
+        await page.setViewportSize(viewport);
+        const source = page.getByRole("button", {
+          name: /^(Open source|Source)$/,
+        });
+        await source.click();
+        const chart = page.getByRole("dialog").getByRole("figure");
+        await expect(chart).toHaveAttribute(
+          "aria-label",
+          `${question.chart!.title}: ${question.chart!.labels.map((label, i) => `${label} ${question.chart!.values[i]} ${question.chart!.unit}`).join(", ")}`,
+        );
+        await expect(chart.locator("figcaption")).toHaveText(
+          question.chart!.title,
+        );
+        await expect(chart.locator(".chart-unit")).toHaveText(
+          question.chart!.unit,
+        );
+        const geometry = await chart.evaluate((node) => {
+          const bounds = node.getBoundingClientRect();
+          return {
+            heights: [...node.querySelectorAll(".bar")].map(
+              (bar) => bar.getBoundingClientRect().height,
+            ),
+            widths: [...node.querySelectorAll(".bar")].map(
+              (bar) => bar.getBoundingClientRect().width,
+            ),
+            bottoms: [...node.querySelectorAll(".bar")].map(
+              (bar) => bar.getBoundingClientRect().bottom,
+            ),
+            labels: [
+              ...node.querySelectorAll(".chart-column > span:last-child"),
+            ].map((label) => ({
+              text: label.textContent,
+              fits:
+                label.scrollHeight <= label.clientHeight + 1 &&
+                label.getBoundingClientRect().right <= bounds.right &&
+                label.getBoundingClientRect().left >= bounds.left,
+            })),
+          };
+        });
+        expect(Math.min(...geometry.heights)).toBeGreaterThan(2);
+        expect(
+          Math.max(...geometry.widths) - Math.min(...geometry.widths),
+        ).toBeLessThan(1);
+        expect(
+          Math.max(...geometry.bottoms) - Math.min(...geometry.bottoms),
+        ).toBeLessThan(1);
+        for (const [i, height] of geometry.heights.entries())
+          expect(height / Math.max(...geometry.heights)).toBeCloseTo(
+            question.chart!.values[i] / Math.max(...question.chart!.values),
+            1,
+          );
+        expect(geometry.labels.map((label) => label.text)).toEqual(
+          question.chart!.labels,
+        );
+        expect(geometry.labels.every((label) => label.fits)).toBe(true);
+        if (viewport.width === 320 && mode === "acoustic") {
+          const details = await readDetails(page);
+          expect(details).toContain(compact(question.explanation));
+          if (question.model)
+            expect(details).toContain(compact(question.model));
+        }
+        await page.keyboard.press("Escape");
+        await expect(source).toBeFocused();
+      }
+      if (index < charts.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+    await page.reload();
+    await page.getByRole("button", { name: /^(Open source|Source)$/ }).click();
+    await expect
+      .poll(() =>
+        page
+          .getByRole("dialog")
+          .locator(".bar")
+          .evaluateAll((bars) =>
+            Math.min(...bars.map((bar) => bar.getBoundingClientRect().height)),
+          ),
+      )
+      .toBeGreaterThan(2);
+  });
+}
+
 test("all 65 questions: contextual comparisons and disclosed explanations across all 22 types", async ({
   page,
   context,
