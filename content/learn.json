@@ -103,7 +103,7 @@
       },
       {
         "title": "Using the app offline",
-        "text": "Open the app online once and wait for Offline ready before disconnecting. That status means the app and bundled media have been cached. Browser storage can still be cleared or evicted. Installation requires a supported browser and HTTPS, or localhost for development. On iPhone or iPad, use the browser share menu and Add to Home Screen."
+        "text": "Before relying on offline practice, open the app online, then disconnect and reload. Check that the practice screens and prompt audio you need still work. Reconnect and try again if anything is unavailable. Browser storage can still be cleared or evicted. Installation requires a supported browser and HTTPS, or localhost for development. On iPhone or iPad, use the browser share menu and Add to Home Screen."
       },
       {
         "title": "What is simulated",
