@@ -1,4 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
+import guideData from "../content/guides.json" with { type: "json" };
+import questions from "../content/questions.json" with { type: "json" };
+import sections from "../content/sections.json" with { type: "json" };
+import type { Guide } from "../src/content";
 async function openAchievements(page: Page) {
   const mobile = page.viewportSize()!.width < 768;
   await page
@@ -3363,5 +3367,175 @@ test("short progress keeps every weekly activity mark above the fixed footer", a
         ).toBe(true);
       }
     }
+  }
+});
+
+test("saved sessions expose section identity without changing history or review", async ({
+  page,
+}) => {
+  await page.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const variants = (guideData as Guide[]).map((g) => ({
+    id: `history-section-${g.id}`,
+    label: g.title,
+    section: sections.find((s) => s.id === g.section)!.title,
+    icon: { speaking: "mic", reading: "book-open", listening: "headphones" }[
+      g.section
+    ],
+    questionIds: questions.filter((q) => q.type === g.id).map((q) => q.id),
+  }));
+  variants.push(
+    {
+      id: "history-section-reading-run",
+      label: "Reading practice",
+      section: "Reading",
+      icon: "book-open",
+      questionIds: questions
+        .filter((q) => q.type.startsWith("reading-"))
+        .map((q) => q.id),
+    },
+    {
+      id: "history-section-mixed",
+      label: "Daily practice",
+      section: "Mixed sections",
+      icon: "history",
+      questionIds: [
+        "read-aloud-01",
+        "reading-single-01",
+        "listening-single-01",
+      ],
+    },
+    {
+      id: "history-section-empty",
+      label: "Practice session",
+      section: "Practice session",
+      icon: "history",
+      questionIds: [],
+    },
+  );
+  for (let offset = 0; offset < variants.length; offset += 8) {
+    const batch = variants.slice(offset, offset + 8);
+    const entries = batch.map((v) => ({
+      id: v.id,
+      label: v.label,
+      date: "2026-10-17T01:00:00.000Z",
+      questionIds: v.questionIds,
+      answers: Object.fromEntries(
+        v.questionIds.map((id) => [id, { values: ["0"] }]),
+      ),
+      finished: true,
+    }));
+    await page.evaluate(async (entries) => {
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onupgradeneeded = () => {
+          for (const name of ["attempts", "progress"])
+            if (!request.result.objectStoreNames.contains(name))
+              request.result.createObjectStore(name);
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          const tx = db.transaction("attempts", "readwrite");
+          for (const result of entries)
+            tx.objectStore("attempts").put(
+              { result, recordings: {} },
+              result.id,
+            );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+          };
+        };
+      });
+      localStorage.setItem("pte-studio-history-v1", JSON.stringify(entries));
+    }, entries);
+    for (const size of [
+      { width: 1280, height: 720 },
+      { width: 390, height: 844 },
+      { width: 320, height: 480 },
+    ]) {
+      await page.setViewportSize(size);
+      await page.goto("/history");
+      const seen = new Set<string>();
+      do {
+        for (const row of await page.locator(".history-row").all()) {
+          const href = await row.getAttribute("href");
+          const v = batch.find((v) => href === `/history/${v.id}`)!;
+          expect(v).toBeTruthy();
+          await expect(row).toHaveAccessibleName(new RegExp(v.section));
+          await expect(row.locator(`svg.lucide-${v.icon}`)).toHaveCount(1);
+          await expect(row.locator("small")).toContainText("17 Oct 2026");
+          seen.add(v.id);
+        }
+        await screenFits(page);
+        const next = page.getByRole("button", {
+          name: "Next attempt pages",
+          exact: true,
+        });
+        if (!(await next.count()) || (await next.isDisabled())) break;
+        await next.click();
+      } while (true);
+      expect([...seen].sort()).toEqual(batch.map((v) => v.id).sort());
+      await page.reload();
+      expect(
+        await page.evaluate(() =>
+          JSON.parse(localStorage.getItem("pte-studio-history-v1")!),
+        ),
+      ).toEqual(entries);
+    }
+  }
+  // Same title/date/count: only the section identifies the correct saved activity.
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const duplicates = variants.filter((v) =>
+    [
+      "reading-single",
+      "reading-multiple",
+      "listening-single",
+      "listening-multiple",
+    ].some((id) => v.id === `history-section-${id}`),
+  );
+  await page.evaluate(
+    (ids) => {
+      // These records were already written to this isolated fixture database above.
+      localStorage.setItem("pte-studio-history-v1", JSON.stringify(ids));
+    },
+    duplicates.map((v) => ({
+      id: v.id,
+      label: v.label,
+      date: "2026-10-17T01:00:00.000Z",
+      questionIds: v.questionIds,
+      answers: {},
+      finished: true,
+    })),
+  );
+  await page.goto("/history");
+  for (const v of duplicates) {
+    const row = page.locator(`a.history-row[href="/history/${v.id}"]`);
+    await expect(row).toHaveAccessibleName(new RegExp(v.section));
+    await row.focus();
+    await row.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    const tooltip = page.locator('[data-slot="tooltip-content"][data-open]');
+    await expect(tooltip).toHaveText(v.section);
+    await expect(tooltip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await row.press("Enter");
+    await expect(page).toHaveURL(`/history/${v.id}`);
+    await expect(
+      page.getByRole("heading", { name: "Review", exact: true }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: "Open source", exact: true }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "My practice", exact: true })
+      .click();
   }
 });

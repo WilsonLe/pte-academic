@@ -13,6 +13,11 @@ import {
 } from "lucide-react";
 import { Button, buttonVariants } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "./components/ui/tooltip";
 import { ReadingPages } from "./Pages";
 import { CardsList } from "./components/CardsList";
 import {
@@ -315,27 +320,49 @@ export function HistoryScreen({
             </Button>
           </div>
         }
-        render={(r) => (
-          <Link
-            key={r.id}
-            className="type-row history-row"
-            to="/history/$attemptId"
-            params={{ attemptId: r.id }}
-          >
-            <History />
-            <span className="flex-1 text-left">
-              {r.label}
-              <small>
-                {new Date(r.date).toLocaleString("en-AU", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
-              </small>
-            </span>
-            <Badge variant="secondary">{r.questionIds.length}</Badge>
-            <ChevronRight />
-          </Link>
-        )}
+        render={(r) => {
+          const plannedSections = r.questionIds.map((id) => {
+            const question = questions.find((q) => q.id === id);
+            return question ? guideFor(question).section : undefined;
+          });
+          const distinctSections = new Set(plannedSections);
+          const section =
+            distinctSections.size === 1 ? plannedSections[0] : undefined;
+          const Icon = section ? icons[section] : History;
+          const context = section
+            ? sections.find((s) => s.id === section)!.title
+            : distinctSections.size > 1 && !distinctSections.has(undefined)
+              ? "Mixed sections"
+              : "Practice session";
+          return (
+            <Tooltip key={r.id}>
+              <TooltipTrigger
+                render={
+                  <Link
+                    className="type-row history-row"
+                    to="/history/$attemptId"
+                    params={{ attemptId: r.id }}
+                  />
+                }
+              >
+                <Icon aria-hidden="true" />
+                <span className="flex-1 text-left">
+                  {r.label}
+                  <span className="sr-only"> {context}</span>
+                  <small>
+                    {new Date(r.date).toLocaleString("en-AU", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </small>
+                </span>
+                <Badge variant="secondary">{r.questionIds.length}</Badge>
+                <ChevronRight />
+              </TooltipTrigger>
+              <TooltipContent>{context}</TooltipContent>
+            </Tooltip>
+          );
+        }}
       />
     </div>
   );
