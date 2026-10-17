@@ -14,6 +14,17 @@ test("subdirectory static build retains manifest, audio and offline navigation",
   page,
   context,
 }) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem(
+      "pte:catalogue:/",
+      JSON.stringify({
+        version: 1,
+        selectedSections: [],
+        search: "wrong base",
+        index: 0,
+      }),
+    ),
+  );
   await page.goto("/pte-academic/");
   await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
   await page.reload();
@@ -32,7 +43,8 @@ test("subdirectory static build retains manifest, audio and offline navigation",
   await expect(page.locator(".type-row")).toContainText("Write from Dictation");
   await expect(page).toHaveURL(/\/pte-academic\/types$/);
   await page.reload();
-  await expect(page.getByRole("searchbox")).toBeVisible();
+  await expect(page.getByRole("searchbox")).toHaveValue("Write from Dictation");
+  await expect(page.locator(".type-row")).toHaveCount(1);
   const audio = await page.evaluate(async () => {
     const r = await fetch("/pte-academic/audio/repeat-sentence-01.mp3", {
       headers: { Range: "bytes=0-127" },

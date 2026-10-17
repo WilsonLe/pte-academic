@@ -257,6 +257,11 @@ test("shared cards list fits responsive panels and exposes every question type",
     await page.goto("/#types");
     await page.reload();
     await expect(page.locator(".type-row").first()).toBeVisible();
+    // Reload restores the previous viewport's last page; inventory from the start.
+    const previous = page.getByRole("button", {
+      name: "Previous question type pages",
+    });
+    while (await previous.isEnabled()) await previous.click();
     const titles = new Set<string>();
     for (let i = 0; i < 22; i++) {
       await screenFits(page);
@@ -1890,6 +1895,140 @@ test("daily home groups progress and actions across fresh, partial and completed
   }
 });
 
+test("catalogue reload restores search, sections and the current page", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/types");
+  await page
+    .getByRole("button", { name: "Filter: Speaking & Writing", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Filter: Reading", exact: true })
+    .click();
+  await page.getByRole("searchbox").fill("a");
+  await page
+    .getByRole("button", { name: "Next question type pages", exact: true })
+    .click();
+  const pager = page.getByRole("navigation", {
+    name: "question type pages",
+    exact: true,
+  });
+  await expect(pager.getByRole("status")).toHaveText("2 / 3");
+  await expect(
+    page.getByRole("button", {
+      name: "Select Missing Word Listening",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("searchbox")).toHaveValue("a");
+  for (const [name, pressed] of [
+    ["Speaking & Writing", "false"],
+    ["Reading", "false"],
+    ["Listening", "true"],
+  ])
+    await expect(
+      page.getByRole("button", { name: `Filter: ${name}`, exact: true }),
+    ).toHaveAttribute("aria-pressed", pressed);
+  await expect(pager.getByRole("status")).toHaveText("2 / 3");
+  await page
+    .getByRole("button", { name: "Select Missing Word Listening", exact: true })
+    .click();
+  await page.reload();
+  await page
+    .getByRole("button", { name: "All question types", exact: true })
+    .click();
+  await expect(page.getByRole("searchbox")).toHaveValue("a");
+  await expect(pager.getByRole("status")).toHaveText("2 / 3");
+});
+
+test("invalid catalogue snapshots fall back to the complete catalogue", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/types");
+  const valid = {
+    version: 1,
+    selectedSections: ["listening"],
+    search: "a",
+    index: 1,
+  };
+  for (const raw of [
+    "{",
+    JSON.stringify({ ...valid, version: 2 }),
+    JSON.stringify({ ...valid, selectedSections: ["unknown"] }),
+    JSON.stringify({ ...valid, selectedSections: ["listening", "listening"] }),
+    JSON.stringify({ ...valid, search: 7 }),
+    JSON.stringify({ ...valid, index: -1 }),
+  ]) {
+    await page.evaluate(
+      (value) => sessionStorage.setItem("pte:catalogue:/", value),
+      raw,
+    );
+    await page.reload();
+    await expect(page.getByRole("searchbox")).toHaveValue("");
+    for (const name of ["Speaking & Writing", "Reading", "Listening"])
+      await expect(
+        page.getByRole("button", { name: `Filter: ${name}`, exact: true }),
+      ).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.getByRole("button", { name: /^Read Aloud/ }),
+    ).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+});
+
+for (const blocked of ["getter", "getItem", "setItem"] as const) {
+  test(`catalogue remains usable when tab storage blocks ${blocked}`, async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.addInitScript((mode) => {
+      if (mode === "getter") {
+        Object.defineProperty(window, "sessionStorage", {
+          get() {
+            throw new DOMException(
+              "Controlled blocked storage",
+              "SecurityError",
+            );
+          },
+        });
+      } else {
+        const original = Storage.prototype[mode] as (
+          ...args: string[]
+        ) => unknown;
+        Object.defineProperty(Storage.prototype, mode, {
+          configurable: true,
+          value: function (this: Storage, key: string, ...args: string[]) {
+            if (key.startsWith("pte:catalogue:"))
+              throw new DOMException(
+                "Controlled storage failure",
+                mode === "setItem" ? "QuotaExceededError" : "SecurityError",
+              );
+            return original.call(this, key, ...args);
+          },
+        });
+      }
+    }, blocked);
+    await page.goto("/types");
+    await page.getByRole("searchbox").fill("Select Missing Word");
+    await expect(page.locator(".type-row")).toHaveCount(1);
+    await page.getByRole("button", { name: /^Select Missing Word/ }).click();
+    await page
+      .getByRole("button", { name: "All question types", exact: true })
+      .click();
+    await expect(page.getByRole("searchbox")).toHaveValue(
+      "Select Missing Word",
+    );
+    await page.reload();
+    await expect(page.getByRole("searchbox")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}
+
 test("section filters remain independent across routed question guides", async ({
   page,
 }) => {
@@ -1932,6 +2071,8 @@ test("section filters remain independent across routed question guides", async (
   await expect(speaking).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("searchbox")).toHaveValue("Read Aloud");
   await speaking.click();
+  await expect(page.getByText("No question types found.")).toBeVisible();
+  await page.reload();
   await expect(page.getByText("No question types found.")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Clear filters", exact: true }),
