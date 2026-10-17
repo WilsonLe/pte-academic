@@ -168,7 +168,7 @@
     "answerSeconds": 1200,
     "skills": "Writing",
     "summary": "Develop an argument in 200–300 words.",
-    "instructions": "Write an essay responding to the prompt. You have 20 minutes, including planning and checking.",
+    "instructions": "Write an essay of 200–300 words responding to the prompt. You have 20 minutes, including planning and checking.",
     "tips": [
       "Take a position that answers the exact question.",
       "Develop each main point with a reason and an example.",
@@ -176,7 +176,7 @@
     ],
     "pitfall": "Memorized generic paragraphs may fail to address the prompt.",
     "scoring": "Content, form, organization, language range, grammar, vocabulary and spelling.",
-    "verified": "2026-10-15",
+    "verified": "2026-10-18",
     "order": 9
   },
   {
