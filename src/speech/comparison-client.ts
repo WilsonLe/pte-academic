@@ -17,7 +17,11 @@ import {
 } from "./comparison-schema";
 import type { SyllableTarget } from "./comparison-core";
 import { loadSyllableReferences } from "./word-reference";
-let occupied = false;
+type ComparisonSlot = {
+  isCancelled: () => boolean;
+  finished: Promise<void>;
+};
+let occupied: ComparisonSlot | undefined;
 export function scoreRecording(
   url: string,
   text: string,
@@ -30,25 +34,44 @@ export function scoreRecording(
     rejectJob: ((e: Error) => void) | undefined;
   const abort = new AbortController();
   const cancelled = () => new DOMException("Scoring cancelled", "AbortError");
+  let finish!: () => void;
+  const slot: ComparisonSlot = {
+    isCancelled: () => aborted,
+    finished: new Promise<void>((resolve) => {
+      finish = resolve;
+    }),
+  };
+  const waitFor = <T>(work: Promise<T>) =>
+    new Promise<T>((resolve, reject) => {
+      const stop = () => reject(cancelled());
+      if (abort.signal.aborted) {
+        stop();
+        return;
+      }
+      abort.signal.addEventListener("abort", stop, { once: true });
+      work
+        .then(resolve, reject)
+        .finally(() => abort.signal.removeEventListener("abort", stop));
+    });
   const promise = (async (): Promise<Pronunciation> => {
-    if (occupied)
-      throw new Error(
-        "Another syllable comparison is running. Finish or cancel it first.",
-      );
-    occupied = true;
     try {
+      while (occupied) {
+        const previous = occupied;
+        if (!previous.isCancelled())
+          throw new Error(
+            "Another syllable comparison is running. Finish or cancel it first.",
+          );
+        onProgress("Stopping previous speech feedback…");
+        await waitFor(previous.finished);
+      }
+      if (aborted) throw cancelled();
+      occupied = slot;
       if (!url.startsWith("blob:"))
         throw new Error("Only a local recording can be scored.");
       if (typeof Worker === "undefined" || typeof WebAssembly === "undefined")
         throw new Error("Local speech grading is unavailable in this browser.");
       onProgress("Preparing required speech model…");
-      await new Promise<void>((resolve, reject) => {
-        const stop = () => reject(cancelled());
-        abort.signal.addEventListener("abort", stop, { once: true });
-        prepareComparisonModel(false, comparisonRuntimeFiles)
-          .then(resolve, reject)
-          .finally(() => abort.signal.removeEventListener("abort", stop));
-      });
+      await waitFor(prepareComparisonModel(false, comparisonRuntimeFiles));
       if (aborted) throw cancelled();
       onProgress("Reading recording…");
       const response = await fetch(url, { signal: abort.signal });
@@ -125,7 +148,8 @@ export function scoreRecording(
       });
     } finally {
       worker?.terminate();
-      occupied = false;
+      if (occupied === slot) occupied = undefined;
+      finish();
     }
   })();
   return {
