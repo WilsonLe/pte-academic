@@ -6,7 +6,7 @@ An independent, beginner-friendly PTE Academic practice PWA. All learner-facing 
 
 When asked to “playtest”, run a “playtest session”, or act as a student and suggest improvements, read [agents/playtest.md](agents/playtest.md). Use the visible built-in browser, report observed learner friction, and favor less screen clutter with details on demand. Follow the guide's implementation/retest steps when fixes are requested.
 
-An explicit request to run an “autopilot playtest” selects the guide's [single-cycle mode](agents/playtest.md#autopilot-playtest-one-cycle): discover a new actionable learner-friction finding, implement it, retest, independently review, pass merge gates, merge that cycle's PR to `main`, then verify the merged revision. A clean walkthrough must follow the guide's [discovery gate](agents/playtest.md#discovery-gate) rather than count as a completed cycle. That invocation supplies merge authority for that cycle only; ordinary playtesting retains its existing boundaries.
+An explicit request to run an “autopilot playtest” selects the guide's [single-cycle mode](agents/playtest.md#autopilot-playtest-one-cycle): discover a new actionable learner-friction finding, implement it, retest, independently review, pass merge gates, merge that cycle's PR to `main`, then verify the merged revision. A clean walkthrough must follow the guide's [discovery gate](agents/playtest.md#discovery-gate): exhaust its bounded probes, then rotate to a different unexplored learner flow within the same uncounted cycle. Keep the flow inventory across a requested batch; one exhausted flow does not stop the batch. That invocation supplies merge authority for that cycle only; ordinary playtesting retains its existing boundaries.
 
 ## Architecture
 
