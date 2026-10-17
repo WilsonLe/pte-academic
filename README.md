@@ -11,6 +11,8 @@ A static, installable practice app for someone starting PTE Academic from zero. 
 - Offline app/media caching, installable manifest and original black-and-white app icons.
 - Git-managed content and author/reviewer instructions in [AGENTS.md](AGENTS.md), [content/AGENTS.md](content/AGENTS.md) and [agents/](agents/).
 
+For a repeatable student walkthrough and improvement report, use the [playtest workflow](agents/playtest.md).
+
 Independent practice simulation. Exact live-test visual parity is unverified, and this app does not produce validated PTE scores. The starter bank is shared across all practice modes; it is one form, not an unlimited unseen question bank. See [test fidelity](docs/test-fidelity.md).
 
 ## Develop
