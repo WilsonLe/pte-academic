@@ -58,7 +58,11 @@ export function usePwa() {
     };
   }, []);
   const applyUpdate = useCallback(() => {
-    if (!update?.waiting) return;
+    if (!update) return;
+    if (!update.waiting) {
+      location.reload();
+      return;
+    }
     navigator.serviceWorker.addEventListener(
       "controllerchange",
       () => location.reload(),

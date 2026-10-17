@@ -1377,6 +1377,13 @@ test("new offline pack offers an update without reloading or interrupting practi
     try {
       const file = path === root ? resolve(root, "index.html") : path;
       let body: string | Buffer = await readFile(file);
+      if (file.endsWith("/index.html"))
+        body = body
+          .toString()
+          .replace(
+            "<head>",
+            `<head><meta name="test-pack-version" content="${version}">`,
+          );
       if (file.endsWith("/sw.js"))
         body = body
           .toString()
@@ -1409,12 +1416,17 @@ test("new offline pack offers an update without reloading or interrupting practi
   if (!address || typeof address === "string")
     throw new Error("Missing local test server");
   const origin = `http://127.0.0.1:${address.port}`;
+  const observer = await page.context().newPage();
   try {
     await page.goto(origin);
     await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
     await expect
       .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
       .toBe(true);
+    await observer.goto(origin);
+    await expect(
+      observer.locator('meta[name="test-pack-version"]'),
+    ).toHaveAttribute("content", "1");
     const marker = await page.evaluate(() => {
       const value = crypto.randomUUID();
       (window as Window & { testDocument?: string }).testDocument = value;
@@ -1427,6 +1439,9 @@ test("new offline pack offers an update without reloading or interrupting practi
     await expect(
       page.getByRole("button", { name: "Reload to update", exact: true }),
     ).toBeVisible({ timeout: 15000 });
+    await expect(
+      observer.getByRole("button", { name: "Reload to update", exact: true }),
+    ).toBeVisible();
     expect(
       await page.evaluate(
         () => (window as Window & { testDocument?: string }).testDocument,
@@ -1461,6 +1476,27 @@ test("new offline pack offers an update without reloading or interrupting practi
     await expect(
       page.getByRole("button", { name: "Reload to update" }),
     ).toHaveCount(0);
+    await expect(
+      page.locator('meta[name="test-pack-version"]'),
+    ).toHaveAttribute("content", "2");
+    // Another tab's activation must not reload this document automatically.
+    await expect(
+      observer.locator('meta[name="test-pack-version"]'),
+    ).toHaveAttribute("content", "1");
+    await observer
+      .getByRole("button", { name: "Reload to update", exact: true })
+      .click();
+    await expect(
+      observer.locator('meta[name="test-pack-version"]'),
+    ).toHaveAttribute("content", "2");
+    await expect(
+      observer.getByRole("button", { name: "Reload to update" }),
+    ).toHaveCount(0);
+    await expect(
+      observer.getByRole("button", {
+        name: "10 XP, level 1. View progress",
+      }),
+    ).toBeVisible();
     await expect
       .poll(() =>
         page.evaluate(async () =>
@@ -1469,6 +1505,7 @@ test("new offline pack offers an update without reloading or interrupting practi
       )
       .toEqual([`pte-studio:${origin}/:pte-studio-browser-update-2`]);
   } finally {
+    await observer.close();
     await new Promise<void>((done, reject) =>
       server.close((error) => (error ? reject(error) : done())),
     );
