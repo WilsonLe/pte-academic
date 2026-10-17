@@ -86,7 +86,7 @@ export const badges = [
   {
     id: "worlds",
     title: "All rounder",
-    description: "Practise speaking, reading and listening.",
+    description: "Practise Speaking & Writing, Reading and Listening.",
     target: 3,
   },
   {
