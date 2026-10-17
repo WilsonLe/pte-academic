@@ -150,6 +150,45 @@ async function readDetails(page: Page) {
   throw new Error("Detail pagination did not end");
 }
 async function readComparisons(page: Page, inspect = true) {
+  await expect(page.locator(".friendly-feedback")).toBeVisible();
+  if (
+    await page
+      .getByRole("region", { name: "Written response", exact: true })
+      .count()
+  ) {
+    const parts: string[] = [];
+    const copy = page.locator(".written-response .reading-copy");
+    for (let i = 0; i < 150; i++) {
+      await expect(copy).toBeVisible();
+      await expect
+        .poll(() =>
+          copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+        )
+        .toBe(true);
+      parts.push(
+        (await copy.locator(".reading-block p").allTextContents()).join(" "),
+      );
+      const next = page.getByRole("button", {
+        name: "Next feedback pages",
+        exact: true,
+      });
+      if (!(await next.count()) || (await next.isDisabled())) {
+        if (inspect) {
+          const details = page.getByRole("button", {
+            name: "Open response details",
+            exact: true,
+          });
+          await details.click();
+          parts.push(await readDetails(page));
+          await page.keyboard.press("Escape");
+          await expect(details).toBeFocused();
+        }
+        return compact(parts.join(" "));
+      }
+      await next.click();
+    }
+    throw new Error("Written response pagination did not end");
+  }
   const parts: string[] = [];
   for (let i = 0; i < 150; i++) {
     const cards = page.locator(".friendly-feedback .comparison-card");
@@ -396,13 +435,17 @@ test("long writing and enlarged text remain complete; source audio stays outside
     await page.goto("/history/review-wrong");
     if (viewport.height === 400)
       await page.addStyleTag({
-        content: ".comparison-card { font-size:28px; line-height:42px; }",
+        content:
+          ".written-response .reading-copy { font-size:28px; line-height:42px; }",
       });
     const response = await readComparisons(page, false);
-    const chunks = response
-      .replace(/Response \d+/g, "")
-      .replace(/Not automatically graded/g, "");
-    expect(compact(chunks)).toBe(compact(text));
+    expect(compact(response)).toBe(compact(text));
+    await expect(
+      page.getByRole("region", { name: "Written response", exact: true }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".friendly-feedback .comparison-card"),
+    ).toHaveCount(0);
     await fits(page);
     await page.screenshot({
       path: info.outputPath(`writing-${viewport.height}.png`),
@@ -563,5 +606,97 @@ test("all seven speaking types retain acoustic word selection and disclose missi
       await page
         .getByRole("button", { name: "Next review questions", exact: true })
         .click();
+  }
+});
+
+test("playtest: all writing types share one paragraph-preserving response and disclosed alternatives", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seed(page);
+  const writing = questions.filter((q) => kind(q) === "write");
+  const paragraphs = [
+    "Academic knowledge helps students understand unfamiliar problems. It offers a foundation for evaluating evidence and explaining decisions. Students can then connect new information to ideas they have already studied.",
+    "Practical projects give students an opportunity to apply these ideas. A placement can expose gaps in understanding and encourage reflection. Working with others also develops communication and planning skills.",
+    "Universities should combine both approaches. Theory and experience together prepare students to adapt as their circumstances change.",
+  ];
+  const text = paragraphs.join("\n\n");
+  await page.evaluate(
+    async ({ ids, text }) => {
+      const db = await new Promise<IDBDatabase>((resolve) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onsuccess = () => resolve(request.result);
+      });
+      await new Promise<void>((resolve) => {
+        const tx = db.transaction("attempts", "readwrite");
+        const store = tx.objectStore("attempts");
+        const get = store.get("review-wrong");
+        get.onsuccess = () => {
+          const saved = get.result;
+          saved.result.questionIds = ids;
+          saved.result.answers = Object.fromEntries(
+            ids.map((id) => [id, { text }]),
+          );
+          store.put(saved, "review-wrong");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+      });
+    },
+    { ids: writing.map((q) => q.id), text },
+  );
+  for (const size of [
+    { width: 1280, height: 720 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/history/review-wrong");
+    for (let i = 0; i < writing.length; i++) {
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        writing[i].id,
+      );
+      const response = page.getByRole("region", {
+        name: "Written response",
+        exact: true,
+      });
+      await expect(response).toHaveCount(1);
+      await expect(page.locator(".comparison-card")).toHaveCount(0);
+      await expect(
+        page.getByText(writing[i].explanation, { exact: true }),
+      ).toHaveCount(0);
+      // This whole first paragraph fits in the actual panel; it must not be
+      // chopped into the old 180-character response cards.
+      await expect(response.locator(".reading-block p").first()).toContainText(
+        paragraphs[0],
+      );
+      expect(await readComparisons(page, false)).toBe(compact(text));
+      const details = page.getByRole("button", {
+        name: "Open response details",
+        exact: true,
+      });
+      await details.click();
+      const detail = await readDetails(page);
+      expect(detail).toContain(compact(writing[i].model!));
+      expect(detail).toContain(compact(writing[i].explanation));
+      if (writing[i].type === "write-essay")
+        expect(detail).toContain("Planning outline");
+      await page.keyboard.press("Escape");
+      await expect(details).toBeFocused();
+      if (i < writing.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+    await page.reload();
+    await expect(page.locator(".review-screen")).toHaveAttribute(
+      "data-question-id",
+      writing[0].id,
+    );
+    expect(await readComparisons(page, false)).toBe(compact(text));
   }
 });

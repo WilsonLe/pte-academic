@@ -214,7 +214,23 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
       });
     return items;
   }
-  // Open writing and legacy transcripts have alternatives, not exact answer keys.
+  // Writing is one response. Let the rendered panel measure its reading pages;
+  // fixed character chunks would discard the essay's paragraph structure.
+  if (kind === "write")
+    return [
+      make(
+        "response",
+        "Response",
+        "Not automatically graded",
+        [neutral(a.text?.trim() || "No saved text response.")],
+        [
+          ...rationale,
+          { text: feedback(q, a).detail },
+          ...(q.model ? [{ label: exampleLabel(q), text: q.model }] : []),
+        ],
+      ),
+    ];
+  // Legacy transcripts have alternatives, not exact answer keys.
   let rest =
     (kind === "speak" ? a.transcription?.text : a.text)?.trim() ||
     "No saved text response.";
@@ -230,7 +246,6 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
         [neutral(text)],
         [
           ...rationale,
-          ...(kind === "write" ? [{ text: feedback(q, a).detail }] : []),
           ...(q.model ? [{ label: exampleLabel(q), text: q.model }] : []),
         ],
       ),

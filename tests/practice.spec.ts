@@ -204,6 +204,12 @@ test("fixed viewport keeps preparation and timed response controls reachable", a
     await page.setViewportSize(size);
     await page.goto("/practice/type/write-essay");
     await start(page);
+    await expect(page.locator(".exam-clock")).toContainText(
+      /Section time remaining (80:00|79:\d{2})/,
+    );
+    await expect(page.locator(".item-clock")).toContainText(
+      /Question time remaining: (20:00|19:\d{2})/,
+    );
     const response = page.getByRole("textbox", {
       name: "Your response",
       exact: true,
@@ -2660,5 +2666,53 @@ test("broken-shell rescue cannot activate across an active attempt tab", async (
   } finally {
     await active.close();
     await server.close();
+  }
+});
+
+test("playtest: full question titles open on touch and keyboard without crowding the header", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const size of [
+    { width: 390, height: 844 },
+    { width: 320, height: 568 },
+    { width: 1280, height: 720 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/types/summarize-group-discussion");
+    const trigger = page.getByRole("button", {
+      name: "Show full title: Summarize Group Discussion",
+      exact: true,
+    });
+    await expect(
+      page.getByRole("heading", {
+        name: "Summarize Group Discussion",
+        exact: true,
+      }),
+    ).toBeVisible();
+    if (size.width === 390)
+      expect((await trigger.boundingBox())!.width).toBeGreaterThan(80);
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    const popup = page.locator('[data-slot="popover-content"]');
+    await expect(popup).toHaveText("Summarize Group Discussion");
+    await expect
+      .poll(() => popup.evaluate((el) => el.scrollWidth <= el.clientWidth + 1))
+      .toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(popup).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await expect(popup).toBeVisible();
+    await trigger.click();
+    await expect(popup).toHaveCount(0);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBe(size.width);
+    await expect(
+      page.getByRole("button", { name: "Start practice", exact: true }),
+    ).toBeVisible();
   }
 });
