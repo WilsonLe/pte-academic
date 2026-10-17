@@ -247,10 +247,7 @@ export function QuestionInput({
                 </button>
               ))}
             </div>
-            <p className="exam-hint">
-              Drag a word into a blank, or select a word then select a blank.
-              Select a filled blank to clear it.
-            </p>
+            <p className="exam-hint">Select a filled blank to clear it.</p>
           </>
         )}
       </div>
