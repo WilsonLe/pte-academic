@@ -1731,6 +1731,14 @@ body {
     min-height: 520px;
   }
 }
+/* Writing controls and source audio need readable space even on taller phones. */
+.main-content:has(.written-response) {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.screen-stack:has(.written-response) {
+  min-height: 520px;
+}
 .history-row {
   height: auto;
   min-height: 112px;

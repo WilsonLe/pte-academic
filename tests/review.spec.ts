@@ -671,6 +671,13 @@ test("playtest: all writing types share one paragraph-preserving response and di
   for (const size of [
     { width: 1280, height: 720 },
     { width: 390, height: 844 },
+    { width: 390, height: 440 },
+    { width: 390, height: 451 },
+    { width: 390, height: 480 },
+    { width: 390, height: 560 },
+    { width: 390, height: 568 },
+    { width: 390, height: 640 },
+    { width: 320, height: 568 },
   ]) {
     await page.setViewportSize(size);
     await page.goto("/history/review-wrong");
@@ -688,11 +695,41 @@ test("playtest: all writing types share one paragraph-preserving response and di
       await expect(
         page.getByText(writing[i].explanation, { exact: true }),
       ).toHaveCount(0);
-      // This whole first paragraph fits in the actual panel; it must not be
-      // chopped into the old 180-character response cards.
-      await expect(response.locator(".reading-block p").first()).toContainText(
-        paragraphs[0],
-      );
+      // Reading space must account for the actual controls, including a saved
+      // question pager and source player, rather than a viewport-height cutoff.
+      await expect
+        .poll(() =>
+          response.locator(".reading-copy").evaluate((node) => {
+            const style = getComputedStyle(node);
+            return (
+              (node.clientHeight -
+                parseFloat(style.paddingTop) -
+                parseFloat(style.paddingBottom)) /
+              parseFloat(style.lineHeight)
+            );
+          }),
+        )
+        .toBeGreaterThanOrEqual(3);
+      if (size.height <= 560) {
+        expect(
+          await page.locator("main").evaluate((node) => ({
+            scrolls: node.scrollHeight > node.clientHeight,
+            overflow: getComputedStyle(node).overflowY,
+          })),
+        ).toEqual({ scrolls: true, overflow: "auto" });
+      }
+      if (size.height >= 720) {
+        expect(
+          await page
+            .locator("main")
+            .evaluate((node) => node.scrollHeight > node.clientHeight),
+        ).toBe(false);
+        // This whole first paragraph fits in the actual panel; it must not be
+        // chopped into the old 180-character response cards.
+        await expect(
+          response.locator(".reading-block p").first(),
+        ).toContainText(paragraphs[0]);
+      }
       expect(await readComparisons(page, false)).toBe(compact(text));
       const details = page.getByRole("button", {
         name: "Open response details",
@@ -706,6 +743,13 @@ test("playtest: all writing types share one paragraph-preserving response and di
         expect(detail).toContain("Planning outline");
       await page.keyboard.press("Escape");
       await expect(details).toBeFocused();
+      expect(
+        await page.evaluate(() => ({
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight,
+          top: document.querySelector(".topbar")!.getBoundingClientRect().top,
+        })),
+      ).toEqual({ width: size.width, height: size.height, top: 0 });
       if (i < writing.length - 1)
         await page
           .getByRole("button", { name: "Next review questions", exact: true })
