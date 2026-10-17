@@ -54,7 +54,7 @@ import {
 } from "./LearningScreens";
 import { ReadingPages } from "./Pages";
 import { type PracticePlan, type Result } from "./Runner";
-import { PracticeSession } from "./PracticeSession";
+import { PracticeSession, usePracticePlan } from "./PracticeSession";
 import { loadAttempt } from "./storage";
 import { usePwa } from "./pwa";
 import { useViewportLock } from "./useViewportLock";
@@ -421,10 +421,13 @@ export default function App() {
     ? "Review"
     : currentGuide?.title ||
       (hubView === "badges" ? "Achievements" : titles[active]);
-  const practicePlan =
+  const practiceIdentity =
     page === "practice" && progressReady
-      ? makePlan(route.mode, route.practiceId)
-      : null;
+      ? `${route.mode}/${route.practiceId}`
+      : "";
+  const practicePlan = usePracticePlan(practiceIdentity, () =>
+    practiceIdentity ? makePlan(route.mode, route.practiceId) : null,
+  );
   if (practicePlan?.questions.length)
     return (
       <PracticeSession

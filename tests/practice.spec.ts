@@ -4032,3 +4032,99 @@ test("retained views receive another view's saved sessions and XP without reload
     await writer.close();
   }
 });
+
+for (const phase of ["preparation", "running"] as const) {
+  test(`external daily completion preserves the ${phase} attempt and its plan`, async ({
+    page,
+    context,
+  }) => {
+    await page.goto("/practice/type/daily");
+    await expect(
+      page.getByRole("button", { name: /Preview 3 daily practice questions/ }),
+    ).toBeVisible();
+    if (phase === "running") {
+      await start(page);
+      await answerReading(page);
+    }
+    const response = () =>
+      page.locator(".exam-main").evaluate((main) => ({
+        text: main.textContent,
+        inputs: [...main.querySelectorAll("input")].map((input) => ({
+          value: input.value,
+          checked: input.checked,
+        })),
+        selected: [...main.querySelectorAll("select")].map(
+          (select) => select.value,
+        ),
+      }));
+    const before = phase === "running" ? await response() : null;
+    const originalURL = page.url();
+    const originalDocument = await page.evaluate(() => performance.timeOrigin);
+    const writer = await context.newPage();
+    try {
+      await writer.goto("/practice/type/daily");
+      await start(writer);
+      for (let i = 0; i < 3; i++) {
+        await answerReading(writer);
+        await writer
+          .getByRole("button", {
+            name: i === 2 ? "Finish practice" : "Next",
+            exact: true,
+          })
+          .click();
+      }
+      await expect(
+        writer.getByRole("button", { name: /^60 XP, level/ }),
+      ).toBeVisible();
+      // A second background cache update must not replace the retained plan.
+      await writer
+        .getByRole("link", { name: "PTE Studio home", exact: true })
+        .click();
+      await expect(
+        writer.getByRole("heading", {
+          name: "Daily goal complete",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(page).toHaveURL(originalURL);
+      expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+        originalDocument,
+      );
+      if (phase === "running") {
+        await expect(page.locator(".exam")).toBeVisible();
+        expect(await response()).toEqual(before);
+        // The wall-clock continues; background publication must not restart it.
+        await expect(page.locator(".exam-clock")).not.toHaveText(/30:00/);
+      } else {
+        await expect(
+          page.getByRole("button", {
+            name: /Preview 3 daily practice questions/,
+          }),
+        ).toBeVisible();
+        await start(page);
+        await answerReading(page);
+      }
+      await end(page);
+      await expect(
+        page.getByRole("button", { name: /^60 XP, level/ }),
+      ).toBeVisible();
+      const savedURL = page.url();
+      await page.reload();
+      await expect(page.locator(".review-screen")).toBeVisible();
+      await page
+        .getByRole("link", { name: "PTE Studio home", exact: true })
+        .click();
+      await expect(
+        page.getByRole("heading", { name: "Daily goal complete", exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole("navigation", { name: "Main navigation", exact: true })
+        .getByRole("link", { name: "My practice", exact: true })
+        .click();
+      await page.locator(`a[href="${new URL(savedURL).pathname}"]`).click();
+      await expect(page.locator(".review-screen")).toBeVisible();
+    } finally {
+      await writer.close();
+    }
+  });
+}
