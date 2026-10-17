@@ -15,6 +15,7 @@ import {
   type Pronunciation,
 } from "./comparison-schema";
 import type { SyllableTarget } from "./comparison-core";
+import { loadSyllableReferences } from "./word-reference";
 let occupied = false;
 export function scoreRecording(
   url: string,
@@ -59,6 +60,16 @@ export function scoreRecording(
         throw new Error(
           `Speech feedback supports recordings up to ${recognize ? RECOGNITION_MAX_SECONDS : COMPARISON_MAX_SECONDS} seconds.`,
         );
+      if (target?.word) onProgress("Preparing syllable reference audio…");
+      const references = target?.word
+        ? await loadSyllableReferences(
+            target.word,
+            target.syllableIndex,
+            target.syllableCount,
+            abort.signal,
+          )
+        : [];
+      if (aborted) throw cancelled();
       worker = new Worker(comparisonWorkerUrl, {
         type: "module",
       });
@@ -103,8 +114,8 @@ export function scoreRecording(
           }
         };
         worker!.postMessage(
-          { audio, text, target, recognize, base: modelBase() },
-          [audio.buffer],
+          { audio, text, target, recognize, references, base: modelBase() },
+          [audio.buffer, ...references.map((r) => r.audio.buffer)],
         );
       });
     } finally {

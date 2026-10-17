@@ -15,6 +15,8 @@ import {
   targetVariants,
   type SyllableTarget,
   reliableSignal,
+  isolatedAudio,
+  type SyllableReferenceInput,
   type ComparisonMetadata,
 } from "./comparison-core";
 import {
@@ -44,6 +46,7 @@ self.onmessage = async (
     text: string;
     recognize?: boolean;
     target?: SyllableTarget;
+    references?: SyllableReferenceInput[];
     base: string;
   }>,
 ) => {
@@ -51,7 +54,14 @@ self.onmessage = async (
   const progress = (message: string) =>
     self.postMessage({ type: "progress", message });
   try {
-    const { audio, text, target, base, recognize = false } = event.data;
+    const {
+      audio,
+      text,
+      target,
+      base,
+      recognize = false,
+      references = [],
+    } = event.data;
     if (
       !(audio instanceof Float32Array) ||
       !audio.length ||
@@ -64,6 +74,19 @@ self.onmessage = async (
       new URL(base).origin !== self.location.origin
     )
       throw new Error("Unsupported local speech input.");
+    if (
+      references.length > 4 ||
+      references.some(
+        (ref) =>
+          !(ref.audio instanceof Float32Array) ||
+          ref.audio.length > 16000 * 3 ||
+          ref.audio.some((x) => !Number.isFinite(x)) ||
+          !["en-US", "en-GB", "en-AU", "en-IN", "en"].includes(ref.accent) ||
+          typeof ref.label !== "string" ||
+          ref.label.length > 200,
+      )
+    )
+      throw new Error("Unsupported syllable reference input.");
     const result: Pronunciation = {
       schemaVersion: 1,
       modelSha256: COMPARISON_MODEL_SHA,
@@ -248,6 +271,75 @@ self.onmessage = async (
           })),
         );
       }
+    } else if (target) {
+      // The full-context bank stays unchanged. Isolated retries use compatible
+      // reference clips encoded with exactly the same short-context pipeline.
+      const bank: Record<string, number[][]> = {};
+      const variants = metadata.scripts[scriptKey(expected)];
+      for (const reference of references) {
+        const compatible = variants.filter(
+          (v) => v.syllables[0].phonemes.join(" ") === reference.label,
+        );
+        const samples = isolatedAudio(reference.audio);
+        if (!compatible.length || !reliableSignal(samples)) continue;
+        // A recording frame can start at a different sub-frame phase. Keep
+        // deterministic ±10 ms reference contexts instead of scoring that
+        // capture offset as a pronunciation difference.
+        for (const shift of [-160, -80, 0, 80, 160]) {
+          const aligned = new Float32Array(samples.length + shift);
+          if (shift >= 0) aligned.set(samples, shift);
+          else aligned.set(samples.subarray(-shift));
+          const out = await session.run({
+            input_values: new ort.Tensor("float32", normalizedAudio(aligned), [
+              1,
+              aligned.length,
+            ]),
+          });
+          try {
+            scoreOutputs(
+              aligned,
+              expected,
+              out.hidden7.data as Float32Array,
+              logProbabilities(
+                out.logits.data as Float32Array,
+                Object.keys(metadata.vocab).length,
+              ),
+              { ...metadata, scripts: { [scriptKey(expected)]: compatible } },
+              undefined,
+              (phone, z, confidence) => {
+                if (confidence < 0.03) return;
+                const label = String(metadata.classes.indexOf(phone));
+                (bank[label] ||= []).push(z);
+              },
+            );
+          } catch {
+            /* An uncertain reference cannot supply an invented template. */
+          }
+        }
+      }
+      const samples = isolatedAudio(audio);
+      if (!reliableSignal(samples)) {
+        result.status = "no-reliable-speech";
+        self.postMessage({ type: "complete", result });
+        return;
+      }
+      const out = await session.run({
+        input_values: new ort.Tensor("float32", normalizedAudio(samples), [
+          1,
+          samples.length,
+        ]),
+      });
+      result.syllables = scoreOutputs(
+        samples,
+        expected,
+        out.hidden7.data as Float32Array,
+        logProbabilities(
+          out.logits.data as Float32Array,
+          Object.keys(metadata.vocab).length,
+        ),
+        metadata,
+        bank,
+      ).map((s) => ({ ...s, start: 0, end: result.seconds }));
     } else {
       const input = new ort.Tensor("float32", normalizedAudio(audio), [
         1,

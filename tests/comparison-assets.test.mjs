@@ -3,6 +3,23 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
+import { gunzipSync } from "node:zlib";
+async function decoded(directory, file) {
+  const raw = await readFile(directory + (file.transport?.path || file.path));
+  if (!file.transport) return raw;
+  assert.equal(raw.length, file.transport.bytes);
+  assert.equal(sha(raw), file.transport.sha256);
+  const data = gunzipSync(raw, { maxOutputLength: file.bytes });
+  if (file.transport.encoding === "gzip") return data;
+  assert.equal(file.transport.encoding, "gzip-shuffle2");
+  const result = Buffer.alloc(data.length),
+    half = Math.ceil(data.length / 2);
+  for (let i = 0; i < half; i++) {
+    result[i * 2] = data[i];
+    if (i * 2 + 1 < data.length) result[i * 2 + 1] = data[half + i];
+  }
+  return result;
+}
 test("audio-only recognizer, word dictionary and synthetic word library have complete pinned assets", async () => {
   const manifest = JSON.parse(
     await readFile("src/speech/recognition-manifest.json", "utf8"),
@@ -21,10 +38,19 @@ test("audio-only recognizer, word dictionary and synthetic word library have com
     manifest.referenceExporterSha256,
     sha(await readFile("training/export_word_references.py")),
   );
+  assert.equal(
+    manifest.transportPackerSha256,
+    sha(await readFile("scripts/pack-models.mjs")),
+  );
+  assert.equal(
+    manifest.totalDownloadBytes,
+    manifest.files.reduce((n, f) => n + (f.transport?.bytes || f.bytes), 0),
+  );
+  assert.ok(manifest.totalDownloadBytes < manifest.totalBytes * 0.9);
   let total = 0;
   const encoder = createHash("sha256");
   for (const f of manifest.files) {
-    const bytes = await readFile(dir + f.path);
+    const bytes = await decoded(dir, f);
     assert.equal(bytes.length, f.bytes);
     assert.equal(sha(bytes), f.sha256, f.path);
     assert.ok(f.bytes <= 48 * 1024 * 1024);
@@ -98,10 +124,19 @@ test("browser model pack is complete, pinned to accepted v3, and covers every fi
     sha(await readFile("training/export_browser.py")),
     manifest.exporterSha256,
   );
+  assert.equal(
+    manifest.transportPackerSha256,
+    sha(await readFile("scripts/pack-models.mjs")),
+  );
+  assert.equal(
+    manifest.totalDownloadBytes,
+    manifest.files.reduce((n, f) => n + (f.transport?.bytes || f.bytes), 0),
+  );
+  assert.ok(manifest.totalDownloadBytes < manifest.totalBytes * 0.9);
   let total = 0;
   const encoder = createHash("sha256");
   for (const file of manifest.files) {
-    const bytes = await readFile(directory + file.path);
+    const bytes = await decoded(directory, file);
     assert.equal(bytes.length, file.bytes, file.path);
     assert.equal(sha(bytes), file.sha256, file.path);
     assert.ok(bytes.length <= 48 * 1024 * 1024);

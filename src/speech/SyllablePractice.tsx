@@ -20,8 +20,10 @@ import { loadWordReference, type ReferenceSyllable } from "./word-reference";
 import {
   ModelAssetError,
   invalidateComparisonModel,
+  modelStatus,
 } from "./comparison-assets";
 import { similarityTone } from "./syllable-display";
+import { scriptKey } from "./comparison-core";
 
 const referenceAccentNames: Record<string, string> = {
   "en-US": "American English",
@@ -51,11 +53,17 @@ export function SyllablePractice({
     useState<Awaited<ReturnType<typeof loadWordReference>>>();
   const [referenceError, setReferenceError] = useState("");
   const referenceLabels = word.syllables.map((s) => s.label).join("|");
+  const [referenceRequest, setReferenceRequest] = useState(0);
+  const previousReady = useRef(ready);
+  useEffect(() => {
+    if (ready && !previousReady.current && referenceError)
+      setReferenceRequest((request) => request + 1);
+    previousReady.current = ready;
+  }, [ready, referenceError]);
   useEffect(() => {
     if (!word.spoken) return;
     setCorpusReference(undefined);
     setReferenceError("");
-    if (!ready) return;
     let live = true,
       url = "";
     loadWordReference(
@@ -75,7 +83,10 @@ export function SyllablePractice({
         else URL.revokeObjectURL(url);
       })
       .catch((error) => {
-        if (error instanceof ModelAssetError)
+        if (
+          error instanceof ModelAssetError &&
+          modelStatus().status === "ready"
+        )
           invalidateComparisonModel(error.message);
         if (live) setReferenceError("The word reference could not be loaded.");
       });
@@ -83,7 +94,7 @@ export function SyllablePractice({
       live = false;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [word.spoken?.word, referenceLabels, ready]);
+  }, [word.spoken?.word, referenceLabels, referenceRequest]);
   const reference = word.spoken
     ? corpusReference
       ? {
@@ -222,7 +233,7 @@ export function SyllablePractice({
             if (alive.current) setMessage(value);
           },
           {
-            word: word.spoken?.word,
+            word: scriptKey(word.spoken?.word || current.word),
             wordIndex: word.index,
             syllableIndex: current.syllableIndex,
             syllableCount: syllables.length,
@@ -295,111 +306,125 @@ export function SyllablePractice({
       }}
     >
       <DialogContent className="practice-ui syllable-practice">
-        <DialogTitle>{word.word}</DialogTitle>
-        <DialogDescription>
-          Listen, choose a syllable, then record it. Earn 5 XP per syllable each
-          day for completing practice.
-        </DialogDescription>
-        <fieldset
-          disabled={busy}
-          className="paired-audio"
-          aria-label="Word audio comparison"
-        >
-          {recording && (word.spoken || word.syllables.length > 0) && (
-            <AudioPlayer
-              src={recording}
-              label="Your word"
-              start={
-                word.spoken?.start ??
-                Math.min(...word.syllables.map((s) => s.start))
-              }
-              end={
-                word.spoken?.end ??
-                Math.max(...word.syllables.map((s) => s.end))
-              }
-            />
+        <div className="syllable-practice-scroll">
+          <DialogTitle>{word.word}</DialogTitle>
+          <DialogDescription>
+            Listen, choose a syllable, then record it. Earn 5 XP per syllable
+            each day for completing practice.
+          </DialogDescription>
+          <fieldset
+            disabled={busy}
+            className="paired-audio"
+            aria-label="Word audio comparison"
+          >
+            {recording && (word.spoken || word.syllables.length > 0) && (
+              <AudioPlayer
+                src={recording}
+                label="Your word"
+                start={
+                  word.spoken?.start ??
+                  Math.min(...word.syllables.map((s) => s.start))
+                }
+                end={
+                  word.spoken?.end ??
+                  Math.max(...word.syllables.map((s) => s.end))
+                }
+              />
+            )}
+            {reference && refWord.length > 0 && (
+              <AudioPlayer
+                src={word.spoken ? reference.audio : asset(reference.audio)}
+                label="Reference pronunciation"
+                start={Math.min(...refWord.map((s) => s.start))}
+                end={Math.max(...refWord.map((s) => s.end))}
+              />
+            )}
+          </fieldset>
+          {referenceError && <p role="status">{referenceError}</p>}
+          {word.spoken && !word.syllables.length && (
+            <p>
+              No reliable syllable grade is available for this recognised word.
+            </p>
           )}
-          {reference && refWord.length > 0 && (
-            <AudioPlayer
-              src={word.spoken ? reference.audio : asset(reference.audio)}
-              label="Reference pronunciation"
-              start={Math.min(...refWord.map((s) => s.start))}
-              end={Math.max(...refWord.map((s) => s.end))}
-            />
+          {corpusReference && (
+            <p className="speech-stats">
+              Synthetic{" "}
+              {referenceAccentNames[corpusReference.accent] || "English"}{" "}
+              reference · not human verified
+            </p>
           )}
-        </fieldset>
-        {referenceError && <p role="status">{referenceError}</p>}
-        {word.spoken && !word.syllables.length && (
-          <p>
-            No reliable syllable grade is available for this recognised word.
-          </p>
-        )}
-        {corpusReference && (
+          <div
+            className="syllable-choices"
+            role="group"
+            aria-label="Choose a syllable"
+          >
+            {syllables.map((s, i) => (
+              <Button
+                key={s.syllableIndex}
+                variant={activeIndex === i ? "secondary" : "outline"}
+                disabled={busy || reward.isPending}
+                aria-pressed={activeIndex === i}
+                onClick={() => {
+                  setIndex(i);
+                  setGrade(undefined);
+                  setRetryUrl("");
+                  setError("");
+                  transition("idle");
+                  reward.reset();
+                }}
+              >
+                Syllable {i + 1}
+                <span className="syllable-phonemes">
+                  /{s.label.replace(/[012]/g, "")}/
+                </span>
+                <span data-tone={similarityTone(s.similarity)}>
+                  {s.similarity === null
+                    ? "Uncertain"
+                    : `${Math.round(s.similarity)}/100`}
+                </span>
+              </Button>
+            ))}
+          </div>
+          {current && (
+            <div className="syllable-detail">
+              <h3>Practise syllable {activeIndex + 1}</h3>
+              <fieldset
+                disabled={busy}
+                className="paired-audio"
+                aria-label="Syllable audio comparison"
+              >
+                {recording && original && (
+                  <AudioPlayer
+                    key={`your-${activeIndex}`}
+                    src={recording}
+                    start={original.start}
+                    end={original.end}
+                    label="Your syllable"
+                  />
+                )}
+                {standard && reference && (
+                  <AudioPlayer
+                    key={`reference-${activeIndex}`}
+                    src={word.spoken ? reference.audio : asset(reference.audio)}
+                    start={standard.start}
+                    end={standard.end}
+                    label="Reference syllable"
+                  />
+                )}
+              </fieldset>
+              {retryUrl && (
+                <AudioPlayer src={retryUrl} label="Your new syllable" />
+              )}
+            </div>
+          )}
           <p className="speech-stats">
-            Synthetic{" "}
-            {referenceAccentNames[corpusReference.accent] || "English"}{" "}
-            reference · not human verified
+            Synthetic reference example; timings are approximate. All four
+            supported accents remain valid. Similarity is not pronunciation
+            correctness or an exam score. Retry audio stays in this view.
           </p>
-        )}
-        <div
-          className="syllable-choices"
-          role="group"
-          aria-label="Choose a syllable"
-        >
-          {syllables.map((s, i) => (
-            <Button
-              key={s.syllableIndex}
-              variant={activeIndex === i ? "secondary" : "outline"}
-              disabled={busy || reward.isPending}
-              aria-pressed={activeIndex === i}
-              onClick={() => {
-                setIndex(i);
-                setGrade(undefined);
-                setRetryUrl("");
-                setError("");
-                transition("idle");
-                reward.reset();
-              }}
-            >
-              Syllable {i + 1}
-              <span className="syllable-phonemes">
-                /{s.label.replace(/[012]/g, "")}/
-              </span>
-              <span data-tone={similarityTone(s.similarity)}>
-                {s.similarity === null
-                  ? "Uncertain"
-                  : `${Math.round(s.similarity)}/100`}
-              </span>
-            </Button>
-          ))}
         </div>
         {current && (
-          <div className="syllable-detail">
-            <h3>Practise syllable {activeIndex + 1}</h3>
-            <fieldset
-              disabled={busy}
-              className="paired-audio"
-              aria-label="Syllable audio comparison"
-            >
-              {recording && original && (
-                <AudioPlayer
-                  key={`your-${activeIndex}`}
-                  src={recording}
-                  start={original.start}
-                  end={original.end}
-                  label="Your syllable"
-                />
-              )}
-              {standard && reference && (
-                <AudioPlayer
-                  key={`reference-${activeIndex}`}
-                  src={word.spoken ? reference.audio : asset(reference.audio)}
-                  start={standard.start}
-                  end={standard.end}
-                  label="Reference syllable"
-                />
-              )}
-            </fieldset>
+          <div className="syllable-practice-footer">
             <div className="retry-actions">
               {phase === "recording" ? (
                 <Button onClick={stop}>
@@ -446,16 +471,8 @@ export function SyllablePractice({
                   " · Already practised for XP today"}
               </p>
             )}
-            {retryUrl && (
-              <AudioPlayer src={retryUrl} label="Your new syllable" />
-            )}
           </div>
         )}
-        <p className="speech-stats">
-          Synthetic reference example; timings are approximate. All four
-          supported accents remain valid. Similarity is not pronunciation
-          correctness or an exam score. Retry audio stays in this view.
-        </p>
       </DialogContent>
     </Dialog>
   );

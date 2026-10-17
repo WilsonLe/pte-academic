@@ -2049,6 +2049,49 @@ body {
   overflow-y: auto;
 }
 
-.feedback-word:has(.word-replacement) { flex-direction: column; }
-.word-replacement { font-size: 11px; font-weight: 400; color: var(--muted-foreground); }
-.omitted-word .word-characters { text-decoration: line-through; color: var(--muted-foreground); }
+.feedback-word:has(.word-replacement) {
+  flex-direction: column;
+}
+.word-replacement {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+.omitted-word .word-characters {
+  text-decoration: line-through;
+  color: var(--muted-foreground);
+}
+
+.practice-ui.syllable-practice {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  max-height: calc(100dvh - 32px);
+}
+.syllable-practice-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.syllable-practice-scroll > [data-slot="dialog-title"] {
+  padding-right: 32px;
+}
+.syllable-practice-footer {
+  flex: none;
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.syllable-practice-footer .retry-actions {
+  margin: 0;
+}
+.syllable-practice-footer p {
+  margin: 0;
+}

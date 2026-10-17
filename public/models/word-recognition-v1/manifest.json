@@ -12,25 +12,49 @@
       "path": "recognizer-00.bin",
       "bytes": 50331648,
       "sha256": "cb12ee8d7250bdb64c35f2643b86a6dd880837ee41e8376d3f7dcffe2f3b346d",
-      "kind": "recognizer"
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-00.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 43149735,
+        "sha256": "cf330aab35a54022e1d69ccf4f03c16141a6c21a39790465e1859ce8b3107ac4"
+      }
     },
     {
       "path": "recognizer-01.bin",
       "bytes": 50331648,
       "sha256": "f93be457b98f911e77366eb00d09cabab24587198361b0181882099453c47574",
-      "kind": "recognizer"
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-01.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 43057267,
+        "sha256": "ddd34c66a2a5f126d46f3fc9d8ab3f602dc6659800d6e74580cd4162d60d554a"
+      }
     },
     {
       "path": "recognizer-02.bin",
       "bytes": 50331648,
       "sha256": "6a7e82323951e153ea8ca76dd97439efbf16a58e7e7073f41319d98e48a4f1bb",
-      "kind": "recognizer"
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-02.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 43141740,
+        "sha256": "948503bcee42568af8adc5240113dfcbbcd61ab0ccdbfdfe9eb6676be2a3e2f2"
+      }
     },
     {
       "path": "recognizer-03.bin",
       "bytes": 38048556,
       "sha256": "ca45e429cae1b26131f7e2a9173784b27b8b0f67f9aac09b054860a153f77135",
-      "kind": "recognizer"
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-03.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 32498159,
+        "sha256": "c79d614f06dfd00941018c2b810ad7b572af5fe65333b077901a6defa58346bb"
+      }
     },
     {
       "path": "vocab.json",
@@ -42,13 +66,25 @@
       "path": "lexicon.json",
       "bytes": 6942664,
       "sha256": "af6a5ae6b943d9a7944f511b5bca256366616912cf6d30f08db50858b2a308fb",
-      "kind": "lexicon"
+      "kind": "lexicon",
+      "transport": {
+        "path": "lexicon.json.packed",
+        "encoding": "gzip",
+        "bytes": 1268055,
+        "sha256": "12fb5640e2c902b7515ff74bf7790ab4b923ab957d92560555076af4ccf836ce"
+      }
     },
     {
       "path": "word-references.json",
       "bytes": 1847891,
       "sha256": "4e359c6f15e70c490e339ef088a925a13b91382fbbf7e4c82e4498ff50961624",
-      "kind": "reference-index"
+      "kind": "reference-index",
+      "transport": {
+        "path": "word-references.json.packed",
+        "encoding": "gzip",
+        "bytes": 290395,
+        "sha256": "46b37e0dd0ab1b74352fba318cd0925177110f523782585fc4ff03a840c11da0"
+      }
     },
     {
       "path": "word-reference-en-AU.mp3",
@@ -81,5 +117,7 @@
   "representation": "float16 constant storage; float32 operations",
   "limits": "Audio-only greedy English CTC; estimated words/times, not correctness. No prompt input. Synthetic sound comparison remains separate.",
   "referenceExporterSha256": "c70b7dd519e4cf36080b4ea953a8f05f5d70620b2ceddebeb5b12475b9fcbafd",
-  "referenceWords": 998
+  "referenceWords": 998,
+  "totalDownloadBytes": 176928715,
+  "transportPackerSha256": "c5b9de6ea34476b8030b5ef019c6f5ea084ef52624bbe7c1b880353a73fd70d9"
 }

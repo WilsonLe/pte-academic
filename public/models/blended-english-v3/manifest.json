@@ -10,85 +10,169 @@
       "path": "comparison.json",
       "bytes": 21910590,
       "sha256": "4d5058a820687ec4ea596185c34b1dc1ce43909cc2fd72ddd9bd9d4d0a1a996b",
-      "kind": "metadata"
+      "kind": "metadata",
+      "transport": {
+        "path": "comparison.json.packed",
+        "encoding": "gzip",
+        "bytes": 9530033,
+        "sha256": "b212a6e84cfea2e71930d7cf51781f34a3c6e7161e138a47f52eeb739cb6f5e2"
+      }
     },
     {
       "path": "encoder-00.bin",
       "bytes": 50331648,
       "sha256": "572cd3deaee91eb5c193481e6b41f838a6adca353d65af93dff75a391e6363d0",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-00.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42874749,
+        "sha256": "feaa2f816901adbd1daa1b50287dfe34dd28d030a0a2c738bc7f653f3b46c276"
+      }
     },
     {
       "path": "encoder-01.bin",
       "bytes": 50331648,
       "sha256": "5e0e641171f577ffbe49a486d8647158fd665ce0cef4df5e229497becf2b012f",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-01.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42928568,
+        "sha256": "eca8ef88b233d496f46858d9b190690fb57aa3fdf3702201dfcbcacd5f4fba61"
+      }
     },
     {
       "path": "encoder-02.bin",
       "bytes": 50331648,
       "sha256": "deedd1d7705b2a3c8f75576c7ec182113789f7e17e2974d41496ea1b25938198",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-02.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42878740,
+        "sha256": "9535b4fd60aafbf6103499d85140ea80d58ec2814a1f637aaf5193a8a355beae"
+      }
     },
     {
       "path": "encoder-03.bin",
       "bytes": 50331648,
       "sha256": "f2afe9b2dca70700155158f85aee8dcd4d441d93c79d788db57d5bc43312106c",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-03.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42867150,
+        "sha256": "51a3cfa9d37e1cdb34aee9622c159acb3004d52ac3a61585221ae1b8af71d1ce"
+      }
     },
     {
       "path": "encoder-04.bin",
       "bytes": 50331648,
       "sha256": "eb55e6c4fd0712a0fba3764f9fb85fe59d705a3a00c26500158bbc542c4e6b04",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-04.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42870533,
+        "sha256": "764956fd17bb3ae6ea6e3becd7d55dfabeb43d5e83cb9ae9df9bdfcbe4784b83"
+      }
     },
     {
       "path": "encoder-05.bin",
       "bytes": 50331648,
       "sha256": "cfa4251921389cbedbb39ab24fd155579fc1c59a892953a9724d08778a7b214f",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-05.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42914227,
+        "sha256": "564c9a6102c562a418b6696a98d9f351409a825fc264811b03e2358b1f95b623"
+      }
     },
     {
       "path": "encoder-06.bin",
       "bytes": 50331648,
       "sha256": "1c9f4d6a6948628df392eb9779c5e944302ef8f6f49af5014b3a7e6ba523ef0b",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-06.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42951617,
+        "sha256": "2b5f2a1ff6fea3640d931d4b4db9285aec7746c0055a7c3af656fef5a3d891d4"
+      }
     },
     {
       "path": "encoder-07.bin",
       "bytes": 50331648,
       "sha256": "0074ac2b4f5ff306c12ec3844e5d16d4cc4143003347fd198ec176c96e55986c",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-07.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42912192,
+        "sha256": "14fc7689d5cf1e7e00d29e4bdf140709c20864c892a9a053addef7e873bc254b"
+      }
     },
     {
       "path": "encoder-08.bin",
       "bytes": 50331648,
       "sha256": "c2ddd1910ef2d66b516275350a38cbea41284547b8dcd9b5b2ea75806af7e3e5",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-08.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42868158,
+        "sha256": "691e62d64f26575ab0ac7f4b6025e233651e576cddf6d0415179d2697ca0117a"
+      }
     },
     {
       "path": "encoder-09.bin",
       "bytes": 50331648,
       "sha256": "79bb0ac748be0609e6ad861e4a66f599d2568cbd64b7ee12a6aaea6b4ade6b3e",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-09.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42864377,
+        "sha256": "875f3ea28fffb94028396edc6753d94e4b4c56ffc281179a5df61575e117891b"
+      }
     },
     {
       "path": "encoder-10.bin",
       "bytes": 50331648,
       "sha256": "1974c832286d69838d29c960978e9c8f517201c696f9b33ca011d87cdff92705",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-10.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 42893059,
+        "sha256": "4b152b547ec801c55e80d05487759273f01e6013b93707c69fb21b19f1932746"
+      }
     },
     {
       "path": "encoder-11.bin",
       "bytes": 50331648,
       "sha256": "f99fc2298c6eeb06d3071deb9cb65d89151c4091d49443d37e76aaf96bdf8f2a",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-11.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 43018378,
+        "sha256": "5b28a9045a65c750b183b867ef3dd295749040c6d276eaf965708f7770ac31c0"
+      }
     },
     {
       "path": "encoder-12.bin",
       "bytes": 28178564,
       "sha256": "eda20a866e3c23ea71f674e7ea0a87d9222e942469b0aaebac9dc893f5b0a15f",
-      "kind": "encoder"
+      "kind": "encoder",
+      "transport": {
+        "path": "encoder-12.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 24104586,
+        "sha256": "867ec93619dc1e293ce80547fca657740e62bde481b45bb9be099ec4f3aa7649"
+      }
     }
   ],
   "totalBytes": 654068930,
@@ -99,5 +183,7 @@
   ],
   "source": "training/checkpoints/blended-english-v3/model.pt",
   "quantization": "float16 constant storage with explicit float32 casts/operations; comparison head/bank/calibration unchanged",
-  "limits": "Sound similarity only; expected-text scripts; <=45s. Required automatic download; local cached inference."
+  "limits": "Sound similarity only; expected-text scripts; <=45s. Required automatic download; local cached inference.",
+  "totalDownloadBytes": 548476367,
+  "transportPackerSha256": "c5b9de6ea34476b8030b5ef019c6f5ea084ef52624bbe7c1b880353a73fd70d9"
 }
