@@ -26,7 +26,7 @@ export function Chart({
               className="bar"
               style={{
                 height: responsive
-                  ? `calc((100% - 48px) * ${c.values[i] / max})`
+                  ? `${(c.values[i] / max) * 100}%`
                   : `${(c.values[i] / max) * 200}px`,
               }}
             />

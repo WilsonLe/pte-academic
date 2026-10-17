@@ -1392,36 +1392,57 @@ body {
   height: 100%;
   max-height: 100%;
   margin: 0 auto;
-  padding: 18px;
+  padding: 12px;
   border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px 8px;
 }
 .review-chart .chart figcaption {
-  font-size: 18px;
+  font-size: 16px;
   margin: 0;
 }
 .review-chart .chart-unit {
-  font-size: 13px;
+  align-self: center;
+  font-size: 11px;
   margin: 0;
 }
 .review-chart .chart-bars {
+  grid-column: 1 / -1;
   flex: 1;
   min-height: 0;
   height: auto;
-  gap: 10px;
+  gap: 8px;
+  padding: 0;
 }
 .review-chart .chart-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: end;
+  flex: 1;
+  min-width: 0;
+  max-width: none;
   height: 100%;
   font-size: 14px;
-  gap: 6px;
+  gap: 4px;
+}
+.review-chart .chart-column .bar {
+  min-width: 0;
 }
 .review-chart .chart-column > span:last-child {
+  /* Equal label rows preserve the bars' common baseline and scale. */
+  width: 100%;
+  height: 2.4em;
+  line-height: 1.2;
   transform: none;
   margin: 0;
   font-size: 12px;
+  text-align: center;
   white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* Shared practice surfaces and media controls build on the shadcn theme. */
