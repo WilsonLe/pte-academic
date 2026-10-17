@@ -78,6 +78,7 @@ import { GameHub, GameStatus } from "./GameHub";
 import { badges, emptyProgress, localDay, questQuestions } from "./progress";
 import { Review } from "./Review";
 import { RequiredSpeechModel } from "./speech/RequiredSpeechModel";
+import { readCatalogueState, writeCatalogueState } from "./catalogue-state";
 import type { Pronunciation } from "./speech/comparison-schema";
 const navigation: readonly {
   id: ScreenId;
@@ -249,11 +250,13 @@ export default function App() {
     });
   const progressReady = !progressState.isPending;
   const [today, setToday] = useState(localDay);
-  const [selectedSections, setSelectedSections] = useState<Section[]>(() =>
-    sections.map((section) => section.id),
-  );
-  const [catalogueIndex, setCatalogueIndex] = useState(0);
-  const [search, setSearch] = useState("");
+  const [catalogue, setCatalogue] = useState(readCatalogueState);
+  const { selectedSections, index: catalogueIndex, search } = catalogue;
+  const setCatalogueIndex = (index: number) =>
+    setCatalogue((current) =>
+      current.index === index ? current : { ...current, index },
+    );
+  useEffect(() => writeCatalogueState(catalogue), [catalogue]);
   const [result, setResult] = useState<Result | null>(null);
   const resultRef = useRef(result);
   resultRef.current = result;
@@ -614,12 +617,16 @@ export default function App() {
                                   aria-label={`Filter: ${s.label}`}
                                   aria-pressed={selectedSections.includes(s.id)}
                                   onClick={() => {
-                                    setSelectedSections((selected) =>
-                                      selected.includes(s.id)
-                                        ? selected.filter((id) => id !== s.id)
-                                        : [...selected, s.id],
-                                    );
-                                    setCatalogueIndex(0);
+                                    setCatalogue((current) => ({
+                                      ...current,
+                                      selectedSections:
+                                        current.selectedSections.includes(s.id)
+                                          ? current.selectedSections.filter(
+                                              (id) => id !== s.id,
+                                            )
+                                          : [...current.selectedSections, s.id],
+                                      index: 0,
+                                    }));
                                   }}
                                 />
                               }
@@ -638,8 +645,12 @@ export default function App() {
                         placeholder="Search"
                         value={search}
                         onChange={(e) => {
-                          setSearch(e.target.value);
-                          setCatalogueIndex(0);
+                          const value = e.target.value;
+                          setCatalogue((current) => ({
+                            ...current,
+                            search: value,
+                            index: 0,
+                          }));
                         }}
                         className="h-9 min-w-0 flex-1 bg-transparent text-sm outline-none"
                       />
