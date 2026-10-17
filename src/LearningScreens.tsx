@@ -148,12 +148,15 @@ export function LearnScreen({
   onPractice,
   topic,
   onTopic,
+  section = 0,
+  onSection,
 }: {
   onPractice: () => void;
   topic?: string;
   onTopic: (id?: string) => void;
+  section?: number;
+  onSection: (section: number) => void;
 }) {
-  const [block, setBlock] = useState(-1);
   const article = articles.find((a) => a.id === topic);
   if (!article)
     return (
@@ -167,10 +170,7 @@ export function LearnScreen({
             <button
               className="type-row"
               key={a.id}
-              onClick={() => {
-                onTopic(a.id);
-                setBlock(-1);
-              }}
+              onClick={() => onTopic(a.id)}
             >
               <BookOpen />
               <span className="flex-1 text-left">{a.title}</span>
@@ -180,6 +180,12 @@ export function LearnScreen({
         />
       </div>
     );
+  const block =
+    Number.isSafeInteger(section) &&
+    section > 0 &&
+    section <= article.blocks.length
+      ? section - 1
+      : -1;
   return (
     <div className="screen-stack lesson-screen">
       <div className="screen-toolbar">
@@ -201,7 +207,7 @@ export function LearnScreen({
         <select
           aria-label="Learning topic"
           value={block}
-          onChange={(e) => setBlock(+e.target.value)}
+          onChange={(e) => onSection(+e.target.value + 1)}
         >
           <option value={-1}>Overview</option>
           {article.blocks.map((b, i) => (

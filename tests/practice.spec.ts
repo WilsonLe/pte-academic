@@ -412,6 +412,96 @@ test("shared cards list hides unnecessary pagination and preserves navigation on
   await screenFits(page);
 });
 
+test("Learn study step survives reload and practice return", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/guide/first-week");
+  const topic = page.getByRole("combobox", { name: "Learning topic" });
+  await topic.selectOption({ label: "Days 5–6: connect a section" });
+  await page.reload();
+  await expect(topic).toHaveValue("2");
+  await expect(page).toHaveURL(/\/guide\/first-week\?section=3$/);
+  await expect(
+    page.getByRole("region", { name: "Learning article" }),
+  ).toContainText("Try a complete section with the timer running.");
+  await page.getByRole("button", { name: "Practise", exact: true }).click();
+  await expect(page).toHaveURL(/\/types$/);
+  await page.goBack();
+  await expect(topic).toHaveValue("2");
+  await page.goForward();
+  await expect(page).toHaveURL(/\/types$/);
+  await page.goBack();
+  await topic.selectOption({ label: "Overview" });
+  await expect(page).toHaveURL(/\/guide\/first-week$/);
+  await page.reload();
+  await expect(topic).toHaveValue("-1");
+  await page.goto("/guide");
+  await page
+    .getByRole("button", { name: "Your first week of practice", exact: true })
+    .click();
+  await topic.selectOption("2");
+  await topic.selectOption("3");
+  await page.goBack();
+  await expect(page).toHaveURL(/\/guide$/);
+  await expect(
+    page.getByRole("heading", { name: "About PTE.", exact: true }),
+  ).toBeVisible();
+  await page.goForward();
+  await expect(topic).toHaveValue("3");
+});
+
+test("Learn study-step deep links cover every category and reject invalid selections", async ({
+  page,
+}) => {
+  const { readFile } = await import("node:fs/promises");
+  const articles = JSON.parse(
+    await readFile(new URL("../content/learn.json", import.meta.url), "utf8"),
+  ) as {
+    id: string;
+    title: string;
+    intro: string;
+    blocks: { text: string }[];
+  }[];
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  const topic = page.getByRole("combobox", { name: "Learning topic" });
+  const copy = page.getByRole("region", { name: "Learning article" });
+  for (const article of articles) {
+    await page.goto(`/guide/${article.id}?section=${article.blocks.length}`);
+    await expect(topic).toHaveValue(String(article.blocks.length - 1));
+    await expect(copy).toHaveText(article.blocks.at(-1)!.text);
+    await page.reload();
+    await expect(topic).toHaveValue(String(article.blocks.length - 1));
+    await expect(copy).toHaveText(article.blocks.at(-1)!.text);
+    await page.getByRole("button", { name: "All learning topics" }).click();
+    await expect(page).toHaveURL(/\/guide$/);
+    await page
+      .getByRole("button", { name: article.title, exact: true })
+      .click();
+    await expect(topic).toHaveValue("-1");
+    await expect(copy).toHaveText(article.intro);
+  }
+  const first = articles[0];
+  for (const section of [
+    "0",
+    "-1",
+    "1.5",
+    "text",
+    "999",
+    "1e100",
+    "%5B1%2C2%5D",
+  ]) {
+    await page.goto(`/guide/${first.id}?section=${section}`);
+    await expect(topic).toHaveValue("-1");
+    await expect(copy).toHaveText(first.intro);
+    await topic.selectOption("0");
+    await expect(copy).toHaveText(first.blocks[0].text);
+    await expect(page).toHaveURL(new RegExp(`/guide/${first.id}\\?section=1$`));
+  }
+  expect(errors).toEqual([]);
+});
+
 test("Learn scrolls all topics and article text while History keeps paging", async ({
   page,
 }, info) => {
@@ -476,6 +566,9 @@ test("Learn scrolls all topics and article text while History keeps paging", asy
           .getByRole("combobox", { name: "Learning topic" })
           .selectOption(String(i));
         await expect(copy).toHaveText(article.blocks[i].text);
+        expect(new URL(page.url()).searchParams.get("section")).toBe(
+          String(i + 1),
+        );
         await expect(page.locator(".page-controls")).toHaveCount(0);
       }
       await page.getByRole("button", { name: "All learning topics" }).click();

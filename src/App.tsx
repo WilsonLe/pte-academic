@@ -740,6 +740,15 @@ export default function App() {
                 <LearnScreen
                   key={route.topicId}
                   topic={route.topicId}
+                  section={route.learnSection}
+                  onSection={(section) =>
+                    void go({
+                      to: "/guide/$topicId",
+                      params: { topicId: route.topicId! },
+                      search: section > 0 ? { section } : {},
+                      replace: true,
+                    })
+                  }
                   onTopic={(id) =>
                     void (id
                       ? go({ to: "/guide/$topicId", params: { topicId: id } })
