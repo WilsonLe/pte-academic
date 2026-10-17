@@ -787,6 +787,118 @@ test("word bank and paragraph controls are keyboard operable", async ({
     .click();
   await expect(page.locator(".target")).toHaveCount(0);
 });
+for (const title of [
+  "Summarize Written Text",
+  "Write Essay",
+  "Summarize Spoken Text",
+  "Write from Dictation",
+]) {
+  test(`writing clipboard preserves text and native undo: ${title}`, async ({
+    page,
+  }) => {
+    await drill(page, title);
+    await start(page);
+    const input = page.getByRole("textbox", {
+      name: "Your response",
+      exact: true,
+    });
+    await expect(input).toBeEnabled();
+    const text = "Academic knowledge matters.";
+    const undo = process.platform === "darwin" ? "Meta+z" : "Control+z";
+    const redo =
+      process.platform === "darwin" ? "Meta+Shift+z" : "Control+Shift+z";
+    await input.fill(text);
+    await input.press("ControlOrMeta+a");
+    await page.getByRole("button", { name: "Paste", exact: true }).click();
+    await expect(input).toHaveValue(text);
+    expect(
+      await input.evaluate((el: HTMLTextAreaElement) => [
+        el.selectionStart,
+        el.selectionEnd,
+      ]),
+    ).toEqual([0, text.length]);
+    await page.getByRole("button", { name: "Copy", exact: true }).click();
+    await input.press("ArrowRight");
+    for (const action of ["Copy", "Cut"]) {
+      await page.getByRole("button", { name: action, exact: true }).click();
+      await expect(input).toHaveValue(text);
+    }
+    await page.getByRole("button", { name: "Paste", exact: true }).click();
+    await expect(input).toHaveValue(text + text);
+    await input.press(undo);
+    await expect(input).toHaveValue(text);
+    await input.press(redo);
+    await expect(input).toHaveValue(text + text);
+    await input.press(undo);
+    await input.press("ControlOrMeta+a");
+    await page.getByRole("button", { name: "Cut", exact: true }).click();
+    await expect(input).toHaveValue("");
+    await input.press(undo);
+    await expect(input).toHaveValue(text);
+    await input.press(redo);
+    await expect(input).toHaveValue("");
+    await page.getByRole("button", { name: "Paste", exact: true }).click();
+    await expect(input).toHaveValue(text);
+    expect(
+      await input.evaluate((el: HTMLTextAreaElement) => [
+        el.selectionStart,
+        el.selectionEnd,
+      ]),
+    ).toEqual([text.length, text.length]);
+    await end(page);
+    await expect(page.getByRole("main")).toContainText(
+      /Academic.*knowledge.*matters/s,
+    );
+    await page.reload();
+    await expect(page.getByRole("main")).toContainText(
+      /Academic.*knowledge.*matters/s,
+    );
+  });
+}
+
+for (const failure of ["unsupported", "throws"] as const) {
+  test(`writing clipboard retains the response when native editing ${failure}`, async ({
+    page,
+  }) => {
+    await drill(page, "Write Essay");
+    await start(page);
+    const input = page.getByRole("textbox", {
+      name: "Your response",
+      exact: true,
+    });
+    const text = "Academic knowledge matters.";
+    await input.fill(text);
+    await input.press("ControlOrMeta+a");
+    await page.getByRole("button", { name: "Copy", exact: true }).click();
+    await page.evaluate((mode) => {
+      const original = document.execCommand.bind(document);
+      document.execCommand = (command, ...args) => {
+        if (command !== "insertText") return original(command, ...args);
+        if (mode === "throws") throw new Error("Controlled unsupported edit");
+        return false;
+      };
+    }, failure);
+    for (const action of ["Cut", "Paste"]) {
+      await page.getByRole("button", { name: action, exact: true }).click();
+      await expect(input).toHaveValue(text);
+      await expect(page.getByRole("status")).toHaveText(
+        "This browser could not edit the selection. Use keyboard shortcuts.",
+      );
+      expect(
+        await input.evaluate((el: HTMLTextAreaElement) => [
+          el.selectionStart,
+          el.selectionEnd,
+        ]),
+      ).toEqual([0, text.length]);
+    }
+    // Native keyboard editing still works; no extra undo implementation or state.
+    await input.press("Backspace");
+    await expect(input).toHaveValue("");
+    await input.press(process.platform === "darwin" ? "Meta+z" : "Control+z");
+    await expect(input).toHaveValue(text);
+  });
+}
+
 test("writing tools count words and ten minute timer advances forward", async ({
   page,
 }) => {
@@ -795,6 +907,11 @@ test("writing tools count words and ten minute timer advances forward", async ({
   await page
     .getByRole("textbox", { name: "Your response" })
     .fill("Community gardens need clear rules.");
+  await page
+    .getByRole("textbox", { name: "Your response" })
+    .press("ControlOrMeta+a");
+  await page.getByRole("button", { name: "Cut", exact: true }).click();
+  await page.getByRole("button", { name: "Paste", exact: true }).click();
   await expect(page.getByText("Total Word Count: 5")).toBeVisible();
   await page.clock.install();
   await page.clock.fastForward(600500);
@@ -802,6 +919,17 @@ test("writing tools count words and ten minute timer advances forward", async ({
   await expect(
     page.getByRole("textbox", { name: "Your response" }),
   ).toHaveValue("");
+  await page
+    .getByRole("textbox", { name: "Your response" })
+    .press(process.platform === "darwin" ? "Meta+z" : "Control+z");
+  await page.getByRole("button", { name: "Paste", exact: true }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Your response" }),
+  ).toHaveValue("");
+  await end(page);
+  await expect(page.getByRole("main")).toContainText(
+    "Community gardens need clear rules.",
+  );
 });
 test("listening is single play, transcript hidden, highlight input available", async ({
   page,
