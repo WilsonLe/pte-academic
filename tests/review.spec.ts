@@ -356,6 +356,10 @@ for (const mode of ["legacy", "acoustic"]) {
           .click();
     }
     await page.reload();
+    await expect(page.locator(".review-screen")).toHaveAttribute(
+      "data-question-id",
+      discussions[0].id,
+    );
     const sourceText = await readSource(page);
     expect(sourceText).toContain(compact(discussions[0].audioText!));
   });
