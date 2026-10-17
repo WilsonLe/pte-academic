@@ -267,7 +267,9 @@ export function QuestionInput({
                 </button>
               ))}
             </div>
-            <p className="exam-hint">Select a filled blank to clear it.</p>
+            {!word && (
+              <p className="exam-hint">Select a filled blank to clear it.</p>
+            )}
           </>
         )}
       </div>
