@@ -764,6 +764,63 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
       }),
     ).toContainText(word);
 });
+test("word-bank guidance follows clearing and replacement modes for every item", async ({
+  page,
+}) => {
+  await drill(page, "Fill in the Blanks \\(Drag and Drop\\)");
+  await start(page);
+  const clearing = page.getByText("Select a filled blank to clear it.", {
+    exact: true,
+  });
+  for (let item = 0; item < 4; item++) {
+    const [first, second] = await page
+      .getByLabel("Word bank", { exact: true })
+      .getByRole("button")
+      .allTextContents();
+    const firstWord = page.getByRole("button", { name: first, exact: true });
+    const secondWord = page.getByRole("button", { name: second, exact: true });
+    await firstWord.press("Space");
+    await page
+      .getByRole("button", { name: "Blank 1", exact: true })
+      .press("Enter");
+    await expect(clearing).toBeVisible();
+    await secondWord.press("Enter");
+    await expect(clearing).not.toBeVisible();
+    await secondWord.press("Enter");
+    await expect(clearing).toBeVisible();
+    await page
+      .getByRole("button", { name: `Blank 1: ${first}`, exact: true })
+      .press("Enter");
+    await expect(
+      page.getByRole("button", { name: "Blank 1", exact: true }),
+    ).toHaveText(" ");
+    await expect(firstWord).toBeEnabled();
+    await firstWord.press("Enter");
+    await page
+      .getByRole("button", { name: "Blank 1", exact: true })
+      .press("Enter");
+    await secondWord.press("Space");
+    await page
+      .getByRole("button", { name: `Blank 1: ${first}`, exact: true })
+      .press("Enter");
+    await expect(
+      page.getByRole("button", { name: `Blank 1: ${second}`, exact: true }),
+    ).toHaveText(second);
+    await expect(firstWord).toBeEnabled();
+    await expect(secondWord).toBeDisabled();
+    await expect(clearing).toBeVisible();
+    await page
+      .getByRole("button", {
+        name: item === 3 ? "Finish practice" : "Next",
+        exact: true,
+      })
+      .press("Enter");
+  }
+  await expect(
+    page.getByRole("heading", { name: "Review", exact: true }),
+  ).toBeVisible();
+});
+
 test("word bank and paragraph controls are keyboard operable", async ({
   page,
 }) => {
