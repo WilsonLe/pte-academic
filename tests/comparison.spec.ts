@@ -438,50 +438,39 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
         Math.max(0, Math.floor(syllable.start * 16000)),
         Math.ceil(syllable.end * 16000),
       );
-    const buffer = new ArrayBuffer(44 + samples.length * 2),
-      view = new DataView(buffer);
-    const str = (at: number, s: string) =>
-      [...s].forEach((c, i) => view.setUint8(at + i, c.charCodeAt(0)));
-    str(0, "RIFF");
-    view.setUint32(4, 36 + samples.length * 2, true);
-    str(8, "WAVE");
-    str(12, "fmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, 16000, true);
-    view.setUint32(28, 32000, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    str(36, "data");
-    view.setUint32(40, samples.length * 2, true);
-    samples.forEach((s, i) =>
-      view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, s)) * 32767, true),
-    );
-    const blob = new Blob([buffer], { type: "audio/wav" });
     await context.close();
     (window as any).__tracks = [];
-    const getUserMedia = navigator.mediaDevices.getUserMedia.bind(
-      navigator.mediaDevices,
-    );
-    navigator.mediaDevices.getUserMedia = async (constraints) => {
-      const stream = await getUserMedia(constraints);
-      (window as any).__tracks.push(...stream.getTracks());
-      return stream;
+    const starts = new Map<string, () => void>();
+    navigator.mediaDevices.getUserMedia = async () => {
+      const ac = new AudioContext({ sampleRate: 48000 });
+      await ac.resume();
+      const destination = ac.createMediaStreamDestination(),
+        source = ac.createBufferSource();
+      source.buffer = ac.createBuffer(1, samples.length, 16000);
+      source.buffer.copyToChannel(samples, 0);
+      source.connect(destination);
+      starts.set(destination.stream.id, () =>
+        source.start(ac.currentTime + 0.1),
+      );
+      for (const track of destination.stream.getTracks()) {
+        const stop = track.stop.bind(track);
+        let closed = false;
+        track.stop = () => {
+          stop();
+          if (!closed) {
+            closed = true;
+            void ac.close();
+          }
+        };
+        (window as any).__tracks.push(track);
+      }
+      return destination.stream;
     };
-    (window as any).MediaRecorder = class {
-      state = "inactive";
-      mimeType = "audio/wav";
-      ondataavailable: any;
-      onstop: any;
-      start() {
-        this.state = "recording";
-      }
-      stop() {
-        this.state = "inactive";
-        this.ondataavailable?.({ data: blob });
-        this.onstop?.();
-      }
+    const start = MediaRecorder.prototype.start;
+    MediaRecorder.prototype.start = function (...args) {
+      const result = start.apply(this, args);
+      starts.get(this.stream.id)?.();
+      return result;
     };
   });
   await page.getByRole("button", { name: /^Practise word 1:/ }).click();
@@ -489,6 +478,7 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
   await dialog
     .getByRole("button", { name: "Record syllable", exact: true })
     .click();
+  await page.waitForTimeout(1200); // Let the controlled syllable enter the native recorder.
   await dialog.getByRole("button", { name: "Stop and grade" }).click();
   await expect(dialog.locator(".retry-result")).toHaveText(
     /(?:\d+\/100 reference similarity|Uncertain · no reliable score for this syllable\.)/,
@@ -510,6 +500,7 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
   await dialog
     .getByRole("button", { name: "Record syllable", exact: true })
     .click();
+  await page.waitForTimeout(1200); // Let the controlled syllable enter the native recorder.
   await dialog.getByRole("button", { name: "Stop and grade" }).click();
   await expect(dialog.locator(".retry-result")).toContainText(
     "Already practised for XP today",
@@ -573,13 +564,19 @@ test("failed required download blocks model grading and retries without a word-m
 }) => {
   test.setTimeout(120000);
   await page.setViewportSize({ width: 390, height: 844 });
-  let release!: () => void;
-  const held = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  await page.route("**/models/blended-english-v3/encoder-00.bin", async (r) => {
-    await held;
-    await r.abort();
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("pte-test-download-released")) return;
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) =>
+      String(input).endsWith("/models/blended-english-v3/encoder-00.bin")
+        ? new Promise<Response>((resolve) => {
+            (window as any).__failModelDownload = () => {
+              sessionStorage.setItem("pte-test-download-released", "1");
+              window.fetch = nativeFetch;
+              resolve(new Response("Download unavailable", { status: 503 }));
+            };
+          })
+        : nativeFetch(input, init);
   });
   await page.goto(base + "types");
   const notifications = page.getByRole("button", {
@@ -596,7 +593,7 @@ test("failed required download blocks model grading and retries without a word-m
     await page.screenshot({
       path: "artifacts/pronunciation/browser-export/model-loading-mobile.png",
     });
-  release();
+  await page.evaluate(() => (window as any).__failModelDownload());
   await expect(
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible({ timeout: 60000 });
@@ -630,7 +627,6 @@ test("failed required download blocks model grading and retries without a word-m
     page.getByRole("button", { name: "Retry model download" }),
   ).toBeVisible();
   await context.setOffline(false);
-  await page.unroute("**/models/blended-english-v3/encoder-00.bin");
   await page.getByRole("button", { name: "Retry model download" }).click();
   await expect(notifications).toHaveAccessibleDescription("No notifications.", {
     timeout: 90000,
@@ -818,5 +814,382 @@ test("post-ready missing and corrupt model metadata recover through notification
     await expect(
       page.getByRole("button", { name: "Cancel speech scoring" }),
     ).toHaveCount(0);
+  }
+});
+
+test("isolated retries accept all four reference accents after native recording and reject wrong syllables", async ({
+  page,
+}, info) => {
+  test.setTimeout(240000);
+  await seed(page);
+  const workerUrl = await workerPath();
+  const report = await page.evaluate(
+    async ({ workerUrl, base }) => {
+      const cache = await caches.open(
+        (await caches.keys()).find((k) => k.startsWith("pte-comparison:"))!,
+      );
+      const index = await (await cache.match(
+        new URL(
+          base + "models/word-recognition-v1/word-references.json",
+          location.origin,
+        ),
+      ))!.json();
+      const library = index.words.library.slice(0, 4);
+      const references = [] as {
+        accent: string;
+        label: string;
+        audio: Float32Array;
+      }[];
+      const wrong = [] as Float32Array[];
+      for (const ref of library) {
+        const bytes = await (await cache.match(
+          new URL(
+            base + "models/word-recognition-v1/" + ref.audio,
+            location.origin,
+          ),
+        ))!.arrayBuffer();
+        const ctx = new AudioContext({ sampleRate: 48000 });
+        const decoded = await ctx.decodeAudioData(bytes);
+        const slice = (i: number) =>
+          decoded
+            .getChannelData(0)
+            .slice(
+              Math.floor(ref.syllables[i].start * 48000),
+              Math.ceil(ref.syllables[i].end * 48000),
+            );
+        references.push({
+          accent: ref.accent,
+          label: ref.syllables[0].label,
+          audio: slice(0),
+        });
+        if (ref.accent === "en-US") {
+          wrong.push(slice(1), slice(2));
+        }
+        await ctx.close();
+      }
+      async function recorded(pcm: Float32Array) {
+        const ctx = new AudioContext({ sampleRate: 48000 });
+        await ctx.resume();
+        const dest = ctx.createMediaStreamDestination(),
+          source = ctx.createBufferSource();
+        source.buffer = ctx.createBuffer(1, pcm.length, 48000);
+        source.buffer.copyToChannel(pcm as Float32Array<ArrayBuffer>, 0);
+        source.connect(dest);
+        const recorder = new MediaRecorder(dest.stream);
+        const chunks: BlobPart[] = [];
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        const blob = await new Promise<Blob>((resolve) => {
+          recorder.onstop = () =>
+            resolve(new Blob(chunks, { type: recorder.mimeType }));
+          recorder.start();
+          source.start(ctx.currentTime + 0.25);
+          setTimeout(() => recorder.stop(), (pcm.length / 48000 + 1) * 1000);
+        });
+        dest.stream.getTracks().forEach((t) => t.stop());
+        await ctx.close();
+        const decode = new AudioContext({ sampleRate: 16000 });
+        try {
+          return (await decode.decodeAudioData(await blob.arrayBuffer()))
+            .getChannelData(0)
+            .slice();
+        } finally {
+          await decode.close();
+        }
+      }
+      async function grade(audio: Float32Array, refs = references) {
+        const worker = new Worker(workerUrl, { type: "module" });
+        try {
+          return await new Promise<any>((resolve, reject) => {
+            const timer = setTimeout(
+              () => reject(new Error("Retry timed out")),
+              60000,
+            );
+            worker.onmessage = (e) => {
+              if (e.data.type === "complete") {
+                clearTimeout(timer);
+                resolve(e.data.result);
+              }
+              if (e.data.type === "error") {
+                clearTimeout(timer);
+                reject(new Error(e.data.message));
+              }
+            };
+            worker.onerror = (e) => {
+              clearTimeout(timer);
+              reject(new Error(e.message));
+            };
+            worker.postMessage({
+              audio,
+              text: "unrelated prompt",
+              target: {
+                word: "library",
+                wordIndex: 1,
+                syllableIndex: 0,
+                syllableCount: 3,
+              },
+              references: refs,
+              base: new URL(base, location.origin).href,
+            });
+          });
+        } finally {
+          worker.terminate();
+        }
+      }
+      const raw = references.map((r) => r.audio);
+      for (const ref of references) ref.audio = await recorded(ref.audio);
+      const positive = [];
+      for (const [i, ref] of references.entries())
+        positive.push({
+          accent: ref.accent,
+          result: await grade(await recorded(raw[i])),
+        });
+      const negative = [];
+      for (const audio of wrong)
+        negative.push(await grade(await recorded(audio)));
+      const missing = await grade(references[0].audio, []);
+      const silence = await grade(new Float32Array(16000));
+      return { positive, negative, missing, silence };
+    },
+    { workerUrl, base },
+  );
+  await writeFile(
+    info.outputPath("native-controls.json"),
+    JSON.stringify(report, null, 2),
+  );
+  for (const control of report.positive) {
+    const syllable = control.result.syllables[0];
+    if (syllable.similarity === null)
+      expect(syllable.status, control.accent).toBe("uncertain");
+    else expect(syllable.similarity, control.accent).toBeGreaterThanOrEqual(75);
+    expect(pronunciationSchema.safeParse(control.result).success).toBe(true);
+  }
+  expect(
+    report.positive.filter((c) => c.result.syllables[0].similarity >= 75)
+      .length,
+  ).toBeGreaterThanOrEqual(3);
+  for (const control of report.negative)
+    expect(control.syllables[0]?.similarity ?? 0).toBeLessThan(50);
+  expect(
+    report.missing.syllables.every((s: any) => s.similarity === null),
+  ).toBe(true);
+  expect(report.silence.status).toBe("no-reliable-speech");
+  await info.attach("isolated-reference-controls", {
+    body: JSON.stringify(report, null, 2),
+    contentType: "application/json",
+  });
+});
+
+test("warm preparation avoids model transfers and saved word references work while weights prepare", async ({
+  page,
+}, info) => {
+  test.setTimeout(150000);
+  await seed(page);
+  const transferred: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/models/")) transferred.push(r.url());
+  });
+  const started = Date.now();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Notifications", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Notifications", exact: true })
+    .click();
+  await expect(
+    page.getByText("No notifications", { exact: true }),
+  ).toBeVisible();
+  const warmMilliseconds = Date.now() - started;
+  expect(transferred).toEqual([]);
+  await page.keyboard.press("Escape");
+  await page.evaluate(async (base) => {
+    const key = (await caches.keys()).find((k) =>
+      k.startsWith("pte-comparison:"),
+    )!;
+    const cache = await caches.open(key);
+    await cache.delete(
+      new URL(
+        base + "models/blended-english-v3/encoder-00.bin",
+        location.origin,
+      ),
+    );
+  }, base);
+  await page.addInitScript(() => {
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) =>
+      String(input).endsWith("/models/blended-english-v3/encoder-00.bin")
+        ? new Promise<Response>((resolve) => {
+            (window as any).__releaseWeights = () => {
+              window.fetch = nativeFetch;
+              resolve(nativeFetch(input, init));
+            };
+          })
+        : nativeFetch(input, init);
+  });
+  const release = () =>
+    page.evaluate(() => (window as any).__releaseWeights?.());
+  try {
+    await page.reload();
+    await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+    await page
+      .getByRole("button", { name: /^Practise word 2: library/ })
+      .click();
+    const dialog = page.getByRole("dialog");
+    await expect(
+      dialog.getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    await expect(
+      dialog.getByRole("button", { name: "Record syllable", exact: true }),
+    ).toBeDisabled();
+    await dialog
+      .getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      })
+      .click();
+    await expect
+      .poll(() =>
+        dialog
+          .getByRole("group", { name: "Reference pronunciation", exact: true })
+          .locator("audio")
+          .evaluate((a) => (a as HTMLAudioElement).currentTime),
+      )
+      .toBeGreaterThan(0);
+    const referenceUrl = await dialog
+      .getByRole("group", { name: "Reference pronunciation", exact: true })
+      .locator("audio")
+      .getAttribute("src");
+    await release();
+    await expect(
+      dialog.getByRole("button", { name: "Record syllable", exact: true }),
+    ).toBeEnabled({ timeout: 30000 });
+    expect(
+      await dialog
+        .getByRole("group", { name: "Reference pronunciation", exact: true })
+        .locator("audio")
+        .getAttribute("src"),
+    ).toBe(referenceUrl);
+  } finally {
+    await release();
+  }
+  await info.attach("warm-preparation", {
+    body: JSON.stringify({ warmMilliseconds, modelTransfersOnWarmStart: 0 }),
+    contentType: "application/json",
+  });
+});
+
+test("an open word dialog recovers a failed reference when header preparation finishes", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  await seed(page);
+  await page.evaluate(async (base) => {
+    const key = (await caches.keys()).find((k) =>
+      k.startsWith("pte-comparison:"),
+    )!;
+    const cache = await caches.open(key);
+    for (const path of [
+      "models/blended-english-v3/encoder-00.bin",
+      "models/blended-english-v3/encoder-01.bin",
+      "models/word-recognition-v1/word-reference-en-US.mp3",
+    ])
+      await cache.delete(new URL(base + path, location.origin));
+  }, base);
+  await page.addInitScript(() => {
+    const nativeFetch = window.fetch.bind(window);
+    let phase = "fail",
+      referenceRequests = 0;
+    const pending: Array<() => void> = [];
+    (window as any).__referenceRecovery = {
+      hold: () => {
+        phase = "hold";
+      },
+      release: () => {
+        phase = "released";
+        pending.splice(0).forEach((f) => f());
+      },
+    };
+    window.fetch = (input, init) => {
+      const url = String(input);
+      if (/\/encoder-0[01]\.bin$/.test(url)) {
+        if (phase === "fail")
+          return Promise.resolve(new Response("Unavailable", { status: 503 }));
+        if (phase === "hold")
+          return new Promise<Response>((resolve) =>
+            pending.push(() => resolve(nativeFetch(input, init))),
+          );
+      }
+      if (
+        url.endsWith("/word-reference-en-US.mp3") &&
+        referenceRequests++ === 0
+      )
+        return Promise.resolve(new Response("Unavailable", { status: 503 }));
+      return nativeFetch(input, init);
+    };
+  });
+  try {
+    await page.reload();
+    const bell = page.getByRole("button", {
+      name: "Notifications",
+      exact: true,
+    });
+    await bell.click();
+    await expect(
+      page.getByRole("button", { name: "Retry model download", exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() => (window as any).__referenceRecovery.hold());
+    await page
+      .getByRole("button", { name: "Retry model download", exact: true })
+      .click();
+    await page.keyboard.press("Escape");
+    await page
+      .getByRole("button", { name: /^Practise word 2: library/ })
+      .click();
+    const dialog = page.getByRole("dialog", { name: "library", exact: true });
+    await expect(
+      dialog.getByText("The word reference could not be loaded.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await page.evaluate(() => (window as any).__referenceRecovery.release());
+    await expect(
+      dialog.getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      }),
+    ).toBeEnabled({ timeout: 30000 });
+    await expect(
+      dialog.getByRole("button", { name: "Record syllable", exact: true }),
+    ).toBeEnabled();
+    await expect(
+      dialog.getByText("The word reference could not be loaded.", {
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    await dialog
+      .getByRole("button", {
+        name: "Play Reference pronunciation",
+        exact: true,
+      })
+      .click();
+    await expect
+      .poll(() =>
+        dialog
+          .getByRole("group", { name: "Reference pronunciation", exact: true })
+          .locator("audio")
+          .evaluate((a) => (a as HTMLAudioElement).currentTime),
+      )
+      .toBeGreaterThan(0);
+  } finally {
+    await page.evaluate(() => (window as any).__referenceRecovery?.release());
   }
 });

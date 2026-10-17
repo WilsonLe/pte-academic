@@ -216,6 +216,9 @@ function Nav({ active, mobile = false }: { active: string; mobile?: boolean }) {
 }
 export default function App() {
   useViewportLock();
+  useEffect(() => {
+    window.dispatchEvent(new Event("pte-workspace-ready"));
+  }, []);
   const client = useQueryClient();
   const progressState = useQuery(progressQuery());
   const progress = progressState.data ?? emptyProgress();

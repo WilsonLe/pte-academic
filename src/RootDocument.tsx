@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { ClientOnly, HeadContent, Scripts } from "@tanstack/react-router";
+import { bootstrapRecovery } from "./bootstrap-recovery";
 import "./style.css";
 import "./screens.css";
 
@@ -11,6 +12,13 @@ export function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {import.meta.env.PROD && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(${bootstrapRecovery.toString()})(${JSON.stringify(base)})`,
+            }}
+          />
+        )}
         <HeadContent />
         <link rel="manifest" href={`${base}manifest.webmanifest`} />
         <link rel="icon" type="image/svg+xml" href={`${base}icon.svg`} />

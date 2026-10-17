@@ -164,6 +164,8 @@ export function scoreOutputs(
   hidden: Float32Array,
   logs: Float32Array,
   meta: ComparisonMetadata,
+  isolatedReferences?: Record<string, number[][]>,
+  onEvidence?: (phone: string, projected: number[], confidence: number) => void,
 ) {
   const variants = meta.scripts[scriptKey(text)];
   if (!variants?.length)
@@ -213,14 +215,17 @@ export function scoreOutputs(
     const z = project(feature, meta),
       phone = variant.phones[i].replace(/[012]+$/g, ""),
       label = String(meta.classes.indexOf(phone)),
-      refs = meta.bank[label],
+      refs = isolatedReferences ? isolatedReferences[label] : meta.bank[label],
       cal = meta.calibration[label];
+    onEvidence?.(phone, z, span.confidence);
     let similarity: number | null = null;
     if (refs?.length && cal) {
       const ds = refs
         .map((row) => 1 - row.reduce((s, v, j) => s + v * z[j], 0))
         .sort((a, b) => a - b);
-      const k = Math.min(8, ds.length),
+      // A retry has one compatible template per available reference accent;
+      // each is an equally valid target, not a vote against the other accents.
+      const k = isolatedReferences ? 1 : Math.min(8, ds.length),
         distance = ds.slice(0, k).reduce((a, b) => a + b, 0) / k;
       similarity = round(
         clip(
@@ -254,7 +259,12 @@ export function scoreOutputs(
   return variant.syllables.map((s) => {
     const ps = s.phoneIndexes.map((i) => phones[i]),
       confidence = ps.reduce((v, p) => v + p.confidence, 0) / ps.length;
-    const valid = ps.every((p) => p.similarity !== null) && confidence >= 0.03;
+    const valid =
+      ps.every(
+        (p) =>
+          p.similarity !== null &&
+          (!isolatedReferences || p.confidence >= 0.03),
+      ) && confidence >= 0.03;
     return {
       word: s.word,
       wordIndex: s.wordIndex,
@@ -335,6 +345,35 @@ export type SyllableTarget = {
   syllableIndex: number;
   syllableCount?: number;
 };
+
+export type SyllableReferenceInput = {
+  accent: string;
+  label: string;
+  audio: Float32Array;
+};
+
+/** Remove recorder waiting time, then give both short inputs identical context. */
+export function isolatedAudio(audio: Float32Array) {
+  const step = 160;
+  const energies: number[] = [];
+  for (let at = 0; at < audio.length; at += step) {
+    let energy = 0;
+    const end = Math.min(audio.length, at + step);
+    for (let i = at; i < end; i++) energy += audio[i] ** 2;
+    energies.push(Math.sqrt(energy / (end - at)));
+  }
+  const peak = Math.max(0, ...energies);
+  const threshold = Math.max(1e-5, peak * 0.04);
+  const first = energies.findIndex((e) => e >= threshold);
+  let last = energies.length - 1;
+  while (last >= 0 && energies[last] < threshold) last--;
+  if (first < 0) return new Float32Array(0);
+  const start = Math.max(0, first * step);
+  const end = Math.min(audio.length, (last + 1) * step);
+  const result = new Float32Array(end - start + 6400);
+  result.set(audio.subarray(start, end), 3200);
+  return result;
+}
 /** Reuse every supported whole-passage variant, selecting only its target sounds. */
 export function targetVariants(variants: Variant[], target: SyllableTarget) {
   if (
