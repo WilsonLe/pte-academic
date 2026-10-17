@@ -1045,7 +1045,7 @@ for (const failure of ["unsupported", "throws"] as const) {
     for (const action of ["Cut", "Paste"]) {
       await page.getByRole("button", { name: action, exact: true }).click();
       await expect(input).toHaveValue(text);
-      await expect(page.getByRole("status")).toHaveText(
+      await expect(page.locator(".writing").getByRole("status")).toHaveText(
         "This browser could not edit the selection. Use keyboard shortcuts.",
       );
       expect(
@@ -1518,12 +1518,15 @@ test("full mock keeps current section status across timeout and ordinary handove
   }
   expect(await retainedStatus!.evaluate((node) => node.isConnected)).toBe(true);
   expect(await retainedStatus!.textContent()).toBe("Listening");
-  const clock = (await page.locator(".exam-clock").innerText()).match(
-    /(\d+):(\d+)/,
-  )!;
-  const seconds = Number(clock[1]) * 60 + Number(clock[2]);
-  expect(seconds).toBeGreaterThan(38 * 60);
-  expect(seconds).toBeLessThanOrEqual(39 * 60);
+  await expect
+    .poll(async () => {
+      const clock = (await page.locator(".exam-clock").innerText()).match(
+        /(\d+):(\d+)/,
+      )!;
+      const seconds = Number(clock[1]) * 60 + Number(clock[2]);
+      return seconds > 38 * 60 && seconds <= 39 * 60;
+    })
+    .toBe(true);
   await page.clock.fastForward(1000);
   await expect(sectionStatus).toHaveText("Listening"); // The ticking clock is outside this region.
   await end(page);
