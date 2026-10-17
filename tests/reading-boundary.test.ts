@@ -1,6 +1,38 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readingBoundary } from "../src/reading-boundary";
+import questions from "../content/questions.json" with { type: "json" };
+
+test("speaker cues stay with their following remarks rather than the previous sentence", () => {
+  const previous = "The first point is complete.";
+  for (const cue of ["Speaker one.", "Speaker two.", "Speaker three."]) {
+    const text = `${previous} ${cue} I disagree because the proposal needs more evidence.`;
+    assert.equal(
+      readingBoundary(text, previous.length + cue.length + 8),
+      previous.length,
+    );
+  }
+});
+
+test("both discussion transcripts preserve all text without cue-only page endings", () => {
+  for (const question of questions.filter(
+    (q) => q.type === "summarize-group-discussion",
+  )) {
+    for (const limit of [64, 120, 180]) {
+      let rest = question.audioText!;
+      const parts: string[] = [];
+      while (rest) {
+        const end = readingBoundary(rest, Math.min(limit, rest.length));
+        assert.ok(end > 0 && end <= limit);
+        const part = rest.slice(0, end);
+        assert.doesNotMatch(part.trim(), /\bSpeaker (?:one|two|three)\.$/);
+        parts.push(part);
+        rest = rest.slice(end);
+      }
+      assert.equal(parts.join(""), question.audioText);
+    }
+  }
+});
 
 test("numbered paragraphs stay intact when a later line only partly fits", () => {
   const first = "1. A library started a seed-sharing scheme.";

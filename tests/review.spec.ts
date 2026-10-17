@@ -249,6 +249,119 @@ async function fits(page: Page) {
 }
 
 for (const mode of ["legacy", "acoustic"]) {
+  test(`discussion speaker cues remain with their remarks in ${mode} review`, async ({
+    page,
+    context,
+  }) => {
+    await context.route("**/models/**", (route) => route.abort());
+    await seed(page);
+    const discussions = questions.filter(
+      (q) => q.type === "summarize-group-discussion",
+    );
+    await page.evaluate(
+      async ({ ids, mode, sha, exportId }) => {
+        const db = await new Promise<IDBDatabase>((resolve) => {
+          const request = indexedDB.open("pte-studio", 2);
+          request.onsuccess = () => resolve(request.result);
+        });
+        await new Promise<void>((resolve) => {
+          const tx = db.transaction("attempts", "readwrite");
+          const store = tx.objectStore("attempts");
+          const get = store.get("review-correct");
+          get.onsuccess = () => {
+            const saved = get.result;
+            saved.result.questionIds = ids;
+            if (mode === "acoustic")
+              for (const id of ids)
+                saved.result.answers[id] = {
+                  speechAssessment: {
+                    schemaVersion: 1,
+                    modelSha256: sha,
+                    exportId,
+                    referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+                    seconds: 3,
+                    status: "unscored",
+                    syllables: [],
+                    recognition: { modelId: "audio-only-words-v1", words: [] },
+                  },
+                };
+            store.put(saved, "review-correct");
+          };
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+        });
+      },
+      {
+        ids: discussions.map((q) => q.id),
+        mode,
+        sha: COMPARISON_MODEL_SHA,
+        exportId: COMPARISON_EXPORT,
+      },
+    );
+    await page.goto("/history/review-correct");
+    for (const [index, question] of discussions.entries()) {
+      for (const viewport of [
+        { width: 320, height: 480 },
+        { width: 390, height: 844 },
+        { width: 1280, height: 720 },
+      ]) {
+        await page.setViewportSize(viewport);
+        const source = page.getByRole("button", {
+          name: /^(Open source|Source)$/,
+        });
+        await source.click();
+        const dialog = page.getByRole("dialog");
+        const copy = dialog.locator(".reading-copy");
+        const transcript: string[] = [];
+        for (let i = 0; i < 80; i++) {
+          await expect(copy.locator(".reading-block")).not.toHaveCount(0);
+          await expect
+            .poll(() =>
+              copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+            )
+            .toBe(true);
+          const blocks = await copy
+            .locator(".reading-block")
+            .evaluateAll((nodes) =>
+              nodes.map((node) => ({
+                label: node.querySelector("h3")?.textContent ?? "",
+                text: node.querySelector("p")?.textContent ?? "",
+              })),
+            );
+          for (const block of blocks) {
+            expect(block.text.trim()).not.toMatch(
+              /\bSpeaker (?:one|two|three)\.$/,
+            );
+            if (block.label.startsWith("Transcript"))
+              transcript.push(block.text);
+          }
+          const next = dialog.getByRole("button", {
+            name: "Next detail pages",
+            exact: true,
+          });
+          if (!(await next.count()) || (await next.isDisabled())) break;
+          await next.click();
+        }
+        expect(compact(transcript.join(" "))).toBe(
+          compact(question.audioText!),
+        );
+        await page.keyboard.press("Escape");
+        await expect(source).toBeFocused();
+      }
+      if (index < discussions.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+    await page.reload();
+    const sourceText = await readSource(page);
+    expect(sourceText).toContain(compact(discussions[0].audioText!));
+  });
+}
+
+for (const mode of ["legacy", "acoustic"]) {
   test(`saved chart bars retain their data and proportions in ${mode} review`, async ({
     page,
     context,
