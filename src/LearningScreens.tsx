@@ -228,6 +228,7 @@ export function GuideScreen({
   onStart: () => void;
 }) {
   const [tab, setTab] = useState("Instructions");
+  const questionCount = questions.filter((q) => q.type === g.id).length;
   const texts =
     tab === "Instructions"
       ? [
@@ -240,7 +241,9 @@ export function GuideScreen({
   return (
     <div className="screen-stack guide-screen">
       <div className="guide-start">
-        <p>{questions.filter((q) => q.type === g.id).length} questions</p>
+        <p>
+          {questionCount} {questionCount === 1 ? "question" : "questions"}
+        </p>
         <Button
           className="big-play"
           aria-label="Start practice"
