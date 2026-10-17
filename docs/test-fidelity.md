@@ -8,7 +8,7 @@ The learning interface uses the default shadcn preset. The test runner has a sep
 - Item preparation and response periods; wall-clock section deadlines; automatic progression at writing/section expiry.
 - Single-play prompt audio with a visible recovery action when browser autoplay is blocked. Audio load failure is explicit.
 - Microphone/headphone preflight with a separate non-question sound check; one recording per item; tone where applicable; a local RMS approximation of the short-speaking silence cutoff.
-- Writing word counts, local cut/copy/paste controls, accessible keyboard alternatives to word/paragraph dragging.
+- Writing word counts and question-local cut/copy/paste controls. Empty clipboard/selection operations leave the response and clipboard intact; supported native edits retain Undo/Redo. An unavailable native edit leaves the response intact with a status message. No system clipboard is read or written. Word/paragraph dragging has accessible keyboard alternatives.
 - Full 65-question form and complete section practice; no review hints during an active attempt.
 - Review keys, transcripts, examples and item-specific explanations. Selection counts, correct gaps and adjacent paragraph pairs describe the saved response; they do not estimate exam credit. All speaking tasks have independent local word recognition followed by v3 syllable reference-similarity feedback; extended writing retains self-review without a proficiency score. Previously saved learner transcripts remain readable.
 

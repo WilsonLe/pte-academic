@@ -91,24 +91,44 @@ export function QuestionInput({
     const text = answer.text || "";
     const a = el.selectionStart,
       b = el.selectionEnd;
-    if (action === "Paste") {
-      onChange({ ...answer, text: text.slice(0, a) + clip + text.slice(b) });
-      setEditMessage(
-        clip
-          ? "Pasted from answer clipboard."
-          : "Select text and use Copy or Cut first.",
-      );
-    } else {
-      setClip(text.slice(a, b));
-      if (action === "Cut")
-        onChange({ ...answer, text: text.slice(0, a) + text.slice(b) });
-      setEditMessage(
-        a === b
-          ? "Select text in your answer first."
-          : `${action === "Cut" ? "Cut" : "Copied"} selected text to answer clipboard.`,
-      );
-    }
     el.focus();
+    el.setSelectionRange(a, b);
+    if (action === "Paste" && !clip) {
+      setEditMessage("Select text and use Copy or Cut first.");
+      return;
+    }
+    if (action !== "Paste" && a === b) {
+      setEditMessage("Select text in your answer first.");
+      return;
+    }
+    if (action !== "Copy") {
+      // Native editing retains Undo/Redo; assigning a controlled value does not.
+      // Keep this transaction local: no system clipboard or HTML insertion.
+      try {
+        if (
+          !document.execCommand(
+            "insertText",
+            false,
+            action === "Paste" ? clip : "",
+          )
+        )
+          throw new Error("Native edit unavailable");
+      } catch {
+        setEditMessage(
+          "This browser could not edit the selection. Use keyboard shortcuts.",
+        );
+        return;
+      }
+      // Some browsers do not dispatch input for execCommand; publish synchronously
+      // so an immediate finish/deadline also captures the actual textarea value.
+      onChange({ ...answer, text: el.value });
+    }
+    if (action !== "Paste") setClip(text.slice(a, b));
+    setEditMessage(
+      action === "Paste"
+        ? "Pasted from answer clipboard."
+        : `${action === "Cut" ? "Cut" : "Copied"} selected text to answer clipboard.`,
+    );
   }
   if (g.kind === "speak") return <>{q.chart && <Chart q={q} />}</>;
   if (g.kind === "write" || g.kind === "dictation")
