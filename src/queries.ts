@@ -9,6 +9,7 @@ import {
   saveAttempt,
   clearHistory,
   saveReviewReward,
+  subscribeToLocalChanges,
 } from "./storage";
 import { emptyProgress } from "./progress";
 
@@ -27,6 +28,15 @@ export function createLocalQueryClient() {
       },
       mutations: { networkMode: "always", retry: false, gcTime: 0 },
     },
+  });
+}
+export function subscribeToLocalQueryChanges(client: QueryClient) {
+  return subscribeToLocalChanges(() => {
+    void (async () => {
+      // An older in-flight read must not win over the external committed change.
+      await client.cancelQueries({ queryKey: ["local"] });
+      await client.invalidateQueries({ queryKey: ["local"] });
+    })();
   });
 }
 export const historyQuery = () =>

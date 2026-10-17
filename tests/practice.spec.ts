@@ -3949,3 +3949,86 @@ test("short desktop sidebar reveals every destination for wheel and keyboard nav
     await screenFits(page);
   }
 });
+
+test("retained views receive another view's saved sessions and XP without reloading", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/history");
+  await expect(
+    page.getByRole("button", { name: /^0 XP, level/ }),
+  ).toBeVisible();
+  const retainedDocument = await page.evaluate(() => performance.timeOrigin);
+  const writer = await context.newPage();
+  await writer.goto("/practice/type/reading-single");
+  await start(writer);
+  await context.setOffline(true);
+  try {
+    for (const round of [0, 1]) {
+      const expectedXP = 10;
+      if (round) {
+        await writer
+          .getByRole("link", { name: "PTE Studio home", exact: true })
+          .click();
+        await writer
+          .getByRole("link", { name: "Question types", exact: true })
+          .click();
+        await writer.getByRole("searchbox").fill("Single");
+        await writer
+          .getByRole("button", {
+            name: /^Multiple Choice, Single Answer Reading/,
+          })
+          .click();
+        await writer
+          .getByRole("button", { name: "Start practice", exact: true })
+          .click();
+        await start(writer);
+      }
+      await writer.getByRole("radio").first().check();
+      await writer.getByRole("button", { name: "Next", exact: true }).click();
+      await end(writer);
+      await expect(
+        writer.getByRole("button", {
+          name: new RegExp(`^${expectedXP} XP, level`),
+        }),
+      ).toBeVisible();
+      const savedPath = new URL(writer.url()).pathname;
+      await expect(page.locator(`a[href="${savedPath}"]`)).toBeVisible();
+      await expect(
+        page.getByRole("button", {
+          name: new RegExp(`^${expectedXP} XP, level`),
+        }),
+      ).toBeVisible();
+      expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+        retainedDocument,
+      );
+    }
+    await page
+      .getByRole("link", { name: "PTE Studio home", exact: true })
+      .click();
+    await expect(
+      page
+        .getByRole("region", { name: "Daily practice" })
+        .getByRole("progressbar"),
+    ).toHaveAttribute("aria-valuenow", "1");
+    await page.getByRole("button", { name: /^10 XP, level/ }).click();
+    await expect(
+      page.getByRole("region", { name: "Practice level", exact: true }),
+    ).toContainText("10");
+    await page
+      .getByRole("navigation", { name: "Main navigation", exact: true })
+      .getByRole("link", { name: "My practice", exact: true })
+      .click();
+    await page.locator(`a[href="${new URL(writer.url()).pathname}"]`).click();
+    await expect(page.locator(".review-screen")).toHaveAttribute(
+      "data-question-id",
+      "reading-single-01",
+    );
+    await expect(
+      page.getByRole("button", { name: "Next question", exact: true }),
+    ).toHaveCount(0);
+  } finally {
+    await context.setOffline(false);
+    await writer.close();
+  }
+});

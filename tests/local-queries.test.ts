@@ -205,12 +205,166 @@ test("offline review reward publishes its committed profile and cancels older re
     finish(saved.progress);
     await pending;
     assert.equal(result.xp, 5);
+    assert.match(
+      values.get("pte-studio-progress-change-v1")!,
+      /^[0-9a-f-]{36}$/,
+    );
     assert.equal(
       client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp,
       saved.progress.xp + 5,
     );
+    const retry = mutation.getCurrentResult().variables!;
+    const firstSignal = values.get("pte-studio-progress-change-v1");
+    assert.equal((await mutation.mutate(retry)).xp, 0);
+    assert.equal(values.get("pte-studio-progress-change-v1"), firstSignal);
+    const setItem = localStorage.setItem;
+    localStorage.setItem = () => {
+      throw new Error("Controlled unavailable marker storage");
+    };
+    try {
+      const next = await mutation.mutate({
+        ...retry,
+        syllableIndex: 1,
+        result: {
+          ...retry.result,
+          syllables: retry.result.syllables.map((s) => ({
+            ...s,
+            syllableIndex: 1,
+          })),
+        },
+      });
+      assert.equal(next.xp, 5);
+      assert.equal((await loadProgress()).xp, saved.progress.xp + 10);
+      assert.equal(
+        client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp,
+        saved.progress.xp + 10,
+      );
+    } finally {
+      localStorage.setItem = setItem;
+    }
     mutation.reset();
   } finally {
     client.clear();
+  }
+});
+
+test("external local changes refresh active offline history/progress and cancel stale reads", async () => {
+  const { QueryObserver } = await import("@tanstack/react-query");
+  const { subscribeToLocalQueryChanges } = await import("../src/queries");
+  const events = new EventTarget();
+  Object.defineProperty(globalThis, "window", {
+    value: events,
+    configurable: true,
+  });
+  const changed = (key: string | null, storageArea: unknown = localStorage) =>
+    events.dispatchEvent(
+      Object.assign(new Event("storage"), { key, storageArea }),
+    );
+  const waitUntil = async (check: () => boolean) => {
+    for (let i = 0; i < 100 && !check(); i++)
+      await new Promise((resolve) => setImmediate(resolve));
+    assert.ok(check(), "external committed snapshots should become visible");
+  };
+  await clearHistory();
+  const client = createLocalQueryClient();
+  const history = new QueryObserver(client, historyQuery());
+  const progress = new QueryObserver(client, progressQuery());
+  const offHistory = history.subscribe(() => {});
+  const offProgress = progress.subscribe(() => {});
+  const unsubscribe = subscribeToLocalQueryChanges(client);
+  onlineManager.setOnline(false);
+  try {
+    await client.fetchQuery(historyQuery());
+    await client.fetchQuery(progressQuery());
+    let finishHistory!: (value: ReturnType<typeof readHistory>) => void;
+    let finishProgress!: (
+      value: Awaited<ReturnType<typeof loadProgress>>,
+    ) => void;
+    let historyCalls = 0;
+    let progressCalls = 0;
+    const staleHistory = client
+      .fetchQuery({
+        ...historyQuery(),
+        queryFn: () =>
+          ++historyCalls === 1
+            ? new Promise<ReturnType<typeof readHistory>>((resolve) => {
+                finishHistory = resolve;
+              })
+            : readHistory(),
+      })
+      .catch(() => {});
+    const staleProgress = client
+      .fetchQuery({
+        ...progressQuery(),
+        queryFn: () =>
+          ++progressCalls === 1
+            ? new Promise<Awaited<ReturnType<typeof loadProgress>>>(
+                (resolve) => {
+                  finishProgress = resolve;
+                },
+              )
+            : loadProgress(),
+      })
+      .catch(() => {});
+    const saved = await saveAttempt(attempt("external"));
+    changed("pte-studio-history-v1");
+    await waitUntil(
+      () =>
+        client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp ===
+        10,
+    );
+    finishHistory([]);
+    finishProgress({ ...saved.progress, xp: 0 });
+    await Promise.all([staleHistory, staleProgress]);
+    assert.equal(
+      client.getQueryData<typeof saved.history>(localKeys.history)?.[0].id,
+      "external",
+    );
+    assert.equal(
+      client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp,
+      10,
+    );
+
+    // XP-only review commits have their own opaque signal, never response data.
+    const second = attempt("external-next");
+    second.questionIds = ["reading-single-02"];
+    second.answers = { "reading-single-02": { values: ["0"] } };
+    await saveAttempt(second);
+    changed("unrelated");
+    changed("pte-studio-history-v1", {}); // sessionStorage/other storage is ignored.
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(
+      client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp,
+      10,
+    );
+    changed("pte-studio-progress-change-v1");
+    await waitUntil(
+      () =>
+        client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp ===
+        20,
+    );
+
+    await clearHistory();
+    changed("pte-studio-history-v1");
+    await waitUntil(
+      () =>
+        client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp ===
+        0,
+    );
+    assert.deepEqual(client.getQueryData(localKeys.history), []);
+    await saveAttempt(attempt("after-unsubscribe"));
+    unsubscribe();
+    changed(null);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(
+      client.getQueryData<typeof saved.progress>(localKeys.progress)?.xp,
+      0,
+    );
+  } finally {
+    unsubscribe();
+    offHistory();
+    offProgress();
+    client.clear();
+    Reflect.deleteProperty(globalThis, "window");
   }
 });

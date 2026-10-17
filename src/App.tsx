@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { historyQuery, progressQuery, saveAttemptMutation } from "./queries";
+import {
+  historyQuery,
+  progressQuery,
+  saveAttemptMutation,
+  subscribeToLocalQueryChanges,
+} from "./queries";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { screenPath, useScreen, isScreenId, type ScreenId } from "./routing";
 import { AudioPlayer } from "./components/AudioPlayer";
@@ -228,6 +233,7 @@ export default function App() {
     window.dispatchEvent(new Event("pte-workspace-ready"));
   }, []);
   const client = useQueryClient();
+  useEffect(() => subscribeToLocalQueryChanges(client), [client]);
   const progressState = useQuery(progressQuery());
   const progress = progressState.data ?? emptyProgress();
   const historyState = useQuery(historyQuery());
