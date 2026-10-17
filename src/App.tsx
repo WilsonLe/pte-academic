@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { historyQuery, progressQuery, saveAttemptMutation } from "./queries";
+import {
+  historyQuery,
+  progressQuery,
+  saveAttemptMutation,
+  subscribeToLocalQueryChanges,
+} from "./queries";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { screenPath, useScreen, isScreenId, type ScreenId } from "./routing";
 import { AudioPlayer } from "./components/AudioPlayer";
@@ -49,7 +54,7 @@ import {
 } from "./LearningScreens";
 import { ReadingPages } from "./Pages";
 import { type PracticePlan, type Result } from "./Runner";
-import { PracticeSession } from "./PracticeSession";
+import { PracticeSession, usePracticePlan } from "./PracticeSession";
 import { loadAttempt } from "./storage";
 import { usePwa } from "./pwa";
 import { useViewportLock } from "./useViewportLock";
@@ -228,6 +233,7 @@ export default function App() {
     window.dispatchEvent(new Event("pte-workspace-ready"));
   }, []);
   const client = useQueryClient();
+  useEffect(() => subscribeToLocalQueryChanges(client), [client]);
   const progressState = useQuery(progressQuery());
   const progress = progressState.data ?? emptyProgress();
   const historyState = useQuery(historyQuery());
@@ -415,10 +421,13 @@ export default function App() {
     ? "Review"
     : currentGuide?.title ||
       (hubView === "badges" ? "Achievements" : titles[active]);
-  const practicePlan =
+  const practiceIdentity =
     page === "practice" && progressReady
-      ? makePlan(route.mode, route.practiceId)
-      : null;
+      ? `${route.mode}/${route.practiceId}`
+      : "";
+  const practicePlan = usePracticePlan(practiceIdentity, () =>
+    practiceIdentity ? makePlan(route.mode, route.practiceId) : null,
+  );
   if (practicePlan?.questions.length)
     return (
       <PracticeSession

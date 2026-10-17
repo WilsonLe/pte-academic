@@ -21,6 +21,23 @@ import {
   type Reward,
 } from "./progress";
 const indexKey = "pte-studio-history-v1";
+const progressChangeKey = "pte-studio-progress-change-v1";
+
+// Other app views share persistence, but each has its own QueryClient.
+export function subscribeToLocalChanges(onChange: () => void) {
+  const onStorage = (event: StorageEvent) => {
+    if (
+      (event.key === indexKey ||
+        event.key === progressChangeKey ||
+        event.key === null) &&
+      event.storageArea === localStorage
+    )
+      onChange();
+  };
+  window.addEventListener("storage", onStorage);
+  return () => window.removeEventListener("storage", onStorage);
+}
+
 const answerSchema = z.object({
   text: z.string().optional(),
   values: z.array(z.string()).optional(),
@@ -284,6 +301,13 @@ export function saveReviewReward(input: {
         if (valid)
           await tx.objectStore("progress").put(awarded.progress, "profile");
         await tx.done;
+        if (awarded.xp > 0) {
+          // XP-only retries do not change the history index. Signal after commit,
+          // without copying learner data or failing an already committed reward.
+          try {
+            localStorage.setItem(progressChangeKey, crypto.randomUUID());
+          } catch {}
+        }
         return { ...awarded, retained: !!saved };
       } finally {
         db.close();
