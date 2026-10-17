@@ -1004,6 +1004,11 @@ for (const title of [
     await expect(page.getByRole("main")).toContainText(
       /Academic.*knowledge.*matters/s,
     );
+    // Review renders before the asynchronous save commits. Reload only after
+    // its existing success receipt, then verify the persisted clipboard edit.
+    await expect(
+      page.getByText("Practice saved", { exact: true }),
+    ).toBeVisible();
     await page.reload();
     await expect(page.getByRole("main")).toContainText(
       /Academic.*knowledge.*matters/s,
