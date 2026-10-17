@@ -48,10 +48,11 @@ export function Catalogue({
   index: number;
   onIndex: (index: number) => void;
 }) {
+  const searchTerm = search.trim().toLowerCase();
   const filtered = guides.filter(
     (g) =>
       selectedSections.includes(g.section) &&
-      `${g.title} ${g.summary}`.toLowerCase().includes(search.toLowerCase()),
+      `${g.title} ${g.summary}`.toLowerCase().includes(searchTerm),
   );
   return (
     <CardsList
