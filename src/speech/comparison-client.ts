@@ -3,6 +3,7 @@ import {
   comparisonRuntimeFiles,
 } from "./comparison-runtime";
 import { decodeRecording } from "./audio";
+import { hasRecordedMicrophoneActivity } from "../microphone-activity";
 import {
   prepareComparisonModel,
   modelBase,
@@ -59,6 +60,10 @@ export function scoreRecording(
       )
         throw new Error(
           `Speech feedback supports recordings up to ${recognize ? RECOGNITION_MAX_SECONDS : COMPARISON_MAX_SECONDS} seconds.`,
+        );
+      if (target && !hasRecordedMicrophoneActivity(audio))
+        throw new Error(
+          "That recording was too quiet. Speak closer to the microphone and try again. No XP awarded.",
         );
       if (target?.word) onProgress("Preparing syllable reference audio…");
       const references = target?.word

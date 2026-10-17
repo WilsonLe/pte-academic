@@ -292,7 +292,10 @@ test("audio-only word recognition is prompt-independent across four accents and 
     page.getByRole("button", { name: /^Practise word 1:/ }),
   ).toBeVisible({ timeout: 90000 });
   await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
-  const sourceButton = page.getByRole("button", { name: "Source", exact: true });
+  const sourceButton = page.getByRole("button", {
+    name: "Source",
+    exact: true,
+  });
   await sourceButton.click();
   await expect(page.getByRole("dialog").getByRole("figure")).toBeVisible();
   await page.keyboard.press("Escape");
@@ -440,14 +443,21 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
       );
     await context.close();
     (window as any).__tracks = [];
+    (window as any).__quietRetry = true;
     const starts = new Map<string, () => void>();
     navigator.mediaDevices.getUserMedia = async () => {
       const ac = new AudioContext({ sampleRate: 48000 });
       await ac.resume();
       const destination = ac.createMediaStreamDestination(),
         source = ac.createBufferSource();
-      source.buffer = ac.createBuffer(1, samples.length, 16000);
-      source.buffer.copyToChannel(samples, 0);
+      const captureSamples = (window as any).__quietRetry
+        ? Float32Array.from(
+            { length: 16000 },
+            (_, i) => 0.002 * Math.sin((2 * Math.PI * 440 * i) / 16000),
+          )
+        : samples;
+      source.buffer = ac.createBuffer(1, captureSamples.length, 16000);
+      source.buffer.copyToChannel(captureSamples, 0);
       source.connect(destination);
       starts.set(destination.stream.id, () =>
         source.start(ac.currentTime + 0.1),
@@ -475,6 +485,27 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
   });
   await page.getByRole("button", { name: /^Practise word 1:/ }).click();
   const dialog = page.getByRole("dialog");
+  // Nonzero room-level input must not count as completed audible practice.
+  await dialog
+    .getByRole("button", { name: "Record syllable", exact: true })
+    .click();
+  await page.waitForTimeout(1200); // Capture the known quiet input through the native codec.
+  await dialog.getByRole("button", { name: "Stop and grade" }).click();
+  await expect(dialog.getByRole("alert")).toHaveText(
+    "That recording was too quiet. Speak closer to the microphone and try again. No XP awarded.",
+    { timeout: 60000 },
+  );
+  await expect(page.locator(".xp-chip")).toHaveAttribute(
+    "aria-label",
+    "0 XP, level 1. View progress",
+  );
+  await expect(
+    dialog.getByRole("button", { name: "Play Your new syllable" }),
+  ).toBeEnabled();
+  await expect(page.getByText("+5 XP for syllable practice")).toHaveCount(0);
+  await page.evaluate(() => {
+    (window as any).__quietRetry = false;
+  });
   await dialog
     .getByRole("button", { name: "Record syllable", exact: true })
     .click();
