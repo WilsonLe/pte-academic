@@ -57,7 +57,7 @@ Keep the trailing slash. Browser routing uses real paths such as `/history` and 
 
 The public app is hosted at **https://wilsonle.github.io/pte-academic/**. [GitHub Pages](.github/workflows/pages.yml) builds and deploys automatically on every push to `main`; it can also be run manually from Actions on `main`. Pull requests run the same production build without deploying. Repository Settings → Pages must use **GitHub Actions** as the publishing source. The workflow uses Node 22, `npm ci`, and `BASE_PATH=/pte-academic/ npm run build`, then uploads only `dist/`. Authoring credentials and learner data are never included. A failed build leaves the existing deployment available.
 
-Open the built site online once to cache the practice pack, then verify a reload without a connection before relying on offline practice. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
+Open the built site online once to cache the practice pack, then verify a reload without a connection before relying on offline practice. Browser storage may still be evicted. A new pack is offered for explicit reload so an active attempt is not interrupted. If another tab applies the update first, use the same action to reload this tab's app code when ready. Installation uses the browser's Install option or Share → Add to Home Screen on iOS.
 
 ## Content and audio management
 
