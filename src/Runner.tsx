@@ -1,5 +1,6 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { AudioPlayer, AudioStartButton } from "./components/AudioPlayer";
+import { hasMicrophoneActivity } from "./microphone-activity";
 import {
   Dialog,
   DialogContent,
@@ -544,10 +545,7 @@ export function Runner({
           monitor = setInterval(() => {
             if (r.state !== "recording") return;
             analyser.getFloatTimeDomainData(samples);
-            const rms = Math.sqrt(
-              samples.reduce((n, x) => n + x * x, 0) / samples.length,
-            );
-            if (rms > 0.012) lastVoice = Date.now();
+            if (hasMicrophoneActivity(samples)) lastVoice = Date.now();
             if (Date.now() - lastVoice >= 3000) {
               r.stop();
               setStoppedForSilence(true);
