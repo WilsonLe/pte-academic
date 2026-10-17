@@ -3539,3 +3539,101 @@ test("saved sessions expose section identity without changing history or review"
       .click();
   }
 });
+
+test("short desktop sidebar reveals every destination for wheel and keyboard navigation", async ({
+  page,
+}) => {
+  await page.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const names = [
+    "Practice",
+    "Question types",
+    "Section practice",
+    "Mock tests",
+    "Learn about PTE",
+    "My practice",
+  ];
+  for (const size of [
+    { width: 844, height: 390 },
+    { width: 768, height: 480 },
+    { width: 1280, height: 400 },
+    { width: 1280, height: 720 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/types/summarize-written-text");
+    const sidebar = page.locator(".sidebar");
+    const nav = page.getByRole("navigation", {
+      name: "Main navigation",
+      exact: true,
+    });
+    await expect(nav.getByRole("link")).toHaveCount(6);
+    await sidebar.hover({ position: { x: 48, y: size.height / 2 } });
+    await page.mouse.wheel(0, 600);
+    if (size.height < 520)
+      await expect
+        .poll(() => sidebar.evaluate((e) => e.scrollTop))
+        .toBeGreaterThan(0);
+    else {
+      expect(await sidebar.evaluate((e) => e.scrollTop)).toBe(0);
+      expect(
+        await sidebar.evaluate((e) => e.scrollHeight <= e.clientHeight),
+      ).toBe(true);
+    }
+    for (const [name, path] of [
+      ["My practice", "/history"],
+      ["Learn about PTE", "/guide"],
+    ]) {
+      const link = nav.getByRole("link", { name, exact: true });
+      const rect = await link.boundingBox();
+      expect(rect!.y).toBeGreaterThanOrEqual(0);
+      expect(rect!.y + rect!.height).toBeLessThanOrEqual(size.height);
+      await link.click();
+      await expect(page).toHaveURL(path);
+    }
+    await sidebar.hover({ position: { x: 48, y: size.height / 2 } });
+    await page.mouse.wheel(0, -600);
+    await expect.poll(() => sidebar.evaluate((e) => e.scrollTop)).toBe(0);
+    await sidebar
+      .getByRole("link", { name: "PTE Studio home", exact: true })
+      .press("Tab");
+    for (let i = 0; i < names.length; i++) {
+      const link = nav.getByRole("link", { name: names[i], exact: true });
+      await expect(link).toBeFocused();
+      await expect
+        .poll(async () => {
+          const r = await link.boundingBox();
+          return r!.y >= 0 && r!.y + r!.height <= size.height;
+        })
+        .toBe(true);
+      expect((await link.boundingBox())!.height).toBe(56);
+      expect(
+        await page
+          .locator(".topbar")
+          .evaluate((e) => e.getBoundingClientRect().top),
+      ).toBe(0);
+      await screenFits(page);
+      if (i < names.length - 1) await page.keyboard.press("Tab");
+    }
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL("/history");
+  }
+  for (const size of [
+    { width: 390, height: 480 },
+    { width: 767, height: 480 },
+  ]) {
+    await page.setViewportSize(size);
+    await page.goto("/types/summarize-written-text");
+    await expect(page.locator(".sidebar")).toBeHidden();
+    const mobile = page.getByRole("navigation", {
+      name: "Mobile navigation",
+      exact: true,
+    });
+    await expect(mobile.getByRole("link")).toHaveCount(3);
+    for (const link of await mobile.getByRole("link").all()) {
+      const r = await link.boundingBox();
+      expect(r!.y).toBeGreaterThanOrEqual(0);
+      expect(r!.y + r!.height).toBeLessThanOrEqual(size.height);
+    }
+    await screenFits(page);
+  }
+});

@@ -32,6 +32,12 @@ body {
 .sidebar {
   width: 96px;
   padding: 24px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 24px;
+}
+.sidebar > * {
+  flex-shrink: 0;
 }
 .workspace {
   margin-left: 96px;
