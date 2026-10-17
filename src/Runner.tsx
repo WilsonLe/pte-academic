@@ -345,6 +345,7 @@ export function Runner({
     plan.minutes[g.section] * 60,
   );
   const [message, setMessage] = useState("");
+  const [stoppedForSilence, setStoppedForSilence] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const audio = useRef<HTMLAudioElement | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -430,6 +431,7 @@ export function Runner({
     let localCancelled = false;
     let monitor: ReturnType<typeof setInterval> | undefined;
     setMessage("");
+    setStoppedForSilence(false);
     setAudioProgress(0);
     writingEnd.current = 0;
     if (previousSection.current !== g.section) {
@@ -535,6 +537,7 @@ export function Runner({
             if (rms > 0.012) lastVoice = Date.now();
             if (Date.now() - lastVoice >= 3000) {
               r.stop();
+              setStoppedForSilence(true);
               changePhase("complete");
             }
           }, 100);
@@ -647,7 +650,9 @@ export function Runner({
               ? "Recording"
               : "In progress"
             : phase === "complete"
-              ? "Completed"
+              ? stoppedForSilence
+                ? "Recording stopped after 3 seconds of silence."
+                : "Completed"
               : phase === "blocked"
                 ? "Audio paused"
                 : "Unavailable";
