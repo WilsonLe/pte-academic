@@ -2139,6 +2139,71 @@ test("catalogue reload restores search, sections and the current page", async ({
   await expect(pager.getByRole("status")).toHaveText("2 / 3");
 });
 
+test("catalogue matches padded searches without changing typed text or sections", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/types");
+  const search = page.getByRole("searchbox");
+  const filter = (name: string) =>
+    page.getByRole("button", { name: `Filter: ${name}`, exact: true });
+  const dropdown = page.getByRole("button", {
+    name: /^Fill in the Blanks \(Dropdown\) Reading(?: 5)?$/,
+  });
+  const bank = page.getByRole("button", {
+    name: /^Fill in the Blanks \(Drag and Drop\) Reading(?: 4)?$/,
+  });
+  const pager = page.getByRole("navigation", {
+    name: "question type pages",
+    exact: true,
+  });
+  await filter("Speaking & Writing").click();
+  await filter("Listening").click();
+  await search.fill("  BlAnKs  ");
+  await expect(dropdown).toBeVisible();
+  await expect(bank).toBeVisible();
+  await expect(pager).toHaveCount(0);
+  await dropdown.click();
+  await page
+    .getByRole("button", { name: "All question types", exact: true })
+    .click();
+  await page.reload();
+  await expect(search).toHaveValue("  BlAnKs  ");
+  await expect(dropdown).toBeVisible();
+  await expect(bank).toBeVisible();
+  await expect(filter("Reading")).toHaveAttribute("aria-pressed", "true");
+  await expect(filter("Listening")).toHaveAttribute("aria-pressed", "false");
+  await expect(filter("Speaking & Writing")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+  await search.fill(" \t ");
+  await expect(dropdown).toBeVisible();
+  await expect(pager.getByRole("status")).toHaveText("1 / 2");
+  await pager.getByRole("button", { name: "Next question type pages" }).click();
+  await expect(pager.getByRole("status")).toHaveText("2 / 2");
+  await search.fill("  blanks  ");
+  await expect(dropdown).toBeVisible();
+  await expect(bank).toBeVisible();
+  await expect(pager).toHaveCount(0);
+  await filter("Reading").click();
+  await expect(
+    page.getByText("No question types found.", { exact: true }),
+  ).toBeVisible();
+  await filter("Reading").click();
+  await expect(dropdown).toBeVisible();
+  await search.fill("  no matching question type  ");
+  await expect(
+    page.getByText("No question types found.", { exact: true }),
+  ).toBeVisible();
+  await expect(pager).toHaveCount(0);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await search.fill("\u00a0Blanks\u00a0");
+  await expect(dropdown).toBeVisible();
+  await expect(bank).toBeVisible();
+  await expect(search).toHaveValue("\u00a0Blanks\u00a0");
+});
+
 test("invalid catalogue snapshots fall back to the complete catalogue", async ({
   page,
 }) => {
