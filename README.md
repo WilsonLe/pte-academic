@@ -119,7 +119,7 @@ The app stays within a fixed device viewport without document scrolling. App-con
 
 Screen destinations include `/progress`, `/achievements`, `/types/:guideID`, `/sections/:sectionID`, `/guide/:topicID`, `/mocks`, `/history/:sessionID` and `/practice/:mode/:practiceID`. The active runner adds `/run`; refresh or forward navigation without a live attempt returns to preflight. Routes contain IDs only, never responses or transcripts.
 
-`src/components/AudioPlayer.tsx` owns shared local playback with play/pause, keyboard seeking, time, errors and retry. It uses the existing shadcn Button and shared practice surface/control tokens in `src/screens.css`. Only one review/preflight player plays at a time. The timed runner keeps its one-play lifecycle and uses the shared start button when browser audio needs a gesture. Native controls are not exposed.
+`src/components/AudioPlayer.tsx` owns shared local playback with play/pause, keyboard seeking, time, errors and retry. It uses the existing shadcn Button and shared practice surface/control tokens in `src/screens.css`. Only one review/preflight player plays at a time. The headphone check uses a separate three-second tone sequence, generated with `python3 scripts/generate-headphone-check.py`, so question recordings stay reserved for the timed attempt. The timed runner keeps its one-play lifecycle and uses the shared start button when browser audio needs a gesture. Native controls are not exposed.
 
 The [practice cleanup coverage audit](docs/ui-cleanup-coverage.md) inventories every question type, section, mock and shared screen owner, including retained controls and validation limits.
 

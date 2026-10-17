@@ -46,6 +46,32 @@ test("subdirectory static build retains manifest, audio and offline navigation",
   expect(audio.status).toBe(206);
   expect(audio.length).toBe(128);
   expect(audio.range).toMatch(/^bytes 0-127\//);
+  await page.goto("/pte-academic/practice/type/summarize-spoken-text");
+  const headphone = page.getByRole("group", {
+    name: "Headphone check",
+    exact: true,
+  });
+  await expect(headphone.locator("audio")).toHaveAttribute(
+    "src",
+    "/pte-academic/audio/headphone-check.wav",
+  );
+  await headphone
+    .getByRole("button", { name: "Play Headphone check", exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      headphone
+        .locator("audio")
+        .evaluate((node: HTMLAudioElement) => node.currentTime),
+    )
+    .toBeGreaterThan(0);
+  await expect
+    .poll(() =>
+      headphone
+        .locator("audio")
+        .evaluate((node: HTMLAudioElement) => node.duration),
+    )
+    .toBe(3);
 });
 
 test("static 404 shell supports direct history routes without rewrites", async ({
@@ -66,6 +92,7 @@ test("static 404 shell supports direct history routes without rewrites", async (
     ".json": "application/json",
     ".webmanifest": "application/manifest+json",
     ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
     ".png": "image/png",
     ".svg": "image/svg+xml",
     ".woff2": "font/woff2",
