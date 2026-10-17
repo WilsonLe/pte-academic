@@ -151,9 +151,10 @@ export function Preflight({
                 render={
                   <Button variant="ghost" size="sm" className="setup-count" />
                 }
-                aria-label={`Preview ${plan.questions.length} daily practice questions`}
+                aria-label={`Preview ${plan.questions.length} daily practice ${plan.questions.length === 1 ? "question" : "questions"}`}
               >
-                {plan.questions.length} questions{" "}
+                {plan.questions.length}{" "}
+                {plan.questions.length === 1 ? "question" : "questions"}{" "}
                 <ChevronDown aria-hidden="true" className="size-3" />
               </DialogTrigger>
               <DialogContent className="practice-ui quest-preview">
@@ -182,7 +183,8 @@ export function Preflight({
             </Dialog>
           ) : (
             <span className="setup-count">
-              {plan.questions.length} questions
+              {plan.questions.length}{" "}
+              {plan.questions.length === 1 ? "question" : "questions"}
             </span>
           )}
         </header>
