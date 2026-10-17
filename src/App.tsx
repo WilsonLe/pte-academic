@@ -684,9 +684,10 @@ export default function App() {
                       </p>
                       <p className="mt-4 text-xs">
                         Synthetic prompts may be shorter than live test prompts.
-                        Read Aloud and Repeat Sentence have local syllable
-                        comparison; open responses use self-review. Exact
-                        live-test UI parity is unverified.
+                        Speaking recordings have on-device word recognition and
+                        experimental syllable comparison; judge content and
+                        fluency yourself. Extended writing needs self-review.
+                        Exact live-test UI parity is unverified.
                       </p>
                     </More>
                   </div>

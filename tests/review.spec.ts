@@ -83,6 +83,19 @@ async function seed(page: Page) {
     id: "review-mock",
     questionIds: mocks[0].questionIds,
   });
+  const highlights = questions.filter((q) => kind(q) === "highlight");
+  attempts.push({
+    ...attempts[2],
+    id: "review-highlight",
+    label: "Word-selection review",
+    questionIds: highlights.map((q) => q.id),
+    answers: Object.fromEntries(
+      highlights.map((q, i) => [
+        q.id,
+        { values: i === 0 ? ["0", ...q.answers!] : ["0"] },
+      ]),
+    ),
+  });
   for (const section of ["speaking", "reading", "listening"])
     attempts.push({
       ...attempts[1],
@@ -252,7 +265,13 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
             for (const value of q.answers!)
               expect(response).toContain(compact(q.options![Number(value)]));
           } else {
-            expect(response).toContain(compact(q.explanation));
+            if (kind(q) === "highlight")
+              expect(response).toContain(
+                state === "correct"
+                  ? "correctly selected"
+                  : "should remain unselected",
+              );
+            else expect(response).toContain(compact(q.explanation));
             if (["single", "multi"].includes(kind(q)))
               for (const option of q.options!)
                 expect(response).toContain(compact(option));
@@ -563,5 +582,60 @@ test("all seven speaking types retain acoustic word selection and disclose missi
       await page
         .getByRole("button", { name: "Next review questions", exact: true })
         .click();
+  }
+});
+
+test("highlight selections explain unchanged, selected and missed words on desktop and mobile", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await seed(page);
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/history/review-highlight");
+    const unchanged = page.getByRole("button", {
+      name: "Word 1: Selected · Incorrect. Explain",
+      exact: true,
+    });
+    await expect(unchanged.locator(".comparison-line")).toHaveCount(1);
+    await expect(unchanged.locator(".diff-neutral")).toHaveText("Before");
+    await unchanged.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "“Before” matches the recording and should remain unselected.",
+    );
+    await expect(page.getByRole("dialog")).not.toContainText("quickly");
+    await page.keyboard.press("Escape");
+    await expect(unchanged).toBeFocused();
+    const correct = page.getByRole("button", {
+      name: "Word 10: Selected · Correct. Explain",
+      exact: true,
+    });
+    await expect(correct).toContainText("quickly.");
+    await expect(correct).toContainText("carefully.");
+    await correct.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "You correctly selected",
+    );
+    await page.keyboard.press("Escape");
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    const missed = page.getByRole("button", {
+      name: "Word 26: Missed. Explain",
+      exact: true,
+    });
+    await expect(missed).toContainText("compulsory.");
+    await expect(missed).toContainText("voluntary.");
+    await missed.click();
+    await expect(page.getByRole("dialog")).toContainText("should be selected");
+    await page.keyboard.press("Escape");
+    await fits(page);
+    await page.reload();
+    await expect(unchanged).toBeVisible();
+    await expect(unchanged.locator(".comparison-line")).toHaveCount(1);
   }
 });

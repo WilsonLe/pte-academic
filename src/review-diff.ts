@@ -188,12 +188,15 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
           value,
           `Word ${i + 1}`,
           state,
-          changed
-            ? [bad(written[i]), good(heard[i])]
-            : [bad(written[i]), good(heard[i], "✓")],
+          changed ? [bad(written[i]), good(heard[i])] : [neutral(written[i])],
           [
-            ...rationale,
-            { text: `${state}. Written: ${written[i]} Heard: ${heard[i]}` },
+            {
+              text: changed
+                ? selected
+                  ? `You correctly selected “${written[i]}”: the displayed word differs from “${heard[i]}” in the recording.`
+                  : `The displayed word “${written[i]}” differs from “${heard[i]}” in the recording and should be selected.`
+                : `“${written[i]}” matches the recording and should remain unselected. Only select words that differ from what you hear.`,
+            },
           ],
         );
       });
