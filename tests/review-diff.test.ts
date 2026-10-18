@@ -2,6 +2,67 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { guides, questions, guideFor, normalize } from "../src/content";
 import { reviewItems, dictationDiff } from "../src/review-diff";
+import { questionBlocks } from "../src/review-content";
+
+test("source positions identify repeated words, numbered gaps, paragraphs and aligned dictation spans", () => {
+  const highlight = {
+    ...questions.find((q) => q.type === "highlight-incorrect")!,
+    text: "  echo echo echo wrong.  ",
+    audioText: "  echo echo echo right.  ",
+    answers: ["3"],
+  };
+  assert.deepEqual(
+    reviewItems(highlight, { values: ["2"] }).map((item) => item.source),
+    [
+      { block: 0, offset: 12 },
+      { block: 0, offset: 17 },
+    ],
+  );
+  for (const q of questions.filter((q) =>
+    ["dropdown", "bank", "blanks"].includes(guideFor(q).kind),
+  )) {
+    const text = questionBlocks(q)[0].text;
+    for (const [index, item] of reviewItems(q, {}).entries()) {
+      assert.deepEqual(
+        item.source,
+        { block: 0, offset: text.indexOf(`[${index + 1}]`) },
+        q.id,
+      );
+    }
+  }
+  for (const q of questions.filter((q) => guideFor(q).kind === "order")) {
+    const blocks = questionBlocks(q);
+    for (const [index, item] of reviewItems(q, {
+      values: [...q.answers!].reverse(),
+    }).entries()) {
+      assert.equal(
+        blocks[item.source!.block].label,
+        `Paragraph ${Number(q.answers![index]) + 1}`,
+      );
+    }
+  }
+  const model = "One two ! three four five six seven.";
+  const dictation = {
+    ...questions.find((q) => q.type === "write-dictation")!,
+    model,
+    audioText: model,
+  };
+  const spans = reviewItems(dictation, {
+    text: "extra extra One two three four five six seven.",
+  });
+  assert.deepEqual(spans[1].source, {
+    block: 0,
+    offset: model.indexOf("five"),
+  });
+  for (const q of questions.filter((q) =>
+    ["single", "multi", "write", "speak"].includes(guideFor(q).kind),
+  )) {
+    assert.ok(
+      reviewItems(q, {}).every((item) => item.source === undefined),
+      q.id,
+    );
+  }
+});
 
 test("all 22 question types build contextual feedback without mutating saved answers", () => {
   const types = new Set<string>();

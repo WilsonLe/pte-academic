@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { type Answer, type Question, guideFor, wordCount } from "./content";
 import { reviewItems, type ReviewItem } from "./review-diff";
-import { ReadingPages, type ReadingBlock } from "./Pages";
+import { ReadingPages, type ReadingBlock, type ReadingFocus } from "./Pages";
 import { CardsList } from "./components/CardsList";
 import { Button } from "./components/ui/button";
 import {
@@ -52,13 +52,21 @@ export function FriendlyFeedback({
   question: q,
   answer: a,
   audio,
+  onSourceFocus,
 }: {
   question: Question;
   answer: Answer;
   audio?: React.ReactNode;
+  onSourceFocus?: (focus?: ReadingFocus) => void;
 }) {
   const [selected, setSelected] = useState<ReviewItem>();
-  const items = reviewItems(q, a);
+  const items = useMemo(() => reviewItems(q, a), [q, a]);
+  const visibleItemsChanged = useCallback(
+    (visible: readonly ReviewItem[]) => {
+      onSourceFocus?.(visible[0]?.source);
+    },
+    [onSourceFocus],
+  );
   const writing = guideFor(q).kind === "write";
   return (
     <div className="friendly-feedback" data-kind={guideFor(q).kind}>
@@ -95,6 +103,7 @@ export function FriendlyFeedback({
         >
           <CardsList
             items={items}
+            onVisibleItemsChange={visibleItemsChanged}
             label="feedback pages"
             counterLabel="Feedback"
             className="comparison-list"
@@ -118,7 +127,8 @@ export function FriendlyFeedback({
                             className={`comparison-token diff-${part.tone}`}
                           />
                         }
-                        onClick={() =>
+                        onClick={() => {
+                          onSourceFocus?.(item.source);
                           setSelected({
                             ...item,
                             title: part.text,
@@ -134,8 +144,8 @@ export function FriendlyFeedback({
                               { label: "Recorded sentence", text: q.model! },
                               ...item.detail,
                             ],
-                          })
-                        }
+                          });
+                        }}
                         aria-label={`${item.title}: ${part.text}, ${part.tone === "good" ? "recorded word" : "typed word"}. Explain`}
                       >
                         <span aria-hidden="true">{part.mark}</span> {part.text}
@@ -149,7 +159,10 @@ export function FriendlyFeedback({
                   render={
                     <Button variant="ghost" className="comparison-card" />
                   }
-                  onClick={() => setSelected(item)}
+                  onClick={() => {
+                    onSourceFocus?.(item.source);
+                    setSelected(item);
+                  }}
                   aria-label={`${item.title}: ${item.state}. Explain`}
                 >
                   <span className="comparison-title">

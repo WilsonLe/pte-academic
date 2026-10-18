@@ -5,9 +5,9 @@ import {
   type Answer,
   type Question,
 } from "./content";
-import { exampleLabel } from "./review-content";
+import { exampleLabel, questionBlocks } from "./review-content";
 import { readingBoundary } from "./reading-boundary";
-import type { ReadingBlock } from "./Pages";
+import type { ReadingBlock, ReadingFocus } from "./Pages";
 
 export type DiffPart = {
   text: string;
@@ -21,6 +21,7 @@ export type ReviewItem = {
   parts: DiffPart[];
   detail: ReadingBlock[];
   words?: boolean;
+  source?: ReadingFocus;
 };
 const good = (text: string, mark = "+"): DiffPart => ({
   text,
@@ -114,6 +115,12 @@ export function dictationDiff(actual: string, expected: string): DiffPart[][] {
 export function reviewItems(q: Question, a: Answer): ReviewItem[] {
   const kind = guideFor(q).kind;
   const values = a.values || [];
+  const blocks = questionBlocks(q);
+  const sourceWords = () => [...(blocks[0]?.text || "").matchAll(/\S+/g)];
+  const wordFocus = (index: number): ReadingFocus | undefined => {
+    const offset = sourceWords()[index]?.index;
+    return offset === undefined ? undefined : { block: 0, offset };
+  };
   const summary = feedback(q, a).detail;
   const rationale: ReadingBlock[] = [
     { text: q.explanation },
@@ -127,7 +134,8 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
     state: string,
     parts: DiffPart[],
     detail = rationale,
-  ): ReviewItem => ({ id, title, state, parts, detail });
+    source?: ReadingFocus,
+  ): ReviewItem => ({ id, title, state, parts, detail, source });
   if (kind === "order")
     return q.answers!.map((value, i) => {
       const matches = values[i] === value;
@@ -143,6 +151,12 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
           ? [good(option(q, value), "✓")]
           : [bad(option(q, values[i])), good(option(q, value))],
         [{ text: q.orderExplanations![i] }],
+        {
+          block: blocks.findIndex(
+            (block) => block.label === `Paragraph ${Number(value) + 1}`,
+          ),
+          offset: 0,
+        },
       );
     });
   if (kind === "single" || kind === "multi")
@@ -188,6 +202,19 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
           ? [good(actual, "✓")]
           : [bad(actual || "Not answered"), good(expected)],
         [...rationale, { text: `Gap ${i + 1}: ${expected}` }],
+        q.text?.includes("{{}}")
+          ? {
+              block: 0,
+              offset: q.text
+                .split("{{}}")
+                .slice(0, i + 1)
+                .reduce(
+                  (offset, text, index) =>
+                    offset + text.length + (index ? `[${index}]`.length : 0),
+                  0,
+                ),
+            }
+          : undefined,
       );
     });
   if (kind === "highlight") {
@@ -218,13 +245,18 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
                 : `“${written[i]}” matches the recording and should remain unselected. Only select words that differ from what you hear.`,
             },
           ],
+          wordFocus(i),
         );
       });
   }
   if (kind === "dictation") {
     const diff = dictationDiff(a.text || "", q.model || "");
     const items: ReviewItem[] = [];
-    for (let i = 0; i < diff.length; i += 6)
+    const recordedWords = sourceWords().filter((word) => normalize(word[0]));
+    let recorded = 0;
+    for (let i = 0; i < diff.length; i += 6) {
+      const offset =
+        recordedWords[Math.min(recorded, recordedWords.length - 1)]?.index;
       items.push({
         ...make(
           String(i),
@@ -234,7 +266,13 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
           [{ text: feedback(q, a).detail }, ...rationale],
         ),
         words: true,
+        source: offset === undefined ? undefined : { block: 0, offset },
       });
+      recorded += diff
+        .slice(i, i + 6)
+        .flat()
+        .filter((part) => part.tone === "good").length;
+    }
     return items;
   }
   // Writing is one response. Let the rendered panel measure its reading pages;

@@ -12,6 +12,165 @@ const questions = questionData as Question[];
 const kind = (q: Question) => guideData.find((g) => g.id === q.type)!.kind;
 const compact = (s: string) => s.replace(/\s+/g, " ").trim();
 
+test("positional feedback keeps the relevant source visible without losing manual reading", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seed(page, ["highlight-incorrect-01", "highlight-incorrect-02"]);
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      const r = indexedDB.open("pte-studio", 2);
+      r.onsuccess = () => resolve(r.result);
+    });
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction("attempts", "readwrite"),
+        store = tx.objectStore("attempts");
+      const get = store.get("review-correct");
+      get.onsuccess = () => {
+        const saved = get.result;
+        saved.result.answers["highlight-incorrect-01"] = {
+          values: ["9", "23"],
+        };
+        saved.result.answers["highlight-incorrect-02"] = {
+          values: ["1", "25"],
+        };
+        store.put(saved, "review-correct");
+      };
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+    });
+  });
+  await page.goto("/history/review-correct");
+  const source = page.locator(".review-question-panel .reading-copy");
+  for (const [index, word] of ["remains.", "compulsory."].entries()) {
+    await page
+      .getByRole("button", { name: "Next feedback pages", exact: true })
+      .click();
+    await expect(source).toContainText(word);
+    // Source browsing remains independent until feedback navigation demands context.
+    await page
+      .getByRole("button", { name: "Next question pages", exact: true })
+      .click();
+    await expect(source).not.toContainText(word);
+    await page
+      .getByRole("button", { name: "Previous feedback pages", exact: true })
+      .click();
+    await expect(source).toContainText(index ? "council" : "quickly.");
+    await page
+      .getByRole("button", { name: "Next feedback pages", exact: true })
+      .click();
+    await page.setViewportSize({ width: 320, height: 568 });
+    await expect(source).toContainText(word);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(source).toContainText(word);
+    await page
+      .getByRole("button", { name: "Next question pages", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: new RegExp(`^Word ${index ? 26 : 24}:`) })
+      .click();
+    await page.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(source).toContainText(word);
+    if (!index)
+      await page
+        .getByRole("button", { name: "Next review questions", exact: true })
+        .click();
+  }
+});
+
+test("gap, paragraph and dictation feedback follow their source positions after measured splits", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (r) => r.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 320, height: 568 });
+  const ids = [
+    "reorder-paragraphs-01",
+    "reading-dropdown-01",
+    "reading-blanks-01",
+    "listening-blanks-01",
+    "write-dictation-01",
+  ];
+  await seed(page, ids);
+  await page.goto("/history/review-correct");
+  await page.addStyleTag({
+    content:
+      ".review-question-panel .reading-copy { font-size: 30px !important; line-height: 1.65 !important; }",
+  });
+  const source = page.locator(".review-question-panel .reading-copy");
+  for (const [index, id] of ids.entries()) {
+    const q = questions.find((q) => q.id === id)!;
+    await expect(page.locator(".review-screen")).toHaveAttribute(
+      "data-question-id",
+      id,
+    );
+    if (q.id === "reorder-paragraphs-01") {
+      await expect(source).toContainText(
+        `Paragraph ${Number(q.answers![0]) + 1}`,
+      );
+      await page
+        .getByRole("button", { name: "Next feedback pages", exact: true })
+        .click();
+      await expect(source).toContainText(
+        `Paragraph ${Number(q.answers![1]) + 1}`,
+      );
+    } else if (q.id === "write-dictation-01") {
+      await page
+        .getByRole("button", { name: "Next feedback pages", exact: true })
+        .click();
+      await expect(source).toContainText("the");
+    } else {
+      await page
+        .getByRole("button", { name: "Next feedback pages", exact: true })
+        .click();
+      await expect(source).toContainText("[2]");
+      await page
+        .getByRole("button", { name: "Previous feedback pages", exact: true })
+        .click();
+      await expect(source).toContainText("[1]");
+    }
+    // Explicit reading is still available; no context callback can trap its pager.
+    const previous = page.getByRole("button", {
+      name: "Previous question pages",
+      exact: true,
+    });
+    while (await previous.isEnabled()) await previous.click();
+    const parts: string[] = [];
+    for (let p = 0; p < 200; p++) {
+      await expect
+        .poll(() =>
+          source.evaluate((node) => node.scrollHeight <= node.clientHeight + 1),
+        )
+        .toBe(true);
+      parts.push(
+        (await source.locator(".reading-block p").allTextContents()).join(" "),
+      );
+      const next = page.getByRole("button", {
+        name: "Next question pages",
+        exact: true,
+      });
+      if (!(await next.isEnabled())) break;
+      await next.click();
+    }
+    let gap = 0;
+    const expected =
+      q.text?.replace(/\{\{\}\}/g, () => `[${++gap}]`) ??
+      q.options?.join(" ") ??
+      q.audioText!;
+    expect(compact(parts.join(" "))).toContain(compact(expected));
+    if (index < ids.length - 1)
+      await page
+        .getByRole("button", { name: "Next review questions", exact: true })
+        .click();
+  }
+});
+
 async function seed(page: Page, questionIds = questions.map((q) => q.id)) {
   await page.goto("/");
   const answers = (state: string) =>
@@ -1705,9 +1864,15 @@ test("saved comparisons distinguish positions, prioritize selections and anchor 
       exact: true,
     });
     await expect(position).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Original question", exact: true }),
-    ).toContainText("Paragraph 1");
+    // Position 1 uses original Paragraph 2; the source follows that comparison.
+    const original = page.getByRole("region", {
+      name: "Original question",
+      exact: true,
+    });
+    await expect(original).toContainText("Paragraph 2");
+    await expect(original).toContainText(
+      "Engineers first built a small model of the proposed bridge.",
+    );
     await position.click();
     await expect(page.getByRole("dialog")).toContainText(
       "position 2 in the answer",
