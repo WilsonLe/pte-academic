@@ -1231,3 +1231,178 @@ test("short comparison reviews keep answers visible after paging", async ({
     }
   }
 });
+
+test.describe("cross-view replayable audio", () => {
+  test.use({ serviceWorkers: "block" });
+  test("saved source switches views without advancing the displaced recording", async ({
+    page,
+    context,
+  }) => {
+    const { verifyAudioHandoff } = await import("./audio-fixture");
+    await verifyAudioHandoff(page, await context.newPage());
+  });
+});
+
+test.describe("replay control transport", () => {
+  test.use({ serviceWorkers: "block" });
+  test("headphone utility takes listening focus without stopping a timed Runner prompt", async ({
+    page,
+    context,
+  }) => {
+    const { openAudioReview, playPrompt, mediaState } =
+      await import("./audio-fixture");
+    await openAudioReview(page);
+    const peer = await context.newPage();
+    await peer.goto("/practice/type/summarize-spoken-text");
+    await playPrompt(page);
+    await peer
+      .getByRole("button", { name: "Play Headphone check", exact: true })
+      .click();
+    await expect.poll(async () => (await mediaState(page)).paused).toBe(true);
+    await peer
+      .getByRole("checkbox", { name: "I can hear the audio clearly" })
+      .check();
+    await peer
+      .getByRole("button", { name: "Begin practice", exact: true })
+      .click();
+    await expect(peer.getByText("Playing", { exact: true })).toBeVisible({
+      timeout: 10000,
+    });
+    const timed = peer.locator("audio");
+    await expect
+      .poll(() => timed.evaluate((node: HTMLAudioElement) => node.currentTime))
+      .toBeGreaterThan(0);
+    await playPrompt(page);
+    const before = await timed.evaluate(
+      (node: HTMLAudioElement) => node.currentTime,
+    );
+    await expect
+      .poll(() => timed.evaluate((node: HTMLAudioElement) => node.currentTime))
+      .toBeGreaterThan(before + 0.2);
+    expect(await timed.evaluate((node: HTMLAudioElement) => node.paused)).toBe(
+      false,
+    );
+  });
+
+  test("a peer cancels buffering playback without a false retry error", async ({
+    page,
+    context,
+  }) => {
+    const { openAudioReview, promptAudio } = await import("./audio-fixture");
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/audio/summarize-spoken-text-01.mp3", async (route) => {
+      await held;
+      await route.continue();
+    });
+    await openAudioReview(page);
+    const peer = await context.newPage();
+    await peer.goto("/practice/type/repeat-sentence");
+    try {
+      await page
+        .getByRole("button", { name: "Play Prompt recording", exact: true })
+        .click();
+      await expect(page.locator(".audio-status")).toHaveText("Loading audio…");
+      await peer
+        .getByRole("button", { name: "Play Headphone check", exact: true })
+        .click();
+      await expect
+        .poll(() =>
+          promptAudio(page).evaluate((node: HTMLAudioElement) => node.paused),
+        )
+        .toBe(true);
+      release();
+      await expect(page.locator(".audio-status")).toHaveCount(0);
+      await expect(page.locator(".audio-error")).toHaveCount(0);
+      await page
+        .getByRole("button", { name: "Play Prompt recording", exact: true })
+        .click();
+      await expect
+        .poll(() =>
+          promptAudio(page).evaluate(
+            (node: HTMLAudioElement) => node.currentTime,
+          ),
+        )
+        .toBeGreaterThan(0);
+    } finally {
+      release();
+    }
+  });
+
+  test("late, malformed and tied claims leave one current owner, and pagehide can recover", async ({
+    page,
+    context,
+  }) => {
+    await context.addInitScript(() => {
+      const Native = BroadcastChannel;
+      (window as any).__claims = [];
+      window.BroadcastChannel = class extends Native {
+        postMessage(value: unknown) {
+          (window as any).__claims.push(value);
+          super.postMessage(value);
+        }
+      };
+    });
+    const { openAudioReview, playPrompt, mediaState } =
+      await import("./audio-fixture");
+    await openAudioReview(page);
+    const peer = await context.newPage();
+    await peer.goto("/history/audio-handoff");
+    await playPrompt(page);
+    const old = await page.evaluate(() => (window as any).__claims.at(-1));
+    await playPrompt(peer);
+    await expect.poll(async () => (await mediaState(page)).paused).toBe(true);
+    await page.evaluate((old) => {
+      const signal = new BroadcastChannel("pte-replay:/");
+      signal.postMessage(old);
+      for (const value of [
+        null,
+        {},
+        { version: 1, at: Infinity, id: "x" },
+        { version: 2, at: Date.now() + 100, id: "x" },
+      ])
+        signal.postMessage(value);
+      signal.close();
+    }, old);
+    const time = (await mediaState(peer)).time;
+    await expect
+      .poll(async () => (await mediaState(peer)).time)
+      .toBeGreaterThan(time + 0.2);
+    // Deliver a same-time losing claim after the newer owner: tie-break is stable.
+    const current = await peer.evaluate(() => (window as any).__claims.at(-1));
+    await page.evaluate((claim) => {
+      const signal = new BroadcastChannel("pte-replay:/");
+      signal.postMessage({ ...claim, id: "!" });
+      signal.close();
+    }, current);
+    expect((await mediaState(peer)).paused).toBe(false);
+    await peer.evaluate(() =>
+      dispatchEvent(new PageTransitionEvent("pagehide", { persisted: true })),
+    );
+    await expect.poll(async () => (await mediaState(peer)).paused).toBe(true);
+    await playPrompt(peer);
+    await playPrompt(page);
+    await expect.poll(async () => (await mediaState(peer)).paused).toBe(true);
+    await expect(page.locator(".audio-error")).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Pause Prompt recording", exact: true })
+      .click();
+    await Promise.all([
+      page
+        .getByRole("button", { name: "Play Prompt recording", exact: true })
+        .click(),
+      peer
+        .getByRole("button", { name: "Play Prompt recording", exact: true })
+        .click(),
+    ]);
+    await expect
+      .poll(
+        async () =>
+          Number(!(await mediaState(page)).paused) +
+          Number(!(await mediaState(peer)).paused),
+      )
+      .toBe(1);
+  });
+});
