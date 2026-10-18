@@ -19,9 +19,16 @@ body {
 }
 
 .app-shell {
+  --workspace-footer-height: 0px;
   height: 100dvh;
   min-height: 0;
   overflow: hidden;
+}
+/* These receipts contain status only. Keep navigation clear and let pointer
+   input reach the workspace underneath, including while a receipt is visible. */
+.app-shell.practice-ui [data-sonner-toaster] {
+  bottom: calc(var(--workspace-footer-height) + 16px);
+  pointer-events: none;
 }
 .workspace {
   height: 100%;
@@ -765,9 +772,12 @@ body {
   }
 }
 @media (max-width: 767px) {
+  .app-shell {
+    --workspace-footer-height: calc(76px + env(safe-area-inset-bottom));
+  }
   .workspace {
     margin-left: 0;
-    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    padding-bottom: var(--workspace-footer-height);
   }
   .topbar {
     flex-basis: 68px;
@@ -802,7 +812,7 @@ body {
     min-width: 40px;
   }
   .mobile-nav {
-    height: calc(76px + env(safe-area-inset-bottom));
+    height: var(--workspace-footer-height);
     padding: 6px 4px max(6px, env(safe-area-inset-bottom));
   }
   .mobile-nav .nav-icon {
