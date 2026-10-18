@@ -3,6 +3,7 @@ import guideData from "../content/guides.json" with { type: "json" };
 import questions from "../content/questions.json" with { type: "json" };
 import sections from "../content/sections.json" with { type: "json" };
 import type { Guide } from "../src/content";
+import { receiptLeavesControlsAvailable } from "./toast-checks";
 async function openAchievements(page: Page) {
   const mobile = page.viewportSize()!.width < 768;
   await page
@@ -89,6 +90,98 @@ async function screenFits(page: Page) {
     );
   expect(bad).toEqual([]);
 }
+
+for (const size of [
+  { width: 1440, height: 900 },
+  { width: 768, height: 500 },
+  { width: 690, height: 764 },
+  { width: 390, height: 844 },
+  { width: 320, height: 400 },
+]) {
+  test(`save receipt leaves immediate navigation available at ${size.width}x${size.height}`, async ({
+    page,
+  }, info) => {
+    await page.setViewportSize(size);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await drill(page, "Write Essay");
+    await start(page);
+    await page
+      .getByRole("textbox", { name: "Your response", exact: true })
+      .fill(
+        "Universities can combine academic knowledge with practical projects.",
+      );
+    await page
+      .getByRole("button", { name: "Finish practice", exact: true })
+      .click();
+    const reviewUrl = page.url();
+    const receipt = page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: "Practice saved" });
+    await expect(receipt).toContainText("+10 XP");
+    await receiptLeavesControlsAvailable(page, receipt);
+    await page.screenshot({ path: info.outputPath("save-receipt.png") });
+    await page.keyboard.press("Alt+t");
+    await expect(page.locator("[data-sonner-toaster]")).toBeFocused();
+    await expect(
+      page.getByRole("region", { name: "Notifications alt+T", exact: true }),
+    ).toContainText("Practice saved");
+    const back = page.getByRole("button", { name: "My practice", exact: true });
+    await back.focus();
+    await expect(receipt).toBeVisible();
+    await back.click({ timeout: 1500 });
+    await expect(page).toHaveURL(/\/history$/);
+    await page.locator(`main a[href="${new URL(reviewUrl).pathname}"]`).click();
+    await page.reload();
+    await expect(page.getByRole("main")).toContainText(
+      "Universities can combine academic knowledge",
+    );
+    await expect(
+      page.getByRole("button", {
+        name: "10 XP, level 1. View progress",
+        exact: true,
+      }),
+    ).toBeVisible();
+  });
+}
+
+test("save failure receipt leaves the unsaved review and navigation usable", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await drill(page, "Write Essay");
+  await start(page);
+  await page
+    .getByRole("textbox", { name: "Your response", exact: true })
+    .fill("A response retained for review despite a controlled save failure.");
+  await page.evaluate(() => {
+    const nativePut = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function (...args) {
+      if (this.name === "attempts")
+        throw new DOMException("Controlled save failure", "QuotaExceededError");
+      return nativePut.apply(this, args);
+    };
+  });
+  await page
+    .getByRole("button", { name: "Finish practice", exact: true })
+    .click();
+  const receipt = page
+    .locator("[data-sonner-toast]")
+    .filter({ hasText: "Unable to save this attempt" });
+  await receiptLeavesControlsAvailable(page, receipt);
+  await expect(page.getByRole("main")).toContainText(
+    "A response retained for review",
+  );
+  await expect(
+    page.getByText("This attempt could not be saved. You can review it now.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "My practice", exact: true })
+    .click({ timeout: 1500 });
+  await expect(page).toHaveURL(/\/history$/);
+  await expect(page.locator("main a[href^='/history/']")).toHaveCount(0);
+});
 test("fixed viewport blocks app zoom and document scrolling without blocking input", async ({
   page,
 }) => {

@@ -775,7 +775,7 @@ export default function App() {
           </main>
         </div>
         <Nav active={navActive} mobile />
-        <Toaster theme="light" position="top-center" />
+        <Toaster theme="light" position="bottom-center" />
       </div>
     </TooltipProvider>
   );

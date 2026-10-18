@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, readdir, writeFile } from "node:fs/promises";
+import { receiptLeavesControlsAvailable } from "./toast-checks";
 import {
   COMPARISON_MODEL_SHA,
   pronunciationSchema,
@@ -292,6 +293,18 @@ test("audio-only word recognition is prompt-independent across four accents and 
     page.getByRole("button", { name: /^Practise word 1:/ }),
   ).toBeVisible({ timeout: 90000 });
   await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const savedReceipt = page.locator("[data-sonner-toast]").filter({
+    hasText: "Syllable feedback saved on this device",
+  });
+  await receiptLeavesControlsAvailable(page, savedReceipt);
+  await page
+    .getByRole("button", { name: "My practice", exact: true })
+    .click({ timeout: 1500 });
+  await expect(page).toHaveURL(new RegExp(`${base}history$`));
+  await page.locator(`main a[href="${base}history/independent-open"]`).click();
+  await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const sourceButton = page.getByRole("button", {
     name: "Source",
     exact: true,
@@ -516,6 +529,12 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
     { timeout: 60000 },
   );
   await expect(page.getByText("+5 XP for syllable practice")).toBeVisible();
+  await receiptLeavesControlsAvailable(
+    page,
+    page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: "+5 XP for syllable practice" }),
+  );
   expect(
     await page.evaluate(() =>
       (window as any).__tracks.every(
