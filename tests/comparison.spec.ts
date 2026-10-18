@@ -298,6 +298,17 @@ test("audio-only word recognition is prompt-independent across four accents and 
     hasText: "Syllable feedback saved on this device",
   });
   await receiptLeavesControlsAvailable(page, savedReceipt);
+  const speakingDetails = page.getByRole("button", {
+    name: "Details",
+    exact: true,
+  });
+  await speakingDetails.click({ timeout: 1500 });
+  await expect(
+    page.getByRole("dialog", { name: "Speaking details", exact: true }),
+  ).toBeVisible();
+  await expect(savedReceipt).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(speakingDetails).toBeFocused();
   await page
     .getByRole("button", { name: "My practice", exact: true })
     .click({ timeout: 1500 });
