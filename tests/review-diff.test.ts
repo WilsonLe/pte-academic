@@ -49,15 +49,17 @@ test("every reorder position explains its opening/conclusion and both available 
     assert.equal(partial[0].parts.length, 1);
     assert.equal(partial[0].state, "In place");
     q.orderExplanations!.forEach((reason, i) => {
+      assert.equal(partial[i].title, `Position ${i + 1}`);
+      assert.doesNotMatch(reason, /paragraph \d/i);
       if (i > 0)
         assert.ok(
-          reason.includes(`paragraph ${i}`),
+          reason.includes(`position ${i}`),
           `${q.id}: preceding ${i + 1}`,
         );
       else assert.match(reason, /first/);
       if (i < q.answers!.length - 1)
         assert.ok(
-          reason.includes(`paragraph ${i + 2}`),
+          reason.includes(`position ${i + 2}`),
           `${q.id}: following ${i + 1}`,
         );
       else assert.match(reason, /last/);
@@ -80,8 +82,8 @@ test("choice, gap and highlight diffs retain selected, missed and unanswered pos
   const multi = questions.find((q) => q.type === "reading-multiple")!;
   const choices = reviewItems(multi, { values: ["0", "2"] });
   assert.equal(choices[0].state, "Selected · Correct");
-  assert.equal(choices[1].state, "Missed");
-  assert.equal(choices[2].parts[0].tone, "bad");
+  assert.equal(choices[1].parts[0].tone, "bad");
+  assert.equal(choices[2].state, "Missed");
   assert.equal(choices[3].parts[0].tone, "neutral");
   for (const type of [
     "reading-dropdown",
@@ -103,6 +105,48 @@ test("choice, gap and highlight diffs retain selected, missed and unanswered pos
   assert.equal(words[1].state, "Missed");
   assert.equal(words[1].parts[0].text, "quickly.");
   assert.equal(words[1].parts[1].text, "carefully.");
+});
+
+test("every choice review starts with saved selections and retains option identities", () => {
+  for (const q of questions.filter((q) =>
+    ["single", "multi"].includes(guideFor(q).kind),
+  )) {
+    for (let selected = 0; selected < q.options!.length; selected++) {
+      const values = [String(selected)];
+      const items = reviewItems(q, { values });
+      assert.equal(items[0].id, String(selected), q.id);
+      assert.equal(
+        items[0].title,
+        `Option ${String.fromCharCode(65 + selected)}`,
+      );
+      assert.match(items[0].state, /^Selected/);
+      assert.deepEqual(
+        new Set(items.map((item) => item.id)),
+        new Set(q.options!.map((_, i) => String(i))),
+      );
+      for (const item of items)
+        assert.equal(item.parts[0].text, q.options![Number(item.id)]);
+      const unselected = items.slice(1);
+      const firstNeutral = unselected.findIndex(
+        (item) => item.state === "Not selected",
+      );
+      if (firstNeutral >= 0)
+        assert.ok(
+          unselected
+            .slice(firstNeutral)
+            .every((item) => item.state === "Not selected"),
+        );
+      assert.deepEqual(values, [String(selected)]);
+    }
+    const last = String(q.options!.length - 1);
+    const selected = [last, "0"];
+    assert.deepEqual(
+      reviewItems(q, { values: selected })
+        .slice(0, 2)
+        .map((item) => item.id),
+      ["0", last],
+    );
+  }
 });
 
 test("highlight feedback distinguishes false positives, correct selections and missed changes", () => {
@@ -184,6 +228,56 @@ test("dictation alignment preserves repeated words, extra/missing words and disp
     dictationDiff("( HELLO, world ! )", "Hello world.")
       .flat()
       .every((part) => part.mark === "✓"),
+  );
+});
+
+test("dictation keeps an exact common opening before repeated-word alignment ties", () => {
+  for (const [actual, expected, prefix] of [
+    [
+      "The students submitted the report.",
+      "The results will be published in the next edition of the journal.",
+      ["The"],
+    ],
+    [
+      "( THE results the report.",
+      "The results will be published in the next edition of the journal.",
+      ["( THE", "results"],
+    ],
+    ["one one wrong", "one one two one", ["one", "one"]],
+  ] as const) {
+    const diff = dictationDiff(actual, expected);
+    assert.deepEqual(
+      diff.slice(0, prefix.length),
+      prefix.map((text) => [{ text, tone: "good", mark: "✓" }]),
+    );
+    assert.equal(
+      diff
+        .flat()
+        .filter((p) => p.tone === "bad" || p.mark === "✓")
+        .map((p) => p.text)
+        .join(" "),
+      actual,
+    );
+    assert.equal(
+      normalize(
+        diff
+          .flat()
+          .filter((p) => p.tone === "good")
+          .map((p) => p.text)
+          .join(" "),
+      ),
+      normalize(expected),
+    );
+  }
+  assert.deepEqual(
+    dictationDiff(
+      "The evidence",
+      "Students are encouraged to attend the workshop on academic writing.",
+    )
+      .flat()
+      .filter((p) => p.mark === "✓")
+      .map((p) => p.text),
+    ["The"],
   );
 });
 
