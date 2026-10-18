@@ -47,6 +47,7 @@ body {
   flex-shrink: 0;
 }
 .workspace {
+  --workspace-gutter: 40px;
   margin-left: 96px;
 }
 .desktop-nav {
@@ -66,7 +67,7 @@ body {
   top: 0;
   flex: 0 0 80px;
   height: 80px;
-  padding: 0 32px;
+  padding: 0 var(--workspace-gutter);
 }
 .topbar h1 {
   font-size: 22px;
@@ -89,7 +90,7 @@ body {
   min-height: 0;
   width: 100%;
   max-width: 1600px;
-  padding: 28px 40px;
+  padding: 28px var(--workspace-gutter);
   display: flex;
 }
 .page-enter {
@@ -760,8 +761,11 @@ body {
   }
 }
 @media (max-width: 1000px) {
+  .workspace {
+    --workspace-gutter: 22px;
+  }
   .main-content {
-    padding: 22px;
+    padding: 22px var(--workspace-gutter);
   }
   .game-mode {
     padding: 16px;
@@ -776,13 +780,14 @@ body {
     --workspace-footer-height: calc(76px + env(safe-area-inset-bottom));
   }
   .workspace {
+    --workspace-gutter: 16px;
     margin-left: 0;
     padding-bottom: var(--workspace-footer-height);
   }
   .topbar {
     flex-basis: 68px;
     height: 68px;
-    padding: 0 16px;
+    padding: 0 var(--workspace-gutter);
     gap: 8px;
   }
   .topbar h1 {
@@ -831,7 +836,7 @@ body {
     border-radius: 17px;
   }
   .main-content {
-    padding: 18px 16px;
+    padding: 18px var(--workspace-gutter);
   }
   .home-screen,
   .screen-stack {

@@ -4710,3 +4710,58 @@ test.describe("touch word-bank actions", () => {
     ).toBeVisible();
   });
 });
+
+test("workspace header and content share their horizontal gutter on every route and breakpoint", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const receipts = [];
+  const routes = [
+    "/",
+    "/types",
+    "/sections",
+    "/mocks",
+    "/guide",
+    "/history",
+    "/progress",
+    "/achievements",
+    "/types/read-aloud",
+  ];
+  for (const width of [989, 1440, 1001, 1000, 901, 768, 767, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const path of routes) {
+      await page.goto(path);
+      await expect(page.locator(".topbar")).toBeVisible();
+      const edges = await page.evaluate(() => {
+        const header = document.querySelector(".topbar")!,
+          main = document.querySelector(".main-content")!;
+        const box = main.getBoundingClientRect(),
+          style = getComputedStyle(main);
+        return {
+          headerLeft: header.firstElementChild!.getBoundingClientRect().left,
+          headerRight: header.lastElementChild!.getBoundingClientRect().right,
+          contentLeft: box.left + parseFloat(style.paddingLeft),
+          contentRight: box.right - parseFloat(style.paddingRight),
+          documentWidth: document.documentElement.scrollWidth,
+        };
+      });
+      expect(
+        Math.abs(edges.headerLeft - edges.contentLeft),
+      ).toBeLessThanOrEqual(1);
+      expect(
+        Math.abs(edges.headerRight - edges.contentRight),
+      ).toBeLessThanOrEqual(1);
+      expect(edges.documentWidth).toBe(width);
+      receipts.push({ path, width, ...edges });
+    }
+  }
+  await (
+    await import("node:fs/promises")
+  ).writeFile(
+    info.outputPath("workspace-gutter-inventory.json"),
+    JSON.stringify(receipts, null, 2),
+  );
+});
