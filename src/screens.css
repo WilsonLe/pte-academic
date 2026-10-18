@@ -2288,21 +2288,34 @@ body {
     overscroll-behavior: contain;
   }
   .review-screen:has(.review-workspace) {
-    height: 100%;
-    min-height: 660px;
+    height: auto;
+    min-height: 100%;
   }
   .review-workspace {
-    min-height: 540px;
+    --review-question-min: 260px;
+    --review-feedback-min: 260px;
+    --review-feedback-share: 1fr;
+    /* A definite basis bounds measured pages while the parent includes its
+       actual heading height. Short windows scroll inside the fixed workspace. */
+    flex: 1 0 calc(var(--review-question-min) + var(--review-feedback-min) + 20px);
+    height: calc(var(--review-question-min) + var(--review-feedback-min) + 20px);
+    min-height: calc(var(--review-question-min) + var(--review-feedback-min) + 20px);
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(2, minmax(260px, 1fr));
+    grid-template-rows: minmax(var(--review-question-min), 1fr) minmax(var(--review-feedback-min), var(--review-feedback-share));
+  }
+  .review-workspace:has(.review-reading > .audio-player) {
+    --review-feedback-min: 360px;
+    --review-feedback-share: 1.3fr;
+  }
+  .review-workspace:has(.review-chart) {
+    --review-question-min: 300px;
+  }
+  .review-workspace:has(.question-query) {
+    --review-question-min: 320px;
   }
   .review-question-panel .reading-copy {
     padding: 16px;
     font-size: 16px;
-  }
-  .review-workspace:has(.review-chart) {
-    min-height: 580px;
-    grid-template-rows: minmax(300px, 1fr) minmax(260px, 1fr);
   }
 }
 @media (max-height: 650px) {

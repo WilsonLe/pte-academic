@@ -261,6 +261,25 @@ async function readSource(page: Page) {
           },
         )
         .toBe(true);
+      await expect
+        .poll(
+          () =>
+            copy.evaluate((node) => {
+              const style = getComputedStyle(node);
+              return (
+                (node.clientHeight -
+                  parseFloat(style.paddingTop) -
+                  parseFloat(style.paddingBottom)) /
+                parseFloat(style.lineHeight)
+              );
+            }),
+          {
+            message: `readable original question: ${await page.locator(".review-screen").getAttribute("data-question-id")} at ${page.viewportSize()!.width}`,
+          },
+        )
+        .toBeGreaterThanOrEqual(
+          (await copy.locator(".reading-block h3").count()) ? 4 : 3,
+        );
       parts.push(
         (await copy.locator(".reading-block p").allTextContents()).join(" "),
       );
@@ -310,15 +329,14 @@ async function fits(page: Page) {
   }
   const main = await page.locator("main").boundingBox();
   if (page.viewportSize()!.height >= 800) {
-    expect(screen!.y + screen!.height).toBeLessThanOrEqual(
-      main!.y + main!.height + 1,
-    );
     for (const name of ["Original question", "Response feedback"]) {
       const panel = await page
         .getByRole("region", { name, exact: true })
         .boundingBox();
-      expect(panel!.y).toBeGreaterThanOrEqual(main!.y - 1);
-      expect(panel!.y).toBeLessThan(main!.y + main!.height);
+      expect(
+        Math.min(panel!.y + panel!.height, main!.y + main!.height) -
+          Math.max(panel!.y, main!.y),
+      ).toBeGreaterThanOrEqual(100);
     }
   }
   if (screen!.y + screen!.height > main!.y + main!.height + 1)
@@ -615,6 +633,7 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
   for (const viewport of [
     { width: 1440, height: 900 },
     { width: 390, height: 844 },
+    { width: 320, height: 568 },
   ]) {
     await page.setViewportSize(viewport);
     for (const state of ["correct", "wrong"]) {
@@ -718,7 +737,7 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
       }
     }
   }
-  expect(visited).toHaveLength(260);
+  expect(visited).toHaveLength(390);
   await info.attach("all-type-feedback-coverage", {
     body: JSON.stringify(visited),
     contentType: "application/json",
@@ -1080,7 +1099,7 @@ test("playtest: all writing types share one paragraph-preserving response and di
           })),
         ).toEqual({ scrolls: true, overflow: "auto" });
       }
-      if (size.height >= 720) {
+      if (size.width > 900 && size.height >= 720) {
         expect(
           await page
             .locator("main")
@@ -1092,6 +1111,7 @@ test("playtest: all writing types share one paragraph-preserving response and di
           response.locator(".reading-block p").first(),
         ).toContainText(paragraphs[0]);
       }
+      await fits(page);
       expect(await readComparisons(page, false)).toBe(compact(text));
       const details = page.getByRole("button", {
         name: "Open response details",
@@ -1126,6 +1146,20 @@ test("playtest: all writing types share one paragraph-preserving response and di
   }
 });
 
+async function showFeedbackButton(page: Page, name: string) {
+  const target = page.getByRole("button", { name, exact: true });
+  for (let i = 0; i < 100; i++) {
+    if (await target.count()) return target;
+    const next = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    await expect(next).toBeEnabled();
+    await next.click();
+  }
+  throw new Error(`Feedback not reachable: ${name}`);
+}
+
 test("highlight selections explain unchanged, selected and missed words on desktop and mobile", async ({
   page,
   context,
@@ -1151,10 +1185,10 @@ test("highlight selections explain unchanged, selected and missed words on deskt
     await expect(page.getByRole("dialog")).not.toContainText("quickly");
     await page.keyboard.press("Escape");
     await expect(unchanged).toBeFocused();
-    const correct = page.getByRole("button", {
-      name: "Word 10: Selected · Correct. Explain",
-      exact: true,
-    });
+    const correct = await showFeedbackButton(
+      page,
+      "Word 10: Selected · Correct. Explain",
+    );
     await expect(correct).toContainText("quickly.");
     await expect(correct).toContainText("carefully.");
     await correct.click();
@@ -1165,10 +1199,7 @@ test("highlight selections explain unchanged, selected and missed words on deskt
     await page
       .getByRole("button", { name: "Next review questions", exact: true })
       .click();
-    const missed = page.getByRole("button", {
-      name: "Word 26: Missed. Explain",
-      exact: true,
-    });
+    const missed = await showFeedbackButton(page, "Word 26: Missed. Explain");
     await expect(missed).toContainText("compulsory.");
     await expect(missed).toContainText("voluntary.");
     await missed.click();
@@ -1309,7 +1340,8 @@ test("short comparison reviews keep answers visible after paging", async ({
           top: document.querySelector(".topbar")!.getBoundingClientRect().top,
         })),
       ).toEqual({ width: size.width, height: size.height, top: 0 });
-      if (size.height >= 720)
+      await fits(page);
+      if (size.width > 900 && size.height >= 720)
         expect(
           await page
             .locator("main")
@@ -1537,8 +1569,14 @@ test("stacked original question and feedback remain reachable at intermediate ph
     "write-essay-01",
   ];
   await seed(page, ids);
-  for (const height of [844, 740, 720, 700, 651, 650, 480]) {
-    await page.setViewportSize({ width: 390, height });
+  for (const viewport of [
+    ...[844, 740, 720, 700, 651, 650, 480].map((height) => ({
+      width: 390,
+      height,
+    })),
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
     await page.goto("/history/review-correct");
     for (const [index, id] of ids.entries()) {
       await expect(page.locator(".review-screen")).toHaveAttribute(
