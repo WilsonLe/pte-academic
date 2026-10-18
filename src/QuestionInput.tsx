@@ -1,5 +1,5 @@
 import { Textarea } from "./components/ui/textarea";
-import { useId, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from "lucide-react";
 import { type Answer, type Question, guideFor, wordCount } from "./content";
 import {
@@ -62,6 +62,16 @@ export function QuestionInput({
   const [clip, setClip] = useState("");
   const [editMessage, setEditMessage] = useState("");
   const textarea = useRef<HTMLTextAreaElement>(null);
+  const orderRoot = useRef<HTMLDivElement>(null);
+  const orderFocus = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const selector = orderFocus.current;
+    orderFocus.current = null;
+    if (!selector || disabled) return;
+    const target =
+      orderRoot.current?.querySelector<HTMLButtonElement>(selector);
+    if (target && !target.disabled) target.focus();
+  }, [values, disabled]);
   const setValues = (next: string[]) => onChange({ ...answer, values: next });
   const toggle = (v: string) =>
     setValues(
@@ -89,14 +99,40 @@ export function QuestionInput({
       : values[i]
         ? `Clear blank ${i + 1}`
         : "Select a word first";
-  const insert = (id: string) => {
-    setValues([...values, id]);
+  const insert = (id: string, keyboard = false) => {
+    const next = [...values, id];
+    if (keyboard) {
+      const remaining = q
+        .options!.map((_, i) => String(i))
+        .find((key) => !next.includes(key));
+      orderFocus.current =
+        remaining !== undefined
+          ? `[data-order-source="${remaining}"]`
+          : `[data-order-target="${id}"] [data-order-action="return"]`;
+    }
+    setValues(next);
     setSelected(null);
   };
-  const move = (at: number, delta: number) => {
+  const move = (at: number, delta: number, keyboard = false) => {
     const next = [...values];
     [next[at], next[at + delta]] = [next[at + delta], next[at]];
+    if (keyboard) {
+      const position = at + delta;
+      const action =
+        position === 0
+          ? "down"
+          : position === next.length - 1
+            ? "up"
+            : delta < 0
+              ? "up"
+              : "down";
+      orderFocus.current = `[data-order-target="${values[at]}"] [data-order-action="${action}"]`;
+    }
     setValues(next);
+  };
+  const returnParagraph = (id: string, keyboard: boolean) => {
+    if (keyboard) orderFocus.current = `[data-order-source="${id}"]`;
+    setValues(values.filter((value) => value !== id));
   };
   function edit(action: "Cut" | "Copy" | "Paste") {
     const el = textarea.current;
@@ -308,7 +344,7 @@ export function QuestionInput({
     );
   if (g.kind === "order")
     return (
-      <div className="reorder">
+      <div className="reorder" ref={orderRoot}>
         <section>
           <h3>Source</h3>
           {q.options!.map(
@@ -316,6 +352,7 @@ export function QuestionInput({
               !values.includes(String(i)) && (
                 <button
                   key={i}
+                  data-order-source={i}
                   disabled={disabled}
                   className={
                     selected === String(i) ? "paragraph selected" : "paragraph"
@@ -336,14 +373,19 @@ export function QuestionInput({
           <button
             aria-label="Move selected paragraph to answer"
             disabled={disabled || selected === null}
-            onClick={() => selected !== null && insert(selected)}
+            onClick={(e) =>
+              selected !== null && insert(selected, e.detail === 0)
+            }
           >
             <ArrowRight size={18} />
           </button>
           <button
             aria-label="Return last paragraph to source"
             disabled={disabled || !values.length}
-            onClick={() => setValues(values.slice(0, -1))}
+            onClick={(e) => {
+              const id = values.at(-1);
+              if (id !== undefined) returnParagraph(id, e.detail === 0);
+            }}
           >
             <ArrowLeft size={18} />
           </button>
@@ -364,27 +406,30 @@ export function QuestionInput({
             </div>
           )}
           {values.map((id, i) => (
-            <div className="paragraph target" key={id}>
+            <div className="paragraph target" key={id} data-order-target={id}>
               <span>{q.options![+id]}</span>
               <div>
                 <button
                   disabled={disabled || i === 0}
+                  data-order-action="up"
                   aria-label={`Move paragraph ${i + 1} up`}
-                  onClick={() => move(i, -1)}
+                  onClick={(e) => move(i, -1, e.detail === 0)}
                 >
                   <ArrowUp size={16} />
                 </button>
                 <button
                   disabled={disabled || i === values.length - 1}
+                  data-order-action="down"
                   aria-label={`Move paragraph ${i + 1} down`}
-                  onClick={() => move(i, 1)}
+                  onClick={(e) => move(i, 1, e.detail === 0)}
                 >
                   <ArrowDown size={16} />
                 </button>
                 <button
                   disabled={disabled}
+                  data-order-action="return"
                   aria-label={`Return paragraph ${i + 1} to source`}
-                  onClick={() => setValues(values.filter((x) => x !== id))}
+                  onClick={(e) => returnParagraph(id, e.detail === 0)}
                 >
                   <ArrowLeft size={16} />
                 </button>
