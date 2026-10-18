@@ -1,12 +1,57 @@
 import { useState } from "react";
-import { asset, guideFor, questions } from "./content";
+import { asset, guideFor, questions, type Question } from "./content";
 import { AudioPlayer } from "./components/AudioPlayer";
-import { Pager } from "./Pages";
-import { FriendlyFeedback } from "./FriendlyFeedback";
+import { Pager, ReadingPages } from "./Pages";
+import { questionBlocks } from "./review-content";
+import { Chart } from "./QuestionInput";
+import { Button } from "./components/ui/button";
+import { FileText } from "lucide-react";
+import { FriendlyFeedback, ReviewDisclosure } from "./FriendlyFeedback";
 import { SpeechReview } from "./speech/SpeechReview";
 import { answered } from "./progress";
 import type { Pronunciation } from "./speech/comparison-schema";
 import type { Result } from "./Runner";
+
+function OriginalQuestion({ question: q }: { question: Question }) {
+  const blocks = questionBlocks(q);
+  const extraTranscript = q.text && q.audioText && q.text !== q.audioText;
+  return (
+    <section className="review-question-panel" aria-label="Original question">
+      <div className="response-heading">
+        <h3>Question</h3>
+        {extraTranscript && (
+          <ReviewDisclosure
+            title="Recording transcript"
+            blocks={[{ text: q.audioText! }]}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Open recording transcript"
+              title="Recording transcript"
+            >
+              <FileText />
+            </Button>
+          </ReviewDisclosure>
+        )}
+      </div>
+      {q.prompt && <p className="question-query">{q.prompt}</p>}
+      {q.chart && (
+        <div className="review-chart">
+          <Chart q={q} responsive />
+        </div>
+      )}
+      {blocks.length > 0 && (
+        <ReadingPages
+          key={q.id}
+          blocks={blocks}
+          label="question pages"
+          counterLabel="Question text"
+        />
+      )}
+    </section>
+  );
+}
 
 export function Review({
   result: r,
@@ -43,29 +88,36 @@ export function Review({
           onChange={setIndex}
         />
       </div>
-      <h3 className="feedback-heading">Feedback</h3>
-      {speaking ? (
-        <div className="speech-panel">
-          <SpeechReview
-            key={id}
-            question={q}
-            answer={a}
-            attemptId={r.id}
-            onPronunciation={(value) => onPronunciation(id, value)}
-          />
-        </div>
-      ) : (
-        <div className="review-reading">
-          {q.audio && (
-            <AudioPlayer
-              key={`audio-${id}`}
-              src={asset(q.audio)}
-              label="Prompt recording"
-            />
+      <div className="review-workspace">
+        <OriginalQuestion question={q} />
+        <section className="review-answer-panel" aria-label="Response feedback">
+          {guideFor(q).kind !== "write" && (
+            <h3 className="feedback-heading">Feedback</h3>
           )}
-          <FriendlyFeedback key={id} question={q} answer={a} />
-        </div>
-      )}
+          {speaking ? (
+            <div className="speech-panel">
+              <SpeechReview
+                key={id}
+                question={q}
+                answer={a}
+                attemptId={r.id}
+                onPronunciation={(value) => onPronunciation(id, value)}
+              />
+            </div>
+          ) : (
+            <div className="review-reading">
+              {q.audio && (
+                <AudioPlayer
+                  key={`audio-${id}`}
+                  src={asset(q.audio)}
+                  label="Prompt recording"
+                />
+              )}
+              <FriendlyFeedback key={id} question={q} answer={a} />
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

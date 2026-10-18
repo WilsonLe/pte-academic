@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import { test } from "./practice-fixture";
 import guideData from "../content/guides.json" with { type: "json" };
 import questions from "../content/questions.json" with { type: "json" };
 import sections from "../content/sections.json" with { type: "json" };
@@ -61,7 +62,7 @@ async function end(page: Page) {
     page.getByRole("heading", { name: "Review", exact: true }),
   ).toBeVisible();
 }
-async function screenFits(page: Page) {
+async function screenFits(page: Page, allowSpeechScroll = false) {
   expect(
     await page.evaluate(() => ({
       width: document.documentElement.scrollWidth,
@@ -72,21 +73,34 @@ async function screenFits(page: Page) {
   );
   const bad = await page
     .locator("main button, main a, main input, main select")
-    .evaluateAll((nodes) =>
-      nodes
-        .filter((node) => {
-          const r = node.getBoundingClientRect(),
-            parent = document.querySelector("main")!.getBoundingClientRect();
-          return (
-            r.width > 0 &&
-            r.height > 0 &&
-            ((!node.closest(".cards-list-scroll") &&
-              (r.top < parent.top - 1 || r.bottom > parent.bottom + 1)) ||
-              r.left < parent.left - 1 ||
-              r.right > parent.right + 1)
-          );
-        })
-        .map((n) => n.textContent || n.getAttribute("aria-label")),
+    .evaluateAll(
+      (nodes, allowSpeechScroll) =>
+        nodes
+          .filter((node) => {
+            const r = node.getBoundingClientRect(),
+              parent = document.querySelector("main")!.getBoundingClientRect();
+            const scroller = allowSpeechScroll
+              ? node.closest(".local-speech-screen")
+              : null;
+            const scrollBox = scroller?.getBoundingClientRect();
+            const containedSpeech =
+              scroller &&
+              /auto|scroll/.test(getComputedStyle(scroller).overflowY) &&
+              scroller.scrollHeight > scroller.clientHeight &&
+              scrollBox!.top >= parent.top - 1 &&
+              scrollBox!.bottom <= parent.bottom + 1;
+            return (
+              r.width > 0 &&
+              r.height > 0 &&
+              ((!node.closest(".cards-list-scroll") &&
+                !containedSpeech &&
+                (r.top < parent.top - 1 || r.bottom > parent.bottom + 1)) ||
+                r.left < parent.left - 1 ||
+                r.right > parent.right + 1)
+            );
+          })
+          .map((n) => n.textContent || n.getAttribute("aria-label")),
+      allowSpeechScroll,
     );
   expect(bad).toEqual([]);
 }
@@ -1211,7 +1225,10 @@ test("listening is single play, transcript hidden, highlight input available", a
   ).toBeVisible();
   const transcript = page.getByText(/surveys the site carefully/);
   await expect(transcript).toHaveCount(0);
-  const source = page.getByRole("button", { name: "Open source", exact: true });
+  const source = page.getByRole("button", {
+    name: "Open recording transcript",
+    exact: true,
+  });
   await source.click();
   const dialog = page.getByRole("dialog");
   const next = dialog.getByRole("button", {
@@ -1524,7 +1541,20 @@ test("microphone preflight, timed recording and persistent audio review", async 
     animations: "disabled",
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await screenFits(page);
+  const details = page.getByRole("button", { name: "Details", exact: true });
+  await details.click({ timeout: 2000 });
+  await expect(
+    page.getByRole("dialog", { name: "Speaking details", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(details).toBeFocused();
+  await responsePlayer
+    .getByRole("button", { name: /Play Your recording|Pause Your recording/ })
+    .scrollIntoViewIfNeeded();
+  await expect(
+    page.getByRole("region", { name: "Original question", exact: true }),
+  ).toBeVisible();
+  await screenFits(page, true);
   await page.screenshot({
     path: "docs/evidence/routing-review-mobile.png",
     animations: "disabled",
@@ -3969,7 +3999,7 @@ test("saved sessions expose section identity without changing history or review"
     ).toBeVisible();
     await page.reload();
     await expect(
-      page.getByRole("button", { name: "Open source", exact: true }),
+      page.getByRole("region", { name: "Original question", exact: true }),
     ).toBeVisible();
     await page
       .getByRole("button", { name: "My practice", exact: true })
@@ -4088,9 +4118,9 @@ test("retained views receive another view's saved sessions and XP without reload
   await writer.goto("/practice/type/reading-single");
   await start(writer);
   await context.setOffline(true);
+  const answeredIds: string[] = [];
   try {
     for (const round of [0, 1]) {
-      const expectedXP = 10;
       if (round) {
         await writer
           .getByRole("link", { name: "PTE Studio home", exact: true })
@@ -4109,6 +4139,11 @@ test("retained views receive another view's saved sessions and XP without reload
           .click();
         await start(writer);
       }
+      answeredIds.push(
+        (await writer.locator(".exam").getAttribute("data-question-id"))!,
+      );
+      if (round) expect(answeredIds[round]).not.toBe(answeredIds[round - 1]);
+      const expectedXP = 10 * new Set(answeredIds).size;
       await writer.getByRole("radio").first().check();
       await writer.getByRole("button", { name: "Next", exact: true }).click();
       await end(writer);
@@ -4135,11 +4170,11 @@ test("retained views receive another view's saved sessions and XP without reload
       page
         .getByRole("region", { name: "Daily practice" })
         .getByRole("progressbar"),
-    ).toHaveAttribute("aria-valuenow", "1");
-    await page.getByRole("button", { name: /^10 XP, level/ }).click();
+    ).toHaveAttribute("aria-valuenow", String(new Set(answeredIds).size));
+    await page.getByRole("button", { name: /^20 XP, level/ }).click();
     await expect(
       page.getByRole("region", { name: "Practice level", exact: true }),
-    ).toContainText("10");
+    ).toContainText("20");
     await page
       .getByRole("navigation", { name: "Main navigation", exact: true })
       .getByRole("link", { name: "My practice", exact: true })
@@ -4147,7 +4182,7 @@ test("retained views receive another view's saved sessions and XP without reload
     await page.locator(`a[href="${new URL(writer.url()).pathname}"]`).click();
     await expect(page.locator(".review-screen")).toHaveAttribute(
       "data-question-id",
-      "reading-single-01",
+      answeredIds.at(-1)!,
     );
     await expect(
       page.getByRole("button", { name: "Next question", exact: true }),
@@ -4173,6 +4208,7 @@ for (const phase of ["preparation", "running"] as const) {
     }
     const response = () =>
       page.locator(".exam-main").evaluate((main) => ({
+        id: main.closest(".exam")!.getAttribute("data-question-id"),
         text: main.textContent,
         inputs: [...main.querySelectorAll("input")].map((input) => ({
           value: input.value,
@@ -4186,10 +4222,14 @@ for (const phase of ["preparation", "running"] as const) {
     const originalURL = page.url();
     const originalDocument = await page.evaluate(() => performance.timeOrigin);
     const writer = await context.newPage();
+    const writerIds: string[] = [];
     try {
       await writer.goto("/practice/type/daily");
       await start(writer);
       for (let i = 0; i < 3; i++) {
+        writerIds.push(
+          (await writer.locator(".exam").getAttribute("data-question-id"))!,
+        );
         await answerReading(writer);
         await writer
           .getByRole("button", {
@@ -4229,13 +4269,26 @@ for (const phase of ["preparation", "running"] as const) {
         await start(page);
         await answerReading(page);
       }
+      const primaryId = (await page
+        .locator(".exam")
+        .getAttribute("data-question-id"))!;
+      const expectedXP = writerIds.includes(primaryId) ? 60 : 70;
       await end(page);
       await expect(
-        page.getByRole("button", { name: /^60 XP, level/ }),
+        page.getByRole("button", {
+          name: new RegExp(`^${expectedXP} XP, level`),
+        }),
       ).toBeVisible();
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        primaryId,
+      );
       const savedURL = page.url();
       await page.reload();
-      await expect(page.locator(".review-screen")).toBeVisible();
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        primaryId,
+      );
       await page
         .getByRole("link", { name: "PTE Studio home", exact: true })
         .click();
@@ -4247,7 +4300,10 @@ for (const phase of ["preparation", "running"] as const) {
         .getByRole("link", { name: "My practice", exact: true })
         .click();
       await page.locator(`a[href="${new URL(savedURL).pathname}"]`).click();
-      await expect(page.locator(".review-screen")).toBeVisible();
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        primaryId,
+      );
     } finally {
       await writer.close();
     }

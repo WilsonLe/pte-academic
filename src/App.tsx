@@ -54,6 +54,7 @@ import {
 } from "./LearningScreens";
 import { ReadingPages } from "./Pages";
 import { type PracticePlan, type Result } from "./Runner";
+import { variedPracticeOrder } from "./practice-order";
 import { PracticeSession, usePracticePlan } from "./PracticeSession";
 import { loadAttempt } from "./storage";
 import { usePwa } from "./pwa";
@@ -333,7 +334,7 @@ export default function App() {
         mode: "type",
         label: "Daily practice",
         previewGuidance: true,
-        questions: questQuestions(progress, today),
+        questions: questQuestions(progress, today, history),
         minutes: mocks[0].sectionMinutes,
       };
     if (!["type", "section", "mock"].includes(mode || "")) return null;
@@ -348,7 +349,7 @@ export default function App() {
           : mode === "section"
             ? `${sections.find((s) => s.id === id)!.title} practice`
             : guides.find((g) => g.id === id)!.title,
-      questions:
+      questions: variedPracticeOrder(
         mode === "mock"
           ? mocks[0].questionIds.map((qid) =>
               questions.find((q) => q.id === qid)!,
@@ -356,6 +357,8 @@ export default function App() {
           : mode === "section"
             ? questions.filter((q) => guideFor(q).section === id)
             : questions.filter((q) => q.type === id),
+        history,
+      ),
       minutes: mocks[0].sectionMinutes,
     };
   }
@@ -422,7 +425,7 @@ export default function App() {
     : currentGuide?.title ||
       (hubView === "badges" ? "Achievements" : titles[active]);
   const practiceIdentity =
-    page === "practice" && progressReady
+    page === "practice" && progressReady && !historyState.isPending
       ? `${route.mode}/${route.practiceId}`
       : "";
   const practicePlan = usePracticePlan(practiceIdentity, () =>

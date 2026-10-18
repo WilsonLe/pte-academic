@@ -298,6 +298,17 @@ test("audio-only word recognition is prompt-independent across four accents and 
     hasText: "Syllable feedback saved on this device",
   });
   await receiptLeavesControlsAvailable(page, savedReceipt);
+  const speakingDetails = page.getByRole("button", {
+    name: "Details",
+    exact: true,
+  });
+  await speakingDetails.click({ timeout: 1500 });
+  await expect(
+    page.getByRole("dialog", { name: "Speaking details", exact: true }),
+  ).toBeVisible();
+  await expect(savedReceipt).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(speakingDetails).toBeFocused();
   await page
     .getByRole("button", { name: "My practice", exact: true })
     .click({ timeout: 1500 });
@@ -305,15 +316,12 @@ test("audio-only word recognition is prompt-independent across four accents and 
   await page.locator(`main a[href="${base}history/independent-open"]`).click();
   await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  const sourceButton = page.getByRole("button", {
-    name: "Source",
-    exact: true,
-  });
-  await sourceButton.click();
-  await expect(page.getByRole("dialog").getByRole("figure")).toBeVisible();
-  await page.keyboard.press("Escape");
+  await expect(
+    page
+      .getByRole("region", { name: "Original question", exact: true })
+      .getByRole("figure"),
+  ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(sourceButton).toBeFocused();
   await expect(
     page.getByText("Syllable feedback saved on this device", { exact: true }),
   ).toBeHidden({ timeout: 10000 });

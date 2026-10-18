@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { BookOpen, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { type Answer, type Question, guideFor, wordCount } from "./content";
-import { promptBlocks } from "./review-content";
 import { reviewItems, type ReviewItem } from "./review-diff";
 import { ReadingPages, type ReadingBlock } from "./Pages";
 import { CardsList } from "./components/CardsList";
@@ -58,28 +57,16 @@ export function FriendlyFeedback({
 }) {
   const [selected, setSelected] = useState<ReviewItem>();
   const items = reviewItems(q, a);
-  const source = promptBlocks(q);
   const writing = guideFor(q).kind === "write";
   return (
     <div className="friendly-feedback" data-kind={guideFor(q).kind}>
-      {(source.length > 0 || q.chart || guideFor(q).kind === "write") && (
-        <div className="feedback-actions">
-          {guideFor(q).kind === "write" && (
-            <span>{wordCount(a.text || "")} words</span>
-          )}
-          {(source.length > 0 || q.chart) && (
-            <ReviewDisclosure title="Source" blocks={source} question={q}>
-              <Button variant="ghost" size="sm" aria-label="Open source">
-                <BookOpen aria-hidden="true" /> Source
-              </Button>
-            </ReviewDisclosure>
-          )}
-        </div>
-      )}
       {writing ? (
         <section className="written-response" aria-label="Written response">
           <div className="response-heading">
-            <h4>Response</h4>
+            <h3>Response</h3>
+            <span className="response-word-count">
+              {wordCount(a.text || "")} words
+            </span>
             <ReviewDisclosure title="Response details" blocks={items[0].detail}>
               <Button
                 variant="ghost"

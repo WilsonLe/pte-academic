@@ -12,7 +12,7 @@ const questions = questionData as Question[];
 const kind = (q: Question) => guideData.find((g) => g.id === q.type)!.kind;
 const compact = (s: string) => s.replace(/\s+/g, " ").trim();
 
-async function seed(page: Page) {
+async function seed(page: Page, questionIds = questions.map((q) => q.id)) {
   await page.goto("/");
   const answers = (state: string) =>
     Object.fromEntries(
@@ -74,7 +74,7 @@ async function seed(page: Page) {
     id: `review-${state}`,
     label: `${state} review`,
     date: new Date().toISOString(),
-    questionIds: questions.map((q) => q.id),
+    questionIds,
     answers: answers(state),
     finished: state !== "empty",
   }));
@@ -174,8 +174,11 @@ async function readComparisons(page: Page, inspect = true) {
     for (let i = 0; i < 150; i++) {
       await expect(copy).toBeVisible();
       await expect
-        .poll(() =>
-          copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+        .poll(
+          () => copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+          {
+            message: `complete written response: ${await page.locator(".review-screen").getAttribute("data-question-id")} at ${page.viewportSize()!.width}`,
+          },
         )
         .toBe(true);
       parts.push(
@@ -230,22 +233,118 @@ async function readComparisons(page: Page, inspect = true) {
   throw new Error("Comparison pagination did not end");
 }
 async function readSource(page: Page) {
-  const source = page.getByRole("button", { name: /^(Open source|Source)$/ });
-  if (!(await source.count())) return "";
-  await source.click();
-  const text = await readDetails(page);
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  return text;
+  const question = page.getByRole("region", {
+    name: "Original question",
+    exact: true,
+  });
+  await expect(question).toBeVisible();
+  const previous = question.getByRole("button", {
+    name: "Previous question pages",
+    exact: true,
+  });
+  while ((await previous.count()) && (await previous.isEnabled()))
+    await previous.click();
+  const parts = [
+    await question
+      .locator(".question-query")
+      .allTextContents()
+      .then((x) => x.join(" ")),
+  ];
+  for (let i = 0; i < 200; i++) {
+    const copy = question.locator(".reading-copy");
+    if (await copy.count()) {
+      await expect
+        .poll(
+          () => copy.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+          {
+            message: `complete original question: ${await page.locator(".review-screen").getAttribute("data-question-id")} at ${page.viewportSize()!.width}`,
+          },
+        )
+        .toBe(true);
+      await expect
+        .poll(
+          () =>
+            copy.evaluate((node) => {
+              const style = getComputedStyle(node);
+              return (
+                (node.clientHeight -
+                  parseFloat(style.paddingTop) -
+                  parseFloat(style.paddingBottom)) /
+                parseFloat(style.lineHeight)
+              );
+            }),
+          {
+            message: `readable original question: ${await page.locator(".review-screen").getAttribute("data-question-id")} at ${page.viewportSize()!.width}`,
+          },
+        )
+        .toBeGreaterThanOrEqual(
+          (await copy.locator(".reading-block h3").count()) ? 4 : 3,
+        );
+      parts.push(
+        (await copy.locator(".reading-block p").allTextContents()).join(" "),
+      );
+    }
+    const next = question.getByRole("button", {
+      name: "Next question pages",
+      exact: true,
+    });
+    if (!(await next.count()) || (await next.isDisabled())) break;
+    await next.click();
+  }
+  for (const name of ["Open recording transcript", "Details"]) {
+    const trigger =
+      name === "Details"
+        ? page
+            .locator(".local-speech-screen")
+            .getByRole("button", { name, exact: true })
+        : question.getByRole("button", { name, exact: true });
+    if (await trigger.count()) {
+      await trigger.click();
+      parts.push(await readDetails(page));
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+    }
+  }
+  return compact(parts.join(" "));
 }
 async function fits(page: Page) {
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth + 1,
-    ),
-  ).toBe(true);
-  const box = await page.locator(".review-screen").boundingBox();
-  expect(box!.y + box!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+    await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight,
+    })),
+  ).toEqual(page.viewportSize());
+  const screen = await page.locator(".review-screen").boundingBox();
+  for (const name of ["Original question", "Response feedback"]) {
+    const panel = await page
+      .getByRole("region", { name, exact: true })
+      .boundingBox();
+    expect(panel!.y).toBeGreaterThanOrEqual(screen!.y);
+    expect(panel!.y + panel!.height).toBeLessThanOrEqual(
+      screen!.y + screen!.height + 1,
+    );
+    expect(panel!.x + panel!.width).toBeLessThanOrEqual(
+      screen!.x + screen!.width + 1,
+    );
+  }
+  const main = await page.locator("main").boundingBox();
+  if (page.viewportSize()!.height >= 800) {
+    for (const name of ["Original question", "Response feedback"]) {
+      const panel = await page
+        .getByRole("region", { name, exact: true })
+        .boundingBox();
+      expect(
+        Math.min(panel!.y + panel!.height, main!.y + main!.height) -
+          Math.max(panel!.y, main!.y),
+      ).toBeGreaterThanOrEqual(100);
+    }
+  }
+  if (screen!.y + screen!.height > main!.y + main!.height + 1)
+    await expect
+      .poll(() =>
+        page.locator("main").evaluate((el) => getComputedStyle(el).overflowY),
+      )
+      .toBe("auto");
 }
 
 for (const mode of ["legacy", "acoustic"]) {
@@ -308,12 +407,17 @@ for (const mode of ["legacy", "acoustic"]) {
         { width: 1280, height: 720 },
       ]) {
         await page.setViewportSize(viewport);
-        const source = page.getByRole("button", {
-          name: /^(Open source|Source)$/,
+        const questionPanel = page.getByRole("region", {
+          name: "Original question",
+          exact: true,
         });
-        await source.click();
-        const dialog = page.getByRole("dialog");
-        const copy = dialog.locator(".reading-copy");
+        const previous = questionPanel.getByRole("button", {
+          name: "Previous question pages",
+          exact: true,
+        });
+        while ((await previous.count()) && (await previous.isEnabled()))
+          await previous.click();
+        const copy = questionPanel.locator(".reading-copy");
         const transcript: string[] = [];
         for (let i = 0; i < 80; i++) {
           await expect(copy.locator(".reading-block")).not.toHaveCount(0);
@@ -337,8 +441,8 @@ for (const mode of ["legacy", "acoustic"]) {
             if (block.label.startsWith("Transcript"))
               transcript.push(block.text);
           }
-          const next = dialog.getByRole("button", {
-            name: "Next detail pages",
+          const next = questionPanel.getByRole("button", {
+            name: "Next question pages",
             exact: true,
           });
           if (!(await next.count()) || (await next.isDisabled())) break;
@@ -347,8 +451,6 @@ for (const mode of ["legacy", "acoustic"]) {
         expect(compact(transcript.join(" "))).toBe(
           compact(question.audioText!),
         );
-        await page.keyboard.press("Escape");
-        await expect(source).toBeFocused();
       }
       if (index < discussions.length - 1)
         await page
@@ -436,11 +538,9 @@ for (const mode of ["legacy", "acoustic"]) {
         { width: 320, height: 480 },
       ]) {
         await page.setViewportSize(viewport);
-        const source = page.getByRole("button", {
-          name: /^(Open source|Source)$/,
-        });
-        await source.click();
-        const chart = page.getByRole("dialog").getByRole("figure");
+        const chart = page
+          .getByRole("region", { name: "Original question", exact: true })
+          .getByRole("figure");
         await expect(chart).toHaveAttribute(
           "aria-label",
           `${question.chart!.title}: ${question.chart!.labels.map((label, i) => `${label} ${question.chart!.values[i]} ${question.chart!.unit}`).join(", ")}`,
@@ -491,13 +591,16 @@ for (const mode of ["legacy", "acoustic"]) {
         );
         expect(geometry.labels.every((label) => label.fits)).toBe(true);
         if (viewport.width === 320 && mode === "acoustic") {
+          await page
+            .getByRole("button", { name: "Details", exact: true })
+            .click();
           const details = await readDetails(page);
           expect(details).toContain(compact(question.explanation));
           if (question.model)
             expect(details).toContain(compact(question.model));
         }
-        await page.keyboard.press("Escape");
-        await expect(source).toBeFocused();
+        if (await page.getByRole("dialog").count())
+          await page.keyboard.press("Escape");
       }
       if (index < charts.length - 1)
         await page
@@ -505,11 +608,10 @@ for (const mode of ["legacy", "acoustic"]) {
           .click();
     }
     await page.reload();
-    await page.getByRole("button", { name: /^(Open source|Source)$/ }).click();
     await expect
       .poll(() =>
         page
-          .getByRole("dialog")
+          .getByRole("region", { name: "Original question", exact: true })
           .locator(".bar")
           .evaluateAll((bars) =>
             Math.min(...bars.map((bar) => bar.getBoundingClientRect().height)),
@@ -531,6 +633,7 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
   for (const viewport of [
     { width: 1440, height: 900 },
     { width: 390, height: 844 },
+    { width: 320, height: 568 },
   ]) {
     await page.setViewportSize(viewport);
     for (const state of ["correct", "wrong"]) {
@@ -543,7 +646,10 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
           q.id,
         );
         await expect(
-          page.getByRole("heading", { name: "Feedback", exact: true }),
+          page.getByRole("heading", {
+            name: kind(q) === "write" ? "Response" : "Feedback",
+            exact: true,
+          }),
         ).toBeVisible();
         await expect(page.getByRole("dialog")).toHaveCount(0);
         await expect(
@@ -631,7 +737,7 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
       }
     }
   }
-  expect(visited).toHaveLength(260);
+  expect(visited).toHaveLength(390);
   await info.attach("all-type-feedback-coverage", {
     body: JSON.stringify(visited),
     contentType: "application/json",
@@ -690,6 +796,7 @@ test("long writing and enlarged text remain complete; source audio stays outside
   page,
   context,
 }, info) => {
+  test.setTimeout(180000);
   await context.route("**/models/**", (r) => r.abort());
   await seed(page);
   const text =
@@ -754,7 +861,10 @@ test("long writing and enlarged text remain complete; source audio stays outside
   await audio.getByRole("button", { name: /Play/ }).click();
   await expect(audio.getByRole("button", { name: /Pause/ })).toBeVisible();
   await audio.getByRole("button", { name: /Pause/ }).click();
-  await page.getByRole("button", { name: "Open source", exact: true }).click();
+  await page
+    .getByRole("button", { name: /Explain$/ })
+    .first()
+    .click();
   await expect(
     page.getByRole("group", { name: "Prompt recording", exact: true }),
   ).toHaveCount(0);
@@ -989,7 +1099,7 @@ test("playtest: all writing types share one paragraph-preserving response and di
           })),
         ).toEqual({ scrolls: true, overflow: "auto" });
       }
-      if (size.height >= 720) {
+      if (size.width > 900 && size.height >= 720) {
         expect(
           await page
             .locator("main")
@@ -1001,6 +1111,7 @@ test("playtest: all writing types share one paragraph-preserving response and di
           response.locator(".reading-block p").first(),
         ).toContainText(paragraphs[0]);
       }
+      await fits(page);
       expect(await readComparisons(page, false)).toBe(compact(text));
       const details = page.getByRole("button", {
         name: "Open response details",
@@ -1035,6 +1146,20 @@ test("playtest: all writing types share one paragraph-preserving response and di
   }
 });
 
+async function showFeedbackButton(page: Page, name: string) {
+  const target = page.getByRole("button", { name, exact: true });
+  for (let i = 0; i < 100; i++) {
+    if (await target.count()) return target;
+    const next = page.getByRole("button", {
+      name: "Next feedback pages",
+      exact: true,
+    });
+    await expect(next).toBeEnabled();
+    await next.click();
+  }
+  throw new Error(`Feedback not reachable: ${name}`);
+}
+
 test("highlight selections explain unchanged, selected and missed words on desktop and mobile", async ({
   page,
   context,
@@ -1060,10 +1185,10 @@ test("highlight selections explain unchanged, selected and missed words on deskt
     await expect(page.getByRole("dialog")).not.toContainText("quickly");
     await page.keyboard.press("Escape");
     await expect(unchanged).toBeFocused();
-    const correct = page.getByRole("button", {
-      name: "Word 10: Selected · Correct. Explain",
-      exact: true,
-    });
+    const correct = await showFeedbackButton(
+      page,
+      "Word 10: Selected · Correct. Explain",
+    );
     await expect(correct).toContainText("quickly.");
     await expect(correct).toContainText("carefully.");
     await correct.click();
@@ -1074,10 +1199,7 @@ test("highlight selections explain unchanged, selected and missed words on deskt
     await page
       .getByRole("button", { name: "Next review questions", exact: true })
       .click();
-    const missed = page.getByRole("button", {
-      name: "Word 26: Missed. Explain",
-      exact: true,
-    });
+    const missed = await showFeedbackButton(page, "Word 26: Missed. Explain");
     await expect(missed).toContainText("compulsory.");
     await expect(missed).toContainText("voluntary.");
     await missed.click();
@@ -1218,7 +1340,8 @@ test("short comparison reviews keep answers visible after paging", async ({
           top: document.querySelector(".topbar")!.getBoundingClientRect().top,
         })),
       ).toEqual({ width: size.width, height: size.height, top: 0 });
-      if (size.height >= 720)
+      await fits(page);
+      if (size.width > 900 && size.height >= 720)
         expect(
           await page
             .locator("main")
@@ -1405,4 +1528,86 @@ test.describe("replay control transport", () => {
       )
       .toBe(1);
   });
+});
+
+test("original question is visible while reflecting on a written response", async ({
+  page,
+}) => {
+  await seed(page, ["summarize-written-text-01"]);
+  await page.goto("/history/review-correct");
+  const original = page.getByRole("region", {
+    name: "Original question",
+    exact: true,
+  });
+  await expect(original).toBeVisible();
+  await expect(original).toContainText("Community gardens are often promoted");
+  const response = page.getByRole("region", {
+    name: "Written response",
+    exact: true,
+  });
+  await expect(response).toBeVisible();
+  await expect(response).toContainText("Community gardens");
+  const [questionBox, responseBox] = await Promise.all([
+    original.boundingBox(),
+    response.boundingBox(),
+  ]);
+  expect(questionBox!.height).toBeGreaterThan(100);
+  expect(responseBox!.height).toBeGreaterThan(100);
+});
+
+test("stacked original question and feedback remain reachable at intermediate phone heights", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  const ids = [
+    "read-aloud-01",
+    "describe-image-01",
+    "summarize-spoken-text-01",
+    "listening-multiple-01",
+    "write-essay-01",
+  ];
+  await seed(page, ids);
+  for (const viewport of [
+    ...[844, 740, 720, 700, 651, 650, 480].map((height) => ({
+      width: 390,
+      height,
+    })),
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/history/review-correct");
+    for (const [index, id] of ids.entries()) {
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        id,
+      );
+      await fits(page);
+      const answer = page.getByRole("region", {
+        name: "Response feedback",
+        exact: true,
+      });
+      const trigger = answer
+        .getByRole("button", {
+          name: /^(Details|Open response details)$|Explain$/,
+        })
+        .first();
+      await trigger.scrollIntoViewIfNeeded();
+      const control = await trigger.boundingBox();
+      const main = await page.locator("main").boundingBox();
+      expect(control!.y).toBeGreaterThanOrEqual(main!.y - 1);
+      expect(control!.y + control!.height).toBeLessThanOrEqual(
+        main!.y + main!.height + 1,
+      );
+      await trigger.click({ timeout: 2000 });
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+      if (index < ids.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+  }
 });

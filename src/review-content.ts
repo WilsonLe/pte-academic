@@ -8,28 +8,23 @@ export const exampleLabel = (q: Question) =>
       ? "Expected answer"
       : "Example response";
 
-export function promptBlocks(q: Question): ReadingBlock[] {
+/** What the learner was asked, never an answer key, example or rationale. */
+export function questionBlocks(q: Question): ReadingBlock[] {
   const blocks: ReadingBlock[] = [];
-  const seen = new Set<string>();
-  const add = (label: string, text?: string) => {
-    if (!text || seen.has(text.trim())) return;
-    seen.add(text.trim());
-    blocks.push({ label, text });
-  };
-  add("Question", q.prompt);
-  // Listening gaps use the complete transcript; repeating the same passage
-  // with holes adds no new source information. Other gaps keep numbered anchors.
-  if (guideFor(q).kind !== "blanks") {
+  if (q.text) {
     let gap = 0;
-    add(
-      q.type === "respond-to-situation"
-        ? "Situation"
-        : q.audioText
-          ? "Displayed text"
-          : "Passage",
-      q.text?.replace(/\{\{\}\}/g, () => `[${++gap}]`),
+    blocks.push({ text: q.text.replace(/\{\{\}\}/g, () => `[${++gap}]`) });
+  } else if (q.audioText)
+    blocks.push({ label: "Transcript", text: q.audioText });
+  const kind = guideFor(q).kind;
+  if (kind === "order")
+    q.options?.forEach((text, i) =>
+      blocks.push({ label: `Paragraph ${i + 1}`, text }),
     );
-  }
-  add("Transcript", q.audioText);
+  if (kind === "bank" && q.options)
+    blocks.push({ label: "Word bank", text: q.options.join(" · ") });
+  q.blankOptions?.forEach((options, i) =>
+    blocks.push({ label: `Gap ${i + 1} choices`, text: options.join(" · ") }),
+  );
   return blocks;
 }

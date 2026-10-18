@@ -31,6 +31,28 @@ export async function receiptLeavesControlsAvailable(
     return [...controls]
       .filter((n) => {
         const r = n.getBoundingClientRect();
+        const x = r.left + r.width / 2,
+          y = r.top + r.height / 2;
+        // A nested scroll panel can clip a control even when its rectangle is
+        // inside the document viewport. It is not a visible toast target yet.
+        for (
+          let parent = n.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
+          const clip = parent.getBoundingClientRect(),
+            style = getComputedStyle(parent);
+          if (
+            /auto|scroll|hidden|clip/.test(style.overflowY) &&
+            (y < clip.top || y > clip.bottom)
+          )
+            return false;
+          if (
+            /auto|scroll|hidden|clip/.test(style.overflowX) &&
+            (x < clip.left || x > clip.right)
+          )
+            return false;
+        }
         return (
           n.getClientRects().length &&
           getComputedStyle(n).visibility !== "hidden" &&
