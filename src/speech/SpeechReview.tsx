@@ -194,15 +194,6 @@ export function SpeechReview({
                 {similarity}/100 similarity
               </Badge>
             )}
-            {pronunciation && (
-              <span>
-                {
-                  pronunciation.syllables.filter((s) => s.status === "scored")
-                    .length
-                }{" "}
-                of {pronunciation.syllables.length} syllables scored
-              </span>
-            )}
             {pronunciation?.status === "no-reliable-speech" && (
               <span>
                 No reliable speech detected. Select a word to practise.
@@ -227,6 +218,18 @@ export function SpeechReview({
             <ReviewDisclosure
               title="Speaking details"
               blocks={[
+                {
+                  label: "About these results",
+                  text: "Reference similarity, not pronunciation correctness or an exam score. Uncertain syllables have no score.",
+                },
+                ...(pronunciation
+                  ? [
+                      {
+                        label: "Coverage",
+                        text: `${pronunciation.syllables.filter((s) => s.status === "scored").length} of ${pronunciation.syllables.length} syllables scored.`,
+                      },
+                    ]
+                  : []),
                 { label: "What to check", text: question.explanation },
                 ...(question.model &&
                 question.model !== question.text &&
@@ -262,10 +265,6 @@ export function SpeechReview({
             pronunciation?.recognition && (
               <p>No words could be recognised reliably.</p>
             )}
-          <p className="speech-stats">
-            Reference similarity, not pronunciation correctness or an exam
-            score. Uncertain syllables have no score.
-          </p>
           {selected?.omitted ? (
             <Dialog
               open

@@ -245,11 +245,11 @@ export function GuideScreen({
     tab === "Instructions"
       ? [
           g.instructions,
-          `${g.prepSeconds ? g.prepSeconds + "s preparation. " : ""}${g.answerSeconds ? g.answerSeconds + "s response." : "Shared section timer."} ${g.skills}`,
+          `${g.prepSeconds ? g.prepSeconds + "s preparation. " : ""}${g.answerSeconds ? g.answerSeconds + "s response." : "Shared section timer."}`,
         ]
       : tab === "Strategy & tips"
         ? [...g.tips, g.pitfall]
-        : [g.scoring];
+        : [g.scoring, `Skills practised: ${g.skills}.`];
   return (
     <div className="screen-stack guide-screen">
       <div className="guide-start">

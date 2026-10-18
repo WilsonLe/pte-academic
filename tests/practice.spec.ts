@@ -968,7 +968,7 @@ test("dropdown inputs preserve answers and explanation", async ({ page }) => {
       }),
     ).toContainText(word);
 });
-test("word-bank guidance follows clearing and replacement modes for every item", async ({
+test("word-bank editing explains the focused gap without a default hint for every item", async ({
   page,
 }) => {
   await drill(page, "Fill in the Blanks \\(Drag and Drop\\)");
@@ -983,36 +983,54 @@ test("word-bank guidance follows clearing and replacement modes for every item",
       .allTextContents();
     const firstWord = page.getByRole("button", { name: first, exact: true });
     const secondWord = page.getByRole("button", { name: second, exact: true });
+    const empty = () =>
+      page.getByRole("button", { name: "Blank 1", exact: true });
+    const filled = (word: string) =>
+      page.getByRole("button", { name: `Blank 1: ${word}`, exact: true });
+    await expect(clearing).toHaveCount(0);
+    // Real keyboard navigation establishes focus-visible modality for tooltips.
+    await empty().press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator('[role="tooltip"][data-open]')).toHaveText(
+      "Select a word first",
+    );
+    await expect(empty()).toHaveAccessibleDescription("Select a word first");
     await firstWord.press("Space");
-    await page
-      .getByRole("button", { name: "Blank 1", exact: true })
-      .press("Enter");
-    await expect(clearing).toBeVisible();
-    await secondWord.press("Enter");
-    await expect(clearing).not.toBeVisible();
-    await secondWord.press("Enter");
-    await expect(clearing).toBeVisible();
-    await page
-      .getByRole("button", { name: `Blank 1: ${first}`, exact: true })
-      .press("Enter");
-    await expect(
-      page.getByRole("button", { name: "Blank 1", exact: true }),
-    ).toHaveText(" ");
+    await empty().focus();
+    await expect(page.locator('[role="tooltip"][data-open]')).toHaveText(
+      `Place ${first} in blank 1`,
+    );
+    await empty().press("Enter");
+    await page.getByRole("button", { name: "Blank 2", exact: true }).focus();
+    await filled(first).focus();
+    await expect(page.locator('[role="tooltip"][data-open]')).toHaveText(
+      "Clear blank 1",
+    );
+    await expect(filled(first)).toHaveAccessibleDescription("Clear blank 1");
+    await filled(first).press("Enter");
+    await expect(empty()).toHaveText(" ");
     await expect(firstWord).toBeEnabled();
     await firstWord.press("Enter");
-    await page
-      .getByRole("button", { name: "Blank 1", exact: true })
-      .press("Enter");
+    await empty().press("Enter");
     await secondWord.press("Space");
-    await page
-      .getByRole("button", { name: `Blank 1: ${first}`, exact: true })
-      .press("Enter");
+    await filled(first).focus();
+    await expect(page.locator('[role="tooltip"][data-open]')).toHaveText(
+      `Place ${second} in blank 1`,
+    );
+    await filled(first).press("Enter");
+    await expect(filled(second)).toContainText(second);
     await expect(
-      page.getByRole("button", { name: `Blank 1: ${second}`, exact: true }),
-    ).toHaveText(second);
+      filled(second).getByText("Clear", { exact: true }),
+    ).toBeVisible();
     await expect(firstWord).toBeEnabled();
     await expect(secondWord).toBeDisabled();
-    await expect(clearing).toBeVisible();
+    await firstWord.dragTo(
+      page.getByRole("button", { name: "Blank 2", exact: true }),
+    );
+    await expect(
+      page.getByRole("button", { name: `Blank 2: ${first}`, exact: true }),
+    ).toContainText(first);
+    await expect(clearing).toHaveCount(0);
     await page
       .getByRole("button", {
         name: item === 3 ? "Finish practice" : "Next",
@@ -1291,7 +1309,7 @@ test("speaking status explains silence stops and resets for the next recording",
     const first = questions.find((q: { type: string }) => q.type === type);
     await page.goto(`/practice/type/${type}`);
     await page
-      .getByRole("button", { name: "Test microphone", exact: true })
+      .getByRole("button", { name: "Record 3-second sample", exact: true })
       .click();
     await expect(
       page.getByLabel("Microphone check playback", { exact: true }),
@@ -1373,7 +1391,7 @@ test("active speaking captures advance and finish without an empty-response warn
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto(`/practice/type/${guide.id}`);
     await page
-      .getByRole("button", { name: "Test microphone", exact: true })
+      .getByRole("button", { name: "Record 3-second sample", exact: true })
       .click();
     await expect(
       page.getByLabel("Microphone check playback", { exact: true }),
@@ -1459,7 +1477,7 @@ test("empty or failed speaking capture retains the blank-response confirmation",
   for (const mode of ["empty", "failed"]) {
     await page.goto("/practice/type/read-aloud");
     await page
-      .getByRole("button", { name: "Test microphone", exact: true })
+      .getByRole("button", { name: "Record 3-second sample", exact: true })
       .click();
     await expect(
       page.getByLabel("Microphone check playback", { exact: true }),
@@ -1498,7 +1516,7 @@ test("microphone preflight, timed recording and persistent audio review", async 
   await expect(
     page.getByRole("button", { name: "Begin practice", exact: true }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Test microphone" }).click();
+  await page.getByRole("button", { name: "Record 3-second sample" }).click();
   await expect(
     page.getByLabel("Microphone check playback", { exact: true }),
   ).toBeVisible({
@@ -1608,7 +1626,7 @@ test("full mock keeps current section status across timeout and ordinary handove
   await page
     .getByRole("checkbox", { name: "I can hear the audio clearly" })
     .check();
-  await page.getByRole("button", { name: "Test microphone" }).click();
+  await page.getByRole("button", { name: "Record 3-second sample" }).click();
   await expect(
     page.getByLabel("Microphone check playback", { exact: true }),
   ).toBeVisible({
@@ -1759,7 +1777,7 @@ test("blocked microphone permission has a recoverable explanation", async ({
     };
   });
   await drill(page, "Read Aloud");
-  await page.getByRole("button", { name: "Test microphone" }).click();
+  await page.getByRole("button", { name: "Record 3-second sample" }).click();
   await expect(page.getByRole("alert")).toContainText(
     "Microphone permission denied",
   );
@@ -3067,15 +3085,32 @@ test("all practice cleanup: every guide, section and mock keeps useful text with
       await expect(
         page.getByRole("button", { name: "Instructions", exact: true }),
       ).toHaveAttribute("aria-pressed", "true");
-      expect(await readPages("reading pages")).toContain(guide.instructions);
+      await page.screenshot({
+        path: info.outputPath(
+          `guide-${viewport.width}-${guide.id}-instructions.png`,
+        ),
+        animations: "disabled",
+      });
+      const instructions = await readPages("reading pages");
+      expect(instructions).toContain(guide.instructions);
+      expect(instructions.trim().endsWith(guide.skills)).toBe(false);
       await expect(
         page.getByText(/One skill at a time|Open a guide, or jump straight in/),
       ).toHaveCount(0);
       for (const [tab, expected] of [
         ["Strategy & tips", [...guide.tips, guide.pitfall].join(" ")],
-        ["How to review", guide.scoring],
+        [
+          "How to review",
+          `${guide.scoring} Skills practised: ${guide.skills}.`,
+        ],
       ]) {
         await page.getByRole("button", { name: tab, exact: true }).click();
+        await page.screenshot({
+          path: info.outputPath(
+            `guide-${viewport.width}-${guide.id}-${tab === "How to review" ? "review" : "strategy"}.png`,
+          ),
+          animations: "disabled",
+        });
         expect(await readPages("reading pages")).toBe(expected);
         await screenFits(page);
       }
@@ -3090,6 +3125,10 @@ test("all practice cleanup: every guide, section and mock keeps useful text with
         page.getByRole("heading", { name: section.title, exact: true }),
       ).toBeVisible();
       await screenFits(page);
+      await page.screenshot({
+        path: info.outputPath(`section-${viewport.width}-${section.id}.png`),
+        animations: "disabled",
+      });
       covered.push(`section:${section.id}:${viewport.width}`);
     }
     await page.goto("/mocks");
@@ -3189,7 +3228,10 @@ test("all practice cleanup: every setup route retains exactly its required devic
             .locator("audio"),
         ).toHaveAttribute("src", "/audio/headphone-check.wav");
       await expect(
-        page.getByRole("button", { name: "Test microphone", exact: true }),
+        page.getByRole("button", {
+          name: "Record 3-second sample",
+          exact: true,
+        }),
       ).toHaveCount(needMic ? 1 : 0);
       const begin = page.getByRole("button", {
         name: /Begin (practice|mock test)/,
@@ -3204,6 +3246,12 @@ test("all practice cleanup: every setup route retains exactly its required devic
       ).toBe(viewport.width);
       await begin.scrollIntoViewIfNeeded();
       await expect(begin).toBeInViewport();
+      await page.screenshot({
+        path: info.outputPath(
+          `setup-${viewport.width}-${plan.path.split("/").slice(2).join("-")}.png`,
+        ),
+        animations: "disabled",
+      });
     }
     await page.goto("/practice/mock/" + sourceMocks[0].id);
     await expect(
@@ -3357,7 +3405,7 @@ test("all practice cleanup: every active response kind keeps its controls and on
     await page.goto(`/practice/type/${guide.id}`);
     if (guide.kind === "speak") {
       await page
-        .getByRole("button", { name: "Test microphone", exact: true })
+        .getByRole("button", { name: "Record 3-second sample", exact: true })
         .click();
       await expect(
         page.getByRole("group", {
@@ -4325,7 +4373,7 @@ test("timed chart labels remain readable and complete across every image and vie
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/practice/type/describe-image");
   await page
-    .getByRole("button", { name: "Test microphone", exact: true })
+    .getByRole("button", { name: "Record 3-second sample", exact: true })
     .click();
   await expect(
     page.getByLabel("Microphone check playback", { exact: true }),
@@ -4447,4 +4495,273 @@ test("timed chart labels remain readable and complete across every image and vie
     body: JSON.stringify(audit, null, 2),
     contentType: "application/json",
   });
+});
+
+test("full mock visual audit visits every authored question and keeps response rows aligned", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(300000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/practice/mock/mock-01");
+  await page
+    .getByRole("button", { name: "Record 3-second sample", exact: true })
+    .click();
+  await expect(
+    page.getByRole("group", { name: "Microphone check playback", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("checkbox", { name: "I can hear the audio clearly" })
+    .check();
+  await page.clock.install();
+  await page
+    .getByRole("button", { name: "Begin mock test", exact: true })
+    .click();
+  const visited = new Set<string>(),
+    receipts = [];
+  for (let index = 0; index < questions.length; index++) {
+    const exam = page.locator(".exam");
+    await expect(
+      page.getByText(`${index + 1} of 65`, { exact: true }),
+    ).toBeVisible();
+    const id = (await exam.getAttribute("data-question-id"))!;
+    const question = questions.find((q) => q.id === id)!;
+    const guide = guideData.find((g) => g.id === question.type)!;
+    expect(visited.has(id)).toBe(false);
+    visited.add(id);
+    // This is a controlled layout audit. Other journeys exercise native timing,
+    // actual playback, one-play rules and microphone capture without these bounds.
+    if (question.audio) {
+      await page.clock.fastForward(3100);
+      await page
+        .locator(".exam-main audio")
+        .evaluate((audio: HTMLAudioElement) => {
+          audio.pause();
+          audio.dispatchEvent(new Event("ended"));
+        });
+      if (guide.kind === "speak" && guide.prepSeconds)
+        await page.clock.fastForward(guide.prepSeconds * 1000 + 100);
+    } else if (guide.kind === "speak") {
+      await page.clock.fastForward((guide.prepSeconds + 1) * 1000);
+    }
+    for (const viewport of [
+      { width: 1440, height: 900 },
+      { width: 390, height: 720 },
+      { width: 320, height: 568 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await expect(
+        page.getByText(guide.instructions, { exact: true }),
+      ).toBeVisible();
+      const geometry = await exam.evaluate((root) => {
+        const rect = (node: Element) => {
+          const r = node.getBoundingClientRect();
+          return {
+            x: r.x,
+            y: r.y,
+            width: r.width,
+            height: r.height,
+            right: r.right,
+            bottom: r.bottom,
+          };
+        };
+        const main = root.querySelector(".exam-main")!,
+          footer = root.querySelector(".exam-footer")!;
+        const horizontal = [
+          ...main.querySelectorAll(
+            "button,input,select,textarea,figure,.stimulus,.exam-instructions",
+          ),
+        ]
+          .filter((n) => n.getBoundingClientRect().width > 0)
+          .filter((n) => {
+            const r = n.getBoundingClientRect(),
+              m = main.getBoundingClientRect();
+            return r.left < m.left - 1 || r.right > m.right + 1;
+          })
+          .map(
+            (n) => n.getAttribute("aria-label") || n.textContent?.slice(0, 80),
+          );
+        const options = [...main.querySelectorAll(".choice")].map(rect);
+        return {
+          viewport: [innerWidth, innerHeight],
+          document: [
+            document.documentElement.scrollWidth,
+            document.documentElement.scrollHeight,
+          ],
+          main: rect(main),
+          footer: rect(footer),
+          horizontal,
+          options,
+          question: root.getAttribute("data-question-id"),
+        };
+      });
+      expect(geometry.document).toEqual([viewport.width, viewport.height]);
+      expect(geometry.horizontal).toEqual([]);
+      expect(geometry.options).toHaveLength(
+        ["single", "multi"].includes(guide.kind) ? question.options!.length : 0,
+      );
+      expect(geometry.footer.bottom).toBeLessThanOrEqual(viewport.height + 1);
+      for (const row of geometry.options) {
+        expect(Math.abs(row.x - geometry.options[0].x)).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(row.width - geometry.options[0].width),
+        ).toBeLessThanOrEqual(1);
+      }
+      receipts.push({ id, type: question.type, kind: guide.kind, ...geometry });
+      // Flush animation frames after resizing; a mocked clock otherwise leaves
+      // stale compositor tiles in rapid viewport screenshot sequences.
+      await page.clock.runFor(50);
+      await page.screenshot({
+        path: info.outputPath(`runner-audit-${viewport.width}-${id}.png`),
+        animations: "disabled",
+      });
+    }
+    const action = page.getByRole("button", {
+      name: index === questions.length - 1 ? "Finish mock test" : "Next",
+      exact: true,
+    });
+    await expect(action).toBeEnabled();
+    await action.click();
+    const dialog = page.getByRole("dialog");
+    if (await dialog.count())
+      await dialog
+        .getByRole("button", {
+          name:
+            index === questions.length - 1 ? "Finish mock test" : "Continue",
+          exact: true,
+        })
+        .click();
+  }
+  expect([...visited].sort()).toEqual(questions.map((q) => q.id).sort());
+  await expect(
+    page.getByRole("heading", { name: "Review", exact: true }),
+  ).toBeVisible();
+  await (
+    await import("node:fs/promises")
+  ).writeFile(
+    info.outputPath("runner-alignment-inventory.json"),
+    JSON.stringify(receipts, null, 2),
+  );
+});
+
+test.describe("touch word-bank actions", () => {
+  test.use({
+    viewport: { width: 390, height: 720 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  test("filled gaps show their Clear action and retain replacement on all four variants", async ({
+    page,
+  }, info) => {
+    await page.goto("/practice/type/reading-blanks");
+    await start(page);
+    for (let item = 0; item < 4; item++) {
+      const [first, second] = await page
+        .getByLabel("Word bank", { exact: true })
+        .getByRole("button")
+        .allTextContents();
+      const word = (value: string) =>
+        page.getByRole("button", { name: value, exact: true });
+      const gap = (value?: string) =>
+        page.getByRole("button", {
+          name: `Blank 1${value ? `: ${value}` : ""}`,
+          exact: true,
+        });
+      await expect(gap()).toHaveAccessibleDescription("Select a word first");
+      await expect(gap().getByText("Clear", { exact: true })).toHaveCount(0);
+      await word(first).tap();
+      await gap().tap();
+      await expect(
+        gap(first).getByText("Clear", { exact: true }),
+      ).toBeVisible();
+      await expect(gap(first)).toHaveAccessibleDescription("Clear blank 1");
+      await expect(page.locator('[role="tooltip"][data-open]')).toHaveCount(0);
+      await page.screenshot({
+        path: info.outputPath(`touch-clear-${item + 1}.png`),
+      });
+      await gap(first).tap();
+      await expect(gap()).toHaveAccessibleDescription("Select a word first");
+      await expect(word(first)).toBeEnabled();
+      await word(first).tap();
+      await gap().tap();
+      await word(second).tap();
+      await expect(gap(first).getByText("Clear", { exact: true })).toHaveCount(
+        0,
+      );
+      await expect(gap(first)).toHaveAccessibleDescription(
+        `Place ${second} in blank 1`,
+      );
+      await gap(first).tap();
+      await expect(
+        gap(second).getByText("Clear", { exact: true }),
+      ).toBeVisible();
+      await expect(word(first)).toBeEnabled();
+      await expect(word(second)).toBeDisabled();
+      await page
+        .getByRole("button", {
+          name: item === 3 ? "Finish practice" : "Next",
+          exact: true,
+        })
+        .tap();
+    }
+    await expect(
+      page.getByRole("heading", { name: "Review", exact: true }),
+    ).toBeVisible();
+  });
+});
+
+test("workspace header and content share their horizontal gutter on every route and breakpoint", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const receipts = [];
+  const routes = [
+    "/",
+    "/types",
+    "/sections",
+    "/mocks",
+    "/guide",
+    "/history",
+    "/progress",
+    "/achievements",
+    "/types/read-aloud",
+  ];
+  for (const width of [989, 1440, 1001, 1000, 901, 768, 767, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const path of routes) {
+      await page.goto(path);
+      await expect(page.locator(".topbar")).toBeVisible();
+      const edges = await page.evaluate(() => {
+        const header = document.querySelector(".topbar")!,
+          main = document.querySelector(".main-content")!;
+        const box = main.getBoundingClientRect(),
+          style = getComputedStyle(main);
+        return {
+          headerLeft: header.firstElementChild!.getBoundingClientRect().left,
+          headerRight: header.lastElementChild!.getBoundingClientRect().right,
+          contentLeft: box.left + parseFloat(style.paddingLeft),
+          contentRight: box.right - parseFloat(style.paddingRight),
+          documentWidth: document.documentElement.scrollWidth,
+        };
+      });
+      expect(
+        Math.abs(edges.headerLeft - edges.contentLeft),
+      ).toBeLessThanOrEqual(1);
+      expect(
+        Math.abs(edges.headerRight - edges.contentRight),
+      ).toBeLessThanOrEqual(1);
+      expect(edges.documentWidth).toBe(width);
+      receipts.push({ path, width, ...edges });
+    }
+  }
+  await (
+    await import("node:fs/promises")
+  ).writeFile(
+    info.outputPath("workspace-gutter-inventory.json"),
+    JSON.stringify(receipts, null, 2),
+  );
 });

@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Mic, Square, X } from "lucide-react";
+import { ChevronDown, Mic, Square, X } from "lucide-react";
 import { toast } from "sonner";
 import { asset } from "../content";
 import { AudioPlayer, stopReviewAudio } from "../components/AudioPlayer";
 import { Button } from "../components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -308,9 +313,8 @@ export function SyllablePractice({
       <DialogContent className="practice-ui syllable-practice">
         <div className="syllable-practice-scroll">
           <DialogTitle>{word.word}</DialogTitle>
-          <DialogDescription>
-            Listen, choose a syllable, then record it. Earn 5 XP per syllable
-            each day for completing practice.
+          <DialogDescription className="sr-only">
+            Listen and practise a syllable from this word.
           </DialogDescription>
           <fieldset
             disabled={busy}
@@ -346,13 +350,6 @@ export function SyllablePractice({
               No reliable syllable grade is available for this recognised word.
             </p>
           )}
-          {corpusReference && (
-            <p className="speech-stats">
-              Synthetic{" "}
-              {referenceAccentNames[corpusReference.accent] || "English"}{" "}
-              reference · not human verified
-            </p>
-          )}
           <div
             className="syllable-choices"
             role="group"
@@ -374,13 +371,10 @@ export function SyllablePractice({
                 }}
               >
                 Syllable {i + 1}
-                <span className="syllable-phonemes">
-                  /{s.label.replace(/[012]/g, "")}/
-                </span>
                 <span data-tone={similarityTone(s.similarity)}>
                   {s.similarity === null
                     ? "Uncertain"
-                    : `${Math.round(s.similarity)}/100`}
+                    : `${Math.round(s.similarity)}/100 similarity`}
                 </span>
               </Button>
             ))}
@@ -417,11 +411,44 @@ export function SyllablePractice({
               )}
             </div>
           )}
-          <p className="speech-stats">
-            Synthetic reference example; timings are approximate. All four
-            supported accents remain valid. Similarity is not pronunciation
-            correctness or an exam score. Retry audio stays in this view.
-          </p>
+          <Collapsible>
+            <CollapsibleTrigger render={<Button variant="ghost" size="sm" />}>
+              Practice details{" "}
+              <ChevronDown aria-hidden="true" className="size-4" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="disclosure-panel">
+              <div className="word-practice-details">
+                <p>
+                  Listen, choose a syllable, then record it. Earn 5 XP per
+                  syllable each day for completing practice.
+                </p>
+                {corpusReference && (
+                  <p>
+                    Synthetic{" "}
+                    {referenceAccentNames[corpusReference.accent] || "English"}{" "}
+                    reference · not human verified
+                  </p>
+                )}
+                <p>
+                  Synthetic reference example; timings are approximate. All four
+                  supported accents remain valid. Similarity is not
+                  pronunciation correctness or an exam score. Retry audio stays
+                  in this view.
+                </p>
+                {syllables.length > 0 && (
+                  <div>
+                    <h3>Sound notation</h3>
+                    {syllables.map((syllable, i) => (
+                      <p key={syllable.syllableIndex}>
+                        Syllable {i + 1}: /
+                        {syllable.label.replace(/[012]/g, "")}/
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
         {current && (
           <div className="syllable-practice-footer">

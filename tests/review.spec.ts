@@ -630,6 +630,7 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
   await page.emulateMedia({ reducedMotion: "reduce" });
   await seed(page);
   const visited: string[] = [];
+  const alignmentReceipts = [];
   for (const viewport of [
     { width: 1440, height: 900 },
     { width: 390, height: 844 },
@@ -657,11 +658,25 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
             name: /^(Your order|Correct order|Why)$/,
           }),
         ).toHaveCount(0);
+        alignmentReceipts.push({
+          id: q.id,
+          type: q.type,
+          state,
+          ...(await alignedReview(page)),
+        });
+        if (state === "correct")
+          await page.screenshot({
+            path: info.outputPath(`review-audit-${viewport.width}-${q.id}.png`),
+            animations: "disabled",
+          });
         let response = "";
         if (fixed) {
           await expect(page.getByLabel("Local syllable scores")).toContainText(
-            "syllables scored",
+            "similarity",
           );
+          await expect(
+            page.getByText(/\d+ of \d+ syllables scored/),
+          ).toHaveCount(0);
           const word = page
             .getByRole("button", { name: /^Practise word / })
             .first();
@@ -738,6 +753,12 @@ test("all 65 questions: contextual comparisons and disclosed explanations across
     }
   }
   expect(visited).toHaveLength(390);
+  await (
+    await import("node:fs/promises")
+  ).writeFile(
+    info.outputPath("review-alignment-inventory.json"),
+    JSON.stringify(alignmentReceipts, null, 2),
+  );
   await info.attach("all-type-feedback-coverage", {
     body: JSON.stringify(visited),
     contentType: "application/json",
@@ -1711,5 +1732,168 @@ test("saved comparisons distinguish positions, prioritize selections and anchor 
       path: info.outputPath(`anchored-comparison-${viewport.width}.png`),
     });
     await fits(page);
+  }
+});
+
+async function alignedReview(page: Page) {
+  const geometry = await page.locator(".review-workspace").evaluate((root) => {
+    const box = (node: Element | null) => {
+      if (!node) throw new Error("Missing review layout boundary");
+      const r = node.getBoundingClientRect();
+      return {
+        x: r.x,
+        y: r.y,
+        width: r.width,
+        height: r.height,
+        right: r.right,
+      };
+    };
+    return {
+      width: innerWidth,
+      leftHeader: box(
+        root.querySelector(".review-question-panel > .response-heading"),
+      ),
+      rightHeader: box(
+        root.querySelector(".feedback-heading") ||
+          root.querySelector(".written-response > .response-heading"),
+      ),
+      leftContent: box(
+        root.querySelector(".review-question-panel > .response-heading + *"),
+      ),
+      rightContent: box(
+        root.querySelector(".written-response > .response-heading + *") ||
+          root.querySelector(".review-answer-panel > .feedback-heading + *"),
+      ),
+    };
+  });
+  const near = (actual: number, expected: number) =>
+    expect(Math.abs(actual - expected)).toBeLessThanOrEqual(1);
+  near(geometry.leftContent.x, geometry.leftHeader.x);
+  near(geometry.rightContent.x, geometry.rightHeader.x);
+  near(geometry.leftContent.width, geometry.leftHeader.width);
+  near(geometry.rightContent.width, geometry.rightHeader.width);
+  if (geometry.width > 900) {
+    near(geometry.leftHeader.y, geometry.rightHeader.y);
+    near(geometry.leftContent.y, geometry.rightContent.y);
+    near(geometry.leftContent.width, geometry.rightContent.width);
+    near(geometry.rightHeader.x - geometry.leftHeader.right, 20);
+  } else {
+    near(geometry.leftHeader.x, geometry.rightHeader.x);
+    near(geometry.leftContent.width, geometry.rightContent.width);
+  }
+  return geometry;
+}
+
+test("review columns align their headers and first content across writing, choices, transcripts and charts", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  const ids = [
+    "summarize-written-text-02",
+    "reading-multiple-02",
+    "listening-blanks-02",
+    "reorder-paragraphs-02",
+    "describe-image-03",
+    "write-essay-01",
+    "summarize-spoken-text-01",
+  ];
+  await seed(page, ids);
+  for (const viewport of [
+    { width: 989, height: 954 },
+    { width: 901, height: 800 },
+    { width: 390, height: 720 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/history/review-correct");
+    for (const [index, id] of ids.entries()) {
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        id,
+      );
+      await alignedReview(page);
+      if (id === "summarize-spoken-text-01")
+        expect(
+          await page
+            .locator(".written-response > .reading-pages")
+            .evaluate((node) => node.clientHeight),
+        ).toBeGreaterThanOrEqual(120);
+      await fits(page);
+      await page.screenshot({
+        path: info.outputPath(`aligned-${viewport.width}-${id}.png`),
+      });
+      if (index < ids.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+  }
+});
+
+test("speaking limits and word-practice metatext remain complete on demand", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seed(page, ["read-aloud-01"]);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 720 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/history/review-correct");
+    await expect(page.getByText(/\d+ of \d+ syllables scored/)).toHaveCount(0);
+    await expect(
+      page.locator(".local-speech-screen > .speech-stats"),
+    ).toHaveCount(0);
+    const details = page.getByRole("button", { name: "Details", exact: true });
+    await details.click();
+    const text = await readDetails(page);
+    expect(text).toContain("Coverage");
+    expect(text).toContain("syllables scored");
+    expect(text).toContain("not pronunciation correctness or an exam score");
+    await page.keyboard.press("Escape");
+    await expect(details).toBeFocused();
+    const word = page.getByRole("button", { name: /^Practise word / }).first();
+    await word.click();
+    const dialog = page.getByRole("dialog");
+    const disclosure = dialog.getByRole("button", {
+      name: "Practice details",
+      exact: true,
+    });
+    await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      dialog.getByText(/Listen, choose a syllable/),
+    ).not.toBeVisible();
+    const syllable = dialog.getByRole("button", { name: /^Syllable 1 / });
+    await expect(syllable).toContainText("similarity");
+    await expect(syllable).toHaveAccessibleName(
+      /^Syllable 1 \d+\/100 similarity$/,
+    );
+    await disclosure.press("Enter");
+    await expect(disclosure).toHaveAttribute("aria-expanded", "true");
+    const support = dialog.locator(".word-practice-details");
+    await expect(support).toContainText("Earn 5 XP per syllable");
+    await expect(support).toContainText(
+      "All four supported accents remain valid",
+    );
+    await expect(support).toContainText("Retry audio stays in this view");
+    await expect(support).toContainText("Sound notation");
+    await support
+      .getByRole("heading", { name: "Sound notation" })
+      .scrollIntoViewIfNeeded();
+    await expect(
+      support.getByRole("heading", { name: "Sound notation" }),
+    ).toBeInViewport();
+    await page.screenshot({
+      path: info.outputPath(`practice-details-${viewport.width}.png`),
+    });
+    await disclosure.scrollIntoViewIfNeeded();
+    await disclosure.press("Enter");
+    await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    await page.keyboard.press("Escape");
+    await expect(word).toBeFocused();
   }
 });

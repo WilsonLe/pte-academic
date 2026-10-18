@@ -1,7 +1,13 @@
 import { Textarea } from "./components/ui/textarea";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from "lucide-react";
 import { type Answer, type Question, guideFor, wordCount } from "./content";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./components/ui/tooltip";
 export function Chart({
   q,
   responsive = false,
@@ -49,6 +55,7 @@ export function QuestionInput({
   disabled: boolean;
 }) {
   const g = guideFor(q);
+  const gapHintId = useId();
   const values = answer.values || [];
   const [word, setWord] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -76,6 +83,12 @@ export function QuestionInput({
     setValues(next);
     setWord("");
   }
+  const gapAction = (i: number) =>
+    word
+      ? `Place ${word} in blank ${i + 1}`
+      : values[i]
+        ? `Clear blank ${i + 1}`
+        : "Select a word first";
   const insert = (id: string) => {
     setValues([...values, id]);
     setSelected(null);
@@ -203,76 +216,95 @@ export function QuestionInput({
     );
   if (["bank", "blanks", "dropdown"].includes(g.kind))
     return (
-      <div>
-        <div className="gap-passage">
-          {q.text!.split("{{}}").map((piece, i, all) => (
-            <span key={i}>
-              {piece}
-              {i < all.length - 1 &&
-                (g.kind === "dropdown" ? (
-                  <select
-                    disabled={disabled}
-                    aria-label={`Blank ${i + 1}`}
-                    value={values[i] || ""}
-                    onChange={(e) => setBlank(i, e.target.value)}
-                  >
-                    <option value="">Select…</option>
-                    {q.blankOptions![i].map((x) => (
-                      <option key={x}>{x}</option>
-                    ))}
-                  </select>
-                ) : g.kind === "blanks" ? (
-                  <input
-                    disabled={disabled}
-                    aria-label={`Blank ${i + 1}`}
-                    value={values[i] || ""}
-                    onChange={(e) => setBlank(i, e.target.value)}
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                ) : (
+      <TooltipProvider delay={150}>
+        <div>
+          <div className="gap-passage">
+            {q.text!.split("{{}}").map((piece, i, all) => (
+              <span key={i}>
+                {piece}
+                {i < all.length - 1 &&
+                  (g.kind === "dropdown" ? (
+                    <select
+                      disabled={disabled}
+                      aria-label={`Blank ${i + 1}`}
+                      value={values[i] || ""}
+                      onChange={(e) => setBlank(i, e.target.value)}
+                    >
+                      <option value="">Select…</option>
+                      {q.blankOptions![i].map((x) => (
+                        <option key={x}>{x}</option>
+                      ))}
+                    </select>
+                  ) : g.kind === "blanks" ? (
+                    <input
+                      disabled={disabled}
+                      aria-label={`Blank ${i + 1}`}
+                      value={values[i] || ""}
+                      onChange={(e) => setBlank(i, e.target.value)}
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <button
+                            disabled={disabled}
+                            className={`word-gap ${word ? "can-place" : ""}`}
+                            aria-label={`Blank ${i + 1}${values[i] ? `: ${values[i]}` : ""}`}
+                            aria-describedby={`${gapHintId}-${i}`}
+                            onClick={() =>
+                              word ? place(i, word) : setBlank(i, "")
+                            }
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              place(i, e.dataTransfer.getData("text/plain"));
+                            }}
+                          />
+                        }
+                      >
+                        {values[i] || " "}
+                        {values[i] && !word && (
+                          <span className="gap-clear" aria-hidden="true">
+                            Clear
+                          </span>
+                        )}
+                      </TooltipTrigger>
+                      <span className="sr-only" id={`${gapHintId}-${i}`}>
+                        {gapAction(i)}
+                      </span>
+                      <TooltipContent role="tooltip">
+                        {gapAction(i)}
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+              </span>
+            ))}
+          </div>
+          {g.kind === "bank" && (
+            <>
+              <div className="word-bank" aria-label="Word bank">
+                {q.options!.map((x) => (
                   <button
-                    disabled={disabled}
-                    className={`word-gap ${word ? "can-place" : ""}`}
-                    aria-label={`Blank ${i + 1}${values[i] ? `: ${values[i]}` : ""}`}
-                    onClick={() => (word ? place(i, word) : setBlank(i, ""))}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      place(i, e.dataTransfer.getData("text/plain"));
+                    disabled={disabled || values.includes(x)}
+                    aria-pressed={word === x}
+                    draggable={!disabled && !values.includes(x)}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("text/plain", x);
+                      setWord(x);
                     }}
+                    onClick={() => setWord(word === x ? "" : x)}
+                    key={x}
                   >
-                    {values[i] || " "}
+                    {x}
                   </button>
                 ))}
-            </span>
-          ))}
+              </div>
+            </>
+          )}
         </div>
-        {g.kind === "bank" && (
-          <>
-            <div className="word-bank" aria-label="Word bank">
-              {q.options!.map((x) => (
-                <button
-                  disabled={disabled || values.includes(x)}
-                  aria-pressed={word === x}
-                  draggable={!disabled && !values.includes(x)}
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("text/plain", x);
-                    setWord(x);
-                  }}
-                  onClick={() => setWord(word === x ? "" : x)}
-                  key={x}
-                >
-                  {x}
-                </button>
-              ))}
-            </div>
-            {!word && (
-              <p className="exam-hint">Select a filled blank to clear it.</p>
-            )}
-          </>
-        )}
-      </div>
+      </TooltipProvider>
     );
   if (g.kind === "order")
     return (

@@ -466,10 +466,6 @@ export function GameHub({
                     selectedBadge.target +
                     " so far."}
               </DialogDescription>
-              <p className="text-xs text-muted-foreground">
-                Practice milestones celebrate effort. Your XP and badges stay on
-                this device.
-              </p>
             </>
           )}
         </DialogContent>

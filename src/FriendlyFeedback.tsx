@@ -51,9 +51,11 @@ export function ReviewDisclosure({
 export function FriendlyFeedback({
   question: q,
   answer: a,
+  audio,
 }: {
   question: Question;
   answer: Answer;
+  audio?: React.ReactNode;
 }) {
   const [selected, setSelected] = useState<ReviewItem>();
   const items = reviewItems(q, a);
@@ -77,6 +79,7 @@ export function FriendlyFeedback({
               </Button>
             </ReviewDisclosure>
           </div>
+          {audio}
           <ReadingPages
             blocks={items[0].parts.map((part) => ({ text: part.text }))}
             label="feedback pages"

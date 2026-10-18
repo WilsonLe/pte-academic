@@ -18,7 +18,9 @@ function OriginalQuestion({ question: q }: { question: Question }) {
   return (
     <section className="review-question-panel" aria-label="Original question">
       <div className="response-heading">
-        <h3>Question</h3>
+        <h3 className={q.prompt ? "question-query" : undefined}>
+          {q.prompt || "Question"}
+        </h3>
         {extraTranscript && (
           <ReviewDisclosure
             title="Recording transcript"
@@ -35,7 +37,6 @@ function OriginalQuestion({ question: q }: { question: Question }) {
           </ReviewDisclosure>
         )}
       </div>
-      {q.prompt && <p className="question-query">{q.prompt}</p>}
       {q.chart && (
         <div className="review-chart">
           <Chart q={q} responsive />
@@ -106,14 +107,26 @@ export function Review({
             </div>
           ) : (
             <div className="review-reading">
-              {q.audio && (
+              {q.audio && guideFor(q).kind !== "write" && (
                 <AudioPlayer
                   key={`audio-${id}`}
                   src={asset(q.audio)}
                   label="Prompt recording"
                 />
               )}
-              <FriendlyFeedback key={id} question={q} answer={a} />
+              <FriendlyFeedback
+                key={id}
+                question={q}
+                answer={a}
+                audio={
+                  q.audio && guideFor(q).kind === "write" ? (
+                    <AudioPlayer
+                      src={asset(q.audio)}
+                      label="Prompt recording"
+                    />
+                  ) : undefined
+                }
+              />
             </div>
           )}
         </section>

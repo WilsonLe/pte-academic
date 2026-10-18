@@ -47,6 +47,7 @@ body {
   flex-shrink: 0;
 }
 .workspace {
+  --workspace-gutter: 40px;
   margin-left: 96px;
 }
 .desktop-nav {
@@ -66,7 +67,7 @@ body {
   top: 0;
   flex: 0 0 80px;
   height: 80px;
-  padding: 0 32px;
+  padding: 0 var(--workspace-gutter);
 }
 .topbar h1 {
   font-size: 22px;
@@ -89,7 +90,7 @@ body {
   min-height: 0;
   width: 100%;
   max-width: 1600px;
-  padding: 28px 40px;
+  padding: 28px var(--workspace-gutter);
   display: flex;
 }
 .page-enter {
@@ -760,8 +761,11 @@ body {
   }
 }
 @media (max-width: 1000px) {
+  .workspace {
+    --workspace-gutter: 22px;
+  }
   .main-content {
-    padding: 22px;
+    padding: 22px var(--workspace-gutter);
   }
   .game-mode {
     padding: 16px;
@@ -776,13 +780,14 @@ body {
     --workspace-footer-height: calc(76px + env(safe-area-inset-bottom));
   }
   .workspace {
+    --workspace-gutter: 16px;
     margin-left: 0;
     padding-bottom: var(--workspace-footer-height);
   }
   .topbar {
     flex-basis: 68px;
     height: 68px;
-    padding: 0 16px;
+    padding: 0 var(--workspace-gutter);
     gap: 8px;
   }
   .topbar h1 {
@@ -831,7 +836,7 @@ body {
     border-radius: 17px;
   }
   .main-content {
-    padding: 18px 16px;
+    padding: 18px var(--workspace-gutter);
   }
   .home-screen,
   .screen-stack {
@@ -2270,6 +2275,19 @@ body {
   flex: 1;
   min-height: 0;
 }
+.review-question-panel > .response-heading,
+.written-response > .response-heading,
+.review-answer-panel > .feedback-heading {
+  min-height: 48px;
+  flex-shrink: 0;
+}
+.review-answer-panel > .feedback-heading {
+  display: flex;
+  align-items: center;
+}
+.written-response {
+  gap: 10px;
+}
 .review-question-panel .reading-copy {
   font-size: 18px;
   line-height: 1.5;
@@ -2303,7 +2321,7 @@ body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(var(--review-question-min), 1fr) minmax(var(--review-feedback-min), var(--review-feedback-share));
   }
-  .review-workspace:has(.review-reading > .audio-player) {
+  .review-workspace:has(.review-reading .audio-player) {
     --review-feedback-min: 360px;
     --review-feedback-share: 1.3fr;
   }
@@ -2330,3 +2348,19 @@ body {
 
 .written-response > .response-heading { gap: 8px; }
 .response-word-count { margin-left: auto; font-size: 13px; color: var(--muted-foreground); }
+
+.word-practice-details {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.word-practice-details p {
+  margin: 0;
+}
+.gap-clear {
+  margin-left: 8px;
+  font-size: 12px;
+  text-decoration: underline;
+}
