@@ -77,6 +77,8 @@ export function observePageLayout(node: HTMLElement, pack: () => void) {
 }
 
 export type ReadingBlock = { label?: string; text: string };
+export type ReadingFocus = { block: number; offset: number };
+type PageBlock = ReadingBlock & { block: number; start: number; end: number };
 
 function ReadingBlocks({ blocks }: { blocks: ReadingBlock[] }) {
   return blocks.map((block, i) => (
@@ -93,15 +95,17 @@ export function ReadingPages({
   label = "reading pages",
   scroll = false,
   counterLabel,
+  focus,
 }: {
   texts?: string[];
   blocks?: ReadingBlock[];
   label?: string;
   scroll?: boolean;
   counterLabel?: string;
+  focus?: ReadingFocus;
 }) {
   const [index, setIndex] = useState(0);
-  const [pages, setPages] = useState<ReadingBlock[][]>([[]]);
+  const [pages, setPages] = useState<PageBlock[][]>([[]]);
   const panel = useRef<HTMLDivElement>(null);
   // Plain reading consumers keep their existing deduplicated, packed prose.
   // Reviews can retain labels and line breaks without adding separate pagers.
@@ -165,12 +169,19 @@ export function ReadingPages({
         }
         return measure.clientHeight <= height;
       };
-      const next: ReadingBlock[][] = [];
-      let page: ReadingBlock[] = [];
-      for (const block of JSON.parse(source) as ReadingBlock[]) {
+      const next: PageBlock[][] = [];
+      let page: PageBlock[] = [];
+      for (const [blockIndex, block] of (
+        JSON.parse(source) as ReadingBlock[]
+      ).entries()) {
         if (!block.text.trim()) continue;
         if (fits([...page, block])) {
-          page.push(block);
+          page.push({
+            ...block,
+            block: blockIndex,
+            start: 0,
+            end: block.text.length,
+          });
           continue;
         }
         // Keep a block together if it can fit on a fresh page.
@@ -179,13 +190,29 @@ export function ReadingPages({
           page = [];
         }
         let rest = block.text.trim();
+        let start = block.text.indexOf(rest);
         let continued = false;
         while (rest) {
-          const title = block.label
+          let title = block.label
             ? block.label + (continued ? " (continued)" : "")
             : undefined;
+          // A continuation heading must leave room for prose, including at
+          // enlarged fonts. Retain its source identity without forcing letters
+          // onto separate pages merely to accommodate the extra suffix.
+          if (
+            continued &&
+            block.label &&
+            !fits([{ label: title, text: rest.split(/\s+/)[0] }])
+          )
+            title = block.label;
           if (fits([{ label: title, text: rest }])) {
-            page.push({ label: title, text: rest });
+            page.push({
+              label: title,
+              text: rest,
+              block: blockIndex,
+              start,
+              end: start + rest.length,
+            });
             break;
           }
           // Measure the maximum fit first, then preserve complete paragraphs
@@ -201,8 +228,19 @@ export function ReadingPages({
             } else high = n - 1;
           }
           fit = readingBoundary(rest, fit);
-          next.push([{ label: title, text: rest.slice(0, fit).trimEnd() }]);
-          rest = rest.slice(fit).trimStart();
+          const text = rest.slice(0, fit).trimEnd();
+          next.push([
+            {
+              label: title,
+              text,
+              block: blockIndex,
+              start,
+              end: start + text.length,
+            },
+          ]);
+          const tail = rest.slice(fit);
+          rest = tail.trimStart();
+          start += fit + tail.length - rest.length;
           continued = true;
         }
       }
@@ -219,6 +257,18 @@ export function ReadingPages({
       disconnect();
     };
   }, [source, scroll]);
+  useLayoutEffect(() => {
+    if (!focus || scroll) return;
+    const target = pages.findIndex((page) =>
+      page.some(
+        (part) =>
+          part.block === focus.block &&
+          focus.offset >= part.start &&
+          focus.offset < part.end,
+      ),
+    );
+    if (target >= 0) setIndex(target);
+  }, [pages, focus, scroll]);
   const current = Math.min(index, pages.length - 1);
   return (
     <div className={`reading-pages ${scroll ? "reading-pages-scroll" : ""}`}>

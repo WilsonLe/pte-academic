@@ -15,6 +15,7 @@ type CardsListProps<T> = {
   empty?: ReactNode;
   index?: number;
   onIndex?: (index: number) => void;
+  onVisibleItemsChange?: (items: readonly T[]) => void;
   className?: string;
   gridClassName?: string;
   minCardWidth?: number;
@@ -35,6 +36,7 @@ export function CardsList<T>({
   empty,
   index,
   onIndex,
+  onVisibleItemsChange,
   className = "",
   gridClassName = "",
   minCardWidth = 300,
@@ -56,6 +58,13 @@ export function CardsList<T>({
     ? 0
     : Math.max(0, Math.min(index ?? page, Math.max(0, count - 1)));
   const latest = useRef({ current, size: layout.size, onIndex });
+  useLayoutEffect(() => {
+    onVisibleItemsChange?.(
+      scroll
+        ? items
+        : items.slice(current * layout.size, (current + 1) * layout.size),
+    );
+  }, [items, current, layout.size, scroll, onVisibleItemsChange]);
   useLayoutEffect(() => {
     latest.current = { current, size: layout.size, onIndex };
   });

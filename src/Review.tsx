@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { asset, guideFor, questions, type Question } from "./content";
 import { AudioPlayer } from "./components/AudioPlayer";
-import { Pager, ReadingPages } from "./Pages";
+import { Pager, ReadingPages, type ReadingFocus } from "./Pages";
 import { questionBlocks } from "./review-content";
 import { Chart } from "./QuestionInput";
 import { Button } from "./components/ui/button";
@@ -12,7 +12,13 @@ import { answered } from "./progress";
 import type { Pronunciation } from "./speech/comparison-schema";
 import type { Result } from "./Runner";
 
-function OriginalQuestion({ question: q }: { question: Question }) {
+function OriginalQuestion({
+  question: q,
+  focus,
+}: {
+  question: Question;
+  focus?: ReadingFocus;
+}) {
   const blocks = questionBlocks(q);
   const extraTranscript = q.text && q.audioText && q.text !== q.audioText;
   return (
@@ -48,6 +54,7 @@ function OriginalQuestion({ question: q }: { question: Question }) {
           blocks={blocks}
           label="question pages"
           counterLabel="Question text"
+          focus={focus}
         />
       )}
     </section>
@@ -62,6 +69,10 @@ export function Review({
   onPronunciation: (questionId: string, value: Pronunciation) => void;
 }) {
   const [index, setIndex] = useState(0);
+  const [sourceContext, setSourceContext] = useState<{
+    id?: string;
+    focus?: ReadingFocus;
+  }>();
   const responded = r.questionIds.filter(
     (id) =>
       answered(r.answers[id]) ||
@@ -70,6 +81,14 @@ export function Review({
       r.answers[id]?.transcription,
   );
   const id = responded[Math.min(index, responded.length - 1)];
+  const focusSource = useCallback(
+    (focus?: ReadingFocus) => {
+      // A repeated selection is a fresh reading request, even when the learner
+      // manually browsed away from the same source position in the meantime.
+      setSourceContext({ id, focus: focus ? { ...focus } : undefined });
+    },
+    [id],
+  );
   if (!id)
     return (
       <p className="empty-state">No responses were saved in this session.</p>
@@ -90,7 +109,10 @@ export function Review({
         />
       </div>
       <div className="review-workspace">
-        <OriginalQuestion question={q} />
+        <OriginalQuestion
+          question={q}
+          focus={sourceContext?.id === id ? sourceContext.focus : undefined}
+        />
         <section className="review-answer-panel" aria-label="Response feedback">
           {guideFor(q).kind !== "write" && (
             <h3 className="feedback-heading">Feedback</h3>
@@ -118,6 +140,7 @@ export function Review({
                 key={id}
                 question={q}
                 answer={a}
+                onSourceFocus={focusSource}
                 audio={
                   q.audio && guideFor(q).kind === "write" ? (
                     <AudioPlayer
