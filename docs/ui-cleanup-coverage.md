@@ -74,3 +74,9 @@ The full-mock visual audit walks all65unique authored IDs using normal forward p
 Native checks use the existing retained sessions without resets: all22review types, all four word-bank variants with a deliberate wrong/partial response, actual microphone sample/playback, guide disclosure, earned/locked badges and main navigation, with History/reopen/reload and preserved progress. Phone and short-window controls remain contained; very short pages may scroll inside their panel. Exact merge/Pages verification belongs to the linked delivery evidence. Chromium coverage does not establish native Safari, a real screen reader, every OS font override or speech-recognition quality. No new content, model, storage, dependency or provider behavior is introduced.
 
 The current architecture already assigns these owners and requires compact defaults/progressive disclosure. This change needs no new ADR or agent-policy layer; the existing audits are the durable coverage record.
+
+## Guide timing follow-up (#139)
+
+Seven guides already state preparation or response limits in their authored instructions. Optional source-owned `timingInInstructions` phase annotations suppress only the equivalent generated fragment. Three writing guides and the discussion guide retain complete limits in prose; Describe Image, Retell Lecture and Respond to a Situation omit repeated preparation but retain their missing 40s response limit. The other 15 guides keep their necessary fallback timing/shared-section context. Original instructions and numeric Runner/preflight limits are unchanged; no natural-language timing heuristic is used.
+
+The authored-time contract independently binds each annotation to its prose and numeric allowance. The all 22 guide browser matrix checks exact complete Instructions, other tabs, paging and responsive controls. This small static display annotation adds no provider, question, audio, storage, scoring, reward or dependency change; no new ADR is needed.

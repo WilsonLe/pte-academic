@@ -241,12 +241,21 @@ export function GuideScreen({
 }) {
   const [tab, setTab] = useState("Instructions");
   const questionCount = questions.filter((q) => q.type === g.id).length;
+  const timing = [
+    g.prepSeconds && !g.timingInInstructions?.preparation
+      ? `${g.prepSeconds}s preparation.`
+      : "",
+    g.answerSeconds
+      ? g.timingInInstructions?.response
+        ? ""
+        : `${g.answerSeconds}s response.`
+      : "Shared section timer.",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const texts =
     tab === "Instructions"
-      ? [
-          g.instructions,
-          `${g.prepSeconds ? g.prepSeconds + "s preparation. " : ""}${g.answerSeconds ? g.answerSeconds + "s response." : "Shared section timer."}`,
-        ]
+      ? [g.instructions, ...(timing ? [timing] : [])]
       : tab === "Strategy & tips"
         ? [...g.tips, g.pitfall]
         : [g.scoring, `Skills practised: ${g.skills}.`];

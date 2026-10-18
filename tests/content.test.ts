@@ -48,3 +48,64 @@ test("writing gives word-count guidance without assigning proficiency scores", (
   assert.match(feedback(q, { text: "Too short" }).detail, /2 words/);
   assert.equal(feedback(q, { text: q.model }).label, "Self-review");
 });
+
+test("guide timing annotations agree with the complete authored phase allowances", () => {
+  const cases = [
+    {
+      id: "describe-image",
+      phases: { preparation: 25 },
+      text: /Study the image for 25 seconds/,
+    },
+    {
+      id: "retell-lecture",
+      phases: { preparation: 10 },
+      text: /10 seconds of preparation/,
+    },
+    {
+      id: "summarize-group-discussion",
+      phases: { preparation: 10, response: 120 },
+      text: /Prepare for 10 seconds.*up to two minutes/,
+    },
+    {
+      id: "respond-to-situation",
+      phases: { preparation: 10 },
+      text: /After 10 seconds, speak/,
+    },
+    {
+      id: "summarize-written-text",
+      phases: { response: 600 },
+      text: /You have 10 minutes/,
+    },
+    {
+      id: "write-essay",
+      phases: { response: 1200 },
+      text: /You have 20 minutes, including planning and checking/,
+    },
+    {
+      id: "summarize-spoken-text",
+      phases: { response: 600 },
+      text: /10 minutes include listening and writing/,
+    },
+  ];
+  assert.deepEqual(
+    guides
+      .filter((g) => g.timingInInstructions)
+      .map((g) => g.id)
+      .sort(),
+    cases.map((c) => c.id).sort(),
+  );
+  for (const c of cases) {
+    const guide = guides.find((g) => g.id === c.id)!;
+    assert.match(guide.instructions, c.text);
+    assert.deepEqual(
+      guide.timingInInstructions,
+      Object.fromEntries(Object.keys(c.phases).map((phase) => [phase, true])),
+    );
+    for (const [phase, seconds] of Object.entries(c.phases)) {
+      assert.equal(
+        phase === "preparation" ? guide.prepSeconds : guide.answerSeconds,
+        seconds,
+      );
+    }
+  }
+});
