@@ -1611,3 +1611,105 @@ test("stacked original question and feedback remain reachable at intermediate ph
     }
   }
 });
+
+test("saved comparisons distinguish positions, prioritize selections and anchor dictation openings", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await seed(page, [
+    "listening-single-02",
+    "reorder-paragraphs-02",
+    "write-dictation-01",
+  ]);
+  // Isolated browser fixture matches the three independently observed native responses.
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("pte-studio", 2);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction("attempts", "readwrite");
+        const store = tx.objectStore("attempts");
+        const record = store.get("review-wrong");
+        record.onsuccess = () => {
+          const saved = record.result;
+          saved.result.answers["listening-single-02"] = { values: ["3"] };
+          saved.result.answers["reorder-paragraphs-02"] = {
+            values: ["1", "0", "3", "2"],
+          };
+          saved.result.answers["write-dictation-01"] = {
+            text: "The students submitted the report.",
+          };
+          store.put(saved, "review-wrong");
+        };
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error);
+        };
+      };
+    });
+  });
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 720 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/history/review-wrong");
+    const feedback = page.getByRole("region", {
+      name: "Response feedback",
+      exact: true,
+    });
+    const selected = feedback.getByRole("button", {
+      name: "Option D: Selected · Incorrect. Explain",
+      exact: true,
+    });
+    await expect(selected).toBeVisible();
+    await expect(
+      feedback.getByRole("button", { name: /Explain$/ }).first(),
+    ).toHaveAccessibleName("Option D: Selected · Incorrect. Explain");
+    await selected.click();
+    await expect(page.getByRole("dialog")).toContainText("Option D");
+    await page.keyboard.press("Escape");
+    await expect(selected).toBeFocused();
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    const position = feedback.getByRole("button", {
+      name: "Position 1: In place. Explain",
+      exact: true,
+    });
+    await expect(position).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Original question", exact: true }),
+    ).toContainText("Paragraph 1");
+    await position.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "position 2 in the answer",
+    );
+    await page.keyboard.press("Escape");
+    await expect(position).toBeFocused();
+    await page
+      .getByRole("button", { name: "Next review questions", exact: true })
+      .click();
+    const firstWord = feedback.getByRole("button", {
+      name: "Words 1–6: The, recorded word. Explain",
+      exact: true,
+    });
+    await expect(firstWord).toHaveText("✓ The");
+    await firstWord.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      "This word matches the recorded sentence",
+    );
+    await page.keyboard.press("Escape");
+    await expect(firstWord).toBeFocused();
+    await page.screenshot({
+      path: info.outputPath(`anchored-comparison-${viewport.width}.png`),
+    });
+    await fits(page);
+  }
+});

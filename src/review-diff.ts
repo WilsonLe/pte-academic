@@ -55,8 +55,19 @@ export function dictationDiff(actual: string, expected: string): DiffPart[][] {
     if (prefix.length) result.push(prefix.join(" "));
     return result;
   };
-  const a = tokens(actual),
-    b = tokens(expected);
+  const actualTokens = tokens(actual),
+    expectedTokens = tokens(expected);
+  // Anchor an identical opening before backward tie-breaking can align repeated
+  // words later in the sentence and describe that opening as missing.
+  let prefix = 0;
+  while (
+    prefix < actualTokens.length &&
+    prefix < expectedTokens.length &&
+    normalize(actualTokens[prefix]) === normalize(expectedTokens[prefix])
+  )
+    prefix++;
+  const a = actualTokens.slice(prefix),
+    b = expectedTokens.slice(prefix);
   const rows = Array.from(
     { length: a.length + 1 },
     () => new Uint32Array(b.length + 1),
@@ -94,7 +105,10 @@ export function dictationDiff(actual: string, expected: string): DiffPart[][] {
       output.push([good(b[--j])]);
     }
   }
-  return output.reverse();
+  return [
+    ...actualTokens.slice(0, prefix).map((word) => [good(word, "✓")]),
+    ...output.reverse(),
+  ];
 }
 
 export function reviewItems(q: Question, a: Answer): ReviewItem[] {
@@ -119,7 +133,7 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
       const matches = values[i] === value;
       return make(
         String(i),
-        `Paragraph ${i + 1}`,
+        `Position ${i + 1}`,
         matches
           ? "In place"
           : values[i] === undefined
@@ -132,30 +146,36 @@ export function reviewItems(q: Question, a: Answer): ReviewItem[] {
       );
     });
   if (kind === "single" || kind === "multi")
-    return q.options!.map((text, i) => {
-      const selected = values.includes(String(i)),
-        correct = q.answers!.includes(String(i));
-      const state = selected
-        ? correct
-          ? "Selected · Correct"
-          : "Selected · Incorrect"
-        : correct
-          ? "Missed"
-          : "Not selected";
-      return make(
-        String(i),
-        `Option ${String.fromCharCode(65 + i)}`,
-        state,
-        [
-          correct
-            ? good(text, selected ? "✓" : "+")
-            : selected
-              ? bad(text)
-              : neutral(text),
-        ],
-        [...rationale, { text: state }],
-      );
-    });
+    return q
+      .options!.map((text, i) => {
+        const selected = values.includes(String(i)),
+          correct = q.answers!.includes(String(i));
+        const state = selected
+          ? correct
+            ? "Selected · Correct"
+            : "Selected · Incorrect"
+          : correct
+            ? "Missed"
+            : "Not selected";
+        return make(
+          String(i),
+          `Option ${String.fromCharCode(65 + i)}`,
+          state,
+          [
+            correct
+              ? good(text, selected ? "✓" : "+")
+              : selected
+                ? bad(text)
+                : neutral(text),
+          ],
+          [...rationale, { text: state }],
+        );
+      })
+      .sort((left, right) => {
+        const priority = (item: ReviewItem) =>
+          values.includes(item.id) ? 0 : q.answers!.includes(item.id) ? 1 : 2;
+        return priority(left) - priority(right);
+      });
   if (["dropdown", "bank", "blanks"].includes(kind))
     return q.answers!.map((expected, i) => {
       const actual = values[i]?.trim() || "",
