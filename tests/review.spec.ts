@@ -1864,9 +1864,15 @@ test("saved comparisons distinguish positions, prioritize selections and anchor 
       exact: true,
     });
     await expect(position).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Original question", exact: true }),
-    ).toContainText("Paragraph 1");
+    // Position 1 uses original Paragraph 2; the source follows that comparison.
+    const original = page.getByRole("region", {
+      name: "Original question",
+      exact: true,
+    });
+    await expect(original).toContainText("Paragraph 2");
+    await expect(original).toContainText(
+      "Engineers first built a small model of the proposed bridge.",
+    );
     await position.click();
     await expect(page.getByRole("dialog")).toContainText(
       "position 2 in the answer",
