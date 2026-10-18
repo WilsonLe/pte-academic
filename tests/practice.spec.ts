@@ -4160,3 +4160,142 @@ for (const phase of ["preparation", "running"] as const) {
     }
   });
 }
+
+test("timed chart labels remain readable and complete across every image and viewport", async ({
+  page,
+  context,
+}, info) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.addInitScript(() => {
+    AnalyserNode.prototype.getFloatTimeDomainData = function (data) {
+      data.fill(0.03);
+    };
+  });
+  await page.clock.install();
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/practice/type/describe-image");
+  await page
+    .getByRole("button", { name: "Test microphone", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Microphone check playback", { exact: true }),
+  ).toBeVisible();
+  await start(page);
+  const charts = questions.filter((q) => q.chart);
+  expect(charts).toHaveLength(5);
+  const audit = [];
+  for (const [index, question] of charts.entries()) {
+    const chart = question.chart!;
+    await expect(page.getByRole("figure")).toHaveAccessibleName(
+      `${chart.title}: ${chart.labels.map((label, i) => `${label} ${chart.values[i]} ${chart.unit}`).join(", ")}`,
+    );
+    for (const viewport of [
+      { width: 1280, height: 720 },
+      { width: 1440, height: 900 },
+      { width: 390, height: 844 },
+      { width: 320, height: 480 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.locator(".exam-main").evaluate((main) => main.scrollTo(0, 0));
+      const geometry = await page.getByRole("figure").evaluate((figure) => {
+        const bounds = figure.getBoundingClientRect(),
+          main = document.querySelector(".exam-main")!.getBoundingClientRect();
+        return {
+          title: figure.querySelector("figcaption")!.textContent,
+          unit: figure.querySelector(".chart-unit")!.textContent,
+          chartFits: bounds.top >= main.top && bounds.bottom <= main.bottom + 1,
+          labels: [
+            ...figure.querySelectorAll(".chart-column > span:last-child"),
+          ].map((label) => {
+            const r = label.getBoundingClientRect();
+            return {
+              text: label.textContent,
+              fontSize: parseFloat(getComputedStyle(label).fontSize),
+              fits:
+                label.scrollHeight <= label.clientHeight + 1 &&
+                label.scrollWidth <= label.clientWidth + 1 &&
+                r.left >= bounds.left &&
+                r.right <= bounds.right &&
+                r.bottom <= bounds.bottom,
+            };
+          }),
+          values: [
+            ...figure.querySelectorAll(".chart-column > span:first-child"),
+          ].map((value) => value.textContent),
+          bars: [...figure.querySelectorAll(".bar")].map((bar) => {
+            const r = bar.getBoundingClientRect();
+            return { height: r.height, bottom: r.bottom, width: r.width };
+          }),
+        };
+      });
+      expect(geometry.title).toBe(chart.title);
+      expect(geometry.unit).toBe(chart.unit);
+      expect(geometry.values).toEqual(chart.values.map(String));
+      expect(geometry.labels.map((label) => label.text)).toEqual(chart.labels);
+      for (const label of geometry.labels) {
+        expect(label.fontSize).toBeGreaterThanOrEqual(12);
+        expect(label.fits).toBe(true);
+      }
+      const heights = geometry.bars.map((bar) => bar.height),
+        bottoms = geometry.bars.map((bar) => bar.bottom);
+      expect(Math.min(...heights)).toBeGreaterThan(2);
+      // Keep the existing timed-chart scale, alongside its ratios and baseline.
+      expect(Math.max(...heights)).toBeCloseTo(173.9, 0);
+      expect(Math.max(...bottoms) - Math.min(...bottoms)).toBeLessThan(1);
+      for (const [i, height] of heights.entries())
+        expect(height / Math.max(...heights)).toBeCloseTo(
+          chart.values[i] / Math.max(...chart.values),
+          2,
+        );
+      if (viewport.height >= 720) expect(geometry.chartFits).toBe(true);
+      // Short windows keep the complete stimulus reachable in the contained panel.
+      const lastLabel = page.locator(".chart-column > span:last-child").last();
+      await lastLabel.scrollIntoViewIfNeeded();
+      expect(
+        await lastLabel.evaluate((label) => {
+          const r = label.getBoundingClientRect(),
+            main = document
+              .querySelector(".exam-main")!
+              .getBoundingClientRect();
+          return r.top >= main.top - 1 && r.bottom <= main.bottom + 1;
+        }),
+      ).toBe(true);
+      expect(
+        await page.evaluate(() => [
+          document.documentElement.scrollWidth,
+          document.documentElement.scrollHeight,
+        ]),
+      ).toEqual([viewport.width, viewport.height]);
+      await expect(
+        page.getByRole("button", { name: "End practice", exact: true }),
+      ).toBeVisible();
+      audit.push({ question: question.id, viewport, ...geometry });
+    }
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.clock.fastForward(25100);
+    await expect(page.getByText("Recording", { exact: true })).toBeVisible();
+    await page.waitForTimeout(300); // Retain native codec output; only prompt timing is controlled.
+    await page
+      .getByRole("button", {
+        name: index === charts.length - 1 ? "Finish practice" : "Next",
+        exact: true,
+      })
+      .click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+  await expect(
+    page.getByRole("heading", { name: "Review", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "review questions", exact: true }),
+  ).toContainText(/Question\s*1\s*\/\s*5/);
+  await expect(
+    page.getByRole("group", { name: "Your recording", exact: true }),
+  ).toBeVisible();
+  await info.attach("timed-chart-geometry", {
+    body: JSON.stringify(audit, null, 2),
+    contentType: "application/json",
+  });
+});
