@@ -1018,9 +1018,18 @@ test("word-bank editing explains the focused gap without a default hint for ever
       `Place ${second} in blank 1`,
     );
     await filled(first).press("Enter");
-    await expect(filled(second)).toHaveText(second);
+    await expect(filled(second)).toContainText(second);
+    await expect(
+      filled(second).getByText("Clear", { exact: true }),
+    ).toBeVisible();
     await expect(firstWord).toBeEnabled();
     await expect(secondWord).toBeDisabled();
+    await firstWord.dragTo(
+      page.getByRole("button", { name: "Blank 2", exact: true }),
+    );
+    await expect(
+      page.getByRole("button", { name: `Blank 2: ${first}`, exact: true }),
+    ).toContainText(first);
     await expect(clearing).toHaveCount(0);
     await page
       .getByRole("button", {
@@ -4634,4 +4643,70 @@ test("full mock visual audit visits every authored question and keeps response r
     info.outputPath("runner-alignment-inventory.json"),
     JSON.stringify(receipts, null, 2),
   );
+});
+
+test.describe("touch word-bank actions", () => {
+  test.use({
+    viewport: { width: 390, height: 720 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  test("filled gaps show their Clear action and retain replacement on all four variants", async ({
+    page,
+  }, info) => {
+    await page.goto("/practice/type/reading-blanks");
+    await start(page);
+    for (let item = 0; item < 4; item++) {
+      const [first, second] = await page
+        .getByLabel("Word bank", { exact: true })
+        .getByRole("button")
+        .allTextContents();
+      const word = (value: string) =>
+        page.getByRole("button", { name: value, exact: true });
+      const gap = (value?: string) =>
+        page.getByRole("button", {
+          name: `Blank 1${value ? `: ${value}` : ""}`,
+          exact: true,
+        });
+      await expect(gap()).toHaveAccessibleDescription("Select a word first");
+      await expect(gap().getByText("Clear", { exact: true })).toHaveCount(0);
+      await word(first).tap();
+      await gap().tap();
+      await expect(
+        gap(first).getByText("Clear", { exact: true }),
+      ).toBeVisible();
+      await expect(gap(first)).toHaveAccessibleDescription("Clear blank 1");
+      await expect(page.locator('[role="tooltip"][data-open]')).toHaveCount(0);
+      await page.screenshot({
+        path: info.outputPath(`touch-clear-${item + 1}.png`),
+      });
+      await gap(first).tap();
+      await expect(gap()).toHaveAccessibleDescription("Select a word first");
+      await expect(word(first)).toBeEnabled();
+      await word(first).tap();
+      await gap().tap();
+      await word(second).tap();
+      await expect(gap(first).getByText("Clear", { exact: true })).toHaveCount(
+        0,
+      );
+      await expect(gap(first)).toHaveAccessibleDescription(
+        `Place ${second} in blank 1`,
+      );
+      await gap(first).tap();
+      await expect(
+        gap(second).getByText("Clear", { exact: true }),
+      ).toBeVisible();
+      await expect(word(first)).toBeEnabled();
+      await expect(word(second)).toBeDisabled();
+      await page
+        .getByRole("button", {
+          name: item === 3 ? "Finish practice" : "Next",
+          exact: true,
+        })
+        .tap();
+    }
+    await expect(
+      page.getByRole("heading", { name: "Review", exact: true }),
+    ).toBeVisible();
+  });
 });

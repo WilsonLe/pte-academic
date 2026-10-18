@@ -64,7 +64,7 @@ The inventory includes Home/daily preparation, the type catalogue, all22guides a
 
 - Guide Instructions retain task/timing; labelled Skills practised moves to How to review.
 - Microphone setup uses Record 3-second sample instead of a separate explanatory sentence. Playback, readiness, permission and retry behavior stay intact.
-- Word banks replace the premature default clearing footer with a focus/hover hint at each gap: Select, Place or Clear according to the current action. Stable Blank names and linked accessible descriptions remain; clearing/replacement is covered for all four variants.
+- Word banks replace the premature default clearing footer with a focus/hover hint at each gap: Select, Place or Clear according to the current action. Filled gaps also show a compact Clear cue when no replacement word is selected, so touch learners do not depend on a tooltip. Stable Blank names and always-available linked action descriptions remain; clearing/replacement and drag are covered for all four variants.
 - Achievement details retain earned/locked criteria and remove their generic effort/device footer.
 - Speaking and word-practice supporting copy use existing Details or one inline disclosure. See the review audit for retained limitations and provenance.
 - Shared review headers align source and response/Feedback columns; an actual query replaces duplicate source-header rows. Spoken-summary replay sits beneath its response heading.

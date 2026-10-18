@@ -2354,3 +2354,8 @@ body {
 .word-practice-details p {
   margin: 0;
 }
+.gap-clear {
+  margin-left: 8px;
+  font-size: 12px;
+  text-decoration: underline;
+}

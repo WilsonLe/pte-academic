@@ -83,6 +83,12 @@ export function QuestionInput({
     setValues(next);
     setWord("");
   }
+  const gapAction = (i: number) =>
+    word
+      ? `Place ${word} in blank ${i + 1}`
+      : values[i]
+        ? `Clear blank ${i + 1}`
+        : "Select a word first";
   const insert = (id: string) => {
     setValues([...values, id]);
     setSelected(null);
@@ -259,13 +265,17 @@ export function QuestionInput({
                         }
                       >
                         {values[i] || " "}
+                        {values[i] && !word && (
+                          <span className="gap-clear" aria-hidden="true">
+                            Clear
+                          </span>
+                        )}
                       </TooltipTrigger>
-                      <TooltipContent role="tooltip" id={`${gapHintId}-${i}`}>
-                        {word
-                          ? `Place ${word} in blank ${i + 1}`
-                          : values[i]
-                            ? `Clear blank ${i + 1}`
-                            : "Select a word first"}
+                      <span className="sr-only" id={`${gapHintId}-${i}`}>
+                        {gapAction(i)}
+                      </span>
+                      <TooltipContent role="tooltip">
+                        {gapAction(i)}
                       </TooltipContent>
                     </Tooltip>
                   ))}
