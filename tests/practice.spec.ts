@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { test } from "./practice-fixture";
 import guideData from "../content/guides.json" with { type: "json" };
 import questions from "../content/questions.json" with { type: "json" };
@@ -1043,7 +1043,7 @@ test("word-bank editing explains the focused gap without a default hint for ever
   ).toBeVisible();
 });
 
-test("word bank and paragraph controls are keyboard operable", async ({
+test("word bank and paragraph controls place and return responses", async ({
   page,
 }) => {
   await drill(page, "Fill in the Blanks \\(Drag and Drop\\)");
@@ -1070,7 +1070,150 @@ test("word bank and paragraph controls are keyboard operable", async ({
     .getByRole("button", { name: "Return paragraph 1 to source" })
     .click();
   await expect(page.locator(".target")).toHaveCount(0);
+  await page
+    .getByRole("button", {
+      name: "The scheme allowed residents to borrow seeds and grow vegetables at home.",
+      exact: true,
+    })
+    .dragTo(page.locator(".reorder > section").last());
+  await expect(page.locator(".target > span")).toHaveText([
+    "The scheme allowed residents to borrow seeds and grow vegetables at home.",
+  ]);
 });
+
+for (const size of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 480 },
+]) {
+  test(`keyboard reorder keeps focus with transfers and moved paragraphs at ${size.width}x${size.height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(size);
+    await page.goto("/practice/type/reorder-paragraphs");
+    const button = (name: string) =>
+      page.getByRole("button", { name, exact: true });
+    async function tabTo(control: Locator) {
+      for (let n = 0; n < 80; n++) {
+        if (await control.evaluate((el) => el === document.activeElement))
+          return;
+        await page.keyboard.press("Tab");
+      }
+      throw new Error(
+        `Keyboard could not reach ${await control.getAttribute("aria-label")}`,
+      );
+    }
+    async function activate(control: Locator) {
+      await tabTo(control);
+      await page.keyboard.press("Enter");
+    }
+    async function focused(control: Locator) {
+      await expect(control).toBeFocused();
+      expect(await control.evaluate((el) => el.matches(":focus-visible"))).toBe(
+        true,
+      );
+      await expect(control).toBeInViewport();
+    }
+    await expect(button("Begin practice")).toBeVisible();
+    await activate(button("Begin practice"));
+    const seen: string[] = [];
+    for (let question = 0; question < 2; question++) {
+      await expect(page.locator(".exam-main")).toBeFocused();
+      const id = await page.locator(".exam").getAttribute("data-question-id");
+      seen.push(id!);
+      const options = questions.find((q) => q.id === id)!.options!;
+      const source = (index: number) => button(options[index]);
+      const add = button("Move selected paragraph to answer");
+      const returnLast = button("Return last paragraph to source");
+      const rows = page.locator(".reorder .target > span");
+      async function insert(index: number) {
+        await tabTo(source(index));
+        await page.keyboard.press("Space");
+        await expect(source(index)).toHaveAttribute("aria-pressed", "true");
+        await tabTo(add);
+        await page.keyboard.press(index === 0 ? "Space" : "Enter");
+      }
+      await insert(1);
+      await expect(rows).toHaveText([options[1]]);
+      await focused(source(0));
+      await insert(0);
+      await focused(source(2));
+      await insert(2);
+      await focused(source(3));
+
+      await activate(button("Move paragraph 2 up"));
+      await expect(rows).toHaveText([options[0], options[1], options[2]]);
+      await focused(button("Move paragraph 1 down"));
+      await page.keyboard.press("Enter");
+      await expect(rows).toHaveText([options[1], options[0], options[2]]);
+      await focused(button("Move paragraph 2 down"));
+      await page.keyboard.press("Enter");
+      await expect(rows).toHaveText([options[1], options[2], options[0]]);
+      await focused(button("Move paragraph 3 up"));
+      await page.keyboard.press("Enter");
+      await expect(rows).toHaveText([options[1], options[0], options[2]]);
+      await focused(button("Move paragraph 2 up"));
+
+      await activate(button("Return paragraph 2 to source"));
+      await expect(rows).toHaveText([options[1], options[2]]);
+      await focused(source(0));
+      await activate(returnLast);
+      await expect(rows).toHaveText([options[1]]);
+      await focused(source(2));
+      await activate(returnLast);
+      await expect(rows).toHaveCount(0);
+      await focused(source(1));
+      for (let index = 0; index < options.length; index++) {
+        await insert(index);
+        if (index < options.length - 1) await focused(source(index + 1));
+      }
+      await expect(rows).toHaveText(options);
+      await focused(button("Return paragraph 4 to source"));
+      await activate(returnLast);
+      await focused(source(3));
+      await insert(3);
+      await focused(button("Return paragraph 4 to source"));
+      await activate(button(question === 1 ? "Finish practice" : "Next"));
+    }
+    expect(new Set(seen).size).toBe(2);
+    await expect(
+      page.getByRole("heading", { name: "Review", exact: true }),
+    ).toBeVisible();
+    const attemptId = page.url().split("/history/")[1];
+    const saved = await page.evaluate(
+      (id) =>
+        new Promise<Record<string, { values: string[] }>>((resolve, reject) => {
+          const request = indexedDB.open("pte-studio", 2);
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            const db = request.result;
+            const read = db
+              .transaction("attempts", "readonly")
+              .objectStore("attempts")
+              .get(id);
+            read.onerror = () => {
+              db.close();
+              reject(read.error);
+            };
+            read.onsuccess = () => {
+              db.close();
+              resolve(read.result.result.answers);
+            };
+          };
+        }),
+      attemptId,
+    );
+    expect(saved).toEqual(
+      Object.fromEntries(
+        seen.map((id) => [id, { values: ["0", "1", "2", "3"] }]),
+      ),
+    );
+    await page.reload();
+    await expect(page.locator("[data-question-id]")).toHaveAttribute(
+      "data-question-id",
+      seen[0],
+    );
+  });
+}
 for (const title of [
   "Summarize Written Text",
   "Write Essay",
