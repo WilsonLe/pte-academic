@@ -46,6 +46,9 @@
     "kind": "speak",
     "prepSeconds": 25,
     "answerSeconds": 40,
+    "timingInInstructions": {
+      "preparation": true
+    },
     "skills": "Speaking",
     "summary": "Turn a visual into a clear spoken description.",
     "instructions": "Study the image for 25 seconds. After the tone, describe its main features and relationships.",
@@ -66,6 +69,9 @@
     "kind": "speak",
     "prepSeconds": 10,
     "answerSeconds": 40,
+    "timingInInstructions": {
+      "preparation": true
+    },
     "skills": "Listening · Speaking",
     "summary": "Explain a short lecture in your own words.",
     "instructions": "Listen once and take brief notes. After 10 seconds of preparation, retell the main ideas.",
@@ -106,6 +112,10 @@
     "kind": "speak",
     "prepSeconds": 10,
     "answerSeconds": 120,
+    "timingInInstructions": {
+      "preparation": true,
+      "response": true
+    },
     "skills": "Listening · Speaking",
     "summary": "Connect the views of three speakers.",
     "instructions": "Listen to the three-person discussion. Prepare for 10 seconds, then summarize it in your own words in up to two minutes.",
@@ -126,6 +136,9 @@
     "kind": "speak",
     "prepSeconds": 10,
     "answerSeconds": 40,
+    "timingInInstructions": {
+      "preparation": true
+    },
     "skills": "Speaking",
     "summary": "Say what you would actually say in a situation.",
     "instructions": "Read and listen to the situation. After 10 seconds, speak directly to the person described.",
@@ -146,6 +159,9 @@
     "kind": "write",
     "prepSeconds": 0,
     "answerSeconds": 600,
+    "timingInInstructions": {
+      "response": true
+    },
     "skills": "Reading · Writing",
     "summary": "Summarize a passage in one sentence.",
     "instructions": "Read the passage and write one complete sentence of 5–75 words. You have 10 minutes.",
@@ -166,6 +182,9 @@
     "kind": "write",
     "prepSeconds": 0,
     "answerSeconds": 1200,
+    "timingInInstructions": {
+      "response": true
+    },
     "skills": "Writing",
     "summary": "Develop an argument in 200–300 words.",
     "instructions": "Write an essay of 200–300 words responding to the prompt. You have 20 minutes, including planning and checking.",
@@ -286,6 +305,9 @@
     "kind": "write",
     "prepSeconds": 0,
     "answerSeconds": 600,
+    "timingInInstructions": {
+      "response": true
+    },
     "skills": "Listening · Writing",
     "summary": "Write a concise summary of a recording.",
     "instructions": "Listen once and write a 50–70 word summary. The 10 minutes include listening and writing.",

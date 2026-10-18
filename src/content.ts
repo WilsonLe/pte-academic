@@ -41,6 +41,12 @@ export const guideSchema = z.object({
   ]),
   prepSeconds: z.number().nonnegative(),
   answerSeconds: z.number().nonnegative(),
+  timingInInstructions: z
+    .object({
+      preparation: z.boolean().optional(),
+      response: z.boolean().optional(),
+    })
+    .optional(),
   skills: z.string(),
   summary: z.string(),
   instructions: z.string(),

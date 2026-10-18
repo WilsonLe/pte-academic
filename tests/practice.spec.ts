@@ -3092,7 +3092,26 @@ test("all practice cleanup: every guide, section and mock keeps useful text with
         animations: "disabled",
       });
       const instructions = await readPages("reading pages");
-      expect(instructions).toContain(guide.instructions);
+      const expectedTiming: Record<string, string> = {
+        "read-aloud": "35s preparation. 40s response.",
+        "repeat-sentence": "15s response.",
+        "describe-image": "40s response.",
+        "retell-lecture": "40s response.",
+        "answer-short-question": "10s response.",
+        "summarize-group-discussion": "",
+        "respond-to-situation": "40s response.",
+        "summarize-written-text": "",
+        "write-essay": "",
+        "summarize-spoken-text": "",
+      };
+      expect(instructions).toBe(
+        [
+          guide.instructions,
+          expectedTiming[guide.id] ?? "Shared section timer.",
+        ]
+          .filter(Boolean)
+          .join(" "),
+      );
       expect(instructions.trim().endsWith(guide.skills)).toBe(false);
       await expect(
         page.getByText(/One skill at a time|Open a guide, or jump straight in/),

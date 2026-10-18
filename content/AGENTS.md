@@ -5,6 +5,7 @@ Read the root AGENTS.md, then `agents/content-author.md` and `agents/question-re
 ## Files and schemas
 
 - `guides.json`: one guide for each of the 22 supported types. Include understandable instructions, timings, skills, at least three practical tips, one pitfall, review criteria and an honest verification date.
+- Set optional `timingInInstructions.preparation` or `.response` only when the authored instructions already state that phase's complete time allowance. The guide omits only that duplicated display fragment; keep numeric timing fields unchanged for the runner. Omit the annotation for missing timing/shared-section context. Review the prose, numeric fields and authored-time contract together.
 - `questions.json`: unique stable IDs, an existing `type`, original title/prompt, explanation and task-specific fields. Add enough original context to assess the intended skill. Do not manufacture variants by changing only a title.
 - `mock-tests.json`: ordered, explicit question IDs, at least 65 distinct items and all 22 types. Match the published practice blueprint; do not silently pad a form with duplicates. Each new complete mock needs its own set of original items if it is advertised as unseen.
 - `sections.json`: learner descriptions and section time limits.
