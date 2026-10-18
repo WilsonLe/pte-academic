@@ -195,3 +195,11 @@ test("static 404 shell supports direct history routes without rewrites", async (
     );
   }
 });
+
+test("saved replay hands off between views under the published app base", async ({
+  page,
+  context,
+}) => {
+  const { verifyAudioHandoff } = await import("./audio-fixture");
+  await verifyAudioHandoff(page, await context.newPage(), "/pte-academic/");
+});

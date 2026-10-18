@@ -498,10 +498,44 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
   });
   await page.getByRole("button", { name: /^Practise word 1:/ }).click();
   const dialog = page.getByRole("dialog");
+  // Recording a retry must also stop replayable audio in another app view.
+  const peer = await context.newPage();
+  await peer.goto(base + "history/comparison-fixture");
+  const peerPrompt = peer.getByRole("group", {
+    name: "Prompt recording",
+    exact: true,
+  });
+  await peerPrompt
+    .getByRole("button", { name: "Play Prompt recording", exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      peerPrompt
+        .locator("audio")
+        .evaluate((node: HTMLAudioElement) => node.currentTime),
+    )
+    .toBeGreaterThan(0);
   // Nonzero room-level input must not count as completed audible practice.
   await dialog
     .getByRole("button", { name: "Record syllable", exact: true })
     .click();
+  await expect
+    .poll(
+      () =>
+        peerPrompt
+          .locator("audio")
+          .evaluate((node: HTMLAudioElement) => node.paused),
+      { timeout: 1000 },
+    )
+    .toBe(true);
+  expect(
+    await peerPrompt
+      .locator("audio")
+      .evaluate(
+        (node: HTMLAudioElement) => node.currentTime < node.duration - 0.5,
+      ),
+  ).toBe(true);
+  await peer.close();
   await page.waitForTimeout(1200); // Capture the known quiet input through the native codec.
   await dialog.getByRole("button", { name: "Stop and grade" }).click();
   await expect(dialog.getByRole("alert")).toHaveText(

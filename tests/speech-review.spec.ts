@@ -371,3 +371,66 @@ test("green, yellow and red colour the syllable letters, with uncertainty neutra
     await expect(urban).toBeFocused();
   }
 });
+
+test.describe("optional cross-view replay transport", () => {
+  test.use({ serviceWorkers: "block" });
+  for (const failure of ["missing", "constructor", "send"] as const)
+    test(`same-view source and learner playback survives ${failure} transport`, async ({
+      page,
+    }) => {
+      await page.addInitScript((failure) => {
+        if (failure === "missing")
+          Object.defineProperty(window, "BroadcastChannel", {
+            value: undefined,
+          });
+        else if (failure === "constructor")
+          window.BroadcastChannel = class {
+            constructor() {
+              throw new Error("Unavailable");
+            }
+          } as any;
+        else
+          BroadcastChannel.prototype.postMessage = () => {
+            throw new Error("Unavailable");
+          };
+      }, failure);
+      await page.route("**/models/**", (route) => route.abort());
+      await seed(page, "no-reliable-speech");
+      const learner = page.getByRole("group", {
+        name: "Your recording",
+        exact: true,
+      });
+      const source = page.getByRole("group", {
+        name: "Example reading",
+        exact: true,
+      });
+      await learner
+        .getByRole("button", { name: "Play Your recording", exact: true })
+        .click();
+      await expect
+        .poll(() =>
+          learner
+            .locator("audio")
+            .evaluate((node: HTMLAudioElement) => node.currentTime),
+        )
+        .toBeGreaterThan(0);
+      await source
+        .getByRole("button", { name: "Play Example reading", exact: true })
+        .click();
+      await expect
+        .poll(() =>
+          learner
+            .locator("audio")
+            .evaluate((node: HTMLAudioElement) => node.paused),
+        )
+        .toBe(true);
+      await expect
+        .poll(() =>
+          source
+            .locator("audio")
+            .evaluate((node: HTMLAudioElement) => node.currentTime),
+        )
+        .toBeGreaterThan(0);
+      await expect(page.locator(".audio-error")).toHaveCount(0);
+    });
+});
