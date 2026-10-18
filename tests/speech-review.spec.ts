@@ -187,9 +187,11 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
     "data-question-id",
     "describe-image-01",
   );
-  await page.getByRole("button", { name: "Source", exact: true }).click();
-  await expect(page.getByRole("figure")).toBeVisible();
-  await page.keyboard.press("Escape");
+  await expect(
+    page
+      .getByRole("region", { name: "Original question", exact: true })
+      .getByRole("figure"),
+  ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.getByRole("group", { name: "Your recording", exact: true }),

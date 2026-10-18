@@ -10,7 +10,7 @@ import {
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { asset, type Answer, type Question } from "../content";
-import { exampleLabel, promptBlocks } from "../review-content";
+import { exampleLabel } from "../review-content";
 import { AudioPlayer } from "../components/AudioPlayer";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -225,19 +225,18 @@ export function SpeechReview({
           )}
           <div className="feedback-actions">
             <ReviewDisclosure
-              title="Source"
-              question={question}
+              title="Speaking details"
               blocks={[
                 { label: "What to check", text: question.explanation },
                 ...(question.model &&
-                !promptBlocks(question).some((b) => b.text === question.model)
+                question.model !== question.text &&
+                question.model !== question.audioText
                   ? [{ label: exampleLabel(question), text: question.model }]
                   : []),
-                ...promptBlocks(question),
               ]}
             >
               <Button variant="ghost" size="sm">
-                Source
+                Details
               </Button>
             </ReviewDisclosure>
             {answer.transcription && (

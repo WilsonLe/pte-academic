@@ -668,7 +668,7 @@ export function Runner({
                 ? "Audio paused"
                 : "Unavailable";
   return (
-    <div className="exam">
+    <div className="exam" data-question-id={q.id}>
       <header className="exam-header">
         <span>PTE Academic · Practice</span>
         <div>

@@ -11,7 +11,7 @@ Use this workflow when asked to “playtest”, run a “playtest session”, pl
 
 ## Play as a beginner
 
-Complete at least one coherent journey: choose practice, understand preflight, start, answer, finish, inspect Feedback, then reopen the saved session from History. Include a deliberate mistake or skip so feedback has something useful to explain. Do not expose hints or keys during an active attempt. Check reload recovery outside a live attempt; leaving or refreshing the runner ends it.
+Complete at least one coherent journey: choose practice, understand preflight, start, answer, finish, inspect Feedback, then reopen the saved session from History. Include a deliberate mistake or skip so feedback has something useful to explain. Record the actual question IDs/variants encountered; on retakes, exercise different variants where available. Random selection supplies variety, not proof of variant coverage; identify types with only one authored item. Do not expose hints or keys during an active attempt. Check reload recovery outside a live attempt; leaving or refreshing the runner ends it.
 
 Explore related surfaces within scope: daily practice, question types, sections, mocks, Instructions, Learn, progress and achievements. Check how a learner returns and what state survives. A general session can sample these paths; a request covering “all” or “every” needs an inventory of affected types, response kinds, modes and shared surfaces, with a result or explicit gap for each. Use the [review audit](../docs/review-audit.md) and [UI coverage audit](../docs/ui-cleanup-coverage.md) as starting maps, then verify against the current app.
 
@@ -21,8 +21,9 @@ For speaking, exercise playback, preparation/error states and available review/r
 
 ## Judge improvements by learner purpose
 
-- Identify what the student is trying to do, what blocked or confused them, and why the existing screen failed. Distinguish observed behavior from a hypothesis or personal preference.
+- Identify what the student is trying to do, what blocked or confused them, and why the existing screen failed. Treat missing task context as learner friction even when its text can be found through a secondary control. Distinguish observed behavior from a hypothesis or personal preference.
 - Prefer removing duplication, correcting labels, regrouping controls or reusing existing components. Keep the primary task obvious. Do not add new learning content, default tips, banners or repeated explanations to solve interface friction unless specifically requested.
+- Judge Feedback by reflection: the original question and response must be usable together before opening a disclosure. Read the full passage, numbered gaps/paragraphs, choices or chart as applicable, and verify their meaning survives paging and viewport changes. Passing controls, accessible names and geometric fit alone cannot establish this learner outcome.
 - Put necessary supporting detail behind a clear click/selection, tooltip or existing disclosure. Keep it discoverable and keyboard accessible. Show complete detail when opened; hiding or clipping essential instructions/answers is not a clutter fix.
 - Make feedback local to the response: clickable red/green differences for objective answers, with labels or other non-color cues and explanations on selection. Reorder explanations must explain why each paragraph belongs first/last and how it connects to both available neighbors. Keep writing alternatives/planning outlines neutral and speech's acoustic uncertainty intact. Apply a requested feedback pattern across every affected question type without inventing unsupported correctness or scores.
 

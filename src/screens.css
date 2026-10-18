@@ -2249,3 +2249,61 @@ body {
 .syllable-practice-footer p {
   margin: 0;
 }
+
+/* Reflection needs the original task and the response in the same workspace. */
+.review-workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.review-question-panel,
+.review-answer-panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.review-question-panel > .reading-pages {
+  flex: 1;
+  min-height: 0;
+}
+.review-question-panel .reading-copy {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.question-query {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.review-question-panel > .review-chart {
+  min-height: 260px;
+}
+@media (max-width: 900px) {
+  .review-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(280px, 1fr));
+  }
+  .review-question-panel .reading-copy {
+    padding: 16px;
+    font-size: 16px;
+  }
+  .review-workspace:has(.review-chart) {
+    grid-template-rows: minmax(300px, 1fr) minmax(280px, 1fr);
+  }
+}
+@media (max-height: 650px) {
+  .main-content:has(.review-workspace) {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .review-screen:has(.review-workspace) {
+    min-height: 680px;
+  }
+}
+
+.written-response > .response-heading { gap: 8px; }
+.response-word-count { margin-left: auto; font-size: 13px; color: var(--muted-foreground); }

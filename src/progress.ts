@@ -1,3 +1,4 @@
+import { variedPool } from "./practice-order";
 import { z } from "zod";
 import { questions, guideFor, type Answer } from "./content";
 import type { Result } from "./Runner";
@@ -166,12 +167,18 @@ export function awardPractice(
   reward.levelUp = levelFor(p.xp) > levelFor(before.xp);
   return { progress: p, reward };
 }
-export function questQuestions(p: Progress, day = localDay()) {
+export function questQuestions(
+  p: Progress,
+  day = localDay(),
+  history: readonly Pick<Result, "questionIds">[] = [],
+  random = Math.random,
+) {
   const done = new Set(p.days.find((d) => d.date === day)?.questionIds || []);
   const remaining = Math.max(0, 3 - done.size);
-  const reading = questions.filter((q) => guideFor(q).section === "reading");
-  const seed = Number(day.replaceAll("-", "")) % reading.length;
-  const rotated = [...reading.slice(seed), ...reading.slice(0, seed)];
+  const reading = questions.filter(
+    (q) => guideFor(q).section === "reading" && !done.has(q.id),
+  );
+  const rotated = variedPool(reading, history, random);
   const kinds = new Set<string>();
   const varied = rotated.filter((q) => {
     if (kinds.has(q.type)) return false;

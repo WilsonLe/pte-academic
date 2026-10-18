@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { answerMatches, guideFor, guides, questions } from "../src/content";
-import { exampleLabel, promptBlocks } from "../src/review-content";
+import { exampleLabel, questionBlocks } from "../src/review-content";
 import { reviewItems } from "../src/review-diff";
 
 test("every current question has item feedback and a complete response/source path", () => {
@@ -10,18 +10,30 @@ test("every current question has item feedback and a complete response/source pa
     types.add(q.type);
     const kind = guideFor(q).kind;
     assert.ok(q.explanation.trim(), q.id);
-    const prompt = promptBlocks(q).map((b) => b.text);
-    for (const text of [
-      q.prompt,
-      ["dropdown", "bank", "blanks"].includes(kind) ? undefined : q.text,
-      q.audioText,
-    ].filter(Boolean))
-      assert.ok(prompt.includes(text!), `${q.id}: source missing`);
-    assert.equal(
-      new Set(prompt).size,
-      prompt.length,
-      `${q.id}: duplicate source`,
+    const original = questionBlocks(q).map((b) => b.text);
+    let gap = 0;
+    const text =
+      q.text?.replace(/\{\{\}\}/g, () => `[${++gap}]`) || q.audioText;
+    if (text)
+      assert.ok(original.includes(text), `${q.id}: original question missing`);
+    if (kind === "order")
+      for (const paragraph of q.options!)
+        assert.ok(
+          original.includes(paragraph),
+          `${q.id}: original paragraph missing`,
+        );
+    if (kind === "bank") assert.ok(original.includes(q.options!.join(" · ")));
+    for (const options of q.blankOptions || [])
+      assert.ok(original.includes(options.join(" · ")));
+    assert.ok(
+      !original.includes(q.explanation),
+      `${q.id}: rationale leaked into question`,
     );
+    if (q.model && q.model !== q.text && q.model !== q.audioText)
+      assert.ok(
+        !original.includes(q.model),
+        `${q.id}: alternative leaked into question`,
+      );
     assert.ok(reviewItems(q, {}).length, q.id);
     if (kind !== "write" && kind !== "speak") {
       const answer = q.answers ? { values: q.answers } : { text: q.model };

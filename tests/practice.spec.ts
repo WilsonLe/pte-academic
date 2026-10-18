@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import { test } from "./practice-fixture";
 import guideData from "../content/guides.json" with { type: "json" };
 import questions from "../content/questions.json" with { type: "json" };
 import sections from "../content/sections.json" with { type: "json" };
@@ -1211,7 +1212,10 @@ test("listening is single play, transcript hidden, highlight input available", a
   ).toBeVisible();
   const transcript = page.getByText(/surveys the site carefully/);
   await expect(transcript).toHaveCount(0);
-  const source = page.getByRole("button", { name: "Open source", exact: true });
+  const source = page.getByRole("button", {
+    name: "Open recording transcript",
+    exact: true,
+  });
   await source.click();
   const dialog = page.getByRole("dialog");
   const next = dialog.getByRole("button", {
@@ -3969,7 +3973,7 @@ test("saved sessions expose section identity without changing history or review"
     ).toBeVisible();
     await page.reload();
     await expect(
-      page.getByRole("button", { name: "Open source", exact: true }),
+      page.getByRole("region", { name: "Original question", exact: true }),
     ).toBeVisible();
     await page
       .getByRole("button", { name: "My practice", exact: true })
