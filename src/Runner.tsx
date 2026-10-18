@@ -250,7 +250,6 @@ export function Preflight({
                   <Mic size={22} aria-hidden="true" />
                   <div>
                     <h3 id="microphone-title">Check your microphone</h3>
-                    <p>Record a three-second sample, then listen back.</p>
                     <Button
                       variant="outline"
                       className="secondary"
@@ -263,7 +262,7 @@ export function Preflight({
                           ? "Requesting access…"
                           : mic
                             ? "Record another sample"
-                            : "Test microphone"}
+                            : "Record 3-second sample"}
                     </Button>
                     {sample && (
                       <div>
