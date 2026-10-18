@@ -290,16 +290,38 @@ async function readSource(page: Page) {
 }
 async function fits(page: Page) {
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth + 1,
-    ),
-  ).toBe(true);
-  const box = await page.locator(".review-screen").boundingBox();
-  if (page.viewportSize()!.height > 650)
-    expect(box!.y + box!.height).toBeLessThanOrEqual(
-      page.viewportSize()!.height,
+    await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight,
+    })),
+  ).toEqual(page.viewportSize());
+  const screen = await page.locator(".review-screen").boundingBox();
+  for (const name of ["Original question", "Response feedback"]) {
+    const panel = await page
+      .getByRole("region", { name, exact: true })
+      .boundingBox();
+    expect(panel!.y).toBeGreaterThanOrEqual(screen!.y);
+    expect(panel!.y + panel!.height).toBeLessThanOrEqual(
+      screen!.y + screen!.height + 1,
     );
-  else
+    expect(panel!.x + panel!.width).toBeLessThanOrEqual(
+      screen!.x + screen!.width + 1,
+    );
+  }
+  const main = await page.locator("main").boundingBox();
+  if (page.viewportSize()!.height >= 800) {
+    expect(screen!.y + screen!.height).toBeLessThanOrEqual(
+      main!.y + main!.height + 1,
+    );
+    for (const name of ["Original question", "Response feedback"]) {
+      const panel = await page
+        .getByRole("region", { name, exact: true })
+        .boundingBox();
+      expect(panel!.y).toBeGreaterThanOrEqual(main!.y - 1);
+      expect(panel!.y).toBeLessThan(main!.y + main!.height);
+    }
+  }
+  if (screen!.y + screen!.height > main!.y + main!.height + 1)
     await expect
       .poll(() =>
         page.locator("main").evaluate((el) => getComputedStyle(el).overflowY),
@@ -1499,4 +1521,55 @@ test("original question is visible while reflecting on a written response", asyn
   ]);
   expect(questionBox!.height).toBeGreaterThan(100);
   expect(responseBox!.height).toBeGreaterThan(100);
+});
+
+test("stacked original question and feedback remain reachable at intermediate phone heights", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  const ids = [
+    "read-aloud-01",
+    "describe-image-01",
+    "summarize-spoken-text-01",
+    "listening-multiple-01",
+    "write-essay-01",
+  ];
+  await seed(page, ids);
+  for (const height of [844, 740, 720, 700, 651, 650, 480]) {
+    await page.setViewportSize({ width: 390, height });
+    await page.goto("/history/review-correct");
+    for (const [index, id] of ids.entries()) {
+      await expect(page.locator(".review-screen")).toHaveAttribute(
+        "data-question-id",
+        id,
+      );
+      await fits(page);
+      const answer = page.getByRole("region", {
+        name: "Response feedback",
+        exact: true,
+      });
+      const trigger = answer
+        .getByRole("button", {
+          name: /^(Details|Open response details)$|Explain$/,
+        })
+        .first();
+      await trigger.scrollIntoViewIfNeeded();
+      const control = await trigger.boundingBox();
+      const main = await page.locator("main").boundingBox();
+      expect(control!.y).toBeGreaterThanOrEqual(main!.y - 1);
+      expect(control!.y + control!.height).toBeLessThanOrEqual(
+        main!.y + main!.height + 1,
+      );
+      await trigger.click({ timeout: 2000 });
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+      if (index < ids.length - 1)
+        await page
+          .getByRole("button", { name: "Next review questions", exact: true })
+          .click();
+    }
+  }
 });

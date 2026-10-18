@@ -28,6 +28,7 @@ function OriginalQuestion({ question: q }: { question: Question }) {
               variant="ghost"
               size="icon"
               aria-label="Open recording transcript"
+              title="Recording transcript"
             >
               <FileText />
             </Button>
