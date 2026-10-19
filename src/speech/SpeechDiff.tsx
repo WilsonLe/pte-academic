@@ -107,8 +107,12 @@ export function SpeechDiff({
     measure = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<FeedbackWord[][]>([words]);
   const [page, setPage] = useState(0);
+  const anchor = useRef<FeedbackWord | undefined>(undefined);
   useLayoutEffect(() => {
     let live = true;
+    // Lead with the learner's recognised evidence, keeping the full prompt diff
+    // in its original order and earlier omissions reachable through the pager.
+    anchor.current = words.find((word) => word.spoken) || words[0];
     const pack = () => {
       if (!live || !panel.current || !measure.current) return;
       const nodes = Array.from(measure.current.children) as HTMLElement[];
@@ -132,7 +136,12 @@ export function SpeechDiff({
       });
       if (current.length) next.push(current);
       setPages(next.length ? next : [[]]);
-      setPage((p) => Math.min(p, Math.max(0, next.length - 1)));
+      setPage(
+        Math.max(
+          0,
+          next.findIndex((words) => words.includes(anchor.current!)),
+        ),
+      );
     };
     const disconnect = panel.current
       ? observePageLayout(panel.current, pack)
@@ -208,7 +217,10 @@ export function SpeechDiff({
       <Pager
         index={page}
         count={pages.length}
-        onChange={setPage}
+        onChange={(index) => {
+          anchor.current = pages[index]?.[0];
+          setPage(index);
+        }}
         label="prompt word pages"
       />
     </div>

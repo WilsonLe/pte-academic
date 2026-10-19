@@ -563,8 +563,10 @@ export function Runner({
     const el = audio.current;
     if (q.audio && el) {
       el.onplay = () => {
-        if (q.type === "summarize-spoken-text" && !writingEnd.current)
+        if (q.type === "summarize-spoken-text" && !writingEnd.current) {
           writingEnd.current = Date.now() + g.answerSeconds * 1000;
+          setPhaseSeconds(g.answerSeconds);
+        }
       };
       el.onended = () => {
         setAudioProgress(100);
@@ -747,11 +749,14 @@ export function Runner({
             {status}
           </span>
         ) : null}
-        {!isSpeak && g.answerSeconds > 0 && (
-          <div className="item-clock">
-            Question time remaining: {formatTime(phaseSeconds)}
-          </div>
-        )}
+        {!isSpeak &&
+          g.answerSeconds > 0 &&
+          (phase === "answer" ||
+            (phase === "audio" && writingEnd.current > 0)) && (
+            <div className="item-clock">
+              Question time remaining: {formatTime(phaseSeconds)}
+            </div>
+          )}
         {q.audio && <audio ref={audio} src={asset(q.audio)} preload="auto" />}
         {message && (
           <p className={phase === "error" ? "error" : "notice"} role="alert">
