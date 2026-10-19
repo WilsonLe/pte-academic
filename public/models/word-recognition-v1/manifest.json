@@ -1,59 +1,116 @@
 {
   "schemaVersion": 1,
   "id": "audio-only-words-v1",
-  "repository": "facebook/wav2vec2-base-960h",
-  "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
-  "encoderBytes": 189043500,
-  "encoderSha256": "b81a5907a87709ff9a83ac87a74473128c76ab3cefa8416bdebd4dbbc1eea931",
-  "sourceWeightSha256": "8aa76ab2243c81747a1f832954586bc566090c83a0ac167df6f31f0fa917d74a",
+  "repository": "facebook/wav2vec2-large-960h-lv60-self",
+  "revision": "54074b1c16f4de6a5ad59affb4caa8f2ea03a119",
+  "encoderBytes": 356158757,
+  "encoderSha256": "aa3100a81bc45df0277f2b724227aa4f7c5fd812a44e69f64954734ce870608d",
+  "sourceWeightSha256": "00b604cf4d28e86559e8adaeb3a186daa89dc37f5ab216771a0a15a26db0de9f",
+  "sourceLoaderSha256": "08ee8f5cf9eeb1e43d05d3ef4bf6296f1037c5e37c8a2d5224d57dc62127e8b7",
+  "sourceFilesSha256": {
+    "pytorch_model.bin": "00b604cf4d28e86559e8adaeb3a186daa89dc37f5ab216771a0a15a26db0de9f",
+    "config.json": "bcb82b508db66c6772b34a978bcc6a411f9ea99c33cd9dee337119b5f6ddb797",
+    "preprocessor_config.json": "c403ce09975b90dff0dd8302c42d422e9de1f166cd7772df23490069893cb0cf",
+    "vocab.json": "19727f8944fe6459fc3f240ae2c198395b740f6a029bd23e06656266b83bcf64",
+    "tokenizer_config.json": "c9a86ca4c3d72d4cda976512cd786cc65d87fe22afcd4164c8470f1dde7c9758",
+    "special_tokens_map.json": "bb7068de1150661a10b55f9e4b12a0e77af8bf91f5e45e1b58afaf1d0e17f675"
+  },
   "assetDirectory": "models/word-recognition-v1/",
   "files": [
     {
-      "path": "recognizer-00.bin",
+      "path": "recognizer-lv60-int8-00.bin",
       "bytes": 50331648,
-      "sha256": "cb12ee8d7250bdb64c35f2643b86a6dd880837ee41e8376d3f7dcffe2f3b346d",
+      "sha256": "b0b3b2e4825c0b2d75d4ff66b1cf17b496888052530ffec4a42907213b68cd2b",
       "kind": "recognizer",
       "transport": {
-        "path": "recognizer-00.bin",
+        "path": "recognizer-lv60-int8-00.bin",
         "encoding": "gzip-shuffle2",
-        "bytes": 43149735,
-        "sha256": "cf330aab35a54022e1d69ccf4f03c16141a6c21a39790465e1859ce8b3107ac4"
+        "bytes": 38564747,
+        "sha256": "8af7d2a73eefb245bf4f396ec8db779694410f53eaba4b6246cd96b750a0d21e"
       }
     },
     {
-      "path": "recognizer-01.bin",
+      "path": "recognizer-lv60-int8-01.bin",
       "bytes": 50331648,
-      "sha256": "f93be457b98f911e77366eb00d09cabab24587198361b0181882099453c47574",
+      "sha256": "d8046aa296c136e0d61e29247431bd0e76c2f2c0fdcfaf69b253a7622e4a516a",
       "kind": "recognizer",
       "transport": {
-        "path": "recognizer-01.bin",
+        "path": "recognizer-lv60-int8-01.bin",
         "encoding": "gzip-shuffle2",
-        "bytes": 43057267,
-        "sha256": "ddd34c66a2a5f126d46f3fc9d8ab3f602dc6659800d6e74580cd4162d60d554a"
+        "bytes": 42193159,
+        "sha256": "42a3fbd66ca16e1a0520ed5392d5a0d35955806e4a194e5e1d85795f900ffd0f"
       }
     },
     {
-      "path": "recognizer-02.bin",
+      "path": "recognizer-lv60-int8-02.bin",
       "bytes": 50331648,
-      "sha256": "6a7e82323951e153ea8ca76dd97439efbf16a58e7e7073f41319d98e48a4f1bb",
+      "sha256": "f9c5633be9daeefef6a822a787097edde5a3284fbb80c344fb1becbc0b38e611",
       "kind": "recognizer",
       "transport": {
-        "path": "recognizer-02.bin",
+        "path": "recognizer-lv60-int8-02.bin",
         "encoding": "gzip-shuffle2",
-        "bytes": 43141740,
-        "sha256": "948503bcee42568af8adc5240113dfcbbcd61ab0ccdbfdfe9eb6676be2a3e2f2"
+        "bytes": 43592214,
+        "sha256": "530b703725b791528285acb77db2b018c7c171c41d3e5b30487ed3f16a50f02b"
       }
     },
     {
-      "path": "recognizer-03.bin",
-      "bytes": 38048556,
-      "sha256": "ca45e429cae1b26131f7e2a9173784b27b8b0f67f9aac09b054860a153f77135",
+      "path": "recognizer-lv60-int8-03.bin",
+      "bytes": 50331648,
+      "sha256": "abe6e3650dd788e85344c5c9e7264dd44915d66d7d960f878c1ac8f7ae117ca1",
       "kind": "recognizer",
       "transport": {
-        "path": "recognizer-03.bin",
+        "path": "recognizer-lv60-int8-03.bin",
         "encoding": "gzip-shuffle2",
-        "bytes": 32498159,
-        "sha256": "c79d614f06dfd00941018c2b810ad7b572af5fe65333b077901a6defa58346bb"
+        "bytes": 44697754,
+        "sha256": "2c4a7e41b6bc77e2aba9f16562fa5edb994b4e1c4ceebeea520736507b21340d"
+      }
+    },
+    {
+      "path": "recognizer-lv60-int8-04.bin",
+      "bytes": 50331648,
+      "sha256": "3a0cf3d4a66be83e19119d9692ca402a7bf275feec54294207c4260b8ccafc8e",
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-lv60-int8-04.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 44364161,
+        "sha256": "5cfff789cc32bbf3d34da9a7b366f5ce7859105b54806f26f146771dd6d5ab0f"
+      }
+    },
+    {
+      "path": "recognizer-lv60-int8-05.bin",
+      "bytes": 50331648,
+      "sha256": "0788e4613e5b16d04e4d6f9eb35d49a1bdfa18dac017a7f91ffa4f9e1f0425dc",
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-lv60-int8-05.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 44178986,
+        "sha256": "344c33ced584ad61324d2655e2f86a4901baba340d1274866e7e889fd68c056c"
+      }
+    },
+    {
+      "path": "recognizer-lv60-int8-06.bin",
+      "bytes": 50331648,
+      "sha256": "a2a37605249b8f1c1e056ea8b308b0d90b2939decbcea50d899d649f1b5186d8",
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-lv60-int8-06.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 43910311,
+        "sha256": "8cb5d9fc5a6b78354eaad451a4338b6845f51042840069b78a3dac2746b1b826"
+      }
+    },
+    {
+      "path": "recognizer-lv60-int8-07.bin",
+      "bytes": 3837221,
+      "sha256": "2325e347b75067f1be33c2728850359b7549fcec6cc064f386dd4047940fa1c5",
+      "kind": "recognizer",
+      "transport": {
+        "path": "recognizer-lv60-int8-07.bin",
+        "encoding": "gzip-shuffle2",
+        "bytes": 3078899,
+        "sha256": "75b2f763301fdb1b3463ee51bc7ac8d1359b06c5fc4557c953923322a039d869"
       }
     },
     {
@@ -111,13 +168,22 @@
       "kind": "reference-audio"
     }
   ],
-  "totalBytes": 211357419,
+  "totalBytes": 378472676,
   "lexiconWords": 124082,
-  "exporterSha256": "eaff6484b91be26c7addfa42fcfc91a5d3dcb8c499fd9c4e986b5f14fa483d98",
-  "representation": "float16 constant storage; float32 operations",
+  "exporterSha256": "2e0af3877bbce1217611698e7e602a26bd089dc5fc22f499347490684ad28ffd",
+  "representation": "dynamic per-channel INT8 MatMul/Gemm weights; float32 convolution and other operations",
+  "quantizer": {
+    "runtime": "1.31.0",
+    "perChannel": true,
+    "weightType": "QInt8",
+    "operators": [
+      "MatMul",
+      "Gemm"
+    ]
+  },
   "limits": "Audio-only greedy English CTC; estimated words/times, not correctness. No prompt input. Synthetic sound comparison remains separate.",
-  "referenceExporterSha256": "c70b7dd519e4cf36080b4ea953a8f05f5d70620b2ceddebeb5b12475b9fcbafd",
   "referenceWords": 998,
-  "totalDownloadBytes": 176928715,
+  "referenceExporterSha256": "c70b7dd519e4cf36080b4ea953a8f05f5d70620b2ceddebeb5b12475b9fcbafd",
+  "totalDownloadBytes": 319662045,
   "transportPackerSha256": "c5b9de6ea34476b8030b5ef019c6f5ea084ef52624bbe7c1b880353a73fd70d9"
 }

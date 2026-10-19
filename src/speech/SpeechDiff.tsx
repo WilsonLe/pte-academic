@@ -32,6 +32,16 @@ export function feedbackWords(
       syllables: result?.syllables.filter((s) => s.wordIndex === index) || [],
     }));
 }
+// Explicit orthographic equivalents only. Never merge homophones or fuzzy
+// spellings, and never pass this display key to recognition or acoustic grading.
+function spokenSpellingKey(word: string) {
+  if (word === "judgement") return "judgment";
+  if (word === "judgements") return "judgments";
+  return word;
+}
+const sameSpokenSpelling = (left: string, right: string) =>
+  spokenSpellingKey(left) === spokenSpellingKey(right);
+
 /** Edit-distance diff is display-only; it cannot feed back into recognition/scoring. */
 export function recognizedFeedbackWords(
   text: string,
@@ -48,7 +58,8 @@ export function recognizedFeedbackWords(
     index: i,
     spoken: spoken[i],
     expected:
-      expected !== undefined && source[Number(expected)] !== spoken[i].word
+      expected !== undefined &&
+      !sameSpokenSpelling(source[Number(expected)], spoken[i].word)
         ? displays[Number(expected)]?.trim() || source[Number(expected)]
         : undefined,
     syllables: result.syllables.filter((s) => s.wordIndex === i),
@@ -65,7 +76,8 @@ export function recognizedFeedbackWords(
       rows[i][j] = Math.min(
         rows[i - 1][j] + 1,
         rows[i][j - 1] + 1,
-        rows[i - 1][j - 1] + (source[i - 1] === spoken[j - 1].word ? 0 : 1),
+        rows[i - 1][j - 1] +
+          (sameSpokenSpelling(source[i - 1], spoken[j - 1].word) ? 0 : 1),
       );
   const output: FeedbackWord[] = [];
   let i = source.length,
@@ -75,7 +87,8 @@ export function recognizedFeedbackWords(
       i &&
       j &&
       rows[i][j] ===
-        rows[i - 1][j - 1] + (source[i - 1] === spoken[j - 1].word ? 0 : 1)
+        rows[i - 1][j - 1] +
+          (sameSpokenSpelling(source[i - 1], spoken[j - 1].word) ? 0 : 1)
     ) {
       output.push(asWord(j - 1, String(i - 1)));
       i--;

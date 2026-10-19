@@ -29,7 +29,32 @@ test("audio-only recognizer, word dictionary and synthetic word library have com
     JSON.parse(await readFile(dir + "manifest.json", "utf8")),
     manifest,
   );
-  assert.equal(manifest.revision, "22aad52d435eb6dbaf354bdad9b0da84ce7d6156");
+  assert.equal(manifest.revision, "54074b1c16f4de6a5ad59affb4caa8f2ea03a119");
+  assert.equal(manifest.repository, "facebook/wav2vec2-large-960h-lv60-self");
+  assert.equal(
+    manifest.sourceWeightSha256,
+    "00b604cf4d28e86559e8adaeb3a186daa89dc37f5ab216771a0a15a26db0de9f",
+  );
+  assert.equal(
+    manifest.encoderSha256,
+    "aa3100a81bc45df0277f2b724227aa4f7c5fd812a44e69f64954734ce870608d",
+  );
+  assert.equal(
+    manifest.sourceFilesSha256["pytorch_model.bin"],
+    manifest.sourceWeightSha256,
+  );
+  assert.equal(Object.keys(manifest.sourceFilesSha256).length, 6);
+  assert.ok(manifest.encoderBytes < 360_000_000);
+  assert.ok(
+    manifest.files
+      .filter((f) => f.kind === "recognizer")
+      .every((f) => /^recognizer-lv60-int8-\d{2}\.bin$/.test(f.path)),
+    "new model URLs cannot overwrite base-model cache entries",
+  );
+  assert.equal(
+    manifest.sourceLoaderSha256,
+    sha(await readFile("training/recognition_model.py")),
+  );
   assert.equal(
     manifest.exporterSha256,
     sha(await readFile("training/export_recognition.py")),

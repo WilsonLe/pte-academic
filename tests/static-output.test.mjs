@@ -28,6 +28,16 @@ test("published JavaScript stays within the default 500 kB chunk budget", async 
     );
   }
 });
+test("published static site fits the GitHub Pages one GB limit", async () => {
+  const sizes = await Promise.all(
+    (await files(directory)).map(async (file) => (await stat(file)).size),
+  );
+  const total = sizes.reduce((sum, size) => sum + size, 0);
+  assert.ok(
+    total < 1_000_000_000,
+    `Published artifact is ${total} bytes; GitHub Pages allows at most 1 GB`,
+  );
+});
 test("published artifact contains a base-aware SPA shell, public assets and scoped offline worker", async () => {
   const shell = await readFile(`${directory}/index.html`, "utf8");
   assert.match(

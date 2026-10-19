@@ -2,6 +2,8 @@ import { reliableSignal } from "../src/speech/comparison-core";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  speechWindows,
+  recognitionSpanSeconds,
   recognizeWords,
   speechWindowBounds,
   wordVariants,
@@ -158,4 +160,104 @@ test("bounded windows trim long silent tails while preserving acoustic context a
     end: 16000 * 9 + 3200,
   });
   assert.equal(speechWindowBounds(new Float32Array(16000)), undefined);
+});
+
+test("new recognition provenance survives validation without changing legacy evidence", () => {
+  const original = JSON.stringify(result);
+  const recognition = {
+    ...result.recognition!,
+    recognizerSha256: "a".repeat(64),
+    recognizerRevision: "b".repeat(40),
+    decoder: "greedy-ctc-adaptive-v1" as const,
+    windowSeconds: 20 as const,
+  };
+  assert.deepEqual(
+    pronunciationSchema.parse({ ...result, recognition }).recognition,
+    recognition,
+  );
+  assert.ok(pronunciationSchema.safeParse(result).success);
+  assert.equal(JSON.stringify(result), original);
+  assert.equal(
+    pronunciationSchema.safeParse({
+      ...result,
+      recognition: { ...recognition, recognizerSha256: "wrong" },
+    }).success,
+    false,
+  );
+});
+
+test("short recognition spans own every boundary once while phonetic context stays unchanged", () => {
+  const audio = new Float32Array(125 * 16000).fill(0.01);
+  for (const seconds of [10, 20] as const) {
+    const windows = speechWindows(audio, seconds);
+    assert.equal(windows.length, Math.ceil(125 / seconds));
+    windows.forEach((window, i) => {
+      assert.deepEqual(window, {
+        start: Math.max(0, i * seconds - 1) * 16000,
+        end: Math.min(125, (i + 1) * seconds + 1) * 16000,
+        keepStart: i * seconds,
+        keepEnd: Math.min(125, (i + 1) * seconds),
+      });
+      assert.ok(window.end - window.start <= (seconds + 2) * 16000);
+    });
+    for (const middle of [0, 9.999, 10, 10.001, 19.999, 20, 20.001, 124.999])
+      assert.equal(
+        windows.filter((w) => middle >= w.keepStart && middle < w.keepEnd)
+          .length,
+        1,
+      );
+  }
+  assert.deepEqual(speechWindows(new Float32Array(125 * 16000), 10), []);
+});
+
+test("only long active speech trades recognition context for bounded attention cost", () => {
+  assert.equal(recognitionSpanSeconds(new Float32Array(125 * 16000)), 20);
+  assert.equal(
+    recognitionSpanSeconds(new Float32Array(45 * 16000).fill(0.01)),
+    20,
+  );
+  assert.equal(
+    recognitionSpanSeconds(new Float32Array(46 * 16000).fill(0.01)),
+    10,
+  );
+  const tail = new Float32Array(125 * 16000);
+  tail.set(new Float32Array(19 * 16000).fill(0.01), 16000);
+  assert.equal(recognitionSpanSeconds(tail), 20);
+});
+
+test("regional judgement spellings are display equivalents without replacing recognised evidence", () => {
+  for (const [prompt, recognized] of [
+    ["judgement", "judgment"],
+    ["judgment", "judgement"],
+    ["judgements", "judgments"],
+  ]) {
+    const evidence: Pronunciation = {
+      ...result,
+      recognition: {
+        ...result.recognition!,
+        words: [{ ...spoken[0], word: recognized }],
+      },
+    };
+    const before = JSON.stringify(evidence);
+    const diff = recognizedFeedbackWords(prompt, evidence);
+    assert.equal(diff.length, 1);
+    assert.equal(diff[0].expected, undefined);
+    assert.equal(diff[0].omitted, undefined);
+    assert.equal(diff[0].word, recognized);
+    assert.equal(diff[0].spoken, evidence.recognition!.words[0]);
+    assert.equal(JSON.stringify(evidence), before);
+  }
+  const evidence: Pronunciation = {
+    ...result,
+    recognition: {
+      ...result.recognition!,
+      words: [{ ...spoken[0], word: "two" }],
+    },
+  };
+  assert.equal(recognizedFeedbackWords("too", evidence)[0].expected, "too");
+  evidence.recognition!.words[0].word = "judgemant";
+  assert.equal(
+    recognizedFeedbackWords("judgement", evidence)[0].expected,
+    "judgement",
+  );
 });

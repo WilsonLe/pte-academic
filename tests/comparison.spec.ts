@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { createHash } from "node:crypto";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { receiptLeavesControlsAvailable } from "./toast-checks";
 import {
@@ -96,24 +97,27 @@ async function runWorker(
   pcm: Buffer,
   text: string,
   recognize = false,
+  timeoutMs = 60000,
 ) {
   return await page.evaluate(
-    async ({ data, text, workerPath, base, recognize }) => {
+    async ({ data, text, workerPath, base, recognize, timeoutMs }) => {
       const audio = new Float32Array(
         Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer,
       );
       const worker = new Worker(workerPath, { type: "module" });
       return await new Promise<any>((resolve, reject) => {
+        let progress = "starting";
         const timer = setTimeout(() => {
           worker.terminate();
-          reject(new Error("Worker verification timed out"));
-        }, 60000);
+          reject(new Error(`Worker verification timed out: ${progress}`));
+        }, timeoutMs);
         worker.onerror = (e) => {
           clearTimeout(timer);
           worker.terminate();
           reject(new Error(e.message));
         };
         worker.onmessage = (e) => {
+          if (e.data.type === "progress") progress = e.data.message;
           if (e.data.type === "complete") {
             clearTimeout(timer);
             worker.terminate();
@@ -136,6 +140,7 @@ async function runWorker(
       workerPath: await workerPath(),
       base,
       recognize,
+      timeoutMs,
     },
   );
 }
@@ -208,6 +213,40 @@ test("actual v3 browser inference matches all four Python accent controls and wr
     `artifacts/pronunciation/browser-export/verified-browser-controls${base === "/" ? "" : "-subpath"}.json`,
     JSON.stringify(reports, null, 2) + "\n",
   );
+});
+
+test("recognition retains clear endings and open-response words from the native codec regressions", async ({
+  page,
+}) => {
+  test.setTimeout(240000);
+  await seed(page);
+  const recognitionManifest = JSON.parse(
+    await readFile("src/speech/recognition-manifest.json", "utf8"),
+  );
+  const cases = JSON.parse(
+    await readFile(
+      "artifacts/word-recognition-export/regressions.json",
+      "utf8",
+    ),
+  );
+  for (const control of cases) {
+    const pcm = await readFile(control.pcm);
+    expect(createHash("sha256").update(pcm).digest("hex")).toBe(control.sha256);
+    const result = await runWorker(page, pcm, "an unrelated answer key", true);
+    expect(result.recognition.recognizerSha256).toBe(
+      recognitionManifest.encoderSha256,
+    );
+    expect(result.recognition.recognizerRevision).toBe(
+      recognitionManifest.revision,
+    );
+    expect(result.recognition.decoder).toBe("greedy-ctc-adaptive-v1");
+    expect(result.recognition.windowSeconds).toBe(20);
+    const words = result.recognition.words.map((w: any) => w.word);
+    for (const word of control.required) expect(words).toContain(word);
+    for (const word of control.rejected) expect(words).not.toContain(word);
+    expect(result.syllables.some((s: any) => s.status === "scored")).toBe(true);
+    expect(pronunciationSchema.safeParse(result).success).toBe(true);
+  }
 });
 
 test("audio-only word recognition is prompt-independent across four accents and open speaking review", async ({
@@ -433,6 +472,71 @@ test("audio-only word recognition is prompt-independent across four accents and 
   ).toHaveCount(0);
   expect(external).toEqual([]);
 });
+test("continuous 125-second speech completes within the production five-minute worker budget", async ({
+  page,
+}, info) => {
+  test.setTimeout(330000);
+  await seed(page);
+  const cases = JSON.parse(
+    await readFile("artifacts/word-recognition-export/cases.json", "utf8"),
+  );
+  const bytes = await readFile(cases[0].pcm);
+  const source = new Float32Array(
+    bytes.buffer,
+    bytes.byteOffset,
+    bytes.byteLength / 4,
+  );
+  const audio = new Float32Array(125 * 16000);
+  for (let at = 0; at < audio.length; at += source.length)
+    audio.set(
+      source.subarray(0, Math.min(source.length, audio.length - at)),
+      at,
+    );
+  const started = Date.now();
+  const result = await runWorker(
+    page,
+    Buffer.from(audio.buffer),
+    "unrelated prompt",
+    true,
+    300000,
+  );
+  const milliseconds = Date.now() - started;
+  expect(result.recognition.windowSeconds).toBe(10);
+  expect(milliseconds).toBeLessThan(300000);
+  const completeWords =
+    Math.floor(audio.length / source.length) *
+    cases[0].expected.split(" ").length;
+  expect(result.recognition.words.length).toBeGreaterThanOrEqual(
+    completeWords - 4,
+  );
+  for (let i = 1; i < result.recognition.words.length; i++) {
+    expect(result.recognition.words[i].start).toBeGreaterThanOrEqual(
+      result.recognition.words[i - 1].end,
+    );
+    // This control has no repeated neighbours, including at its loop boundary.
+    expect(result.recognition.words[i].word).not.toBe(
+      result.recognition.words[i - 1].word,
+    );
+  }
+  expect(result.recognition.words.at(-1).start).toBeGreaterThan(120);
+  expect(result.syllables.some((s: any) => s.status === "scored")).toBe(true);
+  expect(pronunciationSchema.safeParse(result).success).toBe(true);
+  const budgetPath = info.outputPath("continuous-speech-budget.json");
+  await writeFile(
+    budgetPath,
+    JSON.stringify({
+      milliseconds,
+      seconds: 125,
+      words: result.recognition.words.length,
+      recognizedWords: result.recognition.words,
+    }),
+  );
+  await info.attach("continuous-speech-budget", {
+    path: budgetPath,
+    contentType: "application/json",
+  });
+});
+
 test("automatic initial feedback persists; isolated syllable retry grades locally, rewards once, and survives offline reload", async ({
   page,
   context,
@@ -1275,6 +1379,21 @@ test("warm preparation avoids model transfers and saved word references work whi
 }, info) => {
   test.setTimeout(150000);
   await seed(page);
+  // An older prepared tab owns different recognizer URLs in the same cache.
+  // A small inert marker verifies retention without loading old weights twice.
+  await page.evaluate(async (base) => {
+    const key = (await caches.keys()).find((k) =>
+      k.startsWith("pte-comparison:"),
+    )!;
+    const cache = await caches.open(key);
+    await cache.put(
+      new URL(
+        base + "models/word-recognition-v1/recognizer-00.bin",
+        location.origin,
+      ),
+      new Response("older-tab-recognizer-marker"),
+    );
+  }, base);
   const transferred: string[] = [];
   page.on("request", (r) => {
     if (r.url().includes("/models/")) transferred.push(r.url());
@@ -1292,6 +1411,22 @@ test("warm preparation avoids model transfers and saved word references work whi
   ).toBeVisible();
   const warmMilliseconds = Date.now() - started;
   expect(transferred).toEqual([]);
+  expect(
+    await page.evaluate(async (base) => {
+      const key = (await caches.keys()).find((k) =>
+        k.startsWith("pte-comparison:"),
+      )!;
+      const response = await (
+        await caches.open(key)
+      ).match(
+        new URL(
+          base + "models/word-recognition-v1/recognizer-00.bin",
+          location.origin,
+        ),
+      );
+      return response?.text();
+    }, base),
+  ).toBe("older-tab-recognizer-marker");
   await page.keyboard.press("Escape");
   await page.evaluate(async (base) => {
     const key = (await caches.keys()).find((k) =>

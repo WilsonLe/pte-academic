@@ -36,6 +36,36 @@ export function speechWindowBounds(audio: Float32Array) {
       };
 }
 
+/** Preserve short-answer context; bound attention cost only for long active speech. */
+export function recognitionSpanSeconds(audio: Float32Array): 10 | 20 {
+  const bounds = speechWindowBounds(audio);
+  return bounds && bounds.end - bounds.start > 45 * 16000 ? 10 : 20;
+}
+
+/** Each owned span has one second of context on either side, then silence trim. */
+export function speechWindows(audio: Float32Array, spanSeconds: 10 | 20) {
+  const windows: {
+    start: number;
+    end: number;
+    keepStart: number;
+    keepEnd: number;
+  }[] = [];
+  const span = spanSeconds * 16000;
+  for (let at = 0; at < audio.length; at += span) {
+    const start = Math.max(0, at - 16000),
+      end = Math.min(audio.length, at + span + 16000),
+      bounds = speechWindowBounds(audio.subarray(start, end));
+    if (!bounds) continue;
+    windows.push({
+      start: start + bounds.start,
+      end: start + bounds.end,
+      keepStart: at / 16000,
+      keepEnd: Math.min(audio.length, at + span) / 16000,
+    });
+  }
+  return windows;
+}
+
 /** Greedy character CTC decoding. This API deliberately has no text argument. */
 export function recognizeWords(
   logits: Float32Array,

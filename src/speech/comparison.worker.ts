@@ -29,7 +29,8 @@ import {
 import recognitionManifest from "./recognition-manifest.json";
 import {
   recognizeWords,
-  speechWindowBounds,
+  speechWindows,
+  recognitionSpanSeconds,
   scoreRecognizedWords,
   wordVariants,
   type WordLexicon,
@@ -87,6 +88,7 @@ self.onmessage = async (
       )
     )
       throw new Error("Unsupported syllable reference input.");
+    const recognitionSpan = recognize ? recognitionSpanSeconds(audio) : 20;
     const result: Pronunciation = {
       schemaVersion: 1,
       modelSha256: COMPARISON_MODEL_SHA,
@@ -97,7 +99,14 @@ self.onmessage = async (
       syllables: [],
     };
     if (recognize)
-      result.recognition = { modelId: "audio-only-words-v1", words: [] };
+      result.recognition = {
+        modelId: "audio-only-words-v1",
+        recognizerSha256: recognitionManifest.encoderSha256,
+        recognizerRevision: recognitionManifest.revision,
+        decoder: "greedy-ctc-adaptive-v1",
+        windowSeconds: recognitionSpan,
+        words: [],
+      };
     if (!reliableSignal(audio)) {
       result.status = "no-reliable-speech";
       self.postMessage({ type: "complete", result });
@@ -133,25 +142,9 @@ self.onmessage = async (
         target,
       );
     // Bounded overlapping windows also support open speaking tasks without text.
-    const windows: {
-      start: number;
-      end: number;
-      keepStart: number;
-      keepEnd: number;
-    }[] = [];
-    if (recognize)
-      for (let at = 0; at < audio.length; at += 20 * 16000) {
-        const start = Math.max(0, at - 16000),
-          end = Math.min(audio.length, at + 21 * 16000);
-        const bounds = speechWindowBounds(audio.subarray(start, end));
-        if (!bounds) continue;
-        windows.push({
-          start: start + bounds.start,
-          end: start + bounds.end,
-          keepStart: at / 16000,
-          keepEnd: Math.min(audio.length, at + 20 * 16000) / 16000,
-        });
-      }
+    // Preserve the original phonetic context. Shorter character-only windows
+    // bound attention cost without changing the v3 grading pipeline.
+    const windows = recognize ? speechWindows(audio, 20) : [];
     const load = async (wordModel: boolean) => {
       const pack = wordModel ? recognitionManifest : comparisonManifest;
       const bytes = new Uint8Array(pack.encoderBytes);
@@ -178,7 +171,7 @@ self.onmessage = async (
         ),
       );
       session = await load(true);
-      for (const window of windows) {
+      for (const window of speechWindows(audio, recognitionSpan)) {
         const samples = audio.subarray(window.start, window.end);
         if (!reliableSignal(samples)) continue;
         const out = await session.run({
