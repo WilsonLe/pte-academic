@@ -6,6 +6,242 @@ import {
   COMPARISON_EXPORT,
 } from "../src/speech/comparison-schema";
 const base = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
+
+test("empty independent recognition explains the result once across all seven speaking types", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.goto(base);
+  const types = [
+    "read-aloud",
+    "repeat-sentence",
+    "describe-image",
+    "retell-lecture",
+    "answer-short-question",
+    "summarize-group-discussion",
+    "respond-to-situation",
+  ];
+  const ids = types.map((type) => questions.find((q) => q.type === type)!.id);
+  await page.evaluate(
+    async ({ ids, sha, exportId }) => {
+      const recording = await (
+        await fetch(
+          new URL("audio/read-aloud-01-reference.mp3", document.baseURI),
+        )
+      ).blob();
+      const assessment = (status: string, words: unknown[] = []) => ({
+        schemaVersion: 1,
+        modelSha256: sha,
+        exportId,
+        referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+        seconds: 3,
+        status,
+        recognition: { modelId: "audio-only-words-v1", words },
+        syllables: [],
+      });
+      const results = ["unscored", "no-reliable-speech"].map((status) => ({
+        id: `empty-${status}`,
+        label: "Controlled empty speech review",
+        date: new Date().toISOString(),
+        finished: true,
+        questionIds: ids,
+        answers: Object.fromEntries(
+          ids.map((id) => [id, { speechAssessment: assessment(status) }]),
+        ),
+      }));
+      results.push({
+        ...results[0],
+        id: "empty-no-recording",
+        questionIds: [ids[0]],
+        answers: { [ids[0]]: results[0].answers[ids[0]] },
+      });
+      results.push({
+        id: "nonempty-unscored",
+        label: "Controlled unscored word",
+        date: new Date().toISOString(),
+        finished: true,
+        questionIds: [ids[2]],
+        answers: {
+          [ids[2]]: {
+            speechAssessment: assessment("unscored", [
+              {
+                word: "urban",
+                index: 0,
+                start: 0,
+                end: 0.8,
+                confidence: 0.5,
+                status: "uncertain",
+              },
+            ]),
+          },
+        },
+      });
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onupgradeneeded = () => {
+          for (const name of ["attempts", "progress"])
+            if (!request.result.objectStoreNames.contains(name))
+              request.result.createObjectStore(name);
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result,
+            tx = db.transaction("attempts", "readwrite");
+          for (const result of results)
+            tx.objectStore("attempts").put(
+              {
+                result,
+                recordings:
+                  result.id === "empty-no-recording"
+                    ? {}
+                    : Object.fromEntries(
+                        result.questionIds.map((id) => [id, recording]),
+                      ),
+              },
+              result.id,
+            );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+      localStorage.setItem(
+        "pte-studio-history-v1",
+        JSON.stringify(results.map((result) => ({ ...result, answers: {} }))),
+      );
+    },
+    { ids, sha: COMPARISON_MODEL_SHA, exportId: COMPARISON_EXPORT },
+  );
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const status of ["unscored", "no-reliable-speech"]) {
+      await page.goto(base + `history/empty-${status}`);
+      for (const [index, id] of ids.entries()) {
+        await expect(page.locator(".review-screen")).toHaveAttribute(
+          "data-question-id",
+          id,
+        );
+        const feedback = page.getByRole("region", {
+          name: "On-device speech feedback",
+          exact: true,
+        });
+        await expect(
+          feedback.getByText("No words could be recognised reliably.", {
+            exact: true,
+          }),
+        ).toBeVisible();
+        await expect(
+          feedback.getByText("No words could be recognised reliably.", {
+            exact: true,
+          }),
+        ).toHaveCount(1);
+        await expect(
+          feedback.getByRole("button", { name: /^(Not heard:|Practise word)/ }),
+        ).toHaveCount(0);
+        await expect(
+          feedback.getByText(
+            /Words are recognised from your recording|Select a word to practise/,
+          ),
+        ).toHaveCount(0);
+        await expect(feedback.getByLabel(/^Reference similarity/)).toHaveCount(
+          0,
+        );
+        await expect(
+          page.getByRole("region", { name: "Original question", exact: true }),
+        ).toBeVisible();
+        await expect(
+          feedback.getByRole("button", {
+            name: "Play Your recording",
+            exact: true,
+          }),
+        ).toBeVisible();
+        await feedback
+          .getByRole("button", { name: "Details", exact: true })
+          .click();
+        await expect(page.getByRole("dialog")).toContainText(
+          "0 of 0 syllables scored.",
+        );
+        await page.getByRole("button", { name: "Close", exact: true }).click();
+        if (index < ids.length - 1)
+          await page
+            .getByRole("button", { name: "Next review questions", exact: true })
+            .click();
+      }
+      await page.reload();
+      await expect(
+        page.getByText("No words could be recognised reliably.", {
+          exact: true,
+        }),
+      ).toBeVisible();
+    }
+    await page.goto(base + "history/empty-no-recording");
+    await expect(
+      page.getByText("No words could be recognised reliably.", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("No recording was saved.", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/You can still practise each syllable/),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Play Your recording", exact: true }),
+    ).toHaveCount(0);
+    await page.goto(base + "history/nonempty-unscored");
+    await expect(
+      page.getByRole("button", { name: "Practise word 1: urban", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("No words could be recognised reliably.", { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
+  }
+  await page
+    .getByRole("button", { name: "Practise word 1: urban", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog");
+  await expect(
+    dialog.getByText(
+      "No reliable syllable grade is available for this recognised word.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("group", { name: "Choose a syllable", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    dialog.getByText("Listen and practise a syllable from this word.", {
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    dialog.getByRole("button", { name: "Play Your word", exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Record syllable", exact: true }),
+  ).toHaveCount(0);
+  await dialog
+    .getByRole("button", { name: "Practice details", exact: true })
+    .click();
+  await expect(
+    dialog.getByText(
+      /Listen, choose a syllable|Earn 5 XP|Retry audio stays|Synthetic reference example/,
+    ),
+  ).toHaveCount(0);
+  await expect(dialog).toContainText(
+    "Similarity is not pronunciation correctness or an exam score.",
+  );
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Practise word 1: urban", exact: true }),
+  ).toBeFocused();
+});
 async function seed(
   page: Page,
   state: "scored" | "no-reliable-speech" = "scored",
@@ -144,6 +380,14 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
   await expect(
     dialog.getByRole("button", { name: "Record syllable", exact: true }),
   ).toBeDisabled();
+  await dialog
+    .getByRole("button", { name: "Practice details", exact: true })
+    .click();
+  await expect(dialog).toContainText(
+    "Listen, choose a syllable, then record it.",
+  );
+  await expect(dialog).toContainText("Earn 5 XP per syllable each day");
+  await expect(dialog).toContainText("Synthetic reference example");
   await page.screenshot({ path: info.outputPath("word-practice-desktop.png") });
   await page.keyboard.press("Escape");
   await expect(
@@ -603,7 +847,10 @@ test("speech review opens at recognised evidence and retains every omission acro
   ).toBeVisible();
   await page.getByRole("button", { name: "Next review questions" }).click();
   await expect(
-    page.getByRole("button", { name: /^Not heard:/ }).first(),
+    page.getByText("No words could be recognised reliably.", { exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Not heard:/ })).toHaveCount(
+    0,
+  );
   await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
 });

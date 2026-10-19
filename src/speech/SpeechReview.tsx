@@ -135,6 +135,7 @@ export function SpeechReview({
   );
   const selected = words.find((word) => word.index === selectedIndex);
   const similarity = pronunciation ? pronunciationSummary(pronunciation) : null;
+  const emptyRecognition = pronunciation?.recognition?.words.length === 0;
   return (
     <section
       aria-label="On-device speech feedback"
@@ -185,35 +186,44 @@ export function SpeechReview({
       )}
       {expected || answer.recording || pronunciation?.recognition ? (
         <>
-          <div className="speech-summary" aria-label="Local syllable scores">
-            {similarity !== null && (
-              <Badge
-                variant="secondary"
-                aria-label={`Reference similarity ${similarity} out of 100`}
+          {!emptyRecognition && (
+            <>
+              <div
+                className="speech-summary"
+                aria-label="Local syllable scores"
               >
-                {similarity}/100 similarity
-              </Badge>
-            )}
-            {pronunciation?.status === "no-reliable-speech" && (
-              <span>
-                No reliable speech detected. Select a word to practise.
-              </span>
-            )}
-          </div>
-          <p className="sr-only">
-            {pronunciation?.recognition
-              ? "Words are recognised from your recording. Select one to hear and practise its pronunciation. Recognition and word timings can be uncertain."
-              : pronunciation
-                ? "Saved prompt-aligned syllable feedback. Select a word to listen and practise."
-                : "Words will appear after on-device recognition."}
-          </p>
-          <SpeechDiff
-            words={words}
-            onSelect={(word) => setSelectedIndex(word.index)}
-          />
-          {!answer.recording && (
-            <p>No recording was saved. You can still practise each syllable.</p>
+                {similarity !== null && (
+                  <Badge
+                    variant="secondary"
+                    aria-label={`Reference similarity ${similarity} out of 100`}
+                  >
+                    {similarity}/100 similarity
+                  </Badge>
+                )}
+                {pronunciation?.status === "no-reliable-speech" && (
+                  <span>
+                    No reliable speech detected. Select a word to practise.
+                  </span>
+                )}
+              </div>
+              <p className="sr-only">
+                {pronunciation?.recognition
+                  ? "Words are recognised from your recording. Select one to hear and practise its pronunciation. Recognition and word timings can be uncertain."
+                  : pronunciation
+                    ? "Saved prompt-aligned syllable feedback. Select a word to listen and practise."
+                    : "Words will appear after on-device recognition."}
+              </p>
+            </>
           )}
+          {emptyRecognition ? (
+            !progress && <p>No words could be recognised reliably.</p>
+          ) : (
+            <SpeechDiff
+              words={words}
+              onSelect={(word) => setSelectedIndex(word.index)}
+            />
+          )}
+          {!answer.recording && <p>No recording was saved.</p>}
           <div className="feedback-actions">
             <ReviewDisclosure
               title="Speaking details"
@@ -259,12 +269,6 @@ export function SpeechReview({
               </ReviewDisclosure>
             )}
           </div>
-          {!expected &&
-            !words.length &&
-            !progress &&
-            pronunciation?.recognition && (
-              <p>No words could be recognised reliably.</p>
-            )}
           {selected?.omitted ? (
             <Dialog
               open
