@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   speechWindows,
-  recognitionSpanSeconds,
+  usesBaseRecognizer,
   recognizeWords,
   speechWindowBounds,
   wordVariants,
@@ -210,19 +210,34 @@ test("short recognition spans own every boundary once while phonetic context sta
   assert.deepEqual(speechWindows(new Float32Array(125 * 16000), 10), []);
 });
 
-test("only long active speech trades recognition context for bounded attention cost", () => {
-  assert.equal(recognitionSpanSeconds(new Float32Array(125 * 16000)), 20);
+test("isolated and expensive trimmed context preserve the original recognizer", () => {
+  assert.equal(usesBaseRecognizer([{ start: 0, end: 2 * 16000 - 1 }]), true);
+  assert.equal(usesBaseRecognizer([{ start: 0, end: 2 * 16000 }]), false);
+  assert.equal(usesBaseRecognizer([{ start: 0, end: 45 * 16000 }]), false);
+  assert.equal(usesBaseRecognizer([{ start: 0, end: 45 * 16000 + 1 }]), true);
   assert.equal(
-    recognitionSpanSeconds(new Float32Array(45 * 16000).fill(0.01)),
-    20,
+    usesBaseRecognizer(speechWindows(new Float32Array(125 * 16000), 20)),
+    true,
   );
   assert.equal(
-    recognitionSpanSeconds(new Float32Array(46 * 16000).fill(0.01)),
-    10,
+    usesBaseRecognizer(
+      speechWindows(new Float32Array(40 * 16000).fill(0.01), 20),
+    ),
+    false,
+  );
+  assert.equal(
+    usesBaseRecognizer(
+      speechWindows(new Float32Array(125 * 16000).fill(0.01), 20),
+    ),
+    true,
   );
   const tail = new Float32Array(125 * 16000);
   tail.set(new Float32Array(19 * 16000).fill(0.01), 16000);
-  assert.equal(recognitionSpanSeconds(tail), 20);
+  assert.equal(usesBaseRecognizer(speechWindows(tail, 20)), false);
+  const separated = new Float32Array(125 * 16000);
+  separated.set(new Float32Array(5 * 16000).fill(0.01), 16000);
+  separated.set(new Float32Array(5 * 16000).fill(0.01), 70 * 16000);
+  assert.equal(usesBaseRecognizer(speechWindows(separated, 20)), false);
 });
 
 test("regional judgement spellings are display equivalents without replacing recognised evidence", () => {

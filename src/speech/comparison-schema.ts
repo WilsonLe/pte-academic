@@ -47,7 +47,13 @@ export const pronunciationSchema = z
           .string()
           .regex(/^[a-f0-9]{40}$/)
           .optional(),
-        decoder: z.enum(["greedy-ctc-v1", "greedy-ctc-adaptive-v1"]).optional(),
+        decoder: z
+          .enum([
+            "greedy-ctc-v1",
+            "greedy-ctc-adaptive-v1",
+            "greedy-ctc-duration-v1",
+          ])
+          .optional(),
         windowSeconds: z.union([z.literal(10), z.literal(20)]).optional(),
         words: z
           .array(

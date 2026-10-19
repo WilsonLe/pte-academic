@@ -1,4 +1,4 @@
-# ADR-0001: Use a compact self-trained audio-only recognizer
+# ADR-0001: Select compact audio-only recognizers by processed duration
 
 - Status: accepted
 - Date: 2026-10-19
@@ -13,9 +13,13 @@ Greedy decoding of the frozen base recognizer repeatedly loses clear word ending
 
 ## Decision
 
-Use frozen `facebook/wav2vec2-large-960h-lv60-self` revision `54074b1c16f4de6a5ad59affb4caa8f2ea03a119`, verified by source weight hash. Export per-channel dynamic INT8 MatMul/Gemm weights, retaining float32 convolution and other operations, and the existing bounded greedy audio-only CTC decoder. Keep20second owned character-recognition spans for at most45seconds of active speech; use10second spans for longer active speech. Both retain1second context on each side (at most22/12seconds). Retain20second owned spans and at most22second context for the independent phonetic grader. The earlier20second recognition candidate exceeded the existing300second production deadline on continuous125second speech, so release requires the shorter-window budget and quality controls to pass. Record encoder hash, upstream revision and decoder/window identity in new assessments. Preserve existing saved results, the v3 phonetic model, reference bank, calibration, pronunciation dictionary and all learner data.
+Use frozen `facebook/wav2vec2-large-960h-lv60-self` revision `54074b1c16f4de6a5ad59affb4caa8f2ea03a119` for 2–45 seconds of summed, trimmed recognition context. Export symmetric block-32 weight-only INT4 MatMulNBits with float32 activations, convolution and other operations. For isolated context below 2 seconds or greater cost above 45 seconds, retain the exact original `facebook/wav2vec2-base-960h` revision `22aad52d435eb6dbaf354bdad9b0da84ce7d6156` encoder with float16 constant storage and float32 operations. Pin both public sources/configurations and reproduce the original base hash and compressed chunk bytes. Retain greedy character CTC and 20-second owned spans with at most 22-second context for recognition and phonetic grading. Long silence and separated short speech do not count as expensive processed context. Prompt text and grades never select the model.
 
-Keep the existing asset directory/cache identity. Each changed encoder file must pass transport and decoded hashes; unchanged phonetic/reference files remain reusable. The recognition session is released before loading the phonetic encoder. No learner audio is uploaded, no prompt enters recognition, and no linguistic match becomes a grade.
+A native recording independently labelled “ice” regressed to “i” with weight-only INT4. Changing block sizes or preserving the output projection did not restore it. Preserve the original recognizer for isolated utterances by an audio-only context floor; no prompt, word, score or clip hash selects a model. This retains baseline short-answer behavior rather than claiming its recognition issues are solved.
+
+The earlier large-only export exceeded the300-second deadline on 125-second continuous speech. Alternative compact base exports regressed actual browser recognition on a mixed-accent control despite passing CPU checks; retain the original base output instead. The smaller short-response export preserves the targeted native corrections and improves the wider synthetic controls while fitting the static-hosting budget alongside the original base. Save exact selected-model and decoder provenance. Preserve the v3 phonetic model, reference bank, calibration, dictionary, saved originals and learner data.
+
+Keep v3, references, runtime and existing legacy entries in the original model cache. Each new encoder uses a separate immutable cache namespace derived from its SHA, bounding fresh per-cache size below 1 GiB for memory-backed browsers. Reuse a legacy entry only after a full decoded hash check, and never delete it. Check all required receipts again before reporting ready; missing/corrupt model recovery remains in the header. The recognition session is released before loading the phonetic encoder. No learner audio is uploaded and no linguistic match becomes a grade.
 
 ## Alternatives
 
@@ -23,7 +27,7 @@ The existing base model with dictionary-aware prefix beam search corrects some b
 
 ## Consequences
 
-The recognition encoder grows from 189,043,500 to 356,158,757 decoded bytes. The compact export retains the improvements on the original recordings, with a small fresh-control difference from full precision. Browser runtime, download size, cancellation, offline behavior and acoustic-grade coverage require actual verification before release. New provenance is optional so older records remain readable; opening an older independent result does not rescore or replace it.
+The short-response encoder has 241,236,684 decoded bytes; the exact original long-response encoder has 189,043,500 bytes. The recognition pack transfers 377,145,008 bytes versus 176,928,715 previously. The normal publisher fits the unchanged 1 GB site guard without omitting decoded sidecars. Original generic base URLs remain byte-for-byte compatible. Sustained speech retains the base model's weaker recognition; short responses receive the demonstrated improvement. Browser runtime, download size, cancellation, offline behavior and acoustic-grade coverage require current-candidate verification. Provenance stays optional so older records remain readable; opening an older independent result does not replace it.
 
 Synthetic script agreement is diagnostic evidence, not a human word-error benchmark or a validated pronunciation score. Ambiguous audio, unfamiliar names, valid spelling variants and residual substitutions remain possible. Unsupported or weak acoustic evidence stays uncertain. See the recognition report and issue for measured results and remaining errors.
 
@@ -31,4 +35,4 @@ Synthetic script agreement is diagnostic evidence, not a human word-error benchm
 
 Revisit if browser memory/preparation/assessment latency regresses, a representative independently listened human benchmark shows a regression, or a smaller pinned local recognizer demonstrates equal or better outcomes. Such investigation does not authorize cloud recognition, prompt correction or replacing original saved assessments.
 
-Recognition chunks use the versioned `recognizer-lv60-int8-` filename prefix. The shared model-cache identity and unchanged phonetic/dictionary/reference URLs remain stable, while a prepared older tab keeps its original decoded recognizer entries. New preparation must not overwrite those old cache keys. An older tab with an incomplete pack may need an ordinary app update after publication; do not activate one during an attempt.
+Short-response chunks use `recognizer-lv60-int4-`; long responses retain the original generic `recognizer-NN.bin` URLs. The shared model-cache identity and unchanged phonetic/dictionary/reference URLs remain stable, while a prepared older tab keeps its original decoded recognizer entries. New preparation must not overwrite those old cache keys. An older tab with an incomplete pack may need an ordinary app update after publication; do not activate one during an attempt.

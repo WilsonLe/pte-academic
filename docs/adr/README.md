@@ -9,4 +9,4 @@ Edit records, then run refresh and check; do not hand-edit this index.
 
 | ADR | Decision | Status | Date |
 | --- | --- | --- | --- |
-| [ADR-0001](0001-use-a-compact-self-trained-audio-only-recognizer.md) | Use a compact self-trained audio-only recognizer | accepted | 2026-10-19 |
+| [ADR-0001](0001-use-a-compact-self-trained-audio-only-recognizer.md) | Select compact audio-only recognizers by processed duration | accepted | 2026-10-19 |

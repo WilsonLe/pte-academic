@@ -14,9 +14,11 @@ CASES = [
     ('describe-image', ['bus'], ['bust']),
     ('retell-lecture', ['retrieval', 'retention', 'across'], ['retrievale', 'retension']),
     ('summarize-group-discussion', ['another', 'attendance'], ['attendants']),
+    ('fresh-ice', ['ice'], ['i', 'is']),
 ]
 # Exact app-native decoded PCM, not a script treated as a human transcript.
 HASHES = {
+    'fresh-ice': '3292bd84c8267ba4f7a88e94996761ba5e0d653cb823bc94e1e458d6490660fb',
     'read-aloud': '685a59bd010556ee0cd74dbdcd4cb0af9d395e13ec96ed57dec81db5c883ec8b',
     'describe-image': 'b724c01071c94056db8664496f6bf58c43afe2adeaabfdde8ba19354874da9e7',
     'retell-lecture': '27d93f04877982132648e9e8faf628c70cd7411f728ec5fa1eb2244614f24c36',
@@ -40,6 +42,7 @@ def main():
         shutil.copyfile(source, target)
         cases.append({'name': name, 'pcm': str(target), 'sha256': digest,
                       'required': required, 'rejected': rejected,
+                      'originalRecognizer': name == 'fresh-ice',
                       'provenance': 'Retained synthetic native MediaRecorder capture, issue150; not a human speech benchmark.'})
     (output/'regressions.json').write_text(json.dumps(cases, indent=2)+'\n')
 

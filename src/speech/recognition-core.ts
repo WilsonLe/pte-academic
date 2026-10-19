@@ -36,10 +36,15 @@ export function speechWindowBounds(audio: Float32Array) {
       };
 }
 
-/** Preserve short-answer context; bound attention cost only for long active speech. */
-export function recognitionSpanSeconds(audio: Float32Array): 10 | 20 {
-  const bounds = speechWindowBounds(audio);
-  return bounds && bounds.end - bounds.start > 45 * 16000 ? 10 : 20;
+/** Preserve original isolated-word and sustained-speech behavior. */
+export function usesBaseRecognizer(
+  windows: readonly { start: number; end: number }[],
+) {
+  const samples = windows.reduce(
+    (total, window) => total + window.end - window.start,
+    0,
+  );
+  return samples < 2 * 16000 || samples > 45 * 16000;
 }
 
 /** Each owned span has one second of context on either side, then silence trim. */

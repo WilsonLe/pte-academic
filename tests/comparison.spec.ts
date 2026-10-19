@@ -92,15 +92,48 @@ async function workerPath() {
     ).find((f) => /^comparison\.worker-.*\.js$/.test(f))
   );
 }
+function wordEdits(expected: string[], actual: string[]) {
+  let row = Array.from({ length: actual.length + 1 }, (_, i) => i);
+  expected.forEach((word, i) => {
+    const next = [i + 1];
+    actual.forEach((heard, j) =>
+      next.push(
+        Math.min(row[j + 1] + 1, next[j] + 1, row[j] + Number(word !== heard)),
+      ),
+    );
+    row = next;
+  });
+  return row.at(-1)!;
+}
 async function runWorker(
   page: Page,
   pcm: Buffer,
   text: string,
   recognize = false,
-  timeoutMs = 60000,
+  timeoutMs = recognize ? 300000 : 60000,
 ) {
+  const modelFiles = (
+    await Promise.all(
+      ["comparison", "recognition"].map(async (name) => {
+        const manifest = JSON.parse(
+          await readFile(`src/speech/${name}-manifest.json`, "utf8"),
+        );
+        return manifest.files.map(
+          (file: any) => manifest.assetDirectory + file.path,
+        );
+      }),
+    )
+  ).flat();
   return await page.evaluate(
-    async ({ data, text, workerPath, base, recognize, timeoutMs }) => {
+    async ({
+      data,
+      text,
+      workerPath,
+      base,
+      recognize,
+      timeoutMs,
+      modelFiles,
+    }) => {
       const audio = new Float32Array(
         Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer,
       );
@@ -116,7 +149,7 @@ async function runWorker(
           worker.terminate();
           reject(new Error(e.message));
         };
-        worker.onmessage = (e) => {
+        worker.onmessage = async (e) => {
           if (e.data.type === "progress") progress = e.data.message;
           if (e.data.type === "complete") {
             clearTimeout(timer);
@@ -125,7 +158,46 @@ async function runWorker(
           } else if (e.data.type === "error") {
             clearTimeout(timer);
             worker.terminate();
-            reject(new Error(e.data.message));
+            let audit: unknown;
+            try {
+              const names = (await caches.keys()).filter((name) =>
+                name.startsWith("pte-comparison:"),
+              );
+              const opened = await Promise.all(
+                names.map(async (name) => ({
+                  name,
+                  cache: await caches.open(name),
+                })),
+              );
+              const missing: string[] = [];
+              for (const file of modelFiles) {
+                const matches = await Promise.all(
+                  opened.map(({ cache }) =>
+                    cache.match(
+                      new URL(file, new URL(base, location.origin)).href,
+                    ),
+                  ),
+                );
+                if (!matches.some(Boolean)) missing.push(file);
+              }
+              audit = {
+                storage: await navigator.storage.estimate(),
+                missing,
+                caches: await Promise.all(
+                  opened.map(async ({ name, cache }) => ({
+                    name,
+                    entries: (await cache.keys()).length,
+                  })),
+                ),
+              };
+            } catch (error) {
+              audit = String(error);
+            }
+            reject(
+              new Error(
+                `${e.data.message}; phase=${progress}; audit=${JSON.stringify(audit)}`,
+              ),
+            );
           }
         };
         worker.postMessage(
@@ -141,6 +213,7 @@ async function runWorker(
       base,
       recognize,
       timeoutMs,
+      modelFiles,
     },
   );
 }
@@ -217,8 +290,8 @@ test("actual v3 browser inference matches all four Python accent controls and wr
 
 test("recognition retains clear endings and open-response words from the native codec regressions", async ({
   page,
-}) => {
-  test.setTimeout(240000);
+}, info) => {
+  test.setTimeout(360000);
   await seed(page);
   const recognitionManifest = JSON.parse(
     await readFile("src/speech/recognition-manifest.json", "utf8"),
@@ -229,17 +302,31 @@ test("recognition retains clear endings and open-response words from the native 
       "utf8",
     ),
   );
+  const receipts: unknown[] = [];
   for (const control of cases) {
     const pcm = await readFile(control.pcm);
     expect(createHash("sha256").update(pcm).digest("hex")).toBe(control.sha256);
+    const started = Date.now();
     const result = await runWorker(page, pcm, "an unrelated answer key", true);
+    receipts.push({
+      sha256: control.sha256,
+      milliseconds: Date.now() - started,
+      result,
+    });
+    await writeFile(
+      info.outputPath("native-regression-results.json"),
+      JSON.stringify(receipts, null, 2),
+    );
+    const expectedEncoder = control.originalRecognizer
+      ? recognitionManifest.longRecognizer
+      : recognitionManifest;
     expect(result.recognition.recognizerSha256).toBe(
-      recognitionManifest.encoderSha256,
+      expectedEncoder.encoderSha256,
     );
     expect(result.recognition.recognizerRevision).toBe(
-      recognitionManifest.revision,
+      expectedEncoder.revision,
     );
-    expect(result.recognition.decoder).toBe("greedy-ctc-adaptive-v1");
+    expect(result.recognition.decoder).toBe("greedy-ctc-duration-v1");
     expect(result.recognition.windowSeconds).toBe(20);
     const words = result.recognition.words.map((w: any) => w.word);
     for (const word of control.required) expect(words).toContain(word);
@@ -501,7 +588,21 @@ test("continuous 125-second speech completes within the production five-minute w
     300000,
   );
   const milliseconds = Date.now() - started;
-  expect(result.recognition.windowSeconds).toBe(10);
+  await writeFile(
+    info.outputPath("continuous-speech-result.json"),
+    JSON.stringify({ milliseconds, result }),
+  );
+  const recognitionManifest = JSON.parse(
+    await readFile("src/speech/recognition-manifest.json", "utf8"),
+  );
+  expect(result.recognition.recognizerSha256).toBe(
+    recognitionManifest.longRecognizer.encoderSha256,
+  );
+  expect(result.recognition.recognizerRevision).toBe(
+    recognitionManifest.longRecognizer.revision,
+  );
+  expect(result.recognition.decoder).toBe("greedy-ctc-duration-v1");
+  expect(result.recognition.windowSeconds).toBe(20);
   expect(milliseconds).toBeLessThan(300000);
   const completeWords =
     Math.floor(audio.length / source.length) *
@@ -509,6 +610,16 @@ test("continuous 125-second speech completes within the production five-minute w
   expect(result.recognition.words.length).toBeGreaterThanOrEqual(
     completeWords - 4,
   );
+  const expected = Array.from(
+    { length: Math.floor(audio.length / source.length) },
+    () => cases[0].expected.split(" "),
+  ).flat();
+  expect(
+    wordEdits(
+      expected,
+      result.recognition.words.slice(0, completeWords).map((w: any) => w.word),
+    ),
+  ).toBeLessThanOrEqual(4);
   for (let i = 1; i < result.recognition.words.length; i++) {
     expect(result.recognition.words[i].start).toBeGreaterThanOrEqual(
       result.recognition.words[i - 1].end,
@@ -535,6 +646,60 @@ test("continuous 125-second speech completes within the production five-minute w
     path: budgetPath,
     contentType: "application/json",
   });
+});
+
+test("sustained speaking retains four accents without prompt-derived words", async ({
+  page,
+}, info) => {
+  test.setTimeout(330000);
+  await seed(page);
+  const cases = JSON.parse(
+    await readFile("artifacts/word-recognition-export/cases.json", "utf8"),
+  );
+  const parts: Buffer[] = [];
+  const expected: string[] = [];
+  for (let repeat = 0; repeat < 3; repeat++) {
+    for (const control of cases) {
+      parts.push(await readFile(control.pcm), Buffer.alloc(3200 * 4));
+      expected.push(...control.expected.split(" "));
+    }
+  }
+  const started = Date.now();
+  const result = await runWorker(
+    page,
+    Buffer.concat(parts),
+    "an unrelated answer key",
+    true,
+    300000,
+  );
+  const milliseconds = Date.now() - started;
+  await writeFile(
+    info.outputPath("mixed-long-speech-result.json"),
+    JSON.stringify({ milliseconds, expected, result }),
+  );
+  const manifest = JSON.parse(
+    await readFile("src/speech/recognition-manifest.json", "utf8"),
+  );
+  expect(result.recognition.recognizerSha256).toBe(
+    manifest.longRecognizer.encoderSha256,
+  );
+  expect(result.recognition.recognizerRevision).toBe(
+    manifest.longRecognizer.revision,
+  );
+  expect(result.recognition.decoder).toBe("greedy-ctc-duration-v1");
+  expect(result.recognition.windowSeconds).toBe(20);
+  expect(
+    wordEdits(
+      expected,
+      result.recognition.words.map((w: any) => w.word),
+    ),
+  ).toBeLessThanOrEqual(4);
+  expect(result.recognition.words.at(-1).end).toBeGreaterThan(
+    result.seconds - 1,
+  );
+  expect(result.syllables.some((s: any) => s.status === "scored")).toBe(true);
+  expect(pronunciationSchema.safeParse(result).success).toBe(true);
+  expect(milliseconds).toBeLessThan(300000);
 });
 
 test("automatic initial feedback persists; isolated syllable retry grades locally, rewards once, and survives offline reload", async ({
@@ -1372,6 +1537,97 @@ test("isolated retries accept all four reference accents after native recording 
     body: JSON.stringify(report, null, 2),
     contentType: "application/json",
   });
+});
+
+test("prepared model files survive moderate memory pressure", async ({
+  page,
+}, info) => {
+  test.setTimeout(180000);
+  await seed(page);
+  const descriptors = (
+    await Promise.all(
+      ["comparison", "recognition"].map(async (name) => {
+        const pack = JSON.parse(
+          await readFile(`src/speech/${name}-manifest.json`, "utf8"),
+        );
+        return pack.files.map((file: any) => ({
+          path: pack.assetDirectory + file.path,
+          sha256: file.sha256,
+        }));
+      }),
+    )
+  ).flat();
+  const audit = () =>
+    page.evaluate(
+      async ({ files, root }) => {
+        const names = (await caches.keys()).filter((name) =>
+          name.startsWith("pte-comparison:"),
+        );
+        const opened = await Promise.all(
+          names.map(async (name) => ({ name, cache: await caches.open(name) })),
+        );
+        const missing: string[] = [];
+        for (const file of files) {
+          const matches = await Promise.all(
+            opened.map(({ cache }) =>
+              cache.match(
+                new URL(file.path, new URL(root, location.origin)).href,
+              ),
+            ),
+          );
+          if (
+            !matches.some(
+              (response) =>
+                response?.headers.get("x-pte-sha256") === file.sha256,
+            )
+          )
+            missing.push(file.path);
+        }
+        const sizes = await Promise.all(
+          opened.map(async ({ name, cache }) => {
+            let bytes = 0;
+            for (const request of await cache.keys())
+              bytes += Number(
+                (await cache.match(request))?.headers.get("content-length") ||
+                  0,
+              );
+            return { name, bytes };
+          }),
+        );
+        return { missing, sizes };
+      },
+      { files: descriptors, root: base },
+    );
+  const before = await audit();
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Memory.simulatePressureNotification", { level: "moderate" });
+  // The notification fans out across browser processes without a completion event.
+  await page.waitForTimeout(1000);
+  const after = await audit();
+  await writeFile(
+    info.outputPath("memory-pressure-cache.json"),
+    JSON.stringify({ before, after }, null, 2),
+  );
+  expect(before.missing).toEqual([]);
+  expect(after.missing).toEqual([]);
+  for (const cache of after.sizes)
+    expect(cache.bytes).toBeLessThan(1_073_741_824);
+  await page.context().setOffline(true);
+  const cases = JSON.parse(
+    await readFile("artifacts/word-recognition-export/cases.json", "utf8"),
+  );
+  const result = await runWorker(
+    page,
+    await readFile(cases[0].pcm),
+    "unrelated prompt",
+    true,
+  );
+  expect(result.recognition.words.map((word: any) => word.word).join(" ")).toBe(
+    cases[0].expected,
+  );
+  expect(
+    result.syllables.some((syllable: any) => syllable.status === "scored"),
+  ).toBe(true);
 });
 
 test("warm preparation avoids model transfers and saved word references work while weights prepare", async ({

@@ -10,7 +10,11 @@ from pathlib import Path
 import re
 
 import cmudict
-from onnxruntime.quantization import quantize_dynamic, QuantType
+import numpy as np
+import onnx
+from onnxruntime.quantization.matmul_nbits_quantizer import MatMulNBitsQuantizer
+from onnx import TensorProto, helper, numpy_helper
+from importlib.metadata import version
 import recognition_model
 import torch
 import comparison
@@ -29,6 +33,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data-root', type=Path, required=True)
     parser.add_argument('--recognizer-root', type=Path, required=True)
+    parser.add_argument('--long-recognizer-root', type=Path, required=True)
     parser.add_argument('--encoder-only', action='store_true', help='Retain the hash-pinned dictionary and word-reference files')
     args = parser.parse_args()
     comparison.DATA = args.data_root.resolve()
@@ -41,7 +46,7 @@ def main():
     previous = json.loads((output/'manifest.json').read_text()) if args.encoder_only else None
 
     class Encoder(torch.nn.Module):
-        def __init__(self):
+        def __init__(self, model):
             super().__init__()
             self.model = model
 
@@ -50,12 +55,15 @@ def main():
 
     packed = cache / 'recognizer.onnx'
     raw = cache / 'recognizer-f32.onnx'
-    torch.onnx.export(Encoder(), (torch.zeros(1, 32000),), str(raw),
+    torch.onnx.export(Encoder(model), (torch.zeros(1, 32000),), str(raw),
                       input_names=['input_values'], output_names=['logits'],
                       dynamic_axes={'input_values': {1: 'samples'}, 'logits': {1: 'frames'}},
                       opset_version=17, dynamo=False, external_data=False)
-    quantize_dynamic(str(raw), str(packed), weight_type=QuantType.QInt8,
-                     per_channel=True, op_types_to_quantize=['MatMul', 'Gemm'])
+    quantizer = MatMulNBitsQuantizer(str(raw), bits=4, block_size=32,
+                                     is_symmetric=True, accuracy_level=0,
+                                     op_types_to_quantize=('MatMul',))
+    quantizer.process()
+    quantizer.model.save_model_to_file(str(packed), False)
     (output / 'vocab.json').write_text(json.dumps(tokenizer.get_vocab(), sort_keys=True)+'\n')
     files = []
 
@@ -65,16 +73,46 @@ def main():
     with packed.open('rb') as stream:
         i = 0
         while data := stream.read(CHUNK):
-            path = output / f'recognizer-lv60-int8-{i:02d}.bin'
+            path = output / f'recognizer-lv60-int4-{i:02d}.bin'
             path.write_bytes(data)
             add(path, 'recognizer')
+            i += 1
+    long_model, long_tokenizer, _ = recognition_model.load_base(args.long_recognizer_root)
+    assert long_tokenizer.get_vocab() == tokenizer.get_vocab(), 'Recognizer vocabularies must agree'
+    long_raw, long_packed = cache/'recognizer-base-f32.onnx', cache/'recognizer-base-fp16.onnx'
+    torch.onnx.export(Encoder(long_model), (torch.zeros(1, 32000),), str(long_raw),
+                      input_names=['input_values'], output_names=['logits'],
+                      dynamic_axes={'input_values': {1: 'samples'}, 'logits': {1: 'frames'}},
+                      opset_version=17, dynamo=False, external_data=False)
+    # Reproduce the original published base encoder, preserving long-answer
+    # browser output and the exact generic chunk URLs used by older tabs.
+    graph = onnx.load(str(long_raw))
+    casts = []
+    for value in graph.graph.initializer:
+        if value.data_type == TensorProto.FLOAT and len(value.raw_data) >= 1024:
+            name = value.name
+            replacement = numpy_helper.from_array(numpy_helper.to_array(value).astype(np.float16), name+'__fp16')
+            value.CopyFrom(replacement)
+            casts.append(helper.make_node('Cast', [replacement.name], [name], to=TensorProto.FLOAT))
+    nodes = list(graph.graph.node)
+    del graph.graph.node[:]
+    graph.graph.node.extend(casts + nodes)
+    onnx.save(graph, str(long_packed))
+    assert sha(long_packed) == 'b81a5907a87709ff9a83ac87a74473128c76ab3cefa8416bdebd4dbbc1eea931'
+
+    with long_packed.open('rb') as stream:
+        i = 0
+        while data := stream.read(CHUNK):
+            path = output / f'recognizer-{i:02d}.bin'
+            path.write_bytes(data)
+            add(path, 'long-recognizer')
             i += 1
     add(output / 'vocab.json', 'vocabulary')
     print('Recognizer exported', flush=True)
     if previous:
         import gzip
         for file in previous['files']:
-            if file['kind'] in ['recognizer', 'vocabulary']:
+            if file['kind'] in ['recognizer', 'long-recognizer', 'vocabulary']:
                 continue
             transport = file.get('transport')
             data = (output/(transport['path'] if transport else file['path'])).read_bytes()
@@ -117,13 +155,22 @@ def main():
         'repository': recognition_model.REPOSITORY, 'revision': REVISION,
         'encoderBytes': packed.stat().st_size, 'encoderSha256': sha(packed),
         'sourceWeightSha256': recognition_model.WEIGHT_SHA,
+        'longRecognizer': {
+            'repository': recognition_model.BASE_REPOSITORY,
+            'revision': recognition_model.BASE_REVISION,
+            'sourceWeightSha256': recognition_model.BASE_WEIGHT_SHA,
+            'sourceFilesSha256': recognition_model.BASE_SOURCE_FILES,
+            'encoderBytes': long_packed.stat().st_size,
+            'encoderSha256': sha(long_packed),
+            'representation': 'float16 constant storage; float32 operations',
+        },
         'sourceLoaderSha256': sha(ROOT/'training/recognition_model.py'),
         'sourceFilesSha256': recognition_model.SOURCE_FILES,
         'assetDirectory': 'models/word-recognition-v1/', 'files': files,
         'totalBytes': sum(f['bytes'] for f in files), 'lexiconWords': lexicon_words,
         'exporterSha256': sha(Path(__file__)),
-        'representation': 'dynamic per-channel INT8 MatMul/Gemm weights; float32 convolution and other operations',
-        'quantizer': {'runtime': __import__('onnxruntime').__version__, 'perChannel': True, 'weightType': 'QInt8', 'operators': ['MatMul', 'Gemm']},
+        'representation': 'symmetric block32 INT4 MatMul weights; float32 activations, convolution and other operations',
+        'quantizer': {'runtime': __import__('onnxruntime').__version__, 'onnxIR': version('onnx-ir'), 'algorithm': 'RTN', 'bits': 4, 'blockSize': 32, 'isSymmetric': True, 'accuracyLevel': 0, 'operators': ['MatMul']},
         'limits': 'Audio-only greedy English CTC; estimated words/times, not correctness. No prompt input. Synthetic sound comparison remains separate.',
     }
     if previous:
@@ -139,7 +186,7 @@ def main():
     (ROOT/'src/speech/recognition-manifest.json').write_text(data)
     # Public upstream Apache-2.0 license is already vendored for the encoder family.
     (output/'LICENSE').write_bytes((ROOT/'public/models/blended-english-v3/ENCODER-LICENSE.txt').read_bytes())
-    (output/'README.md').write_text(f'Audio-only word recognizer derived from {recognition_model.REPOSITORY} at {REVISION}. Apache-2.0. Local ONNX export, no new fitting. CMUdict supplies vocabulary spellings (BSD-style license in CMUDICT-LICENSE); phonetics are generated locally with eSpeak-ng. See training/WORD_RECOGNITION.md.\n')
+    (output/'README.md').write_text(f'Audio-only word recognizers derived from {recognition_model.REPOSITORY} at {REVISION} and {recognition_model.BASE_REPOSITORY} at {recognition_model.BASE_REVISION}. Apache-2.0. Local ONNX export, no new fitting. CMUdict supplies vocabulary spellings (BSD-style license in CMUDICT-LICENSE); phonetics are generated locally with eSpeak-ng. See training/WORD_RECOGNITION.md.\n')
     (output/'CMUDICT-LICENSE').write_text(cmudict.license_string())
     print(json.dumps(manifest, indent=2), flush=True)
 

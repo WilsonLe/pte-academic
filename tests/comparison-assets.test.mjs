@@ -37,18 +37,79 @@ test("audio-only recognizer, word dictionary and synthetic word library have com
   );
   assert.equal(
     manifest.encoderSha256,
-    "aa3100a81bc45df0277f2b724227aa4f7c5fd812a44e69f64954734ce870608d",
+    "69df640ba26e45292aaefd6a57d4bea88ab05000fb28ca139478fbbbc035565a",
   );
   assert.equal(
     manifest.sourceFilesSha256["pytorch_model.bin"],
     manifest.sourceWeightSha256,
   );
   assert.equal(Object.keys(manifest.sourceFilesSha256).length, 6);
-  assert.ok(manifest.encoderBytes < 360_000_000);
+  assert.equal(
+    manifest.longRecognizer.repository,
+    "facebook/wav2vec2-base-960h",
+  );
+  assert.equal(
+    manifest.longRecognizer.revision,
+    "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+  );
+  assert.equal(
+    manifest.longRecognizer.sourceWeightSha256,
+    "8aa76ab2243c81747a1f832954586bc566090c83a0ac167df6f31f0fa917d74a",
+  );
+  assert.equal(
+    manifest.longRecognizer.sourceFilesSha256["model.safetensors"],
+    manifest.longRecognizer.sourceWeightSha256,
+  );
+  assert.equal(
+    Object.keys(manifest.longRecognizer.sourceFilesSha256).length,
+    6,
+  );
+  assert.equal(
+    manifest.longRecognizer.encoderSha256,
+    "b81a5907a87709ff9a83ac87a74473128c76ab3cefa8416bdebd4dbbc1eea931",
+  );
+  assert.ok(manifest.longRecognizer.encoderBytes < 190_000_000);
+  assert.equal(
+    manifest.files.filter((f) => f.kind === "long-recognizer").length,
+    4,
+  );
+  assert.ok(
+    manifest.files
+      .filter((f) => f.kind === "long-recognizer")
+      .every((f) => /^recognizer-\d{2}\.bin$/.test(f.path)),
+  );
+
+  assert.ok(manifest.encoderBytes < 250_000_000);
+  assert.equal(manifest.quantizer.bits, 4);
+  assert.equal(manifest.quantizer.blockSize, 32);
+  assert.equal(manifest.quantizer.isSymmetric, true);
+  assert.equal(manifest.quantizer.accuracyLevel, 0);
+  assert.equal(manifest.quantizer.onnxIR, "0.1.16");
+  assert.equal(
+    manifest.longRecognizer.representation,
+    "float16 constant storage; float32 operations",
+  );
+  const legacyTransports = {
+    "recognizer-00.bin":
+      "cf330aab35a54022e1d69ccf4f03c16141a6c21a39790465e1859ce8b3107ac4",
+    "recognizer-01.bin":
+      "ddd34c66a2a5f126d46f3fc9d8ab3f602dc6659800d6e74580cd4162d60d554a",
+    "recognizer-02.bin":
+      "948503bcee42568af8adc5240113dfcbbcd61ab0ccdbfdfe9eb6676be2a3e2f2",
+    "recognizer-03.bin":
+      "c79d614f06dfd00941018c2b810ad7b572af5fe65333b077901a6defa58346bb",
+  };
+  for (const file of manifest.files.filter((f) => f.kind === "long-recognizer"))
+    assert.equal(
+      file.transport.sha256,
+      legacyTransports[file.path],
+      "original base URLs must retain their published bytes",
+    );
+
   assert.ok(
     manifest.files
       .filter((f) => f.kind === "recognizer")
-      .every((f) => /^recognizer-lv60-int8-\d{2}\.bin$/.test(f.path)),
+      .every((f) => /^recognizer-lv60-int4-\d{2}\.bin$/.test(f.path)),
     "new model URLs cannot overwrite base-model cache entries",
   );
   assert.equal(
@@ -74,6 +135,7 @@ test("audio-only recognizer, word dictionary and synthetic word library have com
   assert.ok(manifest.totalDownloadBytes < manifest.totalBytes * 0.9);
   let total = 0;
   const encoder = createHash("sha256");
+  const longEncoder = createHash("sha256");
   for (const f of manifest.files) {
     const bytes = await decoded(dir, f);
     assert.equal(bytes.length, f.bytes);
@@ -81,9 +143,14 @@ test("audio-only recognizer, word dictionary and synthetic word library have com
     assert.ok(f.bytes <= 48 * 1024 * 1024);
     total += f.bytes;
     if (f.kind === "recognizer") encoder.update(bytes);
+    if (f.kind === "long-recognizer") longEncoder.update(bytes);
   }
   assert.equal(total, manifest.totalBytes);
   assert.equal(encoder.digest("hex"), manifest.encoderSha256);
+  assert.equal(
+    longEncoder.digest("hex"),
+    manifest.longRecognizer.encoderSha256,
+  );
   const lexicon = JSON.parse(await readFile(dir + "lexicon.json", "utf8"));
   assert.equal(Object.keys(lexicon).length, manifest.lexiconWords);
   assert.ok(manifest.lexiconWords > 120000);

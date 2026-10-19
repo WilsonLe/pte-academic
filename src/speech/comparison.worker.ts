@@ -30,7 +30,7 @@ import recognitionManifest from "./recognition-manifest.json";
 import {
   recognizeWords,
   speechWindows,
-  recognitionSpanSeconds,
+  usesBaseRecognizer,
   scoreRecognizedWords,
   wordVariants,
   type WordLexicon,
@@ -88,7 +88,11 @@ self.onmessage = async (
       )
     )
       throw new Error("Unsupported syllable reference input.");
-    const recognitionSpan = recognize ? recognitionSpanSeconds(audio) : 20;
+    const windows = recognize ? speechWindows(audio, 20) : [];
+    const baseRecognition = usesBaseRecognizer(windows);
+    const wordEncoder = baseRecognition
+      ? recognitionManifest.longRecognizer
+      : recognitionManifest;
     const result: Pronunciation = {
       schemaVersion: 1,
       modelSha256: COMPARISON_MODEL_SHA,
@@ -101,10 +105,10 @@ self.onmessage = async (
     if (recognize)
       result.recognition = {
         modelId: "audio-only-words-v1",
-        recognizerSha256: recognitionManifest.encoderSha256,
-        recognizerRevision: recognitionManifest.revision,
-        decoder: "greedy-ctc-adaptive-v1",
-        windowSeconds: recognitionSpan,
+        recognizerSha256: wordEncoder.encoderSha256,
+        recognizerRevision: wordEncoder.revision,
+        decoder: "greedy-ctc-duration-v1",
+        windowSeconds: 20,
         words: [],
       };
     if (!reliableSignal(audio)) {
@@ -142,16 +146,19 @@ self.onmessage = async (
         target,
       );
     // Bounded overlapping windows also support open speaking tasks without text.
-    // Preserve the original phonetic context. Shorter character-only windows
-    // bound attention cost without changing the v3 grading pipeline.
-    const windows = recognize ? speechWindows(audio, 20) : [];
+    // Recognition and grading retain their original acoustic context. The model
+    // choice bounds sustained-speech cost without changing the v3 grader.
     const load = async (wordModel: boolean) => {
       const pack = wordModel ? recognitionManifest : comparisonManifest;
-      const bytes = new Uint8Array(pack.encoderBytes);
+      const encoder = wordModel ? wordEncoder : comparisonManifest;
+      const kind = wordModel
+        ? baseRecognition
+          ? "long-recognizer"
+          : "recognizer"
+        : "encoder";
+      const bytes = new Uint8Array(encoder.encoderBytes);
       let at = 0;
-      for (const part of pack.files.filter(
-        (f) => f.kind === (wordModel ? "recognizer" : "encoder"),
-      )) {
+      for (const part of pack.files.filter((f) => f.kind === kind)) {
         const chunk = await (
           wordModel ? verifiedRecognitionAsset : verifiedAsset
         )(part.path, base);
@@ -171,7 +178,7 @@ self.onmessage = async (
         ),
       );
       session = await load(true);
-      for (const window of speechWindows(audio, recognitionSpan)) {
+      for (const window of windows) {
         const samples = audio.subarray(window.start, window.end);
         if (!reliableSignal(samples)) continue;
         const out = await session.run({
