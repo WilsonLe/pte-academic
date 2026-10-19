@@ -422,10 +422,12 @@ export function SyllablePractice({
             </CollapsibleTrigger>
             <CollapsibleContent className="disclosure-panel">
               <div className="word-practice-details">
-                <p>
-                  Listen, choose a syllable, then record it. Earn 5 XP per
-                  syllable each day for completing practice.
-                </p>
+                {current && (
+                  <p>
+                    Listen, choose a syllable, then record it. Earn 5 XP per
+                    syllable each day for completing practice.
+                  </p>
+                )}
                 {corpusReference && (
                   <p>
                     Synthetic{" "}
@@ -434,10 +436,14 @@ export function SyllablePractice({
                   </p>
                 )}
                 <p>
-                  Synthetic reference example; timings are approximate. All four
-                  supported accents remain valid. Similarity is not
-                  pronunciation correctness or an exam score. Retry audio stays
-                  in this view.
+                  {reference && (
+                    <>
+                      Synthetic reference example; timings are approximate. All
+                      four supported accents remain valid.{" "}
+                    </>
+                  )}
+                  Similarity is not pronunciation correctness or an exam score.
+                  {current && " Retry audio stays in this view."}
                 </p>
                 {syllables.length > 0 && (
                   <div>

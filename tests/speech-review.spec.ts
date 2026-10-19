@@ -226,6 +226,17 @@ test("empty independent recognition explains the result once across all seven sp
   await expect(
     dialog.getByRole("button", { name: "Record syllable", exact: true }),
   ).toHaveCount(0);
+  await dialog
+    .getByRole("button", { name: "Practice details", exact: true })
+    .click();
+  await expect(
+    dialog.getByText(
+      /Listen, choose a syllable|Earn 5 XP|Retry audio stays|Synthetic reference example/,
+    ),
+  ).toHaveCount(0);
+  await expect(dialog).toContainText(
+    "Similarity is not pronunciation correctness or an exam score.",
+  );
   await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Practise word 1: urban", exact: true }),
@@ -369,6 +380,14 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
   await expect(
     dialog.getByRole("button", { name: "Record syllable", exact: true }),
   ).toBeDisabled();
+  await dialog
+    .getByRole("button", { name: "Practice details", exact: true })
+    .click();
+  await expect(dialog).toContainText(
+    "Listen, choose a syllable, then record it.",
+  );
+  await expect(dialog).toContainText("Earn 5 XP per syllable each day");
+  await expect(dialog).toContainText("Synthetic reference example");
   await page.screenshot({ path: info.outputPath("word-practice-desktop.png") });
   await page.keyboard.press("Escape");
   await expect(
