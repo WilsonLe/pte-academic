@@ -314,7 +314,9 @@ export function SyllablePractice({
         <div className="syllable-practice-scroll">
           <DialogTitle>{word.word}</DialogTitle>
           <DialogDescription className="sr-only">
-            Listen and practise a syllable from this word.
+            {syllables.length
+              ? "Listen and practise a syllable from this word."
+              : "Review this recognised word."}
           </DialogDescription>
           <fieldset
             disabled={busy}
@@ -350,35 +352,37 @@ export function SyllablePractice({
               No reliable syllable grade is available for this recognised word.
             </p>
           )}
-          <div
-            className="syllable-choices"
-            role="group"
-            aria-label="Choose a syllable"
-          >
-            {syllables.map((s, i) => (
-              <Button
-                key={s.syllableIndex}
-                variant={activeIndex === i ? "secondary" : "outline"}
-                disabled={busy || reward.isPending}
-                aria-pressed={activeIndex === i}
-                onClick={() => {
-                  setIndex(i);
-                  setGrade(undefined);
-                  setRetryUrl("");
-                  setError("");
-                  transition("idle");
-                  reward.reset();
-                }}
-              >
-                Syllable {i + 1}
-                <span data-tone={similarityTone(s.similarity)}>
-                  {s.similarity === null
-                    ? "Uncertain"
-                    : `${Math.round(s.similarity)}/100 similarity`}
-                </span>
-              </Button>
-            ))}
-          </div>
+          {syllables.length > 0 && (
+            <div
+              className="syllable-choices"
+              role="group"
+              aria-label="Choose a syllable"
+            >
+              {syllables.map((s, i) => (
+                <Button
+                  key={s.syllableIndex}
+                  variant={activeIndex === i ? "secondary" : "outline"}
+                  disabled={busy || reward.isPending}
+                  aria-pressed={activeIndex === i}
+                  onClick={() => {
+                    setIndex(i);
+                    setGrade(undefined);
+                    setRetryUrl("");
+                    setError("");
+                    transition("idle");
+                    reward.reset();
+                  }}
+                >
+                  Syllable {i + 1}
+                  <span data-tone={similarityTone(s.similarity)}>
+                    {s.similarity === null
+                      ? "Uncertain"
+                      : `${Math.round(s.similarity)}/100 similarity`}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          )}
           {current && (
             <div className="syllable-detail">
               <h3>Practise syllable {activeIndex + 1}</h3>
