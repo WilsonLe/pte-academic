@@ -6,6 +6,30 @@ import {
   pronunciationSchema,
 } from "../src/speech/comparison-schema";
 const base = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
+async function expectScoredFeedback(page: Page, timeout = 90000) {
+  await expect(
+    page.getByText(/^Words are recognised from your recording\./),
+  ).toHaveCount(1, { timeout });
+  await expect(
+    page.getByRole("button", { name: "Cancel speech scoring", exact: true }),
+  ).toHaveCount(0, { timeout });
+  await expect(
+    page.getByRole("button", { name: /^Practise word/ }).first(),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Details", exact: true }).click();
+  let details = "";
+  for (let n = 0; n < 12; n++) {
+    details += await page.getByRole("dialog").innerText();
+    const next = page.getByRole("button", {
+      name: "Next detail pages",
+      exact: true,
+    });
+    if (!(await next.count()) || !(await next.isEnabled())) break;
+    await next.click();
+  }
+  expect(details).toMatch(/\b[1-9]\d* of \d+ syllables scored\./);
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+}
 async function seed(page: Page, waitForModel = true) {
   await page.goto(base);
   await page.evaluate(async () => {
@@ -52,10 +76,7 @@ async function seed(page: Page, waitForModel = true) {
     );
   });
   await page.goto(base + "history/comparison-fixture");
-  if (waitForModel)
-    await expect(page.getByLabel(/^Reference similarity/)).toBeVisible({
-      timeout: 90000,
-    });
+  if (waitForModel) await expectScoredFeedback(page);
 }
 async function workerPath() {
   return (
@@ -292,7 +313,7 @@ test("audio-only word recognition is prompt-independent across four accents and 
   await expect(
     page.getByRole("button", { name: /^Practise word 1:/ }),
   ).toBeVisible({ timeout: 90000 });
-  await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+  await expectScoredFeedback(page);
   await page.setViewportSize({ width: 390, height: 844 });
   const savedReceipt = page.locator("[data-sonner-toast]").filter({
     hasText: "Syllable feedback saved on this device",
@@ -314,7 +335,7 @@ test("audio-only word recognition is prompt-independent across four accents and 
     .click({ timeout: 1500 });
   await expect(page).toHaveURL(new RegExp(`${base}history$`));
   await page.locator(`main a[href="${base}history/independent-open"]`).click();
-  await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+  await expectScoredFeedback(page);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(
     page
@@ -427,8 +448,7 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
       requests.push(r.url());
   });
   await seed(page);
-  const badge = page.getByLabel(/^Reference similarity/);
-  await expect(badge).toBeVisible();
+  await expectScoredFeedback(page);
   await expect(page.getByRole("button", { name: /Compare/ })).toHaveCount(0);
   // Feed a real reference syllable through the recorder adapter, then run the actual pinned worker.
   await page.evaluate(async () => {
@@ -638,7 +658,7 @@ test("automatic initial feedback persists; isolated syllable retry grades locall
   await page.keyboard.press("Escape");
   await context.setOffline(true);
   await page.reload();
-  await expect(badge).toBeVisible();
+  await expectScoredFeedback(page);
   await expect(
     page.getByRole("button", { name: /^5 XP, level/ }),
   ).toBeVisible();
@@ -764,9 +784,7 @@ test("automatic feedback cancels, retains playback, and reports worker failure w
     page.getByRole("button", { name: "Retry feedback" }),
   ).toBeEnabled();
   await page.getByRole("button", { name: "Retry feedback" }).click();
-  await expect(page.getByLabel(/^Reference similarity/)).toBeVisible({
-    timeout: 60000,
-  });
+  await expectScoredFeedback(page, 60000);
   await ungrade();
   await context.addInitScript(() =>
     Object.defineProperty(window, "Worker", { value: undefined }),
@@ -1083,9 +1101,7 @@ test("post-ready missing and corrupt model metadata recover through notification
     });
     await expect(retry).toBeEnabled({ timeout: 60000 });
     await retry.click();
-    await expect(page.getByLabel(/^Reference similarity/)).toBeVisible({
-      timeout: 60000,
-    });
+    await expectScoredFeedback(page, 60000);
     await expect(
       page.getByRole("button", { name: "Cancel speech scoring" }),
     ).toHaveCount(0);
@@ -1305,7 +1321,7 @@ test("warm preparation avoids model transfers and saved word references work whi
     page.evaluate(() => (window as any).__releaseWeights?.());
   try {
     await page.reload();
-    await expect(page.getByLabel(/^Reference similarity/)).toBeVisible();
+    await expectScoredFeedback(page);
     await page
       .getByRole("button", { name: /^Practise word 2: library/ })
       .click();
