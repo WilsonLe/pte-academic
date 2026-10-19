@@ -223,9 +223,7 @@ export function SpeechReview({
               onSelect={(word) => setSelectedIndex(word.index)}
             />
           )}
-          {!answer.recording && (
-            <p>No recording was saved.</p>
-          )}
+          {!answer.recording && <p>No recording was saved.</p>}
           <div className="feedback-actions">
             <ReviewDisclosure
               title="Speaking details"
