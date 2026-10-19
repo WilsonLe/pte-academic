@@ -134,7 +134,23 @@ export function SpeechReview({
     [expected, pronunciation, answer.recording],
   );
   const selected = words.find((word) => word.index === selectedIndex);
-  const similarity = pronunciation ? pronunciationSummary(pronunciation) : null;
+  const scoredSyllables =
+    pronunciation?.syllables.filter(
+      (syllable) => syllable.status === "scored",
+    ) || [];
+  const scoredWordCount = new Set(
+    scoredSyllables.map((syllable) => syllable.wordIndex),
+  ).size;
+  const recognisedWordCount = pronunciation?.recognition?.words.length;
+  const completeCoverage =
+    pronunciation &&
+    scoredSyllables.length === pronunciation.syllables.length &&
+    (recognisedWordCount === undefined ||
+      scoredWordCount === recognisedWordCount);
+  const similarity =
+    pronunciation && completeCoverage
+      ? pronunciationSummary(pronunciation)
+      : null;
   const emptyRecognition = pronunciation?.recognition?.words.length === 0;
   return (
     <section
@@ -188,24 +204,27 @@ export function SpeechReview({
         <>
           {!emptyRecognition && (
             <>
-              <div
-                className="speech-summary"
-                aria-label="Local syllable scores"
-              >
-                {similarity !== null && (
-                  <Badge
-                    variant="secondary"
-                    aria-label={`Reference similarity ${similarity} out of 100`}
-                  >
-                    {similarity}/100 similarity
-                  </Badge>
-                )}
-                {pronunciation?.status === "no-reliable-speech" && (
-                  <span>
-                    No reliable speech detected. Select a word to practise.
-                  </span>
-                )}
-              </div>
+              {(similarity !== null ||
+                pronunciation?.status === "no-reliable-speech") && (
+                <div
+                  className="speech-summary"
+                  aria-label="Local syllable scores"
+                >
+                  {similarity !== null && (
+                    <Badge
+                      variant="secondary"
+                      aria-label={`Reference similarity ${similarity} out of 100`}
+                    >
+                      {similarity}/100 similarity
+                    </Badge>
+                  )}
+                  {pronunciation?.status === "no-reliable-speech" && (
+                    <span>
+                      No reliable speech detected. Select a word to practise.
+                    </span>
+                  )}
+                </div>
+              )}
               <p className="sr-only">
                 {pronunciation?.recognition
                   ? "Words are recognised from your recording. Select one to hear and practise its pronunciation. Recognition and word timings can be uncertain."
@@ -236,7 +255,7 @@ export function SpeechReview({
                   ? [
                       {
                         label: "Coverage",
-                        text: `${pronunciation.syllables.filter((s) => s.status === "scored").length} of ${pronunciation.syllables.length} syllables scored.`,
+                        text: `${recognisedWordCount ? `Scored syllables are available for ${scoredWordCount} of ${recognisedWordCount} recognised ${recognisedWordCount === 1 ? "word" : "words"}. ` : ""}${scoredSyllables.length} of ${pronunciation.syllables.length} syllables scored.`,
                       },
                     ]
                   : []),

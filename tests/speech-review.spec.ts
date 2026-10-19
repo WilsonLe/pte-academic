@@ -7,6 +7,224 @@ import {
 } from "../src/speech/comparison-schema";
 const base = process.env.PTE_TEST_SUBPATH === "1" ? "/pte-academic/" : "/";
 
+test("partial speaking scores expose word coverage across all seven types", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(120000);
+  await context.route("**/models/**", (route) => route.abort());
+  await page.goto(base);
+  const types = [
+    "read-aloud",
+    "repeat-sentence",
+    "describe-image",
+    "retell-lecture",
+    "answer-short-question",
+    "summarize-group-discussion",
+    "respond-to-situation",
+  ];
+  const ids = types.map((type) => questions.find((q) => q.type === type)!.id);
+  const cases = [
+    { name: "missing-low", words: 1, scored: 1, total: 1 },
+    { name: "missing-high", words: 1, scored: 1, total: 1 },
+    { name: "uncertain-word", words: 1, scored: 1, total: 2 },
+    { name: "uncertain-syllable", words: 2, scored: 2, total: 3 },
+    { name: "none", words: 0, scored: 0, total: 0 },
+    { name: "full", words: 2, scored: 2, total: 2, mean: 56 },
+    { name: "zero", words: 2, scored: 2, total: 2, mean: 0 },
+  ];
+  await page.evaluate(
+    async ({ ids, cases, sha, exportId }) => {
+      const recording = await (
+        await fetch(
+          new URL("audio/read-aloud-01-reference.mp3", document.baseURI),
+        )
+      ).blob();
+      const results = cases.map(({ name }) => {
+        const missing = name.startsWith("missing"),
+          none = name === "none",
+          uncertain = name === "uncertain-word",
+          split = name === "uncertain-syllable";
+        const second = missing ? "roods" : split ? "student" : "roots";
+        const firstScore =
+          name === "zero" ? 0 : name === "missing-high" ? 99 : 31;
+        const syllable = (
+          word: string,
+          wordIndex: number,
+          syllableIndex: number,
+          similarity: number | null,
+        ) => ({
+          word,
+          wordIndex,
+          syllableIndex,
+          label: "a",
+          start: wordIndex * 0.7 + syllableIndex * 0.2,
+          end: wordIndex * 0.7 + syllableIndex * 0.2 + 0.2,
+          similarity,
+          confidence: similarity === null ? 0 : 0.9,
+          status: similarity === null ? "uncertain" : "scored",
+        });
+        const assessment = {
+          schemaVersion: 1,
+          modelSha256: sha,
+          exportId,
+          referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+          seconds: 3,
+          recognition: {
+            modelId: "audio-only-words-v1",
+            words: ["the", second].map((word, index) => ({
+              word,
+              index,
+              start: index * 0.7,
+              end: index * 0.7 + 0.6,
+              confidence: 0.9,
+              status:
+                none || (index === 1 && uncertain)
+                  ? "uncertain"
+                  : index === 1 && missing
+                    ? "unsupported"
+                    : "recognized",
+            })),
+          },
+          status: none ? "unscored" : "scored",
+          syllables: none
+            ? []
+            : [
+                syllable("the", 0, 0, firstScore),
+                ...(missing
+                  ? []
+                  : [
+                      syllable(
+                        second,
+                        1,
+                        0,
+                        uncertain ? null : name === "zero" ? 0 : 80,
+                      ),
+                    ]),
+                ...(split ? [syllable(second, 1, 1, null)] : []),
+              ],
+        };
+        return {
+          id: "coverage-" + name,
+          label: "Controlled speech coverage",
+          date: new Date().toISOString(),
+          finished: true,
+          questionIds: ids,
+          answers: Object.fromEntries(
+            ids.map((id) => [id, { speechAssessment: assessment }]),
+          ),
+        };
+      });
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onupgradeneeded = () => {
+          for (const name of ["attempts", "progress"])
+            if (!request.result.objectStoreNames.contains(name))
+              request.result.createObjectStore(name);
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result,
+            tx = db.transaction("attempts", "readwrite");
+          for (const result of results)
+            tx.objectStore("attempts").put(
+              {
+                result,
+                recordings: Object.fromEntries(
+                  ids.map((id) => [id, recording]),
+                ),
+              },
+              result.id,
+            );
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+      localStorage.setItem(
+        "pte-studio-history-v1",
+        JSON.stringify(results.map((result) => ({ ...result, answers: {} }))),
+      );
+    },
+    { ids, cases, sha: COMPARISON_MODEL_SHA, exportId: COMPARISON_EXPORT },
+  );
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const scenario of cases) {
+      await page.goto(base + "history/coverage-" + scenario.name);
+      for (const [index, id] of ids.entries()) {
+        await expect(page.locator(".review-screen")).toHaveAttribute(
+          "data-question-id",
+          id,
+        );
+        const feedback = page.getByRole("region", {
+          name: "On-device speech feedback",
+          exact: true,
+        });
+        if (scenario.mean === undefined) {
+          await expect(
+            feedback.getByLabel(/^Reference similarity/),
+          ).toHaveCount(0);
+          await expect(
+            feedback.getByLabel("Local syllable scores", { exact: true }),
+          ).toHaveCount(0);
+        } else
+          await expect(
+            feedback.getByLabel(
+              `Reference similarity ${scenario.mean} out of 100`,
+              { exact: true },
+            ),
+          ).toBeVisible();
+        const details = feedback.getByRole("button", {
+          name: "Details",
+          exact: true,
+        });
+        await details.click();
+        let text = "";
+        for (let n = 0; n < 12; n++) {
+          text += await page.getByRole("dialog").innerText();
+          const next = page.getByRole("button", {
+            name: "Next detail pages",
+            exact: true,
+          });
+          if (!(await next.count()) || !(await next.isEnabled())) break;
+          await next.click();
+        }
+        expect(text).toContain(
+          `Scored syllables are available for ${scenario.words} of 2 recognised words.`,
+        );
+        expect(text).toContain(
+          `${scenario.scored} of ${scenario.total} syllables scored.`,
+        );
+        await page.getByRole("button", { name: "Close", exact: true }).click();
+        await expect(details).toBeFocused();
+        if (scenario.name === "missing-low" && id === ids[4]) {
+          await feedback
+            .getByRole("button", { name: "Practise word 1: the", exact: true })
+            .click();
+          await expect(
+            page
+              .getByRole("dialog")
+              .getByRole("button", { name: /Syllable 1.*31\/100 similarity/ }),
+          ).toBeVisible();
+          await page
+            .getByRole("button", { name: "Close", exact: true })
+            .click();
+        }
+        if (index < ids.length - 1)
+          await page
+            .getByRole("button", { name: "Next review questions", exact: true })
+            .click();
+      }
+    }
+  }
+});
+
 test("empty independent recognition explains the result once across all seven speaking types", async ({
   page,
   context,
@@ -342,6 +560,7 @@ test("feedback is a paged prompt diff, word and syllable playback stop at their 
 }, info) => {
   await context.route("**/models/**", (r) => r.abort());
   await seed(page);
+  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Feedback", exact: true }),
   ).toBeVisible();
