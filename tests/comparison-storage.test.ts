@@ -83,6 +83,10 @@ test("audio-only feedback preserves the original prompt grade and open speaking 
     seconds: 90,
     recognition: {
       modelId: "audio-only-words-v1",
+      recognizerSha256: "a".repeat(64),
+      recognizerRevision: "b".repeat(40),
+      decoder: "greedy-ctc-adaptive-v1",
+      windowSeconds: 20,
       words: [
         {
           word: "test",

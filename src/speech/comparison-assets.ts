@@ -5,6 +5,7 @@ type ModelFile = {
   path: string;
   bytes: number;
   sha256: string;
+  kind?: string;
   transport?: Omit<AssetTransport, "encoding"> & { encoding: string };
 };
 type ModelPack = { assetDirectory: string; files: ModelFile[] };
@@ -47,6 +48,19 @@ export function modelBase() {
 export function modelCache(base = modelBase()) {
   return `pte-comparison:${base}:${manifest.id}:${recognition.id}`;
 }
+// Keep each new encoder bounded in private browsers' memory-backed caches.
+// The original cache and its prepared legacy model entries remain intact.
+function assetCacheName(file: ModelFile, base: string) {
+  const encoder =
+    file.kind === "recognizer"
+      ? recognition.encoderSha256
+      : file.kind === "long-recognizer"
+        ? recognition.longRecognizer.encoderSha256
+        : undefined;
+  return encoder
+    ? `${modelCache(base)}:recognizer:${encoder}`
+    : modelCache(base);
+}
 export class ModelAssetError extends Error {}
 export function invalidateComparisonModel(message: string) {
   pending = undefined;
@@ -59,7 +73,7 @@ export async function verifiedAsset(
 ) {
   const descriptor = pack.files.find((f) => f.path === path);
   if (!descriptor) throw new Error("Unknown speech model asset.");
-  const cache = await caches.open(modelCache(base));
+  const cache = await caches.open(assetCacheName(descriptor, base));
   const response = await cache.match(
     new URL(pack.assetDirectory + path, base).href,
   );
@@ -98,7 +112,8 @@ async function ensureAsset(
   progress: (loaded: number) => void = () => {},
 ) {
   const url = new URL(pack.assetDirectory + file.path, base).href;
-  const cache = await caches.open(modelCache(base));
+  const cacheName = assetCacheName(file, base);
+  const cache = await caches.open(cacheName);
   const existing = await cache.match(url);
   if (existing) {
     const bytes = new Uint8Array(await existing.arrayBuffer());
@@ -108,6 +123,19 @@ async function ensureAsset(
       return bytes;
     }
     await cache.delete(url);
+  }
+  if (cacheName !== modelCache(base)) {
+    const legacy = await (await caches.open(modelCache(base))).match(url);
+    if (legacy) {
+      const bytes = new Uint8Array(await legacy.arrayBuffer());
+      if (
+        bytes.length === file.bytes &&
+        (await sha256(bytes)) === file.sha256
+      ) {
+        await cache.put(url, stored(bytes, file));
+        return bytes;
+      }
+    }
   }
   const current = downloads.get(url);
   if (current) return current;
@@ -240,7 +268,8 @@ export function prepareComparisonModel(
           (p) => file.url === p.assetDirectory + file.path,
         )!;
         try {
-          const cached = await cache.match(new URL(file.url, base).href);
+          const fileCache = await caches.open(assetCacheName(file, base));
+          const cached = await fileCache.match(new URL(file.url, base).href);
           // Warm availability checks only read validation receipts. Every actual
           // inference/reference read still hashes the decoded bytes in full.
           const warm =
@@ -285,6 +314,17 @@ export function prepareComparisonModel(
           );
         await cache.put(url, response);
       }
+    }
+    for (const file of files) {
+      const fileCache = await caches.open(assetCacheName(file, base));
+      const retained = await fileCache.match(new URL(file.url, base).href);
+      if (
+        retained?.headers.get("x-pte-sha256") !== file.sha256 ||
+        retained.headers.get("content-length") !== String(file.bytes)
+      )
+        throw new ModelAssetError(
+          "Required speech model could not be retained. Free browser storage and retry.",
+        );
     }
     update({ status: "ready", percent: 100, message: "Speech model ready" });
   })().catch((e) => {
