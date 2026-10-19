@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import questions from "../content/questions.json" with { type: "json" };
 import references from "../src/speech/reference-clips.json" with { type: "json" };
 import {
   COMPARISON_MODEL_SHA,
@@ -435,4 +436,174 @@ test.describe("optional cross-view replay transport", () => {
         .toBeGreaterThan(0);
       await expect(page.locator(".audio-error")).toHaveCount(0);
     });
+});
+
+test("speech review opens at recognised evidence and retains every omission across paging and resize", async ({
+  page,
+  context,
+}, info) => {
+  await context.route("**/models/**", (route) => route.abort());
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const ids = [
+    "read-aloud-01",
+    "read-aloud-02",
+    "describe-image-01",
+    "repeat-sentence-01",
+  ];
+  const prompts = ids.map((id) => {
+    const q = questions.find((q) => q.id === id)!;
+    return "text" in q
+      ? q.text || ""
+      : "audioText" in q
+        ? q.audioText || ""
+        : "";
+  });
+  const spoken = prompts.map((text, i) =>
+    i === 2
+      ? ["urban", "gardens"]
+      : text
+          .toLowerCase()
+          .match(/[a-z]+(?:['’‘][a-z]+)?/g)!
+          .slice(-2),
+  );
+  await page.evaluate(
+    async ({ ids, spoken, sha, exportId }) => {
+      const answers = Object.fromEntries(
+        ids.map((id, i) => [
+          id,
+          {
+            speechAssessment: {
+              schemaVersion: 1,
+              modelSha256: sha,
+              exportId,
+              referenceAccents: ["en-US", "en-GB", "en-AU", "en-IN"],
+              seconds: 3,
+              status: i === 3 ? "no-reliable-speech" : "scored",
+              recognition: {
+                modelId: "audio-only-words-v1",
+                words:
+                  i === 3
+                    ? []
+                    : spoken[i].map((word, index) => ({
+                        word,
+                        index,
+                        start: index,
+                        end: index + 0.8,
+                        confidence: 0.9,
+                        status: "recognized",
+                      })),
+              },
+              syllables:
+                i === 3
+                  ? []
+                  : spoken[i].map((word, wordIndex) => ({
+                      word,
+                      wordIndex,
+                      syllableIndex: 0,
+                      label: word,
+                      start: wordIndex,
+                      end: wordIndex + 0.8,
+                      similarity: 80,
+                      confidence: 0.9,
+                      status: "scored",
+                    })),
+            },
+          },
+        ]),
+      );
+      const result = {
+        id: "late-recognition",
+        label: "Controlled speech review",
+        date: new Date().toISOString(),
+        finished: true,
+        questionIds: ids,
+        answers,
+      };
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open("pte-studio", 2);
+        request.onupgradeneeded = () => {
+          for (const name of ["attempts", "progress"])
+            if (!request.result.objectStoreNames.contains(name))
+              request.result.createObjectStore(name);
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result,
+            tx = db.transaction("attempts", "readwrite");
+          tx.objectStore("attempts").put({ result, recordings: {} }, result.id);
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+      localStorage.setItem(
+        "pte-studio-history-v1",
+        JSON.stringify([{ ...result, answers: {} }]),
+      );
+    },
+    { ids, spoken, sha: COMPARISON_MODEL_SHA, exportId: COMPARISON_EXPORT },
+  );
+  await page.goto("/history/late-recognition");
+  const word = () =>
+    page.getByRole("button", { name: `Practise word 1: ${spoken[0][0]}` });
+  await expect(word()).toBeVisible();
+  await expect(
+    page.getByLabel("Reference similarity 80 out of 100"),
+  ).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("recognised-first-mobile.png"),
+  });
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(size);
+    await expect(word()).toBeVisible();
+  }
+  const previous = page.getByRole("button", {
+    name: "Previous prompt word pages",
+  });
+  await previous.click();
+  await expect(word()).toHaveCount(0);
+  const beforeResize = await page
+    .locator(".diff-page .feedback-word > span:first-child")
+    .first()
+    .textContent();
+  await page.setViewportSize({ width: 430, height: 932 });
+  await expect(page.locator(".diff-page")).toContainText(beforeResize!);
+  while (await previous.isEnabled()) await previous.click();
+  const collected: string[] = [];
+  const next = page.getByRole("button", { name: "Next prompt word pages" });
+  do {
+    collected.push(
+      ...(await page
+        .locator(".diff-page .feedback-word > span:first-child")
+        .allTextContents()),
+    );
+    if (await next.isDisabled()) break;
+    await next.click();
+  } while (collected.length < 100);
+  expect(collected.join(" ")).toBe(prompts[0]);
+  await page.reload();
+  await expect(word()).toBeVisible();
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(
+    page.getByRole("button", {
+      name: `Practise word 1: ${spoken[1][0]}`,
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(
+    page.getByRole("button", { name: "Practise word 1: urban", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Next review questions" }).click();
+  await expect(
+    page.getByRole("button", { name: /^Not heard:/ }).first(),
+  ).toBeVisible();
+  await expect(page.getByLabel(/^Reference similarity/)).toHaveCount(0);
 });

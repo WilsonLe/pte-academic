@@ -4927,3 +4927,70 @@ test("workspace header and content share their horizontal gutter on every route 
     JSON.stringify(receipts, null, 2),
   );
 });
+
+test("listening summary shows its question budget only after playback starts and retains it for writing", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/practice/type/summarize-spoken-text");
+  await page
+    .getByRole("checkbox", { name: "I can hear the audio clearly" })
+    .check();
+  await page
+    .getByRole("button", { name: "Begin practice", exact: true })
+    .click();
+  await expect(
+    page.getByText("Beginning in 3 seconds", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".item-clock")).toHaveCount(0);
+  await page.clock.runFor(3100);
+  await expect(page.locator(".item-clock")).toContainText(
+    /Question time remaining: (10:00|09:59)/,
+  );
+  await page.clock.runFor(30000);
+  await expect(page.locator(".item-clock")).toContainText(/09:(29|30)/);
+  // This isolated timer contract seeks the real element to its normal end;
+  // the visible learner playtest uses unmodified media and wall-clock time.
+  await page.locator(".exam audio").evaluate((audio: HTMLAudioElement) => {
+    audio.currentTime = audio.duration - 0.05;
+  });
+  await expect(
+    page.getByRole("textbox", { name: "Your response", exact: true }),
+  ).toBeEnabled();
+  await expect(page.locator(".recording-panel")).toHaveCount(0);
+  await expect(page.locator(".item-clock")).toContainText(/09:(29|30)/);
+});
+
+test("paused automatic listening audio waits for a gesture before displaying the question budget", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const play = HTMLMediaElement.prototype.play;
+    let blocked = false;
+    HTMLMediaElement.prototype.play = function () {
+      if (this.closest(".exam") && !blocked) {
+        blocked = true;
+        return Promise.reject(
+          new DOMException("Gesture required", "NotAllowedError"),
+        );
+      }
+      return play.call(this);
+    };
+  });
+  await page.clock.install();
+  await page.goto("/practice/type/summarize-spoken-text");
+  await page
+    .getByRole("checkbox", { name: "I can hear the audio clearly" })
+    .check();
+  await page
+    .getByRole("button", { name: "Begin practice", exact: true })
+    .click();
+  await page.clock.runFor(3100);
+  const resume = page.getByRole("button", { name: "Start audio", exact: true });
+  await expect(resume).toBeVisible();
+  await expect(page.locator(".item-clock")).toHaveCount(0);
+  await resume.click();
+  await expect(page.locator(".item-clock")).toContainText(
+    "Question time remaining: 10:00",
+  );
+});
