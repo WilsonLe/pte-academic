@@ -2,6 +2,10 @@
 
 **Training is paused at accepted v3 (2026-10-16).** Start with the [pause and resume guide](RESUME.md) for the checkpoint, local data to preserve, budget snapshot and future restart procedure. The operator chose to keep training audio out of Git.
 
+The separate recognition-training research is also **paused (2026-10-20)**, without
+a qualified replacement recognizer. See [speech assessment research and next steps](../docs/speech-assessment-research.md)
+for actual results, retained artifacts and the proposed task-specific assessment paths.
+
 This development-only pipeline generates synthetic English reference speech through OpenRouter, trains a local comparison model, and returns a reference similarity index for every supported syllable in a local recording. Its browser export supports local PTE Studio speaking review. The PWA uses its derived browser export for v3 syllable sound similarity after independent word recognition; raw training inputs and Python runtime are not imported into the app.
 
 The operator authorized generated-output training. The current authorized cumulative cap is **US$17.0113639**: on 2026-10-16 the operator explicitly granted a fresh US$10 allowance after US$7.0113639 in reservations. The original spending history remains intact; there is no automatic reset. `content/authoring.json` records the authorization. The corpus generator reads the existing private credential internally and shares the authoring lock and conservative spending ledger. Never reset the ledger, automatically retry a failed paid request, or put a credential in a command argument.
